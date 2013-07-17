@@ -1,41 +1,50 @@
 var EventEmitter = require("events").EventEmitter,
+    mongoose = require('mongoose'),
+    UsersModel = require('./models/USERS.js'),
+    DocumentsModel = require('./models/DOCUMENTS.js'),
+    express = require('express'),
+    path = require('path'),
+    url = require('url'),
+    passport = require('passport'),
+    LocalStrategy = require('passport-local').Strategy,
+    HashStrategy = require('passport-hash').Strategy,
+    GoogleStrategy = require('passport-google').Strategy,
+    RedisStore = require('connect-redis')(express),
+    flashMiddleware = require('connect-flash'),
+    usersController = require('./routes/usersController.js'),
+    async = require('async'),
     util = require("util");
 
 function MWC(config) {
     EventEmitter.call(this);
     var thisMWC=this;
+    this.config=config;
 
-    var express = require('express'),
-        path = require('path'),
-        packages = require(path.dirname(module.parent.filename) + '/package.json').dependencies,
-        url = require('url'),
-        passport = require('passport'),
-        LocalStrategy = require('passport-local').Strategy,
-        HashStrategy = require('passport-hash').Strategy,
-        GoogleStrategy = require('passport-google').Strategy,
-        UsersModel = require('./models/USERS.js'),
-        DocumentsModel = require('./models/DOCUMENTS.js'),
-        RedisStore = require('connect-redis')(express),
-        flashMiddleware = require('connect-flash'),
-        usersController = require('./routes/usersController.js'),
-        mongoose = require('mongoose'),
+    var packages = require(path.dirname(module.parent.filename) + '/package.json').dependencies,
         app = express(),
         pluginsInUse=[];
 
 //init models, DI of models into request variable
-    mongoose.connect(config.mongo_url);
-    var db=mongoose.connection;
+    this.mongoose=mongoose.connect(config.mongo_url);
+    var db=this.mongoose.connection;
     db.on('connect', function (err) {
-        if (err) throw err;
-        console.log('Mongo connection established!');
-        thisMWC.emit('ready');
+        if (err) {
+            thisMWC.emit('error',err);
+        } else {
+            console.log('Mongo connection established!');
+            thisMWC.emit('ready');
+        }
     });
     db.on('error', function (err) {
-        console.error('Mongo connection error!');
-        console.error(err);
+        thisMWC.emit('error',err);
     });
     var Users=UsersModel(mongoose, config);
     var Documents=DocumentsModel(mongoose, config);
+
+    this.MODEL = {
+        'Users':Users,
+        'Documents':Documents
+    };
     app.use(function(request,response,next){
         request.MODEL={
             'Users':Users,
@@ -164,7 +173,7 @@ function MWC(config) {
 
     app.configure('production', function () {
         app.use(function (err, req, res, next) {
-            console.error(err.stack);
+            thisMWC.emit('error',err);
             res.status(503);
             res.header('Retry-After', 360);
             res.send('Error 503. There are problems on our server. We will fix them soon!');//todo - change to our page...
@@ -183,9 +192,27 @@ function MWC(config) {
     app.get('*', function (request, response) {
         response.send(404);
     });
-    return app;
+    this.app = app;
+    return this;
 }
 
 util.inherits(MWC, EventEmitter);
+
+MWC.prototype.populate_database = function(data){
+    console.log('Populating the database');
+    if(data.users && data.users instanceof Array){
+        console.log(data.users);
+        for(var i=0;i<data.users.length;i++){//todo - get some rest and make it via async.parallel - Anatolij
+            console.log(data.users[i]);
+            this.MODEL.Users.create(data.users[i], function (err, userSaved) {
+                if(err) throw err;
+                console.log(userSaved);
+            })
+        }
+    }
+
+}
+
+
 
 module.exports = exports = MWC;

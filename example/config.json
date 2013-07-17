@@ -1,11 +1,17 @@
 {
     "development":{
-        "secret":"hammer on the keyboard"
+        "hostUrl":"http://vvv.msk0.ru/",
+        "secret":"hammer on the keyboard",
+        "mongo_url":"mongodb://localhost/test"
     },
     "production":{
-        "secret":"hammer on the keyboard"
+        "hostUrl":"http://localhost/",
+        "secret":"hammer on the keyboard",
+        "mongo_url":"mongodb://localhost/test"
     },
     "staging":{
-        "secret":"hammer on the keyboard"
+        "hostUrl":"http://localhost/",
+        "secret":"hammer on the keyboard",
+        "mongo_url":"mongodb://localhost/test"
     }
 }

@@ -50,10 +50,10 @@ module.exports = exports = function (mongoose, config) {
             string: String,
             date: Date
         },
-        username: {string: String},
-        email: {string: String},
-        salt: {string: String},
-        password: {string: String},
+        username: String,
+        email: String,
+        salt:  String,
+        password: String,
         groups: [Number]
     });
 
