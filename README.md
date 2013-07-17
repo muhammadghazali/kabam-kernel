@@ -24,12 +24,8 @@ The list of active plugins can be viewed here [http://localhost:3000/example](ht
         "mongo_url":"mongodb://user:password@mongo.example.com:10053/app111"
     });
 
-    console.log('Waiting for Mongo connection...');
-    MWC.on('ready',function(){
-        console.log('Mongo connected!');
-        MWC.listen(MWC.get('port'), function () {
-            console.log("MWC_core server listening on port " + MWC.get('port'));
-        });
+    MWC.app.listen(MWC.app.get('port'), function () {
+        console.log("MWC_core server listening on port " + MWC.app.get('port'));
     });
 
 
@@ -38,13 +34,19 @@ The list of active plugins can be viewed here [http://localhost:3000/example](ht
 Installation
 =======
 
-```
+```shell
 
     $ git clone git@github.com:mywebclass/mwc_core.git
     $ cd nwc_core
     $ npm install
-    $ npm start
+```
 
+Edit the example/config.json file by your favourite text editor.
+
+```shell
+
+    $ node example/populate_database.js
+    $ npm start
 
 ````
 What you can do now with this application
