@@ -1,4 +1,4 @@
 mwc_core
 ========
 
-MyWebClass core nodejs application to be extended by autoloaded middleware pluggins
+MyWebClass core node.js application to be extended by loaded automatically middleware plugins
