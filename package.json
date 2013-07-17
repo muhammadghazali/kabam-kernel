@@ -1,0 +1,22 @@
+{
+  "name": "mwc_core",
+  "version": "0.0.1",
+  "description": "MyWebClass core nodejs application to be extended by autoloaded middleware pluggins",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mywebclass/mwc_core.git"
+  },
+  "keywords": [
+    "mywebclass",
+    "core"
+  ],
+  "author": "Anatolij Ostroumov",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mywebclass/mwc_core/issues"
+  }
+}
