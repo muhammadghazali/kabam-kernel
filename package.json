@@ -8,6 +8,7 @@
     "npm": "1.3.x"
   },
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -18,13 +19,15 @@
     "async": "*",
     "express": "*",
     "redis":"*",
+    "hogan-express":"*",
     "connect-redis": "*",
     "connect-flash": "*",
     "passport": "*",
     "passport-local": "*",
     "passport-hash": "*",
     "passport-google": "*",
-    "vows": "*"
+    "vows": "*",
+    "mwc_plugin_example":"git+ssh://git@github.com:mywebclass/mwc_plugin_example.git"
   },
   "devDependencies":{
     "vows":"*"

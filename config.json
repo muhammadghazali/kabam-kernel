@@ -1,0 +1,7 @@
+{
+    "development":{
+        "secret":"hammer on the keyboard"
+    },
+    "production":{},
+    "staging":{}
+}
