@@ -26,7 +26,10 @@
     "passport-local": "*",
     "passport-hash": "*",
     "passport-google": "*",
-    "vows": "*"
+    "vows": "*",
+    "mongoose": "*",
+    "generate-key":"*",
+    "moment":"*"
   },
   "devDependencies":{
     "vows":"*"
