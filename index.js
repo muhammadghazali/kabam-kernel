@@ -4,6 +4,7 @@ var EventEmitter = require("events").EventEmitter,
 function MWC(config) {
     EventEmitter.call(this);
     var thisMWC=this;
+
     var express = require('express'),
         path = require('path'),
         packages = require(path.dirname(module.parent.filename) + '/package.json').dependencies,
@@ -16,6 +17,7 @@ function MWC(config) {
         DocumentsModel = require('./models/DOCUMENTS.js'),
         RedisStore = require('connect-redis')(express),
         flashMiddleware = require('connect-flash'),
+        usersController = require('./routes/usersController.js'),
         mongoose = require('mongoose'),
         app = express(),
         pluginsInUse=[];
@@ -32,8 +34,8 @@ function MWC(config) {
         console.error('Mongo connection error!');
         console.error(err);
     });
-    var Users=UsersModel(db, config);
-    var Documents=DocumentsModel(db, config);
+    var Users=UsersModel(mongoose, config);
+    var Documents=DocumentsModel(mongoose, config);
     app.use(function(request,response,next){
         request.MODEL={
             'Users':Users,
@@ -168,13 +170,9 @@ function MWC(config) {
             res.send('Error 503. There are problems on our server. We will fix them soon!');//todo - change to our page...
         });
     });
-    app.get('/my',function(request,response){
-        if(request.user){
-            response.json(request.user);
-        } else {
-            response.send(403);
-        }
-    });
+    //routes for users
+
+    usersController(app,config);
     app.get('/auth/google', passport.authenticate('google'));
     app.get('/auth/google/return',passport.authenticate('google', { failureRedirect: '/', successRedirect: '/' }));
     app.post('/logoff',function(request,response){

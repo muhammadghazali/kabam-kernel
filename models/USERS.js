@@ -1,8 +1,6 @@
-var mongoose = require('mongoose'),
-    async = require('async'),
+var async = require('async'),
     rand = require("generate-key"),
     crypto = require('crypto'),
-    Schema = mongoose.Schema,
     moment = require('moment');
 
 
@@ -10,7 +8,8 @@ function md5(str) {
     return crypto.createHash('md5').update(str).digest('hex').toString();
 }
 
-module.exports = exports = function (db, config) {
+module.exports = exports = function (mongoose, config) {
+    var Schema = mongoose.Schema;
     var UserSchema = new Schema({
         active: Boolean,
         activeDate: Date,
@@ -97,5 +96,5 @@ module.exports = exports = function (db, config) {
     UserSchema.methods.verifyPassword = function(password){
         return md5(this.salt+password)==this.password;
     }
-    return mongoose.model('User', UserSchema);
+    return mongoose.model('users', UserSchema);
 }

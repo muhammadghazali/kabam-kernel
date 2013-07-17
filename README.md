@@ -47,5 +47,9 @@ Installation
 
 
 ````
+What you can do now with this application
+=======
 Open [http://localhost:3000/plugins](http://localhost:3000/plugins) in browser to see the pluggins installed.
 Open [http://localhost:3000/example](http://localhost:3000/example) in browser to see the output of example pluggin.
+Open [http://localhost:3000/auth/google](http://localhost:3000/auth/google) in browser to try to login via Google Account
+Open [http://localhost:3000/my](http://localhost:3000/my) to see you profile
