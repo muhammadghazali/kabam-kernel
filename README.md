@@ -21,4 +21,5 @@ Installation
 
 
 ````
-Open http://localhost:3000/example in browser.
+Open http://localhost:3000/plugins in browser to see the pluggins installed.
+Open http://localhost:3000/example in browser to see the output of example pluggin.
