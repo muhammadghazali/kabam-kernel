@@ -2,16 +2,19 @@
     "development":{
         "hostUrl":"http://vvv.msk0.ru/",
         "secret":"hammer on the keyboard",
-        "mongo_url":"mongodb://localhost/test"
+        "mongo_url":"mongodb://localhost/test",
+        "redis":{"host":"localhost","port":6373}
     },
     "production":{
         "hostUrl":"http://localhost/",
         "secret":"hammer on the keyboard",
-        "mongo_url":"mongodb://localhost/test"
+        "mongo_url":"mongodb://localhost/test",
+        "redis":{"host":"localhost","port":6373}
     },
     "staging":{
         "hostUrl":"http://localhost/",
         "secret":"hammer on the keyboard",
-        "mongo_url":"mongodb://localhost/test"
+        "mongo_url":"mongodb://localhost/test",
+        "redis":{"host":"localhost","port":6373}
     }
 }
