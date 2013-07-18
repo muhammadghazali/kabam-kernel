@@ -12,3 +12,7 @@ MWC.on('Coocoo!',function(message){
    console.log('Coocoo! Coocoo! '+message);
 });
 
+MWC.on('honeypot accessed',function(message){
+    console.log('Attention! Somebody tries to hack us! '+message);
+});
+

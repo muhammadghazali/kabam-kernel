@@ -58,6 +58,9 @@ function MWC(config) {
             'Documents':Documents
         };
         request.redisClient=thisMWC.redisClient;
+        request.emitMWC = function(eventName,eventContent){
+            thisMWC.emit(eventName,eventContent);
+        }
         next();
     });
 

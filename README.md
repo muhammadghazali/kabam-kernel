@@ -81,9 +81,20 @@ and for `https` server in this way
 4. `MWC.MODEL` - is a object, that includes [mongoose models](http://mongoosejs.com/docs/guide.html), used by this application.
 For now, there is `MWC.MODEL.users` and `MWC.MODEL.documents` objects in it
 
-5. `MWC.redis` - is a ready to use [redis](https://npmjs.org/package/redis) client used by application
+5. `MWC.redisClient` - is a ready to use [redis](https://npmjs.org/package/redis) client used by application
 
 When we add some pluggins, they can add more internals to MWC object.
+
+Furthemore, MWC extends the [request](http://expressjs.com/api.html#req.params) part in any of pluggins
+with
+```javascript
+    MWC.app.get('/someURI',function(request,response){
+       //request.MODEL.users
+       //request.MODEL.documents
+       //request.redisClient
+       //request.emitMWC('it works!'); //event emmiter, coupled to MWC event emmiter
+    });
+```
 
 Installation
 =======
@@ -107,3 +118,13 @@ Open [http://localhost:3000/plugins](http://localhost:3000/plugins) in browser t
 Open [http://localhost:3000/example](http://localhost:3000/example) in browser to see the output of example pluggin.
 Open [http://localhost:3000/auth/google](http://localhost:3000/auth/google) in browser to try to login via Google Account
 Open [http://localhost:3000/my](http://localhost:3000/my) to see you profile
+
+
+Plugin creating manual
+=======
+
+This is typicale plugin code
+```javascript
+
+```
+
