@@ -13,20 +13,29 @@ var EventEmitter = require("events").EventEmitter,
     flashMiddleware = require('connect-flash'),
     usersController = require('./routes/usersController.js'),
     async = require('async'),
-    util = require("util");
+    util = require("util"),
+    redis = require('redis');
+
 
 function MWC(config) {
     EventEmitter.call(this);
     var thisMWC=this;
-    this.config=config;
+    //exposable internals
+    thisMWC.config=config;
+    thisMWC.mongoose=mongoose.connect(config.mongo_url);
+    thisMWC.app = express();
+    thisMWC.plugins=[];
+    thisMWC.MODEL={};
+    if(config.redis){
+        thisMWC.redisClient=redis.createClient(config.redis.port,config.redis.host);
+    } else {
+        thisMWC.redisClient=redis.createClient();
+    }
 
-    var packages = require(path.dirname(module.parent.filename) + '/package.json').dependencies,
-        app = express(),
-        pluginsInUse=[];
+
 
 //init models, DI of models into request variable
-    this.mongoose=mongoose.connect(config.mongo_url);
-    var db=this.mongoose.connection;
+    var db=thisMWC.mongoose.connection;
     db.on('connect', function (err) {
         if (err) {
             thisMWC.emit('error',err);
@@ -38,22 +47,21 @@ function MWC(config) {
     db.on('error', function (err) {
         thisMWC.emit('error',err);
     });
-    var Users=UsersModel(mongoose, config);
-    var Documents=DocumentsModel(mongoose, config);
+    var Users=UsersModel(thisMWC.mongoose, config);
+    var Documents=DocumentsModel(thisMWC.mongoose, config);
 
-    this.MODEL = {
-        'Users':Users,
-        'Documents':Documents
-    };
-    app.use(function(request,response,next){
+    thisMWC.MODEL.Users=Users;
+    thisMWC.MODEL.Users=Documents;
+    thisMWC.app.use(function(request,response,next){
         request.MODEL={
             'Users':Users,
             'Documents':Documents
         };
+        request.redisClient=thisMWC.redisClient;
         next();
     });
-//setting passport middleware
 
+//setting passport middleware
     passport.use(new LocalStrategy(
         function (username, password, done) {
             Users.findOne({username:username, active:true}, function (err, user) {
@@ -106,94 +114,110 @@ function MWC(config) {
             done(err, user);
         });
     });
-//-------
+//end of setting passport
 
-//passport.use()
-//
-    app.configure('development', function () {
+
+
+    thisMWC.app.configure('development', function () {
         console.log('Development enviroment!');
-        app.use(express.responseTime());
-        app.use(express.logger('dev'));
+        thisMWC.app.use(express.responseTime());
+        thisMWC.app.use(express.logger('dev'));
     });
 
-    app.configure('production', function () {
+    thisMWC.app.configure('production', function () {
         console.log('Production enviroment!');
-        app.locals.production = true;
-        app.enable('view cache'); //prod!
-        app.use(express.logger('short'));
+        thisMWC.app.locals.production = true;
+        thisMWC.app.enable('view cache');
+        thisMWC.app.use(express.logger('short'));
     });
 
-    app.set('port', process.env.PORT || 3000);
+    thisMWC.app.set('port', process.env.PORT || 3000);
 
-    app.set('views', __dirname + '/views');
-    app.set('view engine', 'html');
-    app.set('layout', 'layout');
-    app.engine('html', require('hogan-express'));
-    app.enable('trust proxy');
+//setting template engine. maybe we need to make is a plugin
+    thisMWC.app.set('views', __dirname + '/views');
+    thisMWC.app.set('view engine', 'html');
+    thisMWC.app.set('layout', 'layout');
+    thisMWC.app.engine('html', require('hogan-express'));
+//end of setting template engine
+    thisMWC.app.enable('trust proxy');
 
-    app.use(express.compress());
-    app.use(express.favicon());
-    app.use(express.bodyParser());
-    app.use(express.methodOverride());
-    app.use(express.cookieParser(config.secret));
-    app.use(express.session({
+    thisMWC.app.use(express.compress());
+    thisMWC.app.use(express.favicon());
+    thisMWC.app.use(express.bodyParser());
+    thisMWC.app.use(express.methodOverride());
+    thisMWC.app.use(express.cookieParser(config.secret));
+    thisMWC.app.use(express.session({
         secret: config.secret,
         store: new RedisStore({prefix: 'mwc_core_'}),
         expireAfterSeconds: 180,
         httpOnly: true
     }));
-    app.use(express.csrf());
-    app.use(flashMiddleware());
-    app.use(passport.initialize());
-    app.use(passport.session());
+    thisMWC.app.use(express.csrf());
+    thisMWC.app.use(flashMiddleware());
+    thisMWC.app.use(passport.initialize());
+    thisMWC.app.use(passport.session());
 
+    thisMWC.app.use(express.static(path.join(__dirname, 'public')));//static assets, maybe we need to set is as a plugin
 //dependency injection of plugins
+    var packages = require(path.dirname(module.parent.filename) + '/package.json').dependencies;
+
     for (var x in packages) {
         var pluginParameters = /^mwc_plugin_([a-z0-9_]+)$/.exec(x);
-        //this regex is parsed like it for our plugins [ 'mwc_plugin_example','example',index: 0,input: 'mwc_plugin_example' ]
+        //this regex is parsed like it for our plugins
+        // [ 'mwc_plugin_example','example',index: 0,input: 'mwc_plugin_example' ]
         if (pluginParameters) {
-            require(pluginParameters[0])(app, '/' + pluginParameters[1],config);
-            pluginsInUse.push({
-                'name':pluginParameters[0],
-                'route':'/'+pluginParameters[1]
-            });
+            require(pluginParameters[0])(thisMWC);
+            thisMWC.plugins.push({'plugin':pluginParameters[0],'version':packages[x]});
             console.log('Plugin of "'+pluginParameters[1]+'" is used!');
         }
     }
-    app.use('/plugins',function(request,response,next){
-        response.json(pluginsInUse);
-    });
-    app.use(express.static(path.join(__dirname, 'public')));
-    app.use(app.router);
 
-    app.configure('development', function () {
-        app.use(express.errorHandler());
+
+
+    thisMWC.app.configure('development', function () {
+        thisMWC.app.use(express.errorHandler());
     });
 
 
-    app.configure('production', function () {
-        app.use(function (err, req, res, next) {
+    thisMWC.app.configure('production', function () {
+        thisMWC.app.use(function (err, req, res, next) {
             thisMWC.emit('error',err);
             res.status(503);
             res.header('Retry-After', 360);
             res.send('Error 503. There are problems on our server. We will fix them soon!');//todo - change to our page...
         });
     });
+    thisMWC.app.use(thisMWC.app.router);//set up the router middleware
+
+    //get active plugins - works only on development enviroment
+    thisMWC.app.configure('development', function () {
+        thisMWC.app.get('/plugins',function(request,response){
+            response.json(thisMWC.plugins);
+        });
+    });
     //routes for users
 
-    usersController(app,config);
-    app.get('/auth/google', passport.authenticate('google'));
-    app.get('/auth/google/return',passport.authenticate('google', { failureRedirect: '/', successRedirect: '/' }));
-    app.post('/logoff',function(request,response){
+    usersController(thisMWC.app,config);//restfull api for users
+
+    //autorize by email and password
+
+
+
+    //autorize by google
+    thisMWC.app.get('/auth/google', passport.authenticate('google'));
+    thisMWC.app.get('/auth/google/return',passport.authenticate('google', { failureRedirect: '/', successRedirect: '/' }));
+
+    thisMWC.app.post('/logoff',function(request,response){
         request.logout();
         response.send(200,'OK');
     });
 
-    app.get('*', function (request, response) {
+    //catch all verb to show 404 error to wrong routes
+    thisMWC.app.get('*', function (request, response) {
         response.send(404);
     });
-    this.app = app;
-    return this;
+
+    return thisMWC;
 }
 
 util.inherits(MWC, EventEmitter);
