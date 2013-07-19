@@ -14,7 +14,8 @@ var EventEmitter = require("events").EventEmitter,
     usersController = require('./routes/usersController.js'),
     async = require('async'),
     util = require("util"),
-    redis = require('redis');
+    redis = require('redis'),
+    toobusy = require('toobusy');
 
 
 function MWC(config) {
@@ -136,6 +137,15 @@ function MWC(config) {
 
     thisMWC.app.set('port', process.env.PORT || 3000);
 
+//too busy middleware which blocks requests when we're too busy
+    thisMWC.app.use(function(req, res, next) {
+        if (toobusy()) {
+            res.send(503, "I'm busy right now, sorry.");
+        } else {
+            next();
+        }
+    });
+
 //setting template engine. maybe we need to make is a plugin
     thisMWC.app.set('views', __dirname + '/views');
     thisMWC.app.set('view engine', 'html');
@@ -243,3 +253,10 @@ MWC.prototype.populate_database = function(data){
 
 
 module.exports = exports = MWC;
+
+process.on('SIGINT', function() {
+    //server.close(); //server is instantained somewere else...
+    // calling .shutdown allows your process to exit normally
+    toobusy.shutdown();
+    process.exit();
+});
