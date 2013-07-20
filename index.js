@@ -52,7 +52,7 @@ function MWC(config) {
     var Documents=DocumentsModel(thisMWC.mongoose, config);
 
     thisMWC.MODEL.Users=Users;
-    thisMWC.MODEL.Users=Documents;
+    thisMWC.MODEL.Documents=Documents;
     thisMWC.app.use(function(request,response,next){
         request.MODEL={
             'Users':Users,
