@@ -119,6 +119,16 @@ Open [http://localhost:3000/example](http://localhost:3000/example) in browser t
 Open [http://localhost:3000/auth/google](http://localhost:3000/auth/google) in browser to try to login via Google Account
 Open [http://localhost:3000/my](http://localhost:3000/my) to see you profile
 
+Developer's Note
+================
+
+Run jshint with:
+
+    grunt jshint
+
+Run unit tests with (no tests yet):
+
+    grunt test
 
 Plugin creating manual
 =======

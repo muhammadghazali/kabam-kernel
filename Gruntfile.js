@@ -30,7 +30,9 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-vows');
 
+  // Tasks
+  grunt.registerTask('test', ['vows:all']);
   // Default task.
-  grunt.registerTask('default', ['jshint']);
+  grunt.registerTask('default', ['jshint', 'test']);
 
 };
