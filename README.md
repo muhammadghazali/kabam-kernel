@@ -23,9 +23,62 @@ The list of active plugins can be viewed here [http://localhost:3000/example](ht
         "mongo_url":"mongodb://user:password@mongo.example.com:10053/app111"
     });
 
-    MWC.app.listen(MWC.app.get('port'), function () {
-        console.log("MWC_core server listening on port " + MWC.app.get('port'));
+    //we extend the core module
+    MWC.extendCore(functiont(core){
+      core.doSomething=function(payload){
+        ....
+      }
+
+     setInterval(function(){
+            core.emit('Coocoo!','Time now is '+(new Date().toLocaleTimeString()));
+     },5000);
     });
+
+    //we set the parameters of expressJS app we want to create
+    MWC.setAppParameters('development',function(core){
+        //set port
+        core.app.set('port',8080);
+
+    //set templating engine
+        core.app.set('views', __dirname + '/views');
+        core.app.set('view engine', 'html');
+        core.app.set('layout', 'layout');
+        core.app.engine('html', require('hogan-express'));
+    //end of setting template engine
+
+    //enable operation behing reverse-proxy server
+        core.app.enable('trust proxy');
+    })
+
+    //we set the middlewares the application is using
+
+    MWC.setAppMiddleware( ['development','staging'],[
+        function(req,res,next){
+           res.setHeader('ProductionReady','NO!!!');
+           next();
+        },
+        function(req,res,next){
+           //do something other
+           next();
+        },
+    ] );
+
+    MWC.setAppRoutes(function(core){
+       core.app.get('/',function(req,res){
+          res.send('HI!');
+       });
+    });
+
+    MWC.usePluggin(require('mwc_plugin_exampe'));
+
+    //var https = require('https');
+    //MWC.listen(https);
+
+    //var http = require('http');
+    //MWC.listen(http);
+
+    MWC.listen(8080);//set port to listen on
+    MWC.listen();//set to listen on default port as http server
 
 ```
 
