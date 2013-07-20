@@ -7,7 +7,17 @@ module.exports = function(grunt) {
       options: {
         jshintrc: '.jshintrc'
       },
-      all: ['Gruntfile.js', 'index.js', 'example/**/*.js', 'models/**/*.js', 'public/**/*.js', 'routes/**/*.js', 'test/**/*.js']
+      all: {
+        src: ['Gruntfile.js', 'index.js', 'example/**/*.js', 'models/**/*.js', 'public/**/*.js', 'routes/**/*.js', 'test/**/*.js']
+      },
+      ci: {
+        options: {
+          force: true,
+          reporter: 'checkstyle',
+          reporterOutput: 'jshint-result.xml'
+        },
+        src: '<%= jshint.all.src %>'
+      }
     },
     vows: {
       all: {
