@@ -16,25 +16,30 @@
     "url": "git@github.com:mywebclass/mwc_core.git"
   },
   "dependencies": {
+    "mwc_plugin_example": "git+ssh://git@github.com:mywebclass/mwc_plugin_example.git",
     "async": "*",
     "express": "*",
-    "redis":"*",
-    "hogan-express":"*",
+    "redis": "*",
+    "hogan-express": "*",
     "connect-redis": "*",
     "connect-flash": "*",
     "passport": "*",
     "passport-local": "*",
     "passport-hash": "*",
     "passport-google": "*",
-    "vows": "*",
     "mongoose": "*",
-    "generate-key":"*",
-    "moment":"*"
+    "generate-key": "*",
+    "moment": "*",
+    "toobusy": "~0.2.3"
   },
-  "devDependencies":{
-    "vows":"*"
+  "devDependencies": {
+    "vows": "*",
+    "grunt": "~0.4.1",
+    "grunt-contrib-watch": "~0.5.0",
+    "grunt-contrib-jshint": "~0.6.0",
+    "grunt-vows": "~0.4.0"
   },
-  "optionalDependencies":{
+  "optionalDependencies": {
     "hiredis": "*"
   },
   "keywords": [

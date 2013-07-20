@@ -8,7 +8,7 @@ Pluggable modules runned
 
 Right now there is only one plugable module - [https://github.com/mywebclass/mwc_plugin_example](https://github.com/mywebclass/mwc_plugin_example).
 
-Is is binded to [http://localhost:3000/example](http://localhost:3000/example) route.
+It is binded to [http://localhost:3000/example](http://localhost:3000/example) route.
 
 The list of active plugins can be viewed here [http://localhost:3000/example](http://localhost:3000/example)
 
@@ -101,11 +101,11 @@ Installation
 
 ```shell
     $ git clone git@github.com:mywebclass/mwc_core.git
-    $ cd nwc_core
+    $ cd mwc_core
     $ npm install
 ```
 
-Edit the example/config.json file by your favourite text editor.
+Edit the example/config.json file with your favourite text editor.
 
 ```shell
     $ node example/populate_database.js
@@ -114,7 +114,7 @@ Edit the example/config.json file by your favourite text editor.
 
 What you can do now with this application
 =======
-Open [http://localhost:3000/plugins](http://localhost:3000/plugins) in browser to see the pluggins installed.
+Open [http://localhost:3000/plugins](http://localhost:3000/plugins) in browser to see the plugins installed.
 Open [http://localhost:3000/example](http://localhost:3000/example) in browser to see the output of example pluggin.
 Open [http://localhost:3000/auth/google](http://localhost:3000/auth/google) in browser to try to login via Google Account
 Open [http://localhost:3000/my](http://localhost:3000/my) to see you profile
@@ -127,4 +127,3 @@ This is typicale plugin code
 ```javascript
 
 ```
-
