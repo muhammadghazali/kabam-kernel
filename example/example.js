@@ -87,8 +87,14 @@ MWC.usePlugin({
   }
 });
 
-//injecting plugin as an name of installe npm package!
-MWC.usePlugin('mwc_plugin_example');
+try{
+  //injecting plugin as an name of installe npm package!
+  MWC.usePlugin('mwc_plugin_example');
+} catch (e){
+  if(e.code === 'MODULE_NOT_FOUND'){
+    console.error('mwc_plugin_example is not installed.')
+  }
+}
 
 
 //api/user works from box
