@@ -3,18 +3,30 @@
     "hostUrl":"http://vvv.msk0.ru/",
     "secret":"hammer on the keyboard",
     "mongoUrl":"mongodb://localhost/mwc_dev",
-    "redis":{"host":"localhost","port":6379}
+    "redis":{"host":"localhost","port":6379},
+    "passport":{
+      "GITHUB_CLIENT_ID":"",
+      "GITHUB_CLIENT_SECRET":""
+    }
   },
   "production":{
     "hostUrl":"http://localhost/",
     "secret":"hammer on the keyboard",
     "mongoUrl":"mongodb://localhost/mwc",
-    "redis":{"host":"localhost","port":6379}
+    "redis":{"host":"localhost","port":6379},
+    "passport":{
+      "GITHUB_CLIENT_ID":"",
+      "GITHUB_CLIENT_SECRET":""
+    }
   },
   "staging":{
     "hostUrl":"http://localhost/",
     "secret":"hammer on the keyboard",
     "mongoUrl":"mongodb://localhost/mwc_test",
-    "redis":{"host":"localhost","port":6379}
+    "redis":{"host":"localhost","port":6379},
+    "passport":{
+      "GITHUB_CLIENT_ID":"",
+      "GITHUB_CLIENT_SECRET":""
+    }
   }
 }

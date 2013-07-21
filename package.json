@@ -26,6 +26,7 @@
     "passport-local": "*",
     "passport-hash": "*",
     "passport-google": "*",
+    "passport-github": "*",
 
     "mongoose": "*",
     "generate-key": "*",
