@@ -20,6 +20,7 @@ var EventEmitter = require("events").EventEmitter,
     flashMiddleware = require('connect-flash'),
 
     usersController = require('./routes/usersController.js'),
+    documentsController = require('./routes/documentsController.js'),
     redis = require('redis'),
     toobusy = require('toobusy');
 
@@ -257,6 +258,7 @@ MWC.prototype.ready=function(){
 
     //setting up the default routes
     usersController(thisMWC.app,thisMWC.config);//restfull api for users
+    documentsController(thisMWC.app,thisMWC.config);//restfull api for users
 
     thisMWC.app.configure('development', function () {
         //default route to show plugins installed
