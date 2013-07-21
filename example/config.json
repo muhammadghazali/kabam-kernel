@@ -1,20 +1,20 @@
 {
   "development":{
-    "hostUrl":"http://localhost/",
+    "hostUrl":"http://vvv.msk0.ru/",
     "secret":"hammer on the keyboard",
-    "mongo_url":"mongodb://localhost/mwc_dev",
+    "mongoUrl":"mongodb://localhost/mwc_dev",
     "redis":{"host":"localhost","port":6379}
   },
   "production":{
     "hostUrl":"http://localhost/",
     "secret":"hammer on the keyboard",
-    "mongo_url":"mongodb://localhost/mwc",
+    "mongoUrl":"mongodb://localhost/mwc",
     "redis":{"host":"localhost","port":6379}
   },
   "staging":{
     "hostUrl":"http://localhost/",
     "secret":"hammer on the keyboard",
-    "mongo_url":"mongodb://localhost/mwc_test",
+    "mongoUrl":"mongodb://localhost/mwc_test",
     "redis":{"host":"localhost","port":6379}
   }
 }
