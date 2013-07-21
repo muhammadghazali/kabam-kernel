@@ -109,7 +109,7 @@ module.exports = exports = function (mongoose, config) {
     return;
   };
 
-  UserSchema.Schema.methods.invalidateSession = function(callback){
+  UserSchema.methods.invalidateSession = function(callback){
     this.cookieKey=rack();
     this.save(callback);
     return;
