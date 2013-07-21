@@ -8,3 +8,6 @@ node_js:
 services:
   - redis-server
   - mongodb
+
+notifications:
+  email: false
