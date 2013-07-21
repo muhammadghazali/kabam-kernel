@@ -14,9 +14,7 @@ var EventEmitter = require("events").EventEmitter,
     https = require('https'),
 //passport middleware
     passport = require('passport'),
-    LocalStrategy = require('passport-local').Strategy,
-    HashStrategy = require('passport-hash').Strategy,
-    GoogleStrategy = require('passport-google').Strategy,
+    initPassport = require('./passport/initPassport.js'),
 //
     RedisStore = require('connect-redis')(express),
     flashMiddleware = require('connect-flash'),
@@ -138,58 +136,7 @@ MWC.prototype.ready=function(){
     });
 
     //setting passport
-        passport.use(new LocalStrategy(
-            function (username, password, done) {
-                Users.findOne({username:username, active:true}, function (err, user) {
-                    if(err){
-                        return done(err,false,{'message':'Database broken...'});
-                    } else {
-                        if(user){
-                            if(user.verifyPassword(password)){
-                                return done(null,user,{message:'Welcome, '+user.username});
-                            } else {
-                                return done(null, false, { message:'Access denied!' });
-                            }
-                        } else {
-                            return done(null, false, { message:'Access denied!' });
-                        }
-                    }
-                });
-            }
-        ));
-
-
-        passport.use(new GoogleStrategy({
-                returnURL: thisMWC.config.hostUrl+'auth/google/return',
-                realm: thisMWC.config.hostUrl
-            },
-            function(identifier, profile, done) {
-                var email=profile.emails[0].value;
-                console.log(profile);
-                Users.findOne({'email':email, active:true},function(err,userFound){
-                    console.log(userFound);
-                    if(userFound){
-                        done(err, userFound,{message:'Welcome, '+userFound.username});
-                    } else {
-                        //model.UserModel.create({email:email},function(err,userCreated){
-                        done(err,false,{ message:'Access denied!' });//todo - i am not sure if user can register by singing in with Google Acount
-                        //});
-                    }
-                });
-            }
-        ));
-
-    //Storing user in session
-        passport.serializeUser(function (user, done) {
-            done(null, user.username);
-        });
-
-        passport.deserializeUser(function (username, done) {
-            Users.findOne({username:username}, function (err, user) {
-                done(err, user);
-            });
-        });
-    //end of setting passport
+    initPassport.doInitializePassportStrategies(passport,Users,thisMWC.config);
 
     //start vendoring expressJS application
     thisMWC.app = express();
@@ -318,20 +265,8 @@ MWC.prototype.ready=function(){
         });
     });
 
-    //autorize by email and password
-
-
-
-    //autorize by facebook,twitter,gitgub - todo - implement it
-
-    //autorize by google
-    thisMWC.app.get('/auth/google', passport.authenticate('google'));
-    thisMWC.app.get('/auth/google/return',passport.authenticate('google', { failureRedirect: '/', successRedirect: '/' }));
-
-    thisMWC.app.post('/logoff',function(request,response){
-        request.logout();
-        response.send(200,'OK');
-    });
+    //autorize routes for passport
+    initPassport.doInitializePassportRoutes(passport, thisMWC.app);
 
     //catch all verb to show 404 error to wrong routes
     thisMWC.app.get('*', function (request, response) {
