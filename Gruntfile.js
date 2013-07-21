@@ -8,7 +8,7 @@ module.exports = function(grunt) {
         jshintrc: '.jshintrc'
       },
       all: {
-        src: ['Gruntfile.js', 'index.js', 'example/**/*.js', 'models/**/*.js', 'public/**/*.js', 'routes/**/*.js', 'test/**/*.js']
+        src: ['Gruntfile.js', 'index.js', 'example/**/*.js', 'models/**/*.js', 'public/**/*.js', 'routes/**/*.js', 'tests/**/*.js']
       },
       ci: {
         options: {
@@ -24,7 +24,7 @@ module.exports = function(grunt) {
         options: {
           reporter: 'spec'
         },
-        src: ['test/**/*.js']
+        src: ['tests/**/*.js']
       }
     },
     watch: {
