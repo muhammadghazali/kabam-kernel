@@ -29,7 +29,7 @@
     "passport-github": "*",
 
     "mongoose": "*",
-    "generate-key": "*",
+    "hat": "*",
     "moment": "*",
     "toobusy": "~0.2.3"
   },

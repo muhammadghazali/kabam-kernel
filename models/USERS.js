@@ -1,5 +1,6 @@
 var async = require('async'),
-  rand = require('generate-key'),
+  rand = require('hat'),
+  rack = hat.rack(),
   crypto = require('crypto'),
   moment = require('moment');
 
@@ -63,7 +64,7 @@ module.exports = exports = function (mongoose, config) {
   });
 
   UserSchema.methods.generateConfirmationLink = function (callback) {
-    this.confirmation.string = rand.generateKey();
+    this.confirmation.string = rack();
     this.confirmation.date = new Date();
     this.save(callback);
     return;
@@ -97,5 +98,8 @@ module.exports = exports = function (mongoose, config) {
     return md5(this.salt + password) === this.password;
   };
 
+  UserSchema.methods.setPassword = function(newPassword){
+
+  };
   return mongoose.model('users', UserSchema);
 };
