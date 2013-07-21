@@ -1,5 +1,5 @@
 var async = require('async'),
-  rand = require('hat'),
+  hat = require('hat'),
   rack = hat.rack(),
   crypto = require('crypto'),
   moment = require('moment');
