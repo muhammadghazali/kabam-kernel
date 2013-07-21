@@ -2,7 +2,7 @@ var vows = require('vows'),
   assert = require('assert'),
   mwcCore = require('./../index.js'),
   events = require('events'),
-  config = require('./../example/config.json');
+  config = require('./../example/config.json')['development'];
 
 var MWC = new mwcCore(config);
 MWC.listen(3000);
