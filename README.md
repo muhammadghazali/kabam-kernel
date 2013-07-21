@@ -16,69 +16,59 @@ The list of active plugins can be viewed here [http://localhost:3000/example](ht
 
 ```javascript
 
-    var mwc_core = require('mwc_core');
-    var MWC = new mwc_core({
-        "hostUrl":"http://example.org/",
-        "secret":"hammer on the keyboard",
-        "mongo_url":"mongodb://user:password@mongo.example.com:10053/app111"
+    var mwc_core = require('./../index.js');
+    //setting up the config
+    var MWC = new mwc_core(require('./config.json')[(process.env.NODE_ENV) ? (process.env.NODE_ENV) : 'development']);
+
+    //we extend the mwc_core instance
+    MWC.extendCore(function(core){
+       //starting coocoo clock)
+       setInterval(function(){
+           core.emit('Coocoo!','Time now is '+(new Date().toLocaleTimeString()));
+       },5000);
+       //adding custom function to MWC module
+       core.getSum = function(a,b){
+           return a+b;
+       }
     });
 
-    //we extend the core module
-    MWC.extendCore(functiont(core){
-      core.doSomething=function(payload){
-        ....
-      }
-
-     setInterval(function(){
-            core.emit('Coocoo!','Time now is '+(new Date().toLocaleTimeString()));
-     },5000);
+    //set global lever variables for expressJS application
+    MWC.setAppParameters(['development','staging'],function(core){
+        core.app.set('TempVar','42');
     });
 
-    //we set the parameters of expressJS app we want to create
-    MWC.setAppParameters('development',function(core){
-        //set port
-        core.app.set('port',8080);
+    //set middleware for development and staging enviroments
+    MWC.setAppMiddlewares(['development','staging'],function(core){
+        return function(req,res,next){
+            res.setHeader('X-Production','NO!');
+            next();
+        };
+    });
+    //we add some routes
+    MWC.extendAppRoutes(
+            function (core) {
+            core.app.get('/', function (req, res) {
+                res.send('Hello! TempVar is '+core.app.get('TempVar'));
+            })}
+    );
 
-    //set templating engine
-        core.app.set('views', __dirname + '/views');
-        core.app.set('view engine', 'html');
-        core.app.set('layout', 'layout');
-        core.app.engine('html', require('hogan-express'));
-    //end of setting template engine
+    //api/user works to!!!
 
-    //enable operation behing reverse-proxy server
-        core.app.enable('trust proxy');
-    })
+    //binding application to port
+    MWC.listen(3000);
 
-    //we set the middlewares the application is using
+    //testing custom function defined on line 10
+    console.log('Sum of 2 and 2 is '+MWC.getSum(2,2));
 
-    MWC.setAppMiddleware( ['development','staging'],[
-        function(req,res,next){
-           res.setHeader('ProductionReady','NO!!!');
-           next();
-        },
-        function(req,res,next){
-           //do something other
-           next();
-        },
-    ] );
-
-    MWC.setAppRoutes(function(core){
-       core.app.get('/',function(req,res){
-          res.send('HI!');
-       });
+    //listening of MWC events. 'Coocoo!' is emmited by mwc_plugin_example every 5 seconds
+    MWC.on('Coocoo!', function (message) {
+        console.log('Coocoo! Coocoo! ' + message);
     });
 
-    MWC.usePluggin(require('mwc_plugin_exampe'));
+    MWC.on('honeypot accessed', function (message) {
+        console.log('Attention! Somebody tries to hack us! ' + message);
+    });
 
-    //var https = require('https');
-    //MWC.listen(https);
-
-    //var http = require('http');
-    //MWC.listen(http);
-
-    MWC.listen(8080);//set port to listen on
-    MWC.listen();//set to listen on default port as http server
 
 ```
 

@@ -1,24 +1,27 @@
 var EventEmitter = require("events").EventEmitter,
+    path = require('path'),
+    url = require('url'),
+    async = require('async'),
+    util = require("util"),
+    express = require('express'),
+
+
     mongoose = require('mongoose'),
     UsersModel = require('./models/USERS.js'),
     DocumentsModel = require('./models/DOCUMENTS.js'),
-    express = require('express'),
-    path = require('path'),
-    url = require('url'),
 
     http = require('http'),
     https = require('https'),
-
+//passport middleware
     passport = require('passport'),
     LocalStrategy = require('passport-local').Strategy,
     HashStrategy = require('passport-hash').Strategy,
     GoogleStrategy = require('passport-google').Strategy,
-
+//
     RedisStore = require('connect-redis')(express),
     flashMiddleware = require('connect-flash'),
+
     usersController = require('./routes/usersController.js'),
-    async = require('async'),
-    util = require("util"),
     redis = require('redis'),
     toobusy = require('toobusy');
 
@@ -35,7 +38,7 @@ util.inherits(MWC, EventEmitter);
 
 //extending application
 MWC.prototype.extendCore = function(settingsFunction){
-    this.setCoreFunctions.push(settingsFunction(this));
+    this.setCoreFunctions.push(settingsFunction);
     return this;
 }
 MWC.prototype.setAppParameters = function(environment,settingsFunction){
@@ -53,13 +56,13 @@ MWC.prototype.setAppParameters = function(environment,settingsFunction){
     if(environmentToUse){
         for(var i=0;i<environmentToUse.length;i++){
             this.setAppParametersFunctions.push({
-                'enviroment':environmentToUse[i],
-                'SettingsFunction':settingsFunction(this)
+                'environment':environmentToUse[i],
+                'settingsFunction':settingsFunction
             });
         }
     } else {
         this.setAppParametersFunctions.push({
-            'SettingsFunction':settingsFunction(this)
+            'SettingsFunction':settingsFunction
         });
     }
     return this;
@@ -89,11 +92,11 @@ MWC.prototype.setAppMiddlewares  = function(environment,settingsFunction){
             'SettingsFunction':settingsFunction
         });
     }
-
-
+    return this;
 }
 MWC.prototype.extendAppRoutes = function(settingsFunction){
-    this.setAppRoutesFunctions.push(settingsFunction(this));
+    this.setAppRoutesFunctions.push(settingsFunction);
+    return this;
 }
 
 MWC.prototype.ready=function(){
@@ -218,8 +221,13 @@ MWC.prototype.ready=function(){
     //doing setAppParameters
     //extend vendored application settings
     thisMWC.setAppParametersFunctions.map(function(func){
-        //todo - add path to implement middleware
-        func(thisMWC);
+        if(func.environment){
+            thisMWC.app.configure(func.environment,function(){
+               func.settingsFunction(thisMWC);
+            });
+        } else {
+            func.settingsFunction(thisMWC);
+        }
     });
 
     thisMWC.app.configure('development', function () {
@@ -354,7 +362,7 @@ MWC.prototype.listen=function(httpOrHttpsOrPort){
     }
 }
 
-
+//transfer to separate pluggin...
 MWC.prototype.populate_database = function(data){
     console.log('Populating the database');
     if(data.users && data.users instanceof Array){
@@ -370,13 +378,11 @@ MWC.prototype.populate_database = function(data){
 
 }
 
-
-
-module.exports = exports = MWC;
-
 process.on('SIGINT', function() {
     //server.close(); //server is instantained somewere else...
     // calling .shutdown allows your process to exit normally
     toobusy.shutdown();
     process.exit();
 });
+
+module.exports = exports = MWC;
