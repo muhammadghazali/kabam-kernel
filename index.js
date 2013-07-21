@@ -16,8 +16,13 @@ var EventEmitter = require('events').EventEmitter,
 //passport middleware
   passport = require('passport'),
   initPassport = require('./passport/initPassport.js'),
-//
+
+//session storage
   RedisStore = require('connect-redis')(express),
+  //todo
+  //https://hacks.mozilla.org/2012/12/using-secure-client-side-sessions-to-build-simple-and-scalable-node-js-applications-a-node-js-holiday-season-part-3/
+
+
   flashMiddleware = require('connect-flash'),
 
   usersController = require('./routes/usersController.js'),

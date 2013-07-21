@@ -4,6 +4,7 @@
     "secret":"hammer on the keyboard",
     "mongoUrl":"mongodb://localhost/mwc_dev",
     "redis":{"host":"localhost","port":6379},
+    "sessionStorage": "redis",
     "passport":{
       "GITHUB_CLIENT_ID":"--insert-github-client-id-here--",
       "GITHUB_CLIENT_SECRET": "--insert-github-client-secret-here--"
@@ -14,6 +15,7 @@
     "secret":"hammer on the keyboard",
     "mongoUrl":"mongodb://localhost/mwc",
     "redis":{"host":"localhost","port":6379},
+    "sessionStorage": "redis",
     "passport":{
       "GITHUB_CLIENT_ID":"--insert-github-client-id-here--",
       "GITHUB_CLIENT_SECRET": "--insert-github-client-secret-here--"
@@ -24,6 +26,7 @@
     "secret":"hammer on the keyboard",
     "mongoUrl":"mongodb://localhost/mwc_test",
     "redis":{"host":"localhost","port":6379},
+    "sessionStorage": "redis",
     "passport":{
       "GITHUB_CLIENT_ID":"--insert-github-client-id-here--",
       "GITHUB_CLIENT_SECRET": "--insert-github-client-secret-here--"
