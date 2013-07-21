@@ -16,17 +16,17 @@
     "url": "git@github.com:mywebclass/mwc_core.git"
   },
   "dependencies": {
-    "mwc_plugin_example": "git+ssh://git@github.com:mywebclass/mwc_plugin_example.git",
     "async": "*",
     "express": "*",
     "redis": "*",
-    "hogan-express": "*",
     "connect-redis": "*",
     "connect-flash": "*",
+
     "passport": "*",
     "passport-local": "*",
     "passport-hash": "*",
     "passport-google": "*",
+
     "mongoose": "*",
     "generate-key": "*",
     "moment": "*",
