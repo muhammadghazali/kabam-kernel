@@ -86,7 +86,7 @@ MWC.prototype.setAppParameters = function (environment, settingsFunction) {
 
 MWC.prototype.setAppMiddlewares = function (environment, settingsFunction) {
   if (this.prepared) {
-    throw new Error('MWC core application is already prepared! WE CANN\'T EXTEND IT NOW!');
+    throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
   } else {
     //todo - add path to implement middleware
     var environmentToUse = null;
@@ -118,7 +118,7 @@ MWC.prototype.setAppMiddlewares = function (environment, settingsFunction) {
 
 MWC.prototype.extendAppRoutes = function (settingsFunction) {
   if (this.prepared) {
-    throw new Error('MWC core application is already prepared! WE CANN\'T EXTEND IT NOW!');
+    throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
   } else {
     this.setAppRoutesFunctions.push(settingsFunction);
     return this;
@@ -127,7 +127,7 @@ MWC.prototype.extendAppRoutes = function (settingsFunction) {
 
 MWC.prototype.usePlugin = function (pluginObjectOrName) {
   if (this.prepared) {
-    throw new Error('MWC core application is already prepared! WE CANN\'T EXTEND IT NOW!');
+    throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
   } else {
     var pluginToBeInstalled = {};
     if (typeof pluginObjectOrName === 'string') {

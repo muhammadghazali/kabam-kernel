@@ -38,6 +38,42 @@ vows.describe('mwcCore')
         assert.isFunction(topic.app.get);
         assert.isFunction(topic.app.post);
         assert.isFunction(topic.app.delete);
+      },
+      'it throws error when we try to extend readied application': function (topic) {
+        try {
+          topic.extendCore(function(core){
+            throw new Error('Core was extended for READIED application!');
+          });
+        } catch (e) {
+          assert.equal('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!', e.message);
+        }
+        try {
+          topic.setAppParameters(['development', 'staging'],function(core){
+            throw new Error('Core app parameters were extended for READIED application!');
+          });
+        } catch (e) {
+          assert.equal('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!', e.message);
+        }
+        try {
+          topic.setAppMiddlewares(['development', 'staging'],function(core){
+            throw new Error('Core app middlewares were extended for READIED application!');
+          });
+        } catch (e) {
+          assert.equal('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!', e.message);
+        }
+        try {
+          topic.extendAppRoutes(function(core){
+            throw new Error('Core app routes were extended for READIED application!');
+          });
+        } catch (e) {
+          assert.equal('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!', e.message);
+        }
+        try {
+          topic.usePlugin('mwc_plugin_make_suicide_while_punching_wall_on_high_speed');
+        } catch (e) {
+          assert.equal('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!', e.message);
+        }
+
       }
     },
     'Testing mwc_core event emmiting system': {
