@@ -7,6 +7,8 @@ var EventEmitter = require("events").EventEmitter,
 
 
     mongoose = require('mongoose'),
+    redis = require('redis'),
+
     UsersModel = require('./models/USERS.js'),
     DocumentsModel = require('./models/DOCUMENTS.js'),
 
@@ -21,7 +23,7 @@ var EventEmitter = require("events").EventEmitter,
 
     usersController = require('./routes/usersController.js'),
     documentsController = require('./routes/documentsController.js'),
-    redis = require('redis'),
+
     toobusy = require('toobusy');
 
 function MWC(config) {
@@ -37,65 +39,81 @@ util.inherits(MWC, EventEmitter);
 
 //extending application
 MWC.prototype.extendCore = function(settingsFunction){
-    this.setCoreFunctions.push(settingsFunction);
-    return this;
+    if(this.prepared){
+        throw new Error('MWC core application is already prepared! WE CANN\'T EXTEND IT NOW!')
+    } else {
+        this.setCoreFunctions.push(settingsFunction);
+        return this;
+    }
 }
 MWC.prototype.setAppParameters = function(environment,settingsFunction){
-    var environmentToUse=null;
-    if(typeof settingsFunction == 'undefined'){
-        settingsFunction=environment;
-    }
-    if(typeof environment == 'String'){
-        environmentToUse=[];
-        enviromentToUse.push(environment);
-    }
-    if(environment instanceof Array){
-        environmentToUse=environment;
-    }
-    if(environmentToUse){
-        for(var i=0;i<environmentToUse.length;i++){
+    if (this.prepared) {
+        throw new Error('MWC core application is already prepared! WE CANN\'T EXTEND IT NOW!')
+    } else {
+        var environmentToUse = null;
+        if (typeof settingsFunction == 'undefined') {
+            settingsFunction = environment;
+        }
+        if (typeof environment == 'String') {
+            environmentToUse = [];
+            enviromentToUse.push(environment);
+        }
+        if (environment instanceof Array) {
+            environmentToUse = environment;
+        }
+        if (environmentToUse) {
+            for (var i = 0; i < environmentToUse.length; i++) {
+                this.setAppParametersFunctions.push({
+                    'environment': environmentToUse[i],
+                    'settingsFunction': settingsFunction
+                });
+            }
+        } else {
             this.setAppParametersFunctions.push({
-                'environment':environmentToUse[i],
-                'settingsFunction':settingsFunction
+                'SettingsFunction': settingsFunction
             });
         }
-    } else {
-        this.setAppParametersFunctions.push({
-            'SettingsFunction':settingsFunction
-        });
+        return this;
     }
-    return this;
 }
 MWC.prototype.setAppMiddlewares  = function(environment,settingsFunction){
-    //todo - add path to implement middleware
-    var environmentToUse=null;
-    if(typeof settingsFunction == 'undefined'){
-        settingsFunction=environment;
-    }
-    if(typeof environment == 'String'){
-        environmentToUse=[];
-        environmentToUse.push(environment);
-    }
-    if(environment instanceof Array){
-        environmentToUse=environment;
-    }
-    if(environmentToUse){
-        for(var i=0;i<environmentToUse.length;i++){
+    if (this.prepared) {
+        throw new Error('MWC core application is already prepared! WE CANN\'T EXTEND IT NOW!')
+    } else {
+        //todo - add path to implement middleware
+        var environmentToUse = null;
+        if (typeof settingsFunction == 'undefined') {
+            settingsFunction = environment;
+        }
+        if (typeof environment == 'String') {
+            environmentToUse = [];
+            environmentToUse.push(environment);
+        }
+        if (environment instanceof Array) {
+            environmentToUse = environment;
+        }
+        if (environmentToUse) {
+            for (var i = 0; i < environmentToUse.length; i++) {
+                this.setAppMiddlewaresFunctions.push({
+                    'enviroment': environmentToUse[i],
+                    'SettingsFunction': settingsFunction
+                });
+            }
+        } else {
             this.setAppMiddlewaresFunctions.push({
-                'enviroment':environmentToUse[i],
-                'SettingsFunction':settingsFunction
+                'SettingsFunction': settingsFunction
             });
         }
-    } else {
-        this.setAppMiddlewaresFunctions.push({
-            'SettingsFunction':settingsFunction
-        });
+        return this;
     }
-    return this;
 }
 MWC.prototype.extendAppRoutes = function(settingsFunction){
+    if(this.prepared){
+        throw new Error('MWC core application is already prepared! WE CANN\'T EXTEND IT NOW!')
+    } else {
     this.setAppRoutesFunctions.push(settingsFunction);
     return this;
+    }
 }
 
 MWC.prototype.ready=function(){
