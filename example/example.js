@@ -75,7 +75,26 @@ MWC.extendAppRoutes(
         }
 );
 
-//api/user works to!!!
+//injecting plugin as an object
+MWC.usePlugin({
+
+    'extendCore':null, //can be ommited
+    'setAppParameters':null, //can be ommited
+    'setAppMiddlewares':null, //can be ommited
+
+    'extendAppRoutes':function(core){
+        core.app.get('/newPlugin',function(req,res){
+            res.send('New plugin is installed as object');
+        });
+    }
+});
+
+//injecting plugin as an name of installe npm package!
+MWC.usePlugin('mwc_plugin_example');
+
+
+//api/user works from box
+//api/documents works from box
 
 //binding application to port
 MWC.listen(3000);

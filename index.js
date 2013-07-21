@@ -116,6 +116,40 @@ MWC.prototype.extendAppRoutes = function(settingsFunction){
     }
 }
 
+MWC.prototype.usePlugin = function(pluginObjectOrName){
+    if(this.prepared){
+        throw new Error('MWC core application is already prepared! WE CANN\'T EXTEND IT NOW!')
+    } else {
+        var pluginToBeInstalled={};
+        if(typeof pluginObjectOrName == 'string'){
+            //this is plugin name
+            pluginToBeInstalled=require(''+pluginObjectOrName);
+
+            console.log('===');
+            console.log(pluginObjectOrName)
+            console.log(typeof pluginObjectOrName)
+            console.log(pluginToBeInstalled);
+            console.log('===');
+
+        } else {
+            pluginToBeInstalled = pluginObjectOrName;
+        }
+        if(pluginToBeInstalled.extendCore){
+            this.extendCore(pluginToBeInstalled.extendCore);
+        }
+        if(pluginToBeInstalled.setAppParameters){
+            this.setAppParameters(pluginToBeInstalled.setAppParameters);
+        }
+        if(pluginToBeInstalled.setAppMiddlewares){
+            this.setAppMiddlewares(pluginToBeInstalled.setAppMiddlewares);
+        }
+        if(pluginToBeInstalled.extendAppRoutes){
+            this.extendAppRoutes(pluginToBeInstalled.extendAppRoutes);
+        }
+        return this;
+    }
+}
+
 MWC.prototype.ready=function(){
     var thisMWC=this;
     thisMWC.prepared=true;
@@ -197,7 +231,6 @@ MWC.prototype.ready=function(){
     });
 
     thisMWC.app.configure('development', function () {
-        console.log('Development enviroment!');
         thisMWC.app.use(express.responseTime());
         thisMWC.app.use(express.logger('dev'));
     });
