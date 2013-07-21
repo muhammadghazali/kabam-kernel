@@ -6,7 +6,7 @@ var async = require('async'),
 
 
 function md5(str) {
-  return crypto.createHash('md5').update(str).digest('hex').toString();
+  return crypto.createHash('sha512').update(str).digest('hex').toString(); //Anatolij - lolz!!!)))
 }
 
 module.exports = exports = function (mongoose, config) {
@@ -53,6 +53,9 @@ module.exports = exports = function (mongoose, config) {
     },
     username: String,
     email: String,
+
+    cookieKey:String,//for invalidating sessions by user request
+
     salt: String,
     password: String,
     groups: [Number]
@@ -95,11 +98,22 @@ module.exports = exports = function (mongoose, config) {
   };
 
   UserSchema.methods.verifyPassword = function (password) {
-    return md5(this.salt + password) === this.password;
+    return md5(''+this.salt + password) === this.password;
   };
 
-  UserSchema.methods.setPassword = function(newPassword){
-
+  UserSchema.methods.setPassword = function(newPassword,callback){
+    var salt = md5(rack());
+    this.salt = salt;
+    this.password=md5(''+salt+newPassword);
+    this.save(callback);
+    return;
   };
+
+  User.Schema.methods.invalidateSession = function(callback){
+    this.cookieKey=rack();
+    this.save(callback);
+    return;
+  }
+
   return mongoose.model('users', UserSchema);
 };
