@@ -28,12 +28,9 @@ used in application in *order* they were issued by this function
 Plugins
 =======
 
- [mwc_plugin_example](https://github.com/mywebclass/mwc_plugin_example)
- - demonstration plugin 
- 
- [mwc_plugin_spine](https://github.com/mywebclass/mwc_plugin_spine)
- - plugint that add task queue for application, based on 
- [Assemblage](github.com/pipedrive/assemblage) node module 
+ - [mwc_plugin_example](https://github.com/mywebclass/mwc_plugin_example) demonstration plugin 
+ git
+ - [mwc_plugin_spine](https://github.com/mywebclass/mwc_plugin_spine)  plugint that add task queue for application, based on  [Assemblage](github.com/pipedrive/assemblage) node module 
 
 Example
 =======
