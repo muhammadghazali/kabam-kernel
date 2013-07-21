@@ -1,19 +1,42 @@
 mwc_core
 ========
 
-MyWebClass core node.js application to be extended by loaded automatically middleware plugins
+MyWebClass core node.js application to be extended by loaded automatically middleware plugins.
+Technically this is a Factory class to vendor [express.js](http://expressjs.com/) applications, 
+that can be easily extended by 6 functions.
 
-Pluggable modules runned
+0. Constructor - create application object using configuration object.
+
+1. `extendCore` - extend object created, including expressJS application 
+and some other modules. You can call this function multiple times
+
+2. `setAppParameters` - set global application parameters, for example 
+template [engines](http://expressjs.com/api.html#app.engine), 
+[locals](http://expressjs.com/api.html#app.locals) 
+and [other](http://expressjs.com/api.html#app-settings) settings
+
+3. `setAppMiddlewares` - set application 
+[middleware](http://expressjs.com/api.html#middleware).
+This function can be executed multiple times, the middlewares applied are
+used in application in *order* they were issued by this function
+
+4. `extendAppRoutes` - add custom routes to application
+
+5. `loadPlugin` - load plugin as object or as a installed 
+[npm](https://npmjs.org/) plugin by name
+
+Plugins
 =======
 
-Right now there is only one plugable module - [https://github.com/mywebclass/mwc_plugin_example](https://github.com/mywebclass/mwc_plugin_example).
+ [mwc_plugin_example](https://github.com/mywebclass/mwc_plugin_example)
+ - demonstration plugin 
+ 
+ [mwc_plugin_spine](https://github.com/mywebclass/mwc_plugin_spine)
+ - plugint that add task queue for application, based on 
+ [Assemblage](github.com/pipedrive/assemblage) node module 
 
-It is binded to [http://localhost:3000/example](http://localhost:3000/example) route.
-
-The list of active plugins can be viewed here [http://localhost:3000/example](http://localhost:3000/example)
-
-*Example*:
-
+Example
+=======
 ```javascript
 
     var mwcCore = require('./../index.js');
@@ -187,10 +210,11 @@ Furthemore, MWC extends the [request](http://expressjs.com/api.html#req.params) 
 with
 ```javascript
     MWC.app.get('/someURI',function(request,response){
-       //request.MODEL.users
-       //request.MODEL.documents
-       //request.redisClient
-       //request.emitMWC('it works!'); //event emmiter, coupled to MWC event emmiter
+     //request.user - passport.js authentication middleware user representation
+     //request.MODEL.users
+     //request.MODEL.documents
+     //request.redisClient
+     //request.emitMWC('it works!'); //event emmiter, coupled to MWC event emmiter
     });
 ```
 
@@ -222,11 +246,23 @@ Developer's Note
 
 Run jshint with:
 
-    grunt jshint
+```shell
+    $ grunt jshint
+```
 
 Run unit tests with:
 
-    grunt test
+```shell
+    $ grunt test
+```
+
+or
+
+```shell
+    $ npm test
+```
+
+[![Build Status](https://travis-ci.org/mywebclass/mwc_core.png?branch=master)](https://travis-ci.org/mywebclass/mwc_core)
 
 Plugin creating manual
 =======
