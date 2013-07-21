@@ -9,7 +9,7 @@ MWC.listen(3000);
 
 vows.describe('mwcCore')
   .addBatch({
-    'Testing mwc_core exposed objects': {
+    'Testing exposed objects of running mwcCore': {
       'topic': MWC,
       'it can emit and listen to events': function (topic) {
         assert.isFunction(topic.emit);
@@ -74,6 +74,9 @@ vows.describe('mwcCore')
           assert.equal('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!', e.message);
         }
 
+      },
+      'it setted the "prepared" property to true':function(topic){
+        assert.isTrue(topic.prepared);
       }
     },
     'Testing mwc_core event emmiting system': {
