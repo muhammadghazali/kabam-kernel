@@ -2,7 +2,8 @@ var LocalStrategy = require('passport-local').Strategy,
   HashStrategy = require('passport-hash').Strategy,
   GoogleStrategy = require('passport-google').Strategy,
   GitHubStrategy = require('passport-github').Strategy,
-  TwitterStrategy = require('passport-twitter').Strategy;
+  TwitterStrategy = require('passport-twitter').Strategy,
+  FacebookStrategy = require('passport-facebook').Strategy;
 
 
 exports.doInitializePassportStrategies = function (passport, Users, config) {
@@ -48,34 +49,13 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
     }
   ));
 
-  if(config.passport && config.passport.GITHUB_CLIENT_ID && config.passport.GITHUB_CLIENT_SECRET){
-  //if we have set parameters for github, enable the github passport strategy
-  passport.use(new GitHubStrategy({
+  if (config.passport && config.passport.GITHUB_CLIENT_ID && config.passport.GITHUB_CLIENT_SECRET) {
+    //if we have set parameters for github, enable the github passport strategy
+    passport.use(new GitHubStrategy({
       clientID: config.passport.GITHUB_CLIENT_ID,
       clientSecret: config.passport.GITHUB_CLIENT_SECRET,
       callbackURL: config.hostUrl + 'auth/github/callback'
-    },function(accessToken, refreshToken, profile, done){
-    var email = profile.emails[0].value;
-    console.log(profile);
-    Users.findOne({'email': email, active: true}, function (err, userFound) {
-      console.log(userFound);
-      if (userFound) {
-        done(err, userFound, {message: 'Welcome, ' + userFound.username});
-      } else {
-        //model.UserModel.create({email:email},function(err,userCreated){
-        done(err, false, { message: 'Access denied!' });//todo - i am not sure if user can register by singing in with Google Acount
-        //});
-      }
-    });
-  }));
-  }
-
-  if(config.passport && config.passport.TWITTER_CONSUMER_KEY && config.passport.TWITTER_CONSUMER_SECRET){
-    passport.use(new TwitterStrategy({
-      consumerKey: config.passport.TWITTER_CONSUMER_KEY,
-      consumerSecret: config.passport.TWITTER_CONSUMER_SECRET,
-      callbackURL: config.hostUrl + 'auth/twitter/callback'
-    },function(token, tokenSecret, profile, done){
+    }, function (accessToken, refreshToken, profile, done) {
       var email = profile.emails[0].value;
       console.log(profile);
       Users.findOne({'email': email, active: true}, function (err, userFound) {
@@ -84,13 +64,55 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
           done(err, userFound, {message: 'Welcome, ' + userFound.username});
         } else {
           //model.UserModel.create({email:email},function(err,userCreated){
-          done(err, false, { message: 'Access denied!' });//todo - i am not sure if user can register by singing in with Google Acount
+          done(err, false, { message: 'Access denied!' });//todo - i am not sure if user can register by singing in with Github Account
           //});
         }
       });
     }));
   }
 
+  if (config.passport && config.passport.TWITTER_CONSUMER_KEY && config.passport.TWITTER_CONSUMER_SECRET) {
+    passport.use(new TwitterStrategy({
+      consumerKey: config.passport.TWITTER_CONSUMER_KEY,
+      consumerSecret: config.passport.TWITTER_CONSUMER_SECRET,
+      callbackURL: config.hostUrl + 'auth/twitter/callback'
+    }, function (token, tokenSecret, profile, done) {
+      var email = profile.emails[0].value;
+      console.log(profile);
+      Users.findOne({'email': email, active: true}, function (err, userFound) {
+        console.log(userFound);
+        if (userFound) {
+          done(err, userFound, {message: 'Welcome, ' + userFound.username});
+        } else {
+          //model.UserModel.create({email:email},function(err,userCreated){
+          done(err, false, { message: 'Access denied!' });//todo - i am not sure if user can register by singing in with Twitter Account
+          //});
+        }
+      });
+    }));
+  }
+
+  if (config.passport && config.passport.FACEBOOK_APP_ID && config.passport.FACEBOOK_APP_SECRET) {
+    passport.use(new FacebookStrategy({
+        clientID: config.passport.FACEBOOK_APP_ID,
+        clientSecret: config.passport.FACEBOOK_APP_SECRET,
+        callbackURL: config.hostUrl + 'auth/facebook/callback'
+      },
+      function(accessToken, refreshToken, profile, done) {
+        var email = profile.emails[0].value;
+        console.log(profile);
+        Users.findOne({'email': email, active: true}, function (err, userFound) {
+          console.log(userFound);
+          if (userFound) {
+            done(err, userFound, {message: 'Welcome, ' + userFound.username});
+          } else {
+            //model.UserModel.create({email:email},function(err,userCreated){
+            done(err, false, { message: 'Access denied!' });//todo - i am not sure if user can register by singing in with Facebook Account
+            //});
+          }
+        });
+      }));
+  }
 
   //end of initializing passport strategies
 
@@ -115,25 +137,29 @@ exports.doInitializePassportRoutes = function (passport, app) {
   app.get('/auth/google/return', passport.authenticate('google', { failureRedirect: '/', successRedirect: '/' }));
 
 
-
-
-  if(config.passport && config.passport.GITHUB_CLIENT_ID && config.passport.GITHUB_CLIENT_SECRET){
+  if (config.passport && config.passport.GITHUB_CLIENT_ID && config.passport.GITHUB_CLIENT_SECRET) {
     //if we have set parameters for github, enable the github passport strategy
-  app.get('/auth/github',passport.authenticate('github'),
-    function(req, res){
-      // The request will be redirected to GitHub for authentication, so this
-      // function will not be called.
-    });
-  app.get('/auth/github/callback',passport.authenticate('github', { failureRedirect: '/' }),
-    function(req, res) {
-      res.redirect('/');
-    });
+    app.get('/auth/github', passport.authenticate('github'),
+      function (req, res) {
+        // The request will be redirected to GitHub for authentication, so this
+        // function will not be called.
+      });
+    app.get('/auth/github/callback', passport.authenticate('github', { failureRedirect: '/' }),
+      function (req, res) {
+        res.redirect('/');
+      });
   }
 
-  if(config.passport && config.passport.TWITTER_CONSUMER_KEY && config.passport.TWITTER_CONSUMER_SECRET){
+  if (config.passport && config.passport.TWITTER_CONSUMER_KEY && config.passport.TWITTER_CONSUMER_SECRET) {
     app.get('/auth/twitter', passport.authenticate('twitter'));
-    app.get('/auth/twitter/callback',passport.authenticate('twitter', { successRedirect: '/',failureRedirect: '/' }));
+    app.get('/auth/twitter/callback', passport.authenticate('twitter', { successRedirect: '/', failureRedirect: '/' }));
   }
+
+  if (config.passport && config.passport.FACEBOOK_APP_ID && config.passport.FACEBOOK_APP_SECRET) {
+    app.get('/auth/facebook', passport.authenticate('facebook'));
+    app.get('/auth/facebook/callback', passport.authenticate('facebook', { successRedirect: '/', failureRedirect: '/' }));
+  }
+
 
   app.post('/logoff', function (request, response) {
     request.logout();
