@@ -215,19 +215,19 @@ MWC.prototype.ready = function () {
     }
   });
   thisMWC.app.configure('development', function () {
-    console.log('Development enviroment!');
+    console.log('Development environment!');
     thisMWC.app.use(express.responseTime());
     thisMWC.app.use(express.logger('dev'));
   });
 
   thisMWC.app.configure('staging', function () {
-    console.log('Staging enviroment!');
+    console.log('Staging environment!');
     thisMWC.app.use(express.responseTime());
     thisMWC.app.use(express.logger('dev'));
   });
 
   thisMWC.app.configure('production', function () {
-    console.log('Production enviroment!');
+    console.log('Production environment!');
     thisMWC.app.locals.production = true;
     thisMWC.app.enable('view cache');
     thisMWC.app.use(express.logger('short'));
