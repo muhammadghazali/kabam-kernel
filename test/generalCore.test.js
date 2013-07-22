@@ -3,7 +3,8 @@
 var should = require('should'),
   mwcCore = require('./../index.js'),
   events = require('events'),
-  config = require('./../example/config.json').development;
+  config = require('./../example/config.json').development,
+  blanket = require('blanket');
 
 var MWC = new mwcCore(config);
 MWC.listen(3000);

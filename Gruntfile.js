@@ -26,6 +26,13 @@ module.exports = function(grunt) {
           require: ['should'],
         },
         src: ['test/**/*.js'],
+      },
+      ci: {
+        options: {
+          reporter: 'html-cov',
+          require: ['should']
+        },
+        src: ['test/**/*.js'],
       }
     },
     watch: {
