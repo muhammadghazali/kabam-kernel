@@ -33,7 +33,7 @@ Plugins
  - [mwc_plugin_example](https://github.com/mywebclass/mwc_plugin_example) demonstration plugin 
  
  - [mwc_plugin_spine](https://github.com/mywebclass/mwc_plugin_spine) [![Build Status](https://travis-ci.org/mywebclass/mwc_plugin_spine.png)](https://travis-ci.org/mywebclass/mwc_plugin_spine)  plugint that add task queue for application,
- based on  [Assemblage](github.com/pipedrive/assemblage) node module.
+ based on  [Assemblage](https://github.com/pipedrive/assemblage) node module.
 
 Example
 =======
