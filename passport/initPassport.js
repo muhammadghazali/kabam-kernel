@@ -1,7 +1,8 @@
 var LocalStrategy = require('passport-local').Strategy,
   HashStrategy = require('passport-hash').Strategy,
   GoogleStrategy = require('passport-google').Strategy,
-  GitHubStrategy = require('passport-github').Strategy;
+  GitHubStrategy = require('passport-github').Strategy,
+  TwitterStrategy = require('passport-twitter').Strategy;
 
 
 exports.doInitializePassportStrategies = function (passport, Users, config) {
@@ -47,6 +48,8 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
     }
   ));
 
+  if(config.passport && config.passport.GITHUB_CLIENT_ID && config.passport.GITHUB_CLIENT_SECRET){
+  //if we have set parameters for github, enable the github passport strategy
   passport.use(new GitHubStrategy({
       clientID: config.passport.GITHUB_CLIENT_ID,
       clientSecret: config.passport.GITHUB_CLIENT_SECRET,
@@ -65,6 +68,29 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
       }
     });
   }));
+  }
+
+  if(config.passport && config.passport.TWITTER_CONSUMER_KEY && config.passport.TWITTER_CONSUMER_SECRET){
+    passport.use(new TwitterStrategy({
+      consumerKey: config.passport.TWITTER_CONSUMER_KEY,
+      consumerSecret: config.passport.TWITTER_CONSUMER_SECRET,
+      callbackURL: config.hostUrl + 'auth/twitter/callback'
+    },function(token, tokenSecret, profile, done){
+      var email = profile.emails[0].value;
+      console.log(profile);
+      Users.findOne({'email': email, active: true}, function (err, userFound) {
+        console.log(userFound);
+        if (userFound) {
+          done(err, userFound, {message: 'Welcome, ' + userFound.username});
+        } else {
+          //model.UserModel.create({email:email},function(err,userCreated){
+          done(err, false, { message: 'Access denied!' });//todo - i am not sure if user can register by singing in with Google Acount
+          //});
+        }
+      });
+    }));
+  }
+
 
   //end of initializing passport strategies
 
@@ -84,11 +110,15 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
 }
 exports.doInitializePassportRoutes = function (passport, app) {
 
-
+  //google works alwayes, it do not need tunning
   app.get('/auth/google', passport.authenticate('google'));
   app.get('/auth/google/return', passport.authenticate('google', { failureRedirect: '/', successRedirect: '/' }));
 
 
+
+
+  if(config.passport && config.passport.GITHUB_CLIENT_ID && config.passport.GITHUB_CLIENT_SECRET){
+    //if we have set parameters for github, enable the github passport strategy
   app.get('/auth/github',passport.authenticate('github'),
     function(req, res){
       // The request will be redirected to GitHub for authentication, so this
@@ -98,6 +128,12 @@ exports.doInitializePassportRoutes = function (passport, app) {
     function(req, res) {
       res.redirect('/');
     });
+  }
+
+  if(config.passport && config.passport.TWITTER_CONSUMER_KEY && config.passport.TWITTER_CONSUMER_SECRET){
+    app.get('/auth/twitter', passport.authenticate('twitter'));
+    app.get('/auth/twitter/callback',passport.authenticate('twitter', { successRedirect: '/',failureRedirect: '/' }));
+  }
 
   app.post('/logoff', function (request, response) {
     request.logout();

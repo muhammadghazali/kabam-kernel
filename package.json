@@ -26,6 +26,8 @@
     "passport-hash": "*",
     "passport-google": "*",
     "passport-github": "*",
+    "passport-twitter":"*",
+    "passport-facebook":"*",
     "mongoose": "*",
     "hat": "*",
     "moment": "*",
