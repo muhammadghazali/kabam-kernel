@@ -1,7 +1,9 @@
+/*jshint immed: false */
+
 var should = require('should'),
   mwcCore = require('./../index.js'),
   events = require('events'),
-  config = require('./../example/config.json')['development'];
+  config = require('./../example/config.json').development;
 
 var MWC = new mwcCore(config);
 MWC.listen(3000);
@@ -46,25 +48,25 @@ describe('mwcCore', function() {
     it('throws error when we try to extend readied application', function() {
 
       (function() {
-        MWC.extendCore(function (core) {
+        MWC.extendCore(function () {
           throw new Error('Core was extended for READIED application!');
         });
       }).should.throw('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
 
       (function() {
-        MWC.setAppParameters(['development', 'staging'], function(core) {
+        MWC.setAppParameters(['development', 'staging'], function() {
           throw new Error('Core app parameters were extended for READIED application!');
         });
       }).should.throw('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
 
       (function() {
-        MWC.setAppMiddlewares(['development', 'staging'], function(core) {
+        MWC.setAppMiddlewares(['development', 'staging'], function() {
           throw new Error('Core app middlewares were extended for READIED application!');
         });
       }).should.throw('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
 
       (function() {
-        MWC.extendAppRoutes(function(core){
+        MWC.extendAppRoutes(function() {
           throw new Error('Core app routes were extended for READIED application!');
         });
       }).should.throw('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
@@ -86,7 +88,7 @@ describe('mwcCore', function() {
       message;
 
     before(function(done) {
-      var promise = new (events.EventEmitter),
+      var promise = new events.EventEmitter(),
         mwc = MWC;
 
       mwc.on('error', function (err) {

@@ -214,13 +214,13 @@ MWC.prototype.ready = function () {
   });
 
   thisMWC.app.configure('development', function () {
-    console.log('Development enviroment!');
+    //console.log('Development enviroment!');
     thisMWC.app.use(express.responseTime());
     thisMWC.app.use(express.logger('dev'));
   });
 
   thisMWC.app.configure('production', function () {
-    console.log('Production enviroment!');
+    //console.log('Production enviroment!');
     thisMWC.app.locals.production = true;
     thisMWC.app.enable('view cache');
     thisMWC.app.use(express.logger('short'));

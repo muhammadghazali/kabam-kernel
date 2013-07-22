@@ -8,7 +8,7 @@ module.exports = function(grunt) {
         jshintrc: '.jshintrc'
       },
       all: {
-        src: ['Gruntfile.js', 'index.js', 'example/**/*.js', 'models/**/*.js', 'public/**/*.js', 'routes/**/*.js', 'tests/**/*.js']
+        src: ['Gruntfile.js', 'index.js', 'example/**/*.js', 'models/**/*.js', 'public/**/*.js', 'routes/**/*.js', 'test/**/*.js']
       },
       ci: {
         options: {
