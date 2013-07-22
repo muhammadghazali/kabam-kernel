@@ -19,12 +19,13 @@ module.exports = function(grunt) {
         src: '<%= jshint.all.src %>'
       }
     },
-    vows: {
+    mochacov: {
       all: {
         options: {
-          reporter: 'spec'
+          reporter: 'spec',
+          require: ['should'],
         },
-        src: ['tests/**/*.js']
+        src: ['test/**/*.js'],
       }
     },
     watch: {
@@ -38,10 +39,10 @@ module.exports = function(grunt) {
   // These plugins provide necessary tasks.
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-vows');
+  grunt.loadNpmTasks('grunt-mocha-cov');
 
   // Tasks
-  grunt.registerTask('test', ['vows:all']);
+  grunt.registerTask('test', ['mochacov']);
   // Default task.
   grunt.registerTask('default', ['jshint', 'test']);
 
