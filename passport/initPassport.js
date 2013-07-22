@@ -28,6 +28,10 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
     }
   ));
 
+  //used for verify account by email
+  passport.use(new HashStrategy(function(hash,done){
+    //todo - need to refactor user class for it...
+  }));
 
   passport.use(new GoogleStrategy({
       returnURL: config.hostUrl + 'auth/google/return',
@@ -159,6 +163,12 @@ exports.doInitializePassportRoutes = function (passport, app) {
     app.get('/auth/facebook', passport.authenticate('facebook'));
     app.get('/auth/facebook/callback', passport.authenticate('facebook', { successRedirect: '/', failureRedirect: '/' }));
   }
+
+  app.get('/confirm/:hash',
+    passport.authenticate('hash', { failureRedirect: '/' }),
+    function(req, res) {
+      res.redirect('/');
+    });
 
 
   app.post('/logoff', function (request, response) {
