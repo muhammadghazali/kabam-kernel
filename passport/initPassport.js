@@ -134,7 +134,7 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
 
 
 }
-exports.doInitializePassportRoutes = function (passport, app) {
+exports.doInitializePassportRoutes = function (passport, app, config) {
 
   //google works alwayes, it do not need tunning
   app.get('/auth/google', passport.authenticate('google'));

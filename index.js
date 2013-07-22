@@ -329,7 +329,7 @@ MWC.prototype.ready = function () {
   });
 
   //autorize routes for passport
-  initPassport.doInitializePassportRoutes(passport, thisMWC.app);
+  initPassport.doInitializePassportRoutes(passport, thisMWC.app, thisMWC.config);
 
   //catch all verb to show 404 error to wrong routes
   thisMWC.app.get('*', function (request, response) {
