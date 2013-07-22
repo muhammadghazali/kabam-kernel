@@ -204,6 +204,8 @@ MWC.prototype.ready = function () {
   //start vendoring expressJS application
   thisMWC.app = express();
 
+  thisMWC.app.set('port', process.env.PORT || 3000);
+
 //too busy middleware which blocks requests when we're too busy
   thisMWC.app.use(function (req, res, next) {
     if (toobusy()) {
@@ -212,21 +214,24 @@ MWC.prototype.ready = function () {
       next();
     }
   });
-
   thisMWC.app.configure('development', function () {
-    //console.log('Development enviroment!');
+    console.log('Development enviroment!');
+    thisMWC.app.use(express.responseTime());
+    thisMWC.app.use(express.logger('dev'));
+  });
+
+  thisMWC.app.configure('staging', function () {
+    console.log('Staging enviroment!');
     thisMWC.app.use(express.responseTime());
     thisMWC.app.use(express.logger('dev'));
   });
 
   thisMWC.app.configure('production', function () {
-    //console.log('Production enviroment!');
+    console.log('Production enviroment!');
     thisMWC.app.locals.production = true;
     thisMWC.app.enable('view cache');
     thisMWC.app.use(express.logger('short'));
   });
-
-  thisMWC.app.set('port', process.env.PORT || 3000);
 
   //doing setAppParameters
   //extend vendored application settings
@@ -238,18 +243,6 @@ MWC.prototype.ready = function () {
     } else {
       func.settingsFunction(thisMWC);
     }
-  });
-
-  thisMWC.app.configure('development', function () {
-    thisMWC.app.use(express.responseTime());
-    thisMWC.app.use(express.logger('dev'));
-  });
-
-  thisMWC.app.configure('production', function () {
-    console.log('Production enviroment!');
-    thisMWC.app.locals.production = true;
-    thisMWC.app.enable('view cache');
-    thisMWC.app.use(express.logger('short'));
   });
 
   thisMWC.app.use(express.compress());
