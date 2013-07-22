@@ -26,13 +26,15 @@ describe('mwcCore', function() {
       MWC.redisClient.auth.should.be.a('function');
     });
 
-    it('exposes mongoose model of users', function() {
+    it('exposes mongoose model',function(){
       MWC.MODEL.should.be.a('object');
+    });
+
+    it('exposes mongoose model of users', function() {
       MWC.MODEL.Users.should.be.a('function');
     });
 
     it('exposes mongoose model of documents', function() {
-      MWC.MODEL.should.be.a('object');
       MWC.MODEL.Documents.should.be.a('function');
     });
 
