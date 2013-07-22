@@ -7,30 +7,33 @@ that can be easily extended by 6 functions.
 
 0. Constructor - create application object using configuration object.
 
-1. `extendCore` - extend object created, including expressJS application 
+1. `extendCore(function(core){...})` - extend object created, including expressJS application
 and some other modules. You can call this function multiple times
 
-2. `setAppParameters` - set global application parameters, for example 
+2. `setAppParameters(function(core){...})` - set global application parameters, for example
 template [engines](http://expressjs.com/api.html#app.engine), 
 [locals](http://expressjs.com/api.html#app.locals) 
 and [other](http://expressjs.com/api.html#app-settings) settings
 
-3. `setAppMiddlewares` - set application 
+3. `setAppMiddlewares(function(core){...})` - set application
 [middleware](http://expressjs.com/api.html#middleware).
 This function can be executed multiple times, the middlewares applied are
 used in application in *order* they were issued by this function
 
-4. `extendAppRoutes` - add custom routes to application
+4. `extendAppRoutes(function(core){...})` - add custom routes to application
 
-5. `loadPlugin` - load plugin as object or as a installed 
-[npm](https://npmjs.org/) plugin by name
+5. `loadPlugin("mwc_plugin_foo")` or `loadPlugin(pluginObj)` - load plugin as object or as a installed [npm](https://npmjs.org/) plugin by name
+See [Plugin creating manual](https://github.com/mywebclass/mwc_core#plugin-creating-manual) for details
+
+
 
 Plugins
 =======
 
  - [mwc_plugin_example](https://github.com/mywebclass/mwc_plugin_example) demonstration plugin 
  
- - [mwc_plugin_spine](https://github.com/mywebclass/mwc_plugin_spine)  plugint that add task queue for application, based on  [Assemblage](github.com/pipedrive/assemblage) node module 
+ - [mwc_plugin_spine](https://github.com/mywebclass/mwc_plugin_spine) [![Build Status](https://travis-ci.org/mywebclass/mwc_plugin_spine.png)](https://travis-ci.org/mywebclass/mwc_plugin_spine)  plugint that add task queue for application,
+ based on  [Assemblage](github.com/pipedrive/assemblage) node module.
 
 Example
 =======
@@ -331,3 +334,68 @@ This is typicale plugin code. It is placed there
     }
 
 ```
+
+Lifecycle of mwc_core module and how can we extend it
+=======
+*Firstly*, the *core* module in extending functions are THE SAME instance of mwcCore application.
+And every call of extending functions shedule some customization for this application.
+
+I think i will post a bad example, and explain, why this is bad
+
+```javascript
+
+    MWC.extendCore = function(core){
+            core.sum=function(a,b){
+                return(a+b);
+            }
+            //set expressJS route
+            core.app.get('/someUrl',function(req,res){
+              res.send('Hello!');
+            });
+            //set middleware
+            core.app.use('/someUrl',function(req,res,next){
+              res.setHeader('x-bad-practice','yea!');
+              next();
+            });
+        }
+
+```
+
+And this code will be erroneus, because it violates the desired lifespan of application.
+Because on stage of extending core, there is no core.app variable.
+
+This is the way of things it is intended to work
+When you call the `extendCore(function(core){...})`, you can add global core functions and variables,
+but not anything other touching the application, middlewares or routes.
+In code it is called right after initializing [mongoose routes](https://github.com/mywebclass/mwc_core/blob/master/index.js#L195)
+core have event emmiter capabilities (`emit`,`on`), `redisClient`, and `MODEL.Users`, `MODEL.Documents` (exposed as mongoose schemas).
+Nothing more!
+
+When you call `setAppParameters(function(core){...})`, you can set global application parameters, for example
+template [engines](http://expressjs.com/api.html#app.engine), [locals](http://expressjs.com/api.html#app.locals)
+and [other](http://expressjs.com/api.html#app-settings) settings.
+In code it is called [after settng logging middleware and port](https://github.com/mywebclass/mwc_core/blob/master/index.js#L236).
+You can set any application parameter you want, you have full MWC core internalls at your disposal
+- (`emit`,`on`), `redisClient`, and `MODEL.Users`, `MODEL.Documents`
+
+When you call `setAppMiddlewares(function(core){...})`, you can set app middlewares.
+They are [called]((https://github.com/mywebclass/mwc_core/blob/master/index.js#L283) after
+[setting default exposed internals middleware](https://github.com/mywebclass/mwc_core/blob/master/index.js#L271) and before
+[setting error handlers middlewares](https://github.com/mywebclass/mwc_core/blob/master/index.js#L283).
+
+So, you have the full power of core internals - (`emit`,`on`), `redisClient`, and `MODEL.Users`, `MODEL.Documents`
+and exposed internals middleware - where expressJS object of request have functions of `request.mwcEmit`,
+`request.MODEL`,`request.MODEL.Users`,`request.MODEL.Documents`,`request.MODEL.redisClient`, and `request.user` provided
+by passportjs middleware.
+
+When you call `extendAppRoutes(function(core){})`, you can set the application routes and verbs for them.
+This is done after defining [router middleware]((https://github.com/mywebclass/mwc_core/blob/master/index.js#L307) )
+(the one that bind nodejs functions to URIs) and before the
+[setting up the default routes for Users and documents](https://github.com/mywebclass/mwc_core/blob/master/index.js#L313)
+and routes for passport.js authentication.
+
+It is worth saying, that you also have expressJS object of every route defined to  have functions of `request.mwcEmit`,
+`request.MODEL`,`request.MODEL.Users`,`request.MODEL.Documents`,`request.MODEL.redisClient`, and `request.user` provided
+by passportjs middleware.
+
+

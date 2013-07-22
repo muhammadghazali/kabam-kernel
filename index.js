@@ -291,7 +291,7 @@ MWC.prototype.ready = function () {
       thisMWC.app.use(middleware.SettingsFunction(thisMWC));
     }
   });
-
+  //setting error handler middlewares
   thisMWC.app.configure('development', function () {
     thisMWC.app.use(express.errorHandler());
   });
@@ -304,7 +304,7 @@ MWC.prototype.ready = function () {
       res.send('Error 503. There are problems on our server. We will fix them soon!');//todo - change to our page...
     });
   });
-
+  thisMWC.app.use(thisMWC.app.router);
   //doing setAppRoutes
   thisMWC.setAppRoutesFunctions.map(function (func) {
     func(thisMWC);
