@@ -118,7 +118,23 @@ describe('mwcCore', function() {
     });
 
   });
-  describe('Testing mwc_core mongoose model:', function(){
+  describe('Testing mwc_core mongoose model of users:', function(){
+    it('exposes function find',function(){
+      MWC.MODEL.Users.find.should.be.a('function');
+    });
+    it('exposes function findOne',function(){
+      MWC.MODEL.Users.findOne.should.be.a('function');
+    });
+    it('exposes function count',function(){
+      MWC.MODEL.Users.count.should.be.a('function');
+    });
+    it('exposes function remove',function(){
+      MWC.MODEL.Users.remove.should.be.a('function');
+    });
+    it('exposes function create',function(){
+      MWC.MODEL.Users.create.should.be.a('function');
+    });
+
     it('exposes function createGroup',function(){
       MWC.MODEL.Users.createGroup.should.be.a('function');
     });
