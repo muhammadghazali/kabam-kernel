@@ -3,10 +3,9 @@ var async = require('async'),
   rack = hat.rack(),
   crypto = require('crypto'),
   moment = require('moment'),
-
-//https://github.com/bnoguchi/mongoose-types
-  mongooseTypes = require("mongoose-types"),
+  mongooseTypes = require("mongoose-types"), //https://github.com/bnoguchi/mongoose-types
   useTimestamps = mongooseTypes.useTimestamps;
+
 
 
 function sha512(str) {
@@ -30,6 +29,8 @@ function in_array(what, where) {
 
 module.exports = exports = function (mongoose, config) {
   mongooseTypes.loadTypes(mongoose);
+  var Email = mongoose.SchemaTypes.Email;
+
   var Schema = mongoose.Schema;
 
   //group schema, do not exposed by default
@@ -333,7 +334,7 @@ module.exports = exports = function (mongoose, config) {
   };
 
   //for root user only, static UserSchema methods
-  UserSchema.static.createGroup = function (groupname, ownerName, callback) {
+  UserSchema.statics.createGroup = function (groupname, ownerName, callback) {
     async.parallel({
       'groupCanBeCreated': function (cb) {
         GroupSchema.findOne({'name': groupname}, function (err, groupFound) {
@@ -371,7 +372,7 @@ module.exports = exports = function (mongoose, config) {
     });
   };
 
-  UserSchema.static.deleteGroup = function (groupname, callback) {
+  UserSchema.statics.deleteGroup = function (groupname, callback) {
     GroupSchema.findOne({'name': groupname}, function (err, groupToBeDeleted) {
       if (groupToBeDeleted) {
         async.parallel({
@@ -411,7 +412,7 @@ module.exports = exports = function (mongoose, config) {
     });
   };
 
-  UserSchema.methods.changeOwnershipOfGroup = function (groupname, ownerName, callback) {
+  UserSchema.statics.changeOwnershipOfGroup = function (groupname, ownerName, callback) {
     async.parallel({
       'group': function (cb) {
         GroupSchema.findOne({'name': groupname}, cb);

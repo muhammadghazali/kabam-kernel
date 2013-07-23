@@ -32,6 +32,9 @@ describe('mwcCore', function() {
 
     it('exposes mongoose model of users', function() {
       MWC.MODEL.Users.should.be.a('function');
+      MWC.MODEL.Users.createGroup.should.be.a('function');
+      MWC.MODEL.Users.deleteGroup.should.be.a('function');
+      MWC.MODEL.Users.changeOwnershipOfGroup.should.be.a('function');
     });
 
     it('exposes mongoose model of documents', function() {
