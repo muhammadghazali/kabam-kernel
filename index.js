@@ -344,12 +344,12 @@ MWC.prototype.listen = function (httpOrHttpsOrPort) {
     }
 
     if (httpOrHttpsOrPort instanceof http || httpOrHttpsOrPort instanceof https) {
-      httpOrHttpsOrPort.createcreateServer(this.app).listen(this.app.get('port'));
+      httpOrHttpsOrPort.createServer(this.app).listen(this.app.get('port'));
       return;
     }
     throw new Error('Function MWC.listen(httpOrHttpsOrPort) accepts objects of null, http, https or port\'s number as argument!');
   } else {
-    this.app.listen(this.app.get('port'));
+    this.app.listen(this.app.get('port'));//listening to default port
   }
 };
 
