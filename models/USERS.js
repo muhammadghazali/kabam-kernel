@@ -3,7 +3,6 @@ var async = require('async'),
   rack = hat.rack(),
   crypto = require('crypto'),
   moment = require('moment'),
-  async = require('async'),
 
 //https://github.com/bnoguchi/mongoose-types
   mongooseTypes = require("mongoose-types"),
@@ -234,6 +233,7 @@ module.exports = exports = function (mongoose, config) {
     this.save(callback);
     return;
   };
+
   UserSchema.methods.invalidateSession = function (callback) {
     this.apiKey = rack();
     this.save(callback);
@@ -241,12 +241,19 @@ module.exports = exports = function (mongoose, config) {
   }
 
   //group managment
+  UserSchema.methods.createGroup = function(groupname,ownerName,callbakc){};
+  UserSchema.methods.deleteGroup = function(groupname,callbakc){};
+
+  UserSchema.methods.createMyGroup = function(groupname,callbakc){};
+  UserSchema.methods.deleteMyGroup = function(groupname,callbakc){};
+
   UserSchema.methods.isOwnerOfGroup = function (groupname) {
     return (this.groupsOwning.indexOf(groupname) === -1);
   };
   UserSchema.methods.isMemberOfGroup = function (groupname) {
     return (this.groups.indexOf(groupname) === -1);
   };
+
   UserSchema.methods.inviteToGroup = function (groupname,callback) {
     var thisUser=this;
 
@@ -283,20 +290,19 @@ module.exports = exports = function (mongoose, config) {
       }
     ],callback)
   };
-
   UserSchema.methods.giveOwnershipOfGroup = function(groupname,callback){
 
   };
   UserSchema.methods.removeFromGroup = function (groupname) {
     var thisUser=this;
 
-    if(!thisUser.isOwnerOfGroup(groupname)){
+    if(thisUser.isOwnerOfGroup(groupname)){
       callback(new Error('User "'+thisUser.username+'" is an owner of a group "'+groupname+'"'),false);
       return;
     }
 
     if(!thisUser.isMemberOfGroup(groupname)){
-      callback(new Error('User "'+thisUser.username+'" is a member of a group "'+groupname+'"'),false);
+      callback(new Error('User "'+thisUser.username+'" is NOT a member of a group "'+groupname+'"'),false);
       return;
     }
 
