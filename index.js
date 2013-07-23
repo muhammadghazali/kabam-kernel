@@ -84,7 +84,7 @@ MWC.prototype.setAppParameters = function (environment, settingsFunction) {
   }
 };
 
-MWC.prototype.setAppMiddlewares = function (environment, settingsFunction) {
+MWC.prototype.setAppMiddlewares = function (environment, path, settingsFunction) {
   if (this.prepared) {
     throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
   } else {
@@ -100,17 +100,23 @@ MWC.prototype.setAppMiddlewares = function (environment, settingsFunction) {
     if (environment instanceof Array) {
       environmentToUse = environment;
     }
+
     if (environmentToUse) {
+
       for (var i = 0; i < environmentToUse.length; i++) {
         this.setAppMiddlewaresFunctions.push({
-          'enviroment': environmentToUse[i],
-          'SettingsFunction': settingsFunction
+          'environment': environmentToUse[i],
+          'path' : (typeof path === 'string') ? path : null,
+          'SettingsFunction': (typeof path == 'function') ? path : settingsFunction
         });
       }
     } else {
+      //we set middleware fol all environments
       this.setAppMiddlewaresFunctions.push({
-        'SettingsFunction': settingsFunction
+        'path' : (typeof path === 'string') ? path : null,
+        'SettingsFunction': (typeof path === 'function') ? path : settingsFunction
       });
+
     }
     return this;
   }
@@ -283,12 +289,16 @@ MWC.prototype.ready = function () {
   //doing setAppMiddleware
   //extend vendored application middlewares settings
   thisMWC.setAppMiddlewaresFunctions.map(function (middleware) {
-    if (middleware.enviroment) {
-      thisMWC.app.configure(middleware.enviroment, function () {
-        thisMWC.app.use(middleware.SettingsFunction(thisMWC));
+    if (middleware.environment) {
+
+      thisMWC.app.configure(middleware.environment, function () {
+        thisMWC.app.use( ((middleware.path)?(middleware.path):'/'), middleware.SettingsFunction(thisMWC));
       });
+
     } else {
-      thisMWC.app.use(middleware.SettingsFunction(thisMWC));
+
+      thisMWC.app.use( ((middleware.path)?(middleware.path):'/'), middleware.SettingsFunction(thisMWC));
+
     }
   });
   //setting error handler middlewares

@@ -10,15 +10,16 @@ that can be easily extended by 6 functions.
 1. `extendCore(function(core){...})` - extend object created, including expressJS application
 and some other modules. You can call this function multiple times
 
-2. `setAppParameters(function(core){...})` - set global application parameters, for example
+2. `setAppParameters(['development','staging','production','otherEnviroment'],function(core){...})` - set global application parameters, for example
 template [engines](http://expressjs.com/api.html#app.engine), 
 [locals](http://expressjs.com/api.html#app.locals) 
-and [other](http://expressjs.com/api.html#app-settings) settings
+and [other](http://expressjs.com/api.html#app-settings) settings.
+First argument (array of enviroments) is OPTIONAL
 
-3. `setAppMiddlewares(function(core){...})` - set application
+3. `setAppMiddlewares(['development','staging','production','otherEnviroment'],'/middlewarePath',function(core){...})` - set application
 [middleware](http://expressjs.com/api.html#middleware).
-This function can be executed multiple times, the middlewares applied are
-used in application in *order* they were issued by this function
+This function can be executed multiple times, the middlewares applied are used in application in *order* they were issued by this function.
+First argument (array of enviroments), and the second one (the path where to use middleware, the default is "/") are OPTIONAL
 
 4. `extendAppRoutes(function(core){...})` - add custom routes to application
 
