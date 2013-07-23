@@ -32,9 +32,6 @@ describe('mwcCore', function() {
 
     it('exposes mongoose model of users', function() {
       MWC.MODEL.Users.should.be.a('function');
-      MWC.MODEL.Users.createGroup.should.be.a('function');
-      MWC.MODEL.Users.deleteGroup.should.be.a('function');
-      MWC.MODEL.Users.changeOwnershipOfGroup.should.be.a('function');
     });
 
     it('exposes mongoose model of documents', function() {
@@ -121,6 +118,18 @@ describe('mwcCore', function() {
     });
 
   });
+  describe('Testing mwc_core mongoose model:', function(){
+    it('exposes function createGroup',function(){
+      MWC.MODEL.Users.createGroup.should.be.a('function');
+    });
+    it('exposes function deleteGroup',function(){
+      MWC.MODEL.Users.deleteGroup.should.be.a('function');
+    });
+    it('exposes function changeOwnershipOfGroup',function(){
+      MWC.MODEL.Users.changeOwnershipOfGroup.should.be.a('function');
+    });
+  });
+
   describe('Testing mwc_core mongoose model one instance of user:', function () {
     describe('general function are callable', function () {
       var user;
@@ -158,8 +167,6 @@ describe('mwcCore', function() {
         user.remove(done)
       });
     });
-
-
     describe('functions setPassword, verifyPassword', function () {
       var user;
       before(function (done) {
@@ -227,6 +234,49 @@ describe('mwcCore', function() {
       after(function (done) {
         user.remove(done)
       });
+    });
+    describe('functions of inviteToGroup,isMemberOfGroup,removeFromGroup',function(){
+      var user,
+        isMember,
+        isNotMember,
+        Users=MWC.MODEL.Users;
+
+      before(function(done){
+        Users.create({
+          'username': 'testSubject47',
+          'email': 'ostroumov@teksi.ru'
+        }, function (err, userCreated) {
+          if(err) throw err;
+          userCreated.inviteToGroup('gosduma', function(err1){
+
+            Users.findOne({'username':'testSubject47'},function(err2,userFound){
+              if(err2) throw err2;
+              isMember=userFound.isMemberOfGroup('gosduma');
+              userFound.removeFromGroup('gosduma',function(err3){
+                if(err3) throw err3;
+                Users.findOne({'username':'testSubject47'},function(err4,userFound2){
+                  if(err4) throw err4;
+                  isMember=userFound2.isMemberOfGroup('gosduma');
+                  done();
+                });
+              });
+            });
+          });
+        })
+      });
+
+      it('isMemberOfGroup returns TRUE if user is in group',function(){
+        isMember.should.equal(true);
+      });
+
+      it('isMemberOfGroup returns FALSE if user is NOT in group',function(){
+        isNotMember.should.equal(false);
+      });
+
+      after(function (done) {
+        user.remove(done)
+      });
+
     });
   });
   describe('Testing mwc_core mongoose model of documents', function() {

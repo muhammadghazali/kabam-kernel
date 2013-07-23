@@ -134,6 +134,8 @@ module.exports = exports = function (mongoose, config) {
     this.save(callback);
     return;
   };
+
+  var Groups=mongoose.model('groups', GroupSchema);
   //end of group schema
 
 
@@ -263,10 +265,10 @@ module.exports = exports = function (mongoose, config) {
 
   //group membership check
   UserSchema.methods.isOwnerOfGroup = function (groupname) {
-    return (this.groupsOwning.indexOf(groupname) === -1);
+    return !(this.groupsOwning.indexOf(groupname) === -1);
   };
   UserSchema.methods.isMemberOfGroup = function (groupname) {
-    return (this.groups.indexOf(groupname) === -1);
+    return !(this.groups.indexOf(groupname) === -1);
   };
 
   //group managment
@@ -286,14 +288,14 @@ module.exports = exports = function (mongoose, config) {
     async.waterfall([
       function (cb) {
         //do the group exists?
-        GroupSchema.findOne({'name': groupname}, cb);
+        Groups.findOne({'name': groupname}, cb);
       },
       function (groupThatExists, cb) {
         if (groupThatExists) {
           cb(null, groupThatExists);
         } else {
           //creating the group that do not exists
-          GroupSchema.create({'name': groupname}, cb);
+          Groups.create({'name': groupname}, cb);
         }
       },
       function (groupToAddUser, cb) {
@@ -323,7 +325,7 @@ module.exports = exports = function (mongoose, config) {
     async.waterfall([
       function (cb) {
         //do the group exists?
-        GroupSchema.findOne({'name': groupname}, cb);
+        Groups.findOne({'name': groupname}, cb);
       },
       function (groupThatExists, cb) {
         if (groupThatExists) {
@@ -347,9 +349,10 @@ module.exports = exports = function (mongoose, config) {
 
   //for root user only, static UserSchema methods
   UserSchema.statics.createGroup = function (groupname, ownerName, callback) {
+    var Users=this;
     async.parallel({
       'groupCanBeCreated': function (cb) {
-        GroupSchema.findOne({'name': groupname}, function (err, groupFound) {
+        Groups.findOne({'name': groupname}, function (err, groupFound) {
           if (err) {
             cb(err);
           }
@@ -361,7 +364,7 @@ module.exports = exports = function (mongoose, config) {
         });
       },
       'ownerExists': function (cb) {
-        UserSchema.findOne({'username': ownerName}, function (err, owner) {
+        Users.findOne({'username': ownerName}, function (err, owner) {
           if (err) {
             cb(err);
           }
@@ -377,7 +380,7 @@ module.exports = exports = function (mongoose, config) {
         callback(err);
       }
       if (result.groupCanBeCreated && result.ownerExists) {
-        GroupSchema.create({'name': groupname, 'owner': result.ownerExists}, callback);
+        Groups.create({'name': groupname, 'owner': result.ownerExists}, callback);
       } else {
         callback(new Error('Unable to create group!'));
       }
@@ -385,11 +388,12 @@ module.exports = exports = function (mongoose, config) {
   };
 
   UserSchema.statics.deleteGroup = function (groupname, callback) {
-    GroupSchema.findOne({'name': groupname}, function (err, groupToBeDeleted) {
+    var Users = this;
+    Groups.findOne({'name': groupname}, function (err, groupToBeDeleted) {
       if (groupToBeDeleted) {
         async.parallel({
           'groupOwner': function (cb) {
-            UserSchema.findOne({'username': groupToBeDeleted.owner}, cb);
+            Users.findOne({'username': groupToBeDeleted.owner}, cb);
           },
           'allGroupMembers': function (cb) {
             cb(null, groupToBeDeleted.members);
@@ -406,7 +410,7 @@ module.exports = exports = function (mongoose, config) {
             },
             'denotingGroupMembers': function (cb) {
               async.each(result.allGroupMembers, function (memberName, membersCallback) {
-                UserSchema.findOne({'name': memberName}, function (err, memberFound) {
+                Users.findOne({'name': memberName}, function (err, memberFound) {
                   if (err) {
                     membersCallback(err);
                   }
@@ -425,12 +429,13 @@ module.exports = exports = function (mongoose, config) {
   };
 
   UserSchema.statics.changeOwnershipOfGroup = function (groupname, ownerName, callback) {
+    var Users = this;
     async.parallel({
       'group': function (cb) {
-        GroupSchema.findOne({'name': groupname}, cb);
+        Groups.findOne({'name': groupname}, cb);
       },
       'newOwner': function (cb) {
-        UserSchema.findOne({'name': ownerName}, cb);
+        Users.findOne({'name': ownerName}, cb);
       }
     }, function (err, result) {
       result.group.owner = result.newOwner.username;
