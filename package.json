@@ -30,6 +30,7 @@
     "passport-twitter":"*",
     "passport-facebook":"*",
     "mongoose": "*",
+    "mongoose-types":"*",
     "hat": "*",
     "moment": "*",
     "toobusy": "~0.2.3"
