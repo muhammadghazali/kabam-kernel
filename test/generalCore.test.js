@@ -121,42 +121,114 @@ describe('mwcCore', function() {
     });
 
   });
+  describe('Testing mwc_core mongoose model one instance of user:', function () {
+    describe('general function are callable', function () {
+      var user;
 
-  describe('Testing mwc_core mongoose model of users', function() {
-    var user,error;
+      before(function (done) {
+        MWC.MODEL.Users.create({
+          'username': 'testSubject47',
+          'email': 'ostroumov@teksi.ru'
+        }, function (err, userCreated) {
+          if (err) {
+            throw err;
+          }
+          user = userCreated;
+          done()
+        });
+      });
 
-    before(function(done){
-      MWC.MODEL.Users.create({
-        'username':'testSubject47',
-        'email':'ostroumov@teksi.ru'
-      },function(err,userCreated){
-        if(err) throw err;
-        user=userCreated;
-        done()
+      it('user instance have functions needed', function () {
+        user.verifyPassword.should.be.a('function');
+        user.setPassword.should.be.a('function');
+        user.invalidateSession.should.be.a('function');
+        user.isOwnerOfGroup.should.be.a('function');
+        user.isMemberOfGroup.should.be.a('function');
+        user.inviteToGroup.should.be.a('function');
+        user.isMemberOfGroup.should.be.a('function');
+        user.removeFromGroup.should.be.a('function');
+        user.getGravatar.should.be.a('function');
+      });
+
+      it('user instance creates a proper gravatar url', function () {
+        user.getGravatar().should.equal('https://secure.gravatar.com/avatar/0713799ed54a48d222f068d538d68a70.jpg?s=300&d=wavatar&r=g');
+      });
+
+      after(function (done) {
+        user.remove(done)
       });
     });
 
-    it('user instance have functions needed', function(){
-      user.verifyPassword.should.be.a('function');
-      user.setPassword.should.be.a('function');
-      user.invalidateSession.should.be.a('function');
-      user.isOwnerOfGroup.should.be.a('function');
-      user.isMemberOfGroup.should.be.a('function');
-      user.inviteToGroup.should.be.a('function');
-      user.isMemberOfGroup.should.be.a('function');
-      user.removeFromGroup.should.be.a('function');
-      user.getGravatar.should.be.a('function');
-    });
 
-    it('user instance creates a proper gravatar url', function(){
-        user.getGravatar().should.equal('https://secure.gravatar.com/avatar/0713799ed54a48d222f068d538d68a70.jpg?s=300&d=wavatar&r=g');
-    });
+    describe('functions setPassword, verifyPassword', function () {
+      var user;
+      before(function (done) {
+        MWC.MODEL.Users.create({
+          'username': 'testSubject47',
+          'email': 'ostroumov@teksi.ru'
+        }, function (err, userCreated) {
+          if (err) {
+            throw err;
+          }
+          user = userCreated;
+          user.setPassword('lalalaDaiMne3Ryblya', function (err) {
+            if (err) {
+              throw err;
+            }
+            done();
+          });
+        });
+      });
 
-    after(function(done){
-      user.remove(done)
+
+      it('function verifyPassword returns true on correct password', function () {
+        user.verifyPassword('lalalaDaiMne3Ryblya').should.equal(true);
+      });
+
+      it('function verifyPassword returns false on wrong password', function () {
+        user.verifyPassword('sukapadla_Rozovi#Rassvet_SukePadle_DaliMnogoLet').should.equal(false);
+      });
+
+      after(function (done) {
+        user.remove(done)
+      });
+    });
+    describe('functions invalidateSession', function () {
+      var user;
+      before(function (done) {
+        MWC.MODEL.Users.create({
+          'username': 'testSubject47',
+          'email': 'ostroumov@teksi.ru',
+          'apiKey': 'lalalaDaiMne3Ryblya'
+        }, function (err, userCreated) {
+          if (err) {
+            throw err;
+          }
+          userCreated.invalidateSession(function (err2) {
+            if (err2) {
+              throw err2;
+            }
+            MWC.MODEL.Users.findOne({'username': 'testSubject47'}, function (err3, userFound) {
+              if (err3) {
+                throw err3;
+              }
+              user = userFound;
+              done();
+            });
+          });
+        });
+      });
+
+      it('function invalidateSession changes the apiKey', function () {
+        var test = (user.apiKey == 'lalalaDaiMne3Ryblya');
+        test.should.equal(false);
+      });
+
+      after(function (done) {
+        user.remove(done)
+      });
     });
   });
-
   describe('Testing mwc_core mongoose model of documents', function() {
 
     it('to be created', function() {
