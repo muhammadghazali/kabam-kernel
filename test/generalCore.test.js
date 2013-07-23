@@ -123,11 +123,38 @@ describe('mwcCore', function() {
   });
 
   describe('Testing mwc_core mongoose model of users', function() {
+    var user,error;
 
-    it('to be created', function() {
-      throw new Error('Not implemented');
+    before(function(done){
+      MWC.MODEL.Users.create({
+        'username':'testSubject47',
+        'email':'ostroumov@teksi.ru'
+      },function(err,userCreated){
+        if(err) throw err;
+        user=userCreated;
+        done()
+      });
     });
 
+    it('user instance have functions needed', function(){
+      user.verifyPassword.should.be.a('function');
+      user.setPassword.should.be.a('function');
+      user.invalidateSession.should.be.a('function');
+      user.isOwnerOfGroup.should.be.a('function');
+      user.isMemberOfGroup.should.be.a('function');
+      user.inviteToGroup.should.be.a('function');
+      user.isMemberOfGroup.should.be.a('function');
+      user.removeFromGroup.should.be.a('function');
+      user.getGravatar.should.be.a('function');
+    });
+
+    it('user instance creates a proper gravatar url', function(){
+        user.getGravatar().should.equal('https://secure.gravatar.com/avatar/0713799ed54a48d222f068d538d68a70.jpg?s=300&d=wavatar&r=g');
+    });
+
+    after(function(done){
+      user.remove(done)
+    });
   });
 
   describe('Testing mwc_core mongoose model of documents', function() {

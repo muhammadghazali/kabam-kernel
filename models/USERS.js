@@ -40,7 +40,7 @@ module.exports = exports = function (mongoose, config) {
     members: [String]
   });
 
-  GroupSchema.plugin(useTimestamps);
+  //GroupSchema.plugin(useTimestamps); //do not works...
 
   GroupSchema.index({
     owner: 1,
@@ -193,7 +193,7 @@ module.exports = exports = function (mongoose, config) {
      ],
      //*/
   });
-  UserSchema.plugin(useTimestamps);//add createdAt, and updatedAt attributes
+  //UserSchema.plugin(useTimestamps);//do not works! add createdAt, and updatedAt attributes
 
   UserSchema.index({
     email: 1,
@@ -231,6 +231,18 @@ module.exports = exports = function (mongoose, config) {
     return;
   };
 //*/
+
+
+  UserSchema.methods.getGravatar=function (s,d,r) {
+    //https://ru.gravatar.com/site/implement/images/
+    //s - image size
+    //d - 404,mm,identicon,monsterid,wavatar,retro,blank - style
+    //r - g,pg,r,x - rating
+    if(!s) s=300;
+    if(!d) d='wavatar';
+    if(!r) r='g';
+    return 'https://secure.gravatar.com/avatar/'+md5(this.email.toLowerCase().trim())+'.jpg?s='+s+'&d='+d+'&r='+r;
+  };
 
   UserSchema.methods.verifyPassword = function (password) {
     return sha512('' + this.salt + password) === this.password;
@@ -425,7 +437,6 @@ module.exports = exports = function (mongoose, config) {
       result.group.save(callback);
     })
   };
-
 
   return mongoose.model('users', UserSchema);
 };
