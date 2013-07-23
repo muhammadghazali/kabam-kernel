@@ -294,7 +294,8 @@ module.exports = exports = function (mongoose, config) {
         if (groupThatExists) {
           cb(null, groupThatExists);
         } else {
-          //creating the group that do not exists
+          //
+          console.log('creating the group that do not exists');
           Groups.create({'name': groupname}, cb);
         }
       },
