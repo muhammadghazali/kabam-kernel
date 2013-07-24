@@ -399,52 +399,53 @@ describe('mwcCore', function() {
         user.remove(done)
       });
     });
-    /*/
+
     describe('functions of inviteToGroup,isMemberOfGroup,removeFromGroup',function(){
-      var user,
-        isMember,
-        isNotMember,
-        Users=MWC.MODEL.Users;
-
-      before(function(done){
-        Users.create({
-          'username': 'testSubject47',
-          'email': 'ostroumov@teksi.ru'
-        }, function (err, userCreated) {
-          if(err) throw err;
-          user=userCreated;
-          userCreated.inviteToGroup('gosduma', function(err1){
-            if(err1) throw err1;
-            Users.findOne({'username':'testSubject47'},function(err2,userFound){
-              if(err2) throw err2;
-              isMember=userFound.isMemberOfGroup('gosduma');
-              userFound.removeFromGroup('gosduma',function(err3){
-                if(err3) throw err3;
-                Users.findOne({'username':'testSubject47'},function(err4,userFound2){
-                  if(err4) throw err4;
-                  isMember=userFound2.isMemberOfGroup('gosduma');
-                  done();
-                });
-              });
-            });
-          });
-        });
+//      var user,
+//        isMember,
+//        isNotMember,
+//        Users=MWC.MODEL.Users;
+//
+//      before(function(done){
+//        Users.create({
+//          'username': 'testSubject47',
+//          'email': 'ostroumov@teksi.ru'
+//        }, function (err, userCreated) {
+//          if(err) throw err;
+//          user=userCreated;
+//          userCreated.inviteToGroup('gosduma', function(err1){
+//            if(err1) throw err1;
+//            Users.findOne({'username':'testSubject47'},function(err2,userFound){
+//              if(err2) throw err2;
+//              isMember=userFound.isMemberOfGroup('gosduma');
+//              userFound.removeFromGroup('gosduma',function(err3){
+//                if(err3) throw err3;
+//                Users.findOne({'username':'testSubject47'},function(err4,userFound2){
+//                  if(err4) throw err4;
+//                  isMember=userFound2.isMemberOfGroup('gosduma');
+//                  done();
+//                });
+//              });
+//            });
+//          });
+//        });
+//      });
+//
+//      it('isMemberOfGroup returns TRUE if user is in group',function(){
+//        isMember.should.equal(true);
+//      });
+//
+//      it('isMemberOfGroup returns FALSE if user is NOT in group',function(){
+//        isNotMember.should.equal(false);
+//      });
+//
+//      after(function (done) {
+//        user.remove(done)
+//      });
+      it('to be redone',function(){
+        throw new Error('fails and need to be done')
       });
-
-      it('isMemberOfGroup returns TRUE if user is in group',function(){
-        isMember.should.equal(true);
-      });
-
-      it('isMemberOfGroup returns FALSE if user is NOT in group',function(){
-        isNotMember.should.equal(false);
-      });
-
-      after(function (done) {
-        user.remove(done)
-      });
-
     });
-    //*/
   });
   describe('Testing mwc_core mongoose model of documents', function() {
 
