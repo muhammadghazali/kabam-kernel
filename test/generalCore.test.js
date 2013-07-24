@@ -153,8 +153,8 @@ describe('mwcCore', function() {
   });
 
   describe('Testing mwc_core mongoose model of users group managment', function () {
-
     describe('createGroup', function () {
+/*
       var user, group;
       before(function (done) {
         MWC.MODEL.Users.create({
@@ -178,8 +178,11 @@ describe('mwcCore', function() {
         group.members.should.be.an.instanceOf(Array);
         group.members.length.should.equal(0);
       });
-
-
+*/
+      it('have to be written', function () {
+        throw new Error('have to be finished');
+      });
+/*
       after(function (done) {
         async.parallel([
           function(cb){
@@ -189,15 +192,53 @@ describe('mwcCore', function() {
             MWC.MODEL.Users.deleteGroup(group.name,cb);
           }
         ],done);
-
-
       });
+*/
     });
 
-    describe('changeGroupOwnership',function(){
-      it('have to be written',function(){
+    describe('changeGroupOwnership', function () {
+      var user1, user2, groupBefore,groupAfter;
+      /*
+      before(function (done) {
+        async.parallel({
+          'user1': function (cb) {
+            MWC.MODEL.Users.create({
+              'username': 'testSubject47',
+              'email': 'ostroumov@teksi.ru'
+            }, cb);
+          },
+          'user2': function (cb) {
+            MWC.MODEL.Users.create({
+              'username': 'testSubject47_!',
+              'email': 'ostroumov2@teksi.ru'
+            }, cb);
+          }}, function (err, usersCreated) {
+          if (err) {
+            throw err;
+          } else {
+            if(usersCreated.user1 && usersCreated.user2){
+              user1=usersCreated.user1;
+              user2=usersCreated.user2;
+              MWC.MODEL.Users.createGroup('gosduma',user1.username,function(err2,group){
+                if(err2) throw err2;
+                groupBefore=group;
+
+
+
+              });
+            } else {
+              throw new Error('Unable to create users!');
+            }
+          }
+        });
+      });
+      */
+
+      it('have to be written', function () {
         throw new Error('have to be written');
       });
+
+
     })
   });
 
