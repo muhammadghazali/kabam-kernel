@@ -30,7 +30,7 @@ module.exports = exports = function (app, config) {
     response.send('deleting user ' + request.params.username);
   });
 
-  app.get('/my', function (request, response) {
+  app.get('/api/myself', function (request, response) {
     if (request.user) {
       response.json(request.user);
     } else {
