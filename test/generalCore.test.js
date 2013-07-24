@@ -8,12 +8,21 @@ var should = require('should'),
   blanket = require('blanket');
 
 var MWC = new mwcCore(config);
+
+/*
+ * Extending core
+ */
 var extendCoreFunction = function(core){
   core.sum=function(a,b){
     return (a+b);
   };
 };
+
 MWC.extendCore(extendCoreFunction);
+
+/*
+ * Extending Application Parameters
+ */
 
 var extendAppParametersFunction1 = function (core) {
   core.app.set('TempVar1', 'TempVar1');
@@ -30,6 +39,9 @@ var extendAppParametersFunction3 = function (core) {
 MWC.setAppParameters(['development', 'staging'], extendAppParametersFunction1);
 MWC.setAppParameters('development', extendAppParametersFunction2);
 MWC.setAppParameters('production', extendAppParametersFunction3);
+/*
+ * Extending middlewares
+ */
 var extendAppMiddlewareFunction1=function(core){
   return function(request,response,next){
     response.setHeader('middleware1','middleware1');
@@ -60,6 +72,19 @@ MWC.setAppMiddlewares('staging',extendAppMiddlewareFunction2);
 MWC.setAppMiddlewares(['staging','production'],extendAppMiddlewareFunction3);
 MWC.setAppMiddlewares(['development'],'/middleware3Path',extendAppMiddlewareFunction3);
 MWC.setAppMiddlewares('development','/middleware4Path',extendAppMiddlewareFunction4);
+
+/* Adding custom routes
+ *
+ */
+
+var extendAppRoutesFunction = function(core){
+  core.app.get('/someRoute',function(req,res){
+    res.send('HI');
+  });
+}
+MWC.extendAppRoutes(extendAppRoutesFunction);
+
+
 MWC.listen(3000);
 
 describe('mwcCore', function() {
@@ -187,7 +212,6 @@ describe('mwcCore', function() {
     it('exposes function create',function(){
       MWC.MODEL.Users.create.should.be.a('function');
     });
-
     it('exposes function createGroup',function(){
       MWC.MODEL.Users.createGroup.should.be.a('function');
     });
@@ -197,7 +221,6 @@ describe('mwcCore', function() {
     it('exposes function changeOwnershipOfGroup',function(){
       MWC.MODEL.Users.changeOwnershipOfGroup.should.be.a('function');
     });
-
     it('exposes function getGroup',function(){
       MWC.MODEL.Users.getGroup.should.be.a('function');
     });
@@ -512,7 +535,7 @@ describe('mwcCore', function() {
       if(typeof process.env.NODE_ENV != 'undefined'){
         process.env.NODE_ENV.should.be.equal('development');
       }
-      MWC.setAppMiddlewaresFunctions.should.be.an.instanceOf(Array); //test fails, but program works. who nows why?
+      MWC.setAppMiddlewaresFunctions.should.be.an.instanceOf(Array);
     });
 
     it('it set extendAppMiddlewareFunction1 to all environments and path /',function(){
@@ -541,8 +564,16 @@ describe('mwcCore', function() {
 
   describe('#MWC.extendAppRoutes()', function() {
 
-    it('to be created', function() {
-      throw new Error('Not implemented');
+    it('adds the desired functions to MWC.setAppRoutesFunctions',function(){
+      if(typeof process.env.NODE_ENV != 'undefined'){
+        process.env.NODE_ENV.should.be.equal('development');
+      }
+      MWC.setAppRoutesFunctions.should.be.an.instanceOf(Array);
+      MWC.setAppRoutesFunctions.should.includeEql(extendAppRoutesFunction);
+    });
+
+    it('it actually works!', function() {
+      throw new Error('TODO : write test for it');
     });
 
   });
