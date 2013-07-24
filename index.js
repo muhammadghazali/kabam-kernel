@@ -52,6 +52,11 @@ MWC.prototype.extendCore = function (settingsFunction) {
   }
 };
 
+MWC.prototype.extendModel = function(model){
+  //todo - implement it
+  return this;
+}
+
 MWC.prototype.setAppParameters = function (environment, settingsFunction) {
   if (this.prepared) {
     throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
