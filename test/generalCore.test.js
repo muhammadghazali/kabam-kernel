@@ -262,7 +262,7 @@ describe('mwcCore', function() {
     it('it set extendAppMiddlewareFunction3 to development environment and path /middleware3Path',function(){
       MWC.setAppMiddlewaresFunctions.should.includeEql({'path':'/middleware3Path', environment:'development', 'SettingsFunction':extendAppMiddlewareFunction3});
     });
-    it('it set extendAppMiddlewareFunction4 to all environments and path /middleware4Path',function(){
+    it('it set extendAppMiddlewareFunction4 to development environment and path /middleware4Path',function(){
       MWC.setAppMiddlewaresFunctions.should.includeEql({environment:'development','path':'/middleware4Path', 'SettingsFunction':extendAppMiddlewareFunction4});
     });
 
