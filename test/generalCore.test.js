@@ -305,7 +305,7 @@ describe('mwcCore', function() {
       usersFound.created._id.should.eql(usersFound.byLogin._id);
     });
 
-    it('findOneByLoginOrEmail for Email',function(){
+    it('findOneByLoginOrEmail works for Email',function(){
       usersFound.created._id.should.eql(usersFound.byEmail._id);
     });
 
