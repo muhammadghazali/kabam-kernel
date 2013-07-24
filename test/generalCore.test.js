@@ -96,17 +96,28 @@ var extendAppParametersFunctionPlugin = function(core){
   core.app.set('extendAppParametersFunctionPlugin','extended111');
 };
 
+var extendAppMiddlewareFunctionPlugin = function(core){
+  return function(request,response,next){
+    response.setHeader('extendAppMiddlewareFunctionPlugin','OK');
+    next();
+  };
+};
+
+var extendAppRoutesFunctionPlugin = function (core) {
+  core.app.get('/newPlugin', function (req, res) {
+    res.send('New plugin is installed as object');
+  });
+};
+
 MWC.usePlugin({
   'extendCore': extendCoreFunctionPlugin,
   'setAppParameters': extendAppParametersFunctionPlugin,
-  'setAppMiddlewares': null, //can be ommited
-  'extendAppRoutes': function (core) {
-    core.app.get('/newPlugin', function (req, res) {
-      res.send('New plugin is installed as object');
-    });
-  }
+  'setAppMiddlewares': extendAppMiddlewareFunctionPlugin,
+  'extendAppRoutes': extendAppRoutesFunctionPlugin
 });
 
+
+//create and start this application
 MWC.listen(3000);
 
 describe('mwcCore', function() {
@@ -601,6 +612,7 @@ describe('mwcCore', function() {
   });
 
   describe('#MWC.usePlugin(object)', function () {
+
     describe('extendCore from plugin', function () {
       it('it adds the extending core function to array of #MWC.setCoreFunctions', function () {
         MWC.setCoreFunctions.should.be.an.instanceOf(Array);
@@ -612,23 +624,59 @@ describe('mwcCore', function() {
         MWC.mul(3, 2).should.equal(6);
       });
     });
+
     describe('setAppParameters from plugin', function () {
+
       it('it adds the desired functions to #MWC.setAppParametersFunctions', function () {
         if (typeof process.env.NODE_ENV != 'undefined') {
           process.env.NODE_ENV.should.be.equal('development');
         }
         MWC.setAppParametersFunctions.should.be.an.instanceOf(Array);
-        //
       });
 
       it('it set extendAppParametersFunctionPlugin to all environments', function () {
         MWC.setAppParametersFunctions.should.includeEql({'settingsFunction': extendAppParametersFunctionPlugin});
       });
+
       it('it works', function () {
         MWC.app.get('extendAppParametersFunctionPlugin').should.equal('extended111');
       });
     });
 
+    describe('setAppMiddlewares from plugin',function() {
+      it('adds the desired functions to MWC.setAppMiddlewaresFunctions',function(){
+        if(typeof process.env.NODE_ENV != 'undefined'){
+          process.env.NODE_ENV.should.be.equal('development');
+        }
+        MWC.setAppMiddlewaresFunctions.should.be.an.instanceOf(Array);
+      });
+
+      it('it set extendAppMiddlewareFunctionPlugin to all environments and path "/"',function(){
+        MWC.setAppMiddlewaresFunctions.should.includeEql({'path':'/', 'SettingsFunction':extendAppMiddlewareFunctionPlugin});
+      });
+
+      it('it works', function () {
+        throw new Error('TODO : write test for it');
+      });
+
+    });
+
+    describe('extendAppRoutes from plugin',function(){
+
+      it('adds the desired functions to MWC.setAppRoutesFunctions',function(){
+        if(typeof process.env.NODE_ENV != 'undefined'){
+          process.env.NODE_ENV.should.be.equal('development');
+        }
+        MWC.setAppRoutesFunctions.should.be.an.instanceOf(Array);
+        MWC.setAppRoutesFunctions.should.includeEql(extendAppRoutesFunctionPlugin);
+      });
+
+      it('it actually works!', function() {
+        throw new Error('TODO : write test for it');
+      });
+
+
+    });
   });
 
   describe('#MWC.usePlugin(pluginName)', function() {
