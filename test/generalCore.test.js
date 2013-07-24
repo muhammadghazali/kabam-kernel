@@ -236,6 +236,12 @@ describe('mwcCore', function() {
     it('exposes function findOne',function(){
       MWC.MODEL.Users.findOne.should.be.a('function');
     });
+    it('exposes function findOneByLoginOrEmail',function(){
+      MWC.MODEL.Users.findOneByLoginOrEmail.should.be.a('function');
+    });
+    it('exposes function findOneByApiKey',function(){
+      MWC.MODEL.Users.findOneByApiKey.should.be.a('function');
+    });
     it('exposes function count',function(){
       MWC.MODEL.Users.count.should.be.a('function');
     });
@@ -259,7 +265,58 @@ describe('mwcCore', function() {
     });
 
   });
+  describe('Testing mwc_core mongoose model of users finders',function(){
+    var usersFound;
+    before(function (done) {
+      MWC.MODEL.Users.create({
+        'username': 'testSubject47',
+        'email': 'ostroumov@teksi.ru',
+        'apiKey': 'vseBydetHorosho'
+      }, function (err, userCreated) {
+        if (err) {
+          throw err;
+        }
+        async.parallel({
+          'byLogin':function(cb){
+            MWC.MODEL.Users.findOneByLoginOrEmail('testSubject47',cb);
+          },
+          'byEmail':function(cb){
+            MWC.MODEL.Users.findOneByLoginOrEmail('ostroumov@teksi.ru',cb);
+          },
+          'byApiKey':function(cb){
+            MWC.MODEL.Users.findOneByApiKey('vseBydetHorosho',cb);
+          },
+          'created':function(cb){
+            cb(null,userCreated);
+          }
+        },function(err,res){
+          if(err) throw err;
+          usersFound=res;
+          done();
+        });
+      });
+    });
+    it('we created correct user to be sure',function(){
+      usersFound.created.username.should.be.equal('testSubject47');
+      usersFound.created.email.should.be.equal('ostroumov@teksi.ru');
+      usersFound.created.apiKey.should.be.equal('vseBydetHorosho');
+    });
+    it('findOneByLoginOrEmail works for login',function(){
+      usersFound.created._id.should.eql(usersFound.byLogin._id);
+    });
 
+    it('findOneByLoginOrEmail for Email',function(){
+      usersFound.created._id.should.eql(usersFound.byEmail._id);
+    });
+
+    it('findOneByApiKey works',function(){
+      usersFound.created._id.should.eql(usersFound.byApiKey._id);
+    });
+
+    after(function (done) {
+      usersFound.created.remove(done)
+    });
+  });
   describe('Testing mwc_core mongoose model of users group managment', function () {
     describe('createGroup', function () {
 /*

@@ -387,6 +387,19 @@ module.exports = exports = function (mongoose, config) {
     });
   };
 
+  UserSchema.statics.findOneByLoginOrEmail = function(loginOrEmail,callback){
+    if(/^[a-zA-Z0-9_]+$/.test(loginOrEmail)){
+      this.findOne({'username':loginOrEmail},callback);
+    } else {
+      this.findOne({'email':loginOrEmail},callback);
+    }
+  };
+
+  UserSchema.statics.findOneByApiKey = function(apiKey,callback){
+    this.findOne({'apiKey':apiKey},callback);
+  };
+
+
   UserSchema.statics.deleteGroup = function (groupname, callback) {
     var Users = this;
     Groups.findOne({'name': groupname}, function (err, groupToBeDeleted) {
