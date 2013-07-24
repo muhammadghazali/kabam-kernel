@@ -64,6 +64,7 @@ MWC.prototype.setAppParameters = function (environment, settingsFunction) {
     var environmentToUse = null;
     if (typeof settingsFunction === 'undefined') {
       settingsFunction = environment;
+      environment = null;
     }
     if (typeof environment === 'string') {
       environmentToUse = [];
@@ -81,7 +82,7 @@ MWC.prototype.setAppParameters = function (environment, settingsFunction) {
       }
     } else {
       this.setAppParametersFunctions.push({
-        'SettingsFunction': settingsFunction
+        'settingsFunction': settingsFunction
       });
     }
 
@@ -252,7 +253,9 @@ MWC.prototype.ready = function () {
         func.settingsFunction(thisMWC);
       });
     } else {
-      func.settingsFunction(thisMWC);
+      if(func && func.settingsFunction){
+        func.settingsFunction(thisMWC);
+      }
     }
   });
 

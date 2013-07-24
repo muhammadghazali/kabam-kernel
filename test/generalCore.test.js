@@ -92,9 +92,13 @@ var extendCoreFunctionPlugin=function(core){
   };
 };
 
+var extendAppParametersFunctionPlugin = function(core){
+  core.app.set('extendAppParametersFunctionPlugin','extended111');
+};
+
 MWC.usePlugin({
   'extendCore': extendCoreFunctionPlugin,
-  'setAppParameters': null,
+  'setAppParameters': extendAppParametersFunctionPlugin,
   'setAppMiddlewares': null, //can be ommited
   'extendAppRoutes': function (core) {
     core.app.get('/newPlugin', function (req, res) {
@@ -523,7 +527,7 @@ describe('mwcCore', function() {
       if(typeof process.env.NODE_ENV != 'undefined'){
         process.env.NODE_ENV.should.be.equal('development');
       }
-      MWC.setAppParametersFunctions.should.be.an.instanceOf(Array); //test fails, but program works. who nows why?
+      MWC.setAppParametersFunctions.should.be.an.instanceOf(Array);
     });
     it('it set extendAppParametersFunction1 to development environment',function(){
       MWC.setAppParametersFunctions.should.includeEql({'environment':'development', 'settingsFunction':extendAppParametersFunction1});
@@ -596,16 +600,35 @@ describe('mwcCore', function() {
 
   });
 
-  describe('#MWC.usePlugin(object)', function() {
-    it('adds the extending core function to array of MWC.setCoreFunctions', function() {
-      MWC.setCoreFunctions.should.be.an.instanceOf(Array);
-      MWC.setCoreFunctions.should.include(extendCoreFunctionPlugin);
+  describe('#MWC.usePlugin(object)', function () {
+    describe('extendCore from plugin', function () {
+      it('it adds the extending core function to array of #MWC.setCoreFunctions', function () {
+        MWC.setCoreFunctions.should.be.an.instanceOf(Array);
+        MWC.setCoreFunctions.should.include(extendCoreFunctionPlugin);
+      });
+
+      it('it actually adds new functions to #MWC.core', function () {
+        MWC.mul.should.be.a('function');
+        MWC.mul(3, 2).should.equal(6);
+      });
+    });
+    describe('setAppParameters from plugin', function () {
+      it('it adds the desired functions to #MWC.setAppParametersFunctions', function () {
+        if (typeof process.env.NODE_ENV != 'undefined') {
+          process.env.NODE_ENV.should.be.equal('development');
+        }
+        MWC.setAppParametersFunctions.should.be.an.instanceOf(Array);
+        //
+      });
+
+      it('it set extendAppParametersFunctionPlugin to all environments', function () {
+        MWC.setAppParametersFunctions.should.includeEql({'settingsFunction': extendAppParametersFunctionPlugin});
+      });
+      it('it works', function () {
+        MWC.app.get('extendAppParametersFunctionPlugin').should.equal('extended111');
+      });
     });
 
-    it('actually adds new functions to #MWC',function(){
-      MWC.mul.should.be.a('function');
-      MWC.mul(3,2).should.equal(6);
-    });
   });
 
   describe('#MWC.usePlugin(pluginName)', function() {
