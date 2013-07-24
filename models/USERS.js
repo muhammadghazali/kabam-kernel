@@ -449,7 +449,11 @@ module.exports = exports = function (mongoose, config) {
     }, function (err, result) {
       result.group.owner = result.newOwner.username;
       result.group.save(callback);
-    })
+    });
+  };
+
+  UserSchema.statics.getGroup = function(groupname,callback){
+    Groups.findOne({'name': groupname}, callback);
   };
   var Groups=mongoose.model('groups', GroupSchema);
   return mongoose.model('users', UserSchema);

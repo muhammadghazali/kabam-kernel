@@ -145,6 +145,11 @@ describe('mwcCore', function() {
     it('exposes function changeOwnershipOfGroup',function(){
       MWC.MODEL.Users.changeOwnershipOfGroup.should.be.a('function');
     });
+
+    it('exposes function getGroup',function(){
+      MWC.MODEL.Users.getGroup.should.be.a('function');
+    });
+
   });
 
   describe('Testing mwc_core mongoose model of users group managment', function () {
