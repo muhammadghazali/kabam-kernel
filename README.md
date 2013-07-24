@@ -10,20 +10,22 @@ that can be easily extended by 6 functions.
 1. `extendCore(function(core){...})` - extend object created, including expressJS application
 and some other modules. You can call this function multiple times
 
-2. `setAppParameters(['development','staging','production','otherEnviroment'],function(core){...})` - set global application parameters, for example
+2. `extendModel(ModelName,function(mongoose, config){...})` - extend build in mongoose models.
+
+3. `setAppParameters(['development','staging','production','otherEnviroment'],function(core){...})` - set global application parameters, for example
 template [engines](http://expressjs.com/api.html#app.engine), 
 [locals](http://expressjs.com/api.html#app.locals) 
 and [other](http://expressjs.com/api.html#app-settings) settings.
 First argument (array of enviroments) is OPTIONAL
 
-3. `setAppMiddlewares(['development','staging','production','otherEnviroment'],'/middlewarePath',function(core){...})` - set application
+4. `setAppMiddlewares(['development','staging','production','otherEnviroment'],'/middlewarePath',function(core){...})` - set application
 [middleware](http://expressjs.com/api.html#middleware).
 This function can be executed multiple times, the middlewares applied are used in application in *order* they were issued by this function.
 First argument (array of enviroments), and the second one (the path where to use middleware, the default is "/") are OPTIONAL
 
-4. `extendAppRoutes(function(core){...})` - add custom routes to application
+5. `extendAppRoutes(function(core){...})` - add custom routes to application
 
-5. `loadPlugin("mwc_plugin_foo")` or `loadPlugin(pluginObj)` - load plugin as object or as a installed [npm](https://npmjs.org/) plugin by name
+6. `loadPlugin("mwc_plugin_foo")` or `loadPlugin(pluginObj)` - load plugin as object or as a installed [npm](https://npmjs.org/) plugin by name
 See [Plugin creating manual](https://github.com/mywebclass/mwc_core#plugin-creating-manual) for details
 
 
@@ -61,6 +63,19 @@ Example
     //set global lever variables for expressJS application
     MWC.setAppParameters(['development', 'staging'], function (core) {
       core.app.set('TempVar', '42');
+    });
+
+
+    MWC.extendModel('Cats', function (mongoose, config) {
+      var CatsSchema = new mongoose.Schema({
+        'nickname': String
+      });
+
+      CatsSchema.index({
+        nickname: 1
+      });
+
+      return mongoose.model('cats', CatsSchema);
     });
 
     //set middleware for development and staging enviroments
@@ -116,12 +131,35 @@ Example
           response.send('Administrator was notified about your actions!');
         });
 
+        core.app.get('/kittens',function(request,response){
+          request.MODEL.Cats.find({},function(err,cats){
+            if(err) throw err;
+            response.json(cats);
+          });
+        });
+
+        core.app.get('/dogs',function(request,response){
+          request.MODEL.Dogs.find({},function(err,dogs){
+            if(err) throw err;
+            response.json(dogs);
+          });
+        });
+
       }
     );
 
     //injecting plugin as an object
     MWC.usePlugin({
       'extendCore': null, //can be ommited
+      'extendModel':{'Dogs':function (mongoose, config) {
+        var DogsSchema = new mongoose.Schema({
+          'nickname': String
+        });
+        DogsSchema.index({
+          nickname: 1
+        });
+        return mongoose.model('dogs', DogsSchema);
+      }},
       'setAppParameters': null, //can be ommited
       'setAppMiddlewares': null, //can be ommited
       'extendAppRoutes': function (core) {
@@ -131,8 +169,14 @@ Example
       }
     });
 
-    //injecting plugin as an name of installe npm package!
-    MWC.usePlugin('mwc_plugin_example');
+    try{
+      //injecting plugin as an name of installe npm package!
+      MWC.usePlugin('mwc_plugin_example');
+    } catch (e){
+      if(e.code === 'MODULE_NOT_FOUND'){
+        console.error('mwc_plugin_example is not installed.');
+      }
+    }
 
 
     //api/user works from box
@@ -153,6 +197,24 @@ Example
       console.log('Attention! Somebody tries to hack us! ' + message);
     });
 
+    setTimeout(function(){
+      MWC.MODEL.Cats.create({nickname:'Chubais'},function(err,cat){
+        if(err) throw err;
+        if(cat){
+          console.log('Skoro tolko koshki rodyatsya!');
+          console.log('Happy birthday, '+cat.nickname);
+        }
+      });
+    },5000);
+
+    setTimeout(function(){
+      MWC.MODEL.Dogs.create({nickname:'Laika'},function(err,dog){
+        if(err) throw err;
+        if(dog){
+          console.log('Happy birthday, '+dog.nickname);
+        }
+      });
+    },4000);
 
 
 
@@ -376,15 +438,19 @@ This is the way of things it is intended to work
 When you call the `extendCore(function(core){...})`, you can add global core functions and variables,
 but not anything other touching the application, middlewares or routes.
 In code it is called right after initializing [mongoose routes](https://github.com/mywebclass/mwc_core/blob/master/index.js#L195)
-core have event emmiter capabilities (`emit`,`on`), `redisClient`, and `MODEL.Users`, `MODEL.Documents` (exposed as mongoose schemas).
+core have event emmiter capabilities `MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.MODEL.Users`, `MWC.MODEL.Documents` (exposed as mongoose schemas).
 Nothing more!
+
+When you call `extendModel(ModelName,function(mongoose, config){...})` you get all the enviroment created after calling
+`extendCore(function(core){...})`.
+
 
 When you call `setAppParameters(function(core){...})`, you can set global application parameters, for example
 template [engines](http://expressjs.com/api.html#app.engine), [locals](http://expressjs.com/api.html#app.locals)
 and [other](http://expressjs.com/api.html#app-settings) settings.
 In code it is called [after settng logging middleware and port](https://github.com/mywebclass/mwc_core/blob/master/index.js#L236).
 You can set any application parameter you want, you have full MWC core internalls at your disposal  
-`MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.MODEL.Users`, `MWC.MODEL.Documents`
+`MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.MODEL.Users`, `MWC.MODEL.Documents` and custom models from calling `extendModel`.
 
 When you call `setAppMiddlewares(function(core){...})`, you can set app middlewares.
 They are [called]((https://github.com/mywebclass/mwc_core/blob/master/index.js#L283) after
@@ -393,7 +459,7 @@ They are [called]((https://github.com/mywebclass/mwc_core/blob/master/index.js#L
 
 So, you have the full power of core internals - (`emit`,`on`), `redisClient`, and `MODEL.Users`, `MODEL.Documents`
 and exposed internals middleware - where expressJS object of request have functions of `request.mwcEmit`,
-`request.MODEL`,`request.MODEL.Users`,`request.MODEL.Documents`,`request.MODEL.redisClient`, and `request.user` provided
+`request.MODEL`,`request.MODEL.Users`,`request.MODEL.Documents`, custom models,`request.MODEL.redisClient`, and `request.user` provided
 by passportjs middleware.
 
 When you call `extendAppRoutes(function(core){})`, you can set the application routes and verbs for them.
@@ -403,7 +469,7 @@ This is done after defining [router middleware]((https://github.com/mywebclass/m
 and routes for passport.js authentication.
 
 It is worth saying, that you also have expressJS object of every route defined to  have functions of `request.mwcEmit`,
-`request.MODEL`,`request.MODEL.Users`,`request.MODEL.Documents`,`request.MODEL.redisClient`, and `request.user` provided
+`request.MODEL`,`request.MODEL.Users`,`request.MODEL.Documents`, custom models,`request.MODEL.redisClient`, and `request.user` provided
 by [passportjs](http://passportjs.org) middleware.
 
 

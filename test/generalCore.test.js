@@ -21,6 +21,23 @@ var extendCoreFunction = function(core){
 MWC.extendCore(extendCoreFunction);
 
 /*
+ * Extending model
+ */
+
+var extendModelFunction = function(mongoose,config){
+  var CatsSchema = new mongoose.Schema({
+    'nickname':String
+  });
+
+  CatsSchema.index({
+    nickname: 1
+  });
+
+  return mongoose.model('cats', CatsSchema);
+};
+
+MWC.extendModel('Cats',extendModelFunction);
+/*
  * Extending Application Parameters
  */
 
@@ -109,8 +126,19 @@ var extendAppRoutesFunctionPlugin = function (core) {
   });
 };
 
+var extendModelFunctionPlugin = function (mongoose, config) {
+  var DogsSchema = new mongoose.Schema({
+    'nickname': String
+  });
+  DogsSchema.index({
+    nickname: 1
+  });
+  return mongoose.model('dogs', DogsSchema);
+};
+
 MWC.usePlugin({
   'extendCore': extendCoreFunctionPlugin,
+  'extendModel':{'Dogs':extendModelFunctionPlugin},
   'setAppParameters': extendAppParametersFunctionPlugin,
   'setAppMiddlewares': extendAppMiddlewareFunctionPlugin,
   'extendAppRoutes': extendAppRoutesFunctionPlugin
@@ -589,6 +617,31 @@ describe('mwcCore', function() {
     });
   });
 
+  describe('#MWC.extendModel()',function(){
+    it('adds the extending model function to array of #MWC.additionalModels',function(){
+      MWC.additionalModels.should.includeEql({'name':'Cats','initFunction':extendModelFunction});
+    });
+    it('adds the model of "Cats" to #MWC.MODEL.Cats',function(){
+      MWC.MODEL.Cats.should.be.a('function');
+    });
+    describe('and the "Cats" model looks like mongoose model',function(){
+      it('exposes function find',function(){
+        MWC.MODEL.Cats.find.should.be.a('function');
+      });
+      it('exposes function findOne',function(){
+        MWC.MODEL.Cats.findOne.should.be.a('function');
+      });
+      it('exposes function count',function(){
+        MWC.MODEL.Cats.count.should.be.a('function');
+      });
+      it('exposes function remove',function(){
+        MWC.MODEL.Cats.remove.should.be.a('function');
+      });
+      it('exposes function create',function(){
+        MWC.MODEL.Cats.create.should.be.a('function');
+      });
+    });
+  });
 
   describe('#MWC.setAppParameters()',function(){
     it('adds the desired functions to MWC.setAppParametersFunctions',function(){
@@ -679,6 +732,32 @@ describe('mwcCore', function() {
       it('it actually adds new functions to #MWC.core', function () {
         MWC.mul.should.be.a('function');
         MWC.mul(3, 2).should.equal(6);
+      });
+    });
+
+    describe('extendModel from plugin',function(){
+      it('adds the extending model function to array of #MWC.additionalModels',function(){
+        MWC.additionalModels.should.includeEql({'name':'Dogs','initFunction':extendModelFunctionPlugin});
+      });
+      it('adds the model of "Dogs" to #MWC.MODEL.Dogs',function(){
+        MWC.MODEL.Dogs.should.be.a('function');
+      });
+      describe('and the "Dogs" model looks like mongoose model',function(){
+        it('exposes function find',function(){
+          MWC.MODEL.Dogs.find.should.be.a('function');
+        });
+        it('exposes function findOne',function(){
+          MWC.MODEL.Dogs.findOne.should.be.a('function');
+        });
+        it('exposes function count',function(){
+          MWC.MODEL.Dogs.count.should.be.a('function');
+        });
+        it('exposes function remove',function(){
+          MWC.MODEL.Dogs.remove.should.be.a('function');
+        });
+        it('exposes function create',function(){
+          MWC.MODEL.Dogs.create.should.be.a('function');
+        });
       });
     });
 

@@ -34,6 +34,7 @@ function MWC(config) {
   EventEmitter.call(this);
   this.config = config;
   this.setCoreFunctions = [];
+  this.additionalModels = [];
   this.setAppParametersFunctions = [];
   this.setAppMiddlewaresFunctions = [];
   this.setAppRoutesFunctions = [];
@@ -52,10 +53,14 @@ MWC.prototype.extendCore = function (settingsFunction) {
   }
 };
 
-MWC.prototype.extendModel = function(model){
-  //todo - implement it
-  return this;
-}
+MWC.prototype.extendModel = function(modelName,modelFunction){
+  if(modelName === 'Users' || modelName === 'Documents'){
+    throw new Error('Error extending model, "Users" and "Documents" are reserved names');
+  } else {
+    this.additionalModels.push({'name':modelName,'initFunction':modelFunction});
+    return this;
+  }
+};
 
 MWC.prototype.setAppParameters = function (environment, settingsFunction) {
   if (this.prepared) {
@@ -94,7 +99,6 @@ MWC.prototype.setAppMiddlewares = function (environment, path, settingsFunction)
   if (this.prepared) {
     throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
   } else {
-    //todo - add path to implement middleware
     var environmentToUse = null;
     if (typeof settingsFunction === 'undefined') {
       settingsFunction = environment;
@@ -159,6 +163,11 @@ MWC.prototype.usePlugin = function (pluginObjectOrName) {
     if (pluginToBeInstalled.extendCore) {
       this.extendCore(pluginToBeInstalled.extendCore);
     }
+    if(pluginToBeInstalled.extendModel && typeof pluginToBeInstalled.extendModel === 'object'){
+      for(var x in pluginToBeInstalled.extendModel){
+        this.extendModel(x,pluginObjectOrName.extendModel[x]);
+      }
+    }
     if (pluginToBeInstalled.setAppParameters) {
       this.setAppParameters(pluginToBeInstalled.setAppParameters);
     }
@@ -208,6 +217,11 @@ MWC.prototype.ready = function () {
   //extending core by extendCore
   thisMWC.setCoreFunctions.map(function (settingsFunction) {
     settingsFunction(thisMWC);
+  });
+
+  //loading custom models
+  thisMWC.additionalModels.map(function(customModel){
+    thisMWC.MODEL[customModel.name] = customModel.initFunction(thisMWC.mongoose,thisMWC.config);
   });
 
   //setting passport
@@ -283,10 +297,7 @@ MWC.prototype.ready = function () {
 
   //injecting default internals via middleware
   thisMWC.app.use(function (request, response, next) {
-    request.MODEL = {
-      'Users': Users,
-      'Documents': Documents
-    };
+    request.MODEL = thisMWC.MODEL;
     request.redisClient = thisMWC.redisClient;
     request.emitMWC = function (eventName, eventContent) {
       thisMWC.emit(eventName, eventContent);

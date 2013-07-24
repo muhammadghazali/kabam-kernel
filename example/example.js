@@ -19,6 +19,19 @@ MWC.setAppParameters(['development', 'staging'], function (core) {
   core.app.set('TempVar', '42');
 });
 
+
+MWC.extendModel('Cats', function (mongoose, config) {
+  var CatsSchema = new mongoose.Schema({
+    'nickname': String
+  });
+
+  CatsSchema.index({
+    nickname: 1
+  });
+
+  return mongoose.model('cats', CatsSchema);
+});
+
 //set middleware for development and staging enviroments
 MWC.setAppMiddlewares(['development', 'staging'], function (core) {
   return function (req, res, next) {
@@ -72,12 +85,35 @@ MWC.extendAppRoutes(
       response.send('Administrator was notified about your actions!');
     });
 
+    core.app.get('/kittens',function(request,response){
+      request.MODEL.Cats.find({},function(err,cats){
+        if(err) throw err;
+        response.json(cats);
+      });
+    });
+
+    core.app.get('/dogs',function(request,response){
+      request.MODEL.Dogs.find({},function(err,dogs){
+        if(err) throw err;
+        response.json(dogs);
+      });
+    });
+
   }
 );
 
 //injecting plugin as an object
 MWC.usePlugin({
   'extendCore': null, //can be ommited
+  'extendModel':{'Dogs':function (mongoose, config) {
+    var DogsSchema = new mongoose.Schema({
+      'nickname': String
+    });
+    DogsSchema.index({
+      nickname: 1
+    });
+    return mongoose.model('dogs', DogsSchema);
+  }},
   'setAppParameters': null, //can be ommited
   'setAppMiddlewares': null, //can be ommited
   'extendAppRoutes': function (core) {
@@ -115,3 +151,21 @@ MWC.on('honeypot accessed', function (message) {
   console.log('Attention! Somebody tries to hack us! ' + message);
 });
 
+setTimeout(function(){
+  MWC.MODEL.Cats.create({nickname:'Chubais'},function(err,cat){
+    if(err) throw err;
+    if(cat){
+      console.log('Skoro tolko koshki rodyatsya!');
+      console.log('Happy birthday, '+cat.nickname);
+    }
+  });
+},5000);
+
+setTimeout(function(){
+  MWC.MODEL.Dogs.create({nickname:'Laika'},function(err,dog){
+    if(err) throw err;
+    if(dog){
+      console.log('Happy birthday, '+dog.nickname);
+    }
+  });
+},4000);
