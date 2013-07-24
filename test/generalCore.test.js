@@ -84,6 +84,24 @@ var extendAppRoutesFunction = function(core){
 }
 MWC.extendAppRoutes(extendAppRoutesFunction);
 
+//load plugin as an object
+
+var extendCoreFunctionPlugin=function(core){
+  core.mul=function(a,b){
+    return a*b;
+  };
+};
+
+MWC.usePlugin({
+  'extendCore': extendCoreFunctionPlugin,
+  'setAppParameters': null,
+  'setAppMiddlewares': null, //can be ommited
+  'extendAppRoutes': function (core) {
+    core.app.get('/newPlugin', function (req, res) {
+      res.send('New plugin is installed as object');
+    });
+  }
+});
 
 MWC.listen(3000);
 
@@ -493,7 +511,7 @@ describe('mwcCore', function() {
       MWC.setCoreFunctions.should.include(extendCoreFunction);
     });
 
-    it('actully adds new functions to #MWC',function(){
+    it('actually adds new functions to #MWC',function(){
       MWC.sum.should.be.a('function');
       MWC.sum(2,2).should.equal(4);
     });
@@ -579,11 +597,15 @@ describe('mwcCore', function() {
   });
 
   describe('#MWC.usePlugin(object)', function() {
-
-    it('to be created', function() {
-      throw new Error('Not implemented');
+    it('adds the extending core function to array of MWC.setCoreFunctions', function() {
+      MWC.setCoreFunctions.should.be.an.instanceOf(Array);
+      MWC.setCoreFunctions.should.include(extendCoreFunctionPlugin);
     });
 
+    it('actually adds new functions to #MWC',function(){
+      MWC.mul.should.be.a('function');
+      MWC.mul(3,2).should.equal(6);
+    });
   });
 
   describe('#MWC.usePlugin(pluginName)', function() {
