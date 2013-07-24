@@ -187,18 +187,17 @@ describe('mwcCore', function() {
       }
       MWC.setAppParametersFunctions.should.be.an.instanceOf(Array); //test fails, but program works. who nows why?
     });
-    //todo - fails, because mocha is NOT vows
     it('it set extendAppParametersFunction1 to development environment',function(){
-      MWC.setAppParametersFunctions.should.include({'environment':'development', 'settingsFunction':extendAppParametersFunction1});
+      MWC.setAppParametersFunctions.should.includeEql({'environment':'development', 'settingsFunction':extendAppParametersFunction1});
     });
     it('it set extendAppParametersFunction1 to staging environment',function(){
-      MWC.setAppParametersFunctions.should.include({'environment':'staging',     'settingsFunction':extendAppParametersFunction1});
+      MWC.setAppParametersFunctions.should.includeEql({'environment':'staging',     'settingsFunction':extendAppParametersFunction1});
     });
     it('it set extendAppParametersFunction2 to development environment',function(){
-      MWC.setAppParametersFunctions.should.include({'environment':'development', 'settingsFunction':extendAppParametersFunction2});
+      MWC.setAppParametersFunctions.should.includeEql({'environment':'development', 'settingsFunction':extendAppParametersFunction2});
     });
     it('it set extendAppParametersFunction3 to production environment',function(){
-      MWC.setAppParametersFunctions.should.include({'environment':'production',  'settingsFunction':extendAppParametersFunction3});
+      MWC.setAppParametersFunctions.should.includeEql({'environment':'production',  'settingsFunction':extendAppParametersFunction3});
     });
 
     it('actually works',function(){
