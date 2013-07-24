@@ -273,6 +273,9 @@ Plugin creating manual
 This is typicale plugin code. It is placed there
 [https://github.com/mywebclass/mwc_plugin_example](https://github.com/mywebclass/mwc_plugin_example)
 
+*Important* - when you create plugin, the `setAppParameters`, `setAppMiddlewares` APPLIES to all enviroments!
+Furthemore, `setAppMiddlewares` binds to route '/'
+
 ```javascript
 
     var os = require('os');
@@ -282,16 +285,18 @@ This is typicale plugin code. It is placed there
         setInterval(function(){
             core.emit('Coocoo!','Dzin!');
         },5000);
-    }
+    };
 
-    //exports.setAppParameters = null;
+    exports.setAppParameters = function(core){
+	core.app.set('var1',"42");
+    };
 
     exports.setAppMiddlewares=function(core){
         return function(request, response, next) {
                 response.setHeader('X-MWC-PLUGIN_EXAMPLE!','THIS ROCKS!');
                 next();
             }
-    }
+    };
 
     exports.extendAppRoutes = function(core){
         core.app.get('/time',function(request,response){
@@ -334,7 +339,7 @@ This is typicale plugin code. It is placed there
             request.emitMWC('honeypot accessed','Somebody with IP of '+request.ip+' accessed the honeypot');
             response.send('Administrator was notified about your actions!');
         });
-    }
+    };
 
 ```
 
@@ -378,8 +383,8 @@ When you call `setAppParameters(function(core){...})`, you can set global applic
 template [engines](http://expressjs.com/api.html#app.engine), [locals](http://expressjs.com/api.html#app.locals)
 and [other](http://expressjs.com/api.html#app-settings) settings.
 In code it is called [after settng logging middleware and port](https://github.com/mywebclass/mwc_core/blob/master/index.js#L236).
-You can set any application parameter you want, you have full MWC core internalls at your disposal
-- (`emit`,`on`), `redisClient`, and `MODEL.Users`, `MODEL.Documents`
+You can set any application parameter you want, you have full MWC core internalls at your disposal  
+`MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.MODEL.Users`, `MWC.MODEL.Documents`
 
 When you call `setAppMiddlewares(function(core){...})`, you can set app middlewares.
 They are [called]((https://github.com/mywebclass/mwc_core/blob/master/index.js#L283) after
@@ -399,6 +404,6 @@ and routes for passport.js authentication.
 
 It is worth saying, that you also have expressJS object of every route defined to  have functions of `request.mwcEmit`,
 `request.MODEL`,`request.MODEL.Users`,`request.MODEL.Documents`,`request.MODEL.redisClient`, and `request.user` provided
-by passportjs middleware.
+by [passportjs](http://passportjs.org) middleware.
 
 
