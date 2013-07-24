@@ -106,14 +106,14 @@ MWC.prototype.setAppMiddlewares = function (environment, path, settingsFunction)
       for (var i = 0; i < environmentToUse.length; i++) {
         this.setAppMiddlewaresFunctions.push({
           'environment': environmentToUse[i],
-          'path' : (typeof path === 'string') ? path : null,
+          'path' : (typeof path === 'string') ? path : '/',
           'SettingsFunction': (typeof path == 'function') ? path : settingsFunction
         });
       }
     } else {
       //we set middleware fol all environments
       this.setAppMiddlewaresFunctions.push({
-        'path' : (typeof path === 'string') ? path : null,
+        'path' : (typeof path === 'string') ? path : '/',
         'SettingsFunction': (typeof path === 'function') ? path : settingsFunction
       });
 

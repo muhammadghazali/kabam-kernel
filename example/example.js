@@ -92,7 +92,7 @@ try{
   MWC.usePlugin('mwc_plugin_example');
 } catch (e){
   if(e.code === 'MODULE_NOT_FOUND'){
-    console.error('mwc_plugin_example is not installed.')
+    console.error('mwc_plugin_example is not installed.');
   }
 }
 

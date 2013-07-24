@@ -8,6 +8,58 @@ var should = require('should'),
   blanket = require('blanket');
 
 var MWC = new mwcCore(config);
+var extendCoreFunction = function(core){
+  core.sum=function(a,b){
+    return (a+b);
+  };
+};
+MWC.extendCore(extendCoreFunction);
+
+var extendAppParametersFunction1 = function (core) {
+  core.app.set('TempVar1', 'TempVar1');
+};
+
+var extendAppParametersFunction2 = function (core) {
+  core.app.set('TempVar2', 'TempVar2');
+};
+
+var extendAppParametersFunction3 = function (core) {
+  core.app.set('TempVar3', 'TempVar3');
+};
+
+MWC.setAppParameters(['development', 'staging'], extendAppParametersFunction1);
+MWC.setAppParameters('development', extendAppParametersFunction2);
+MWC.setAppParameters('production', extendAppParametersFunction3);
+var extendAppMiddlewareFunction1=function(core){
+  return function(request,response,next){
+    response.setHeader('middleware1','middleware1');
+    next();
+  }
+}
+var extendAppMiddlewareFunction2=function(core){
+  return function(request,response,next){
+    response.setHeader('middleware2','middleware2');
+    next();
+  }
+}
+var extendAppMiddlewareFunction3=function(core){
+  return function(request,response,next){
+    response.setHeader('middleware3','middleware3');
+    next();
+  }
+}
+var extendAppMiddlewareFunction4=function(core){
+  return function(request,response,next){
+    response.setHeader('middleware4','middleware4');
+    next();
+  }
+}
+
+MWC.setAppMiddlewares(extendAppMiddlewareFunction1);
+MWC.setAppMiddlewares('staging',extendAppMiddlewareFunction2);
+MWC.setAppMiddlewares(['staging','production'],extendAppMiddlewareFunction3);
+MWC.setAppMiddlewares(['development'],'/middleware3Path',extendAppMiddlewareFunction3);
+MWC.setAppMiddlewares('development','/middleware4Path',extendAppMiddlewareFunction4);
 MWC.listen(3000);
 
 describe('mwcCore', function() {
@@ -412,18 +464,78 @@ describe('mwcCore', function() {
 
   describe('#MWC.extendCore()', function() {
 
-    it('to be created', function() {
-      throw new Error('Not implemented');
+    it('adds the extending core function to array of MWC.setCoreFunctions', function() {
+      MWC.setCoreFunctions.should.be.an.instanceOf(Array);
+      MWC.setCoreFunctions.should.include(extendCoreFunction);
     });
 
+    it('actully adds new functions to #MWC',function(){
+      MWC.sum.should.be.a('function');
+      MWC.sum(2,2).should.equal(4);
+    });
   });
 
-  describe('#MWC.setAppMiddlewares()', function() {
 
-    it('to be created', function() {
-      throw new Error('Not implemented');
+  describe('#MWC.setAppParameters()',function(){
+    it('adds the desired functions to MWC.setAppParametersFunctions',function(){
+      if(typeof process.env.NODE_ENV != 'undefined'){
+        process.env.NODE_ENV.should.be.equal('development');
+      }
+      MWC.setAppParametersFunctions.should.be.an.instanceOf(Array); //test fails, but program works. who nows why?
+    });
+    it('it set extendAppParametersFunction1 to development environment',function(){
+      MWC.setAppParametersFunctions.should.includeEql({'environment':'development', 'settingsFunction':extendAppParametersFunction1});
+    });
+    it('it set extendAppParametersFunction1 to staging environment',function(){
+      MWC.setAppParametersFunctions.should.includeEql({'environment':'staging',     'settingsFunction':extendAppParametersFunction1});
+    });
+    it('it set extendAppParametersFunction2 to development environment',function(){
+      MWC.setAppParametersFunctions.should.includeEql({'environment':'development', 'settingsFunction':extendAppParametersFunction2});
+    });
+    it('it set extendAppParametersFunction3 to production environment',function(){
+      MWC.setAppParametersFunctions.should.includeEql({'environment':'production',  'settingsFunction':extendAppParametersFunction3});
     });
 
+    it('actually works',function(){
+      MWC.app.get('TempVar1').should.equal('TempVar1');
+      MWC.app.get('TempVar2').should.equal('TempVar2');
+      if(typeof MWC.app.get('TempVar3') != 'undefined'){
+        throw new Error('We set app parameter for wrong environment!');
+      }
+    });
+  });
+
+
+  describe('#MWC.setAppMiddlewares()', function() {
+    it('adds the desired functions to MWC.setAppMiddlewaresFunctions',function(){
+      if(typeof process.env.NODE_ENV != 'undefined'){
+        process.env.NODE_ENV.should.be.equal('development');
+      }
+      MWC.setAppMiddlewaresFunctions.should.be.an.instanceOf(Array); //test fails, but program works. who nows why?
+    });
+
+    it('it set extendAppMiddlewareFunction1 to all environments and path /',function(){
+      MWC.setAppMiddlewaresFunctions.should.includeEql({'path':'/', 'SettingsFunction':extendAppMiddlewareFunction1});
+    });
+    it('it set extendAppParametersFunction2 to staging environment',function(){
+      MWC.setAppMiddlewaresFunctions.should.includeEql({'path':'/', environment:'staging','SettingsFunction':extendAppMiddlewareFunction2});
+    });
+    it('it set extendAppParametersFunction3 to staging environment',function(){
+      MWC.setAppMiddlewaresFunctions.should.includeEql({'path':'/', environment:'staging', 'SettingsFunction':extendAppMiddlewareFunction3});
+    });
+    it('it set extendAppParametersFunction3 to production environment',function(){
+      MWC.setAppMiddlewaresFunctions.should.includeEql({'path':'/', environment:'production', 'SettingsFunction':extendAppMiddlewareFunction3});
+    });
+    it('it set extendAppMiddlewareFunction3 to development environment and path /middleware3Path',function(){
+      MWC.setAppMiddlewaresFunctions.should.includeEql({'path':'/middleware3Path', environment:'development', 'SettingsFunction':extendAppMiddlewareFunction3});
+    });
+    it('it set extendAppMiddlewareFunction4 to development environment and path /middleware4Path',function(){
+      MWC.setAppMiddlewaresFunctions.should.includeEql({environment:'development','path':'/middleware4Path', 'SettingsFunction':extendAppMiddlewareFunction4});
+    });
+
+    it('actually works',function(){
+      throw new Error('todo : create this test!');
+    });
   });
 
   describe('#MWC.extendAppRoutes()', function() {
