@@ -135,7 +135,6 @@ module.exports = exports = function (mongoose, config) {
     return;
   };
 
-  var Groups=mongoose.model('groups', GroupSchema);
   //end of group schema
 
 
@@ -403,11 +402,18 @@ module.exports = exports = function (mongoose, config) {
             groupToBeDeleted.remove(cb);
           }
         }, function (err, result) {
+          if(err) {
+            callback(err);
+          } else {
           async.parallel({
             'denotingOwner': function (cb) {
-              var groupIndex = result.groupOwner.groupsOwning.indexOf(groupname);
-              result.groupOwner.groupsOwning.splice(groupIndex, 1);
-              result.groupOwner.save(cb);
+              if(result.groupOwner){
+                var groupIndex = result.groupOwner.groupsOwning.indexOf(groupname);
+                result.groupOwner.groupsOwning.splice(groupIndex, 1);
+                result.groupOwner.save(cb);
+              } else {
+                cb(null,true);
+              }
             },
             'denotingGroupMembers': function (cb) {
               async.each(result.allGroupMembers, function (memberName, membersCallback) {
@@ -422,6 +428,8 @@ module.exports = exports = function (mongoose, config) {
               }, cb);
             }
           }, callback);
+          }
+          return;
         });
       } else {
         callback(new Error('Group of "' + groupname + '" do not exists!'));
@@ -443,6 +451,6 @@ module.exports = exports = function (mongoose, config) {
       result.group.save(callback);
     })
   };
-
+  var Groups=mongoose.model('groups', GroupSchema);
   return mongoose.model('users', UserSchema);
 };

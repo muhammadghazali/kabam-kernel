@@ -1,6 +1,7 @@
 /*jshint immed: false */
 
 var should = require('should'),
+  async = require('async'),
   mwcCore = require('./../index.js'),
   events = require('events'),
   config = require('./../example/config.json').development,
@@ -146,6 +147,55 @@ describe('mwcCore', function() {
     });
   });
 
+  describe('Testing mwc_core mongoose model of users group managment', function () {
+
+    describe('createGroup', function () {
+      var user, group;
+      before(function (done) {
+        MWC.MODEL.Users.create({
+          'username': 'testSubject47',
+          'email': 'ostroumov@teksi.ru'
+        }, function (err, userCreated) {
+          if (err) {
+            throw err;
+          }
+          user = userCreated;
+          MWC.MODEL.Users.createGroup('gosduma', user.username, function (err, groupCreated) {
+            group = groupCreated;
+            done();
+          });
+        });
+      });
+
+      it('creates a group with owner needed',function(){
+        group.owner.should.equal('testSubject47');
+        group.name.should.equal('gosduma');
+        group.members.should.be.an.instanceOf(Array);
+        group.members.length.should.equal(0);
+      });
+
+
+      after(function (done) {
+        async.parallel([
+          function(cb){
+            user.remove(cb);
+          },
+          function(cb){
+            MWC.MODEL.Users.deleteGroup(group.name,cb);
+          }
+        ],done);
+
+
+      });
+    });
+
+    describe('changeGroupOwnership',function(){
+      it('have to be written',function(){
+        throw new Error('have to be written');
+      });
+    })
+  });
+
   describe('Testing mwc_core mongoose model one instance of user:', function () {
     describe('general function are callable', function () {
       var user;
@@ -159,7 +209,7 @@ describe('mwcCore', function() {
             throw err;
           }
           user = userCreated;
-          done()
+          done();
         });
       });
 
@@ -242,7 +292,7 @@ describe('mwcCore', function() {
         });
       });
 
-      it('function invalidateSession changes the apiKey', function () {
+      it('changes the apiKey', function () {
         var test = (user.apiKey == 'lalalaDaiMne3Ryblya');
         test.should.equal(false);
       });
@@ -251,6 +301,7 @@ describe('mwcCore', function() {
         user.remove(done)
       });
     });
+    /*/
     describe('functions of inviteToGroup,isMemberOfGroup,removeFromGroup',function(){
       var user,
         isMember,
@@ -295,6 +346,7 @@ describe('mwcCore', function() {
       });
 
     });
+    //*/
   });
   describe('Testing mwc_core mongoose model of documents', function() {
 
