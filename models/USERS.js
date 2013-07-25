@@ -137,7 +137,7 @@ module.exports = exports = function (mongoose, config) {
     groups: [{type: String, match: /^[a-zA-Z0-9_]+$/ }],//user can be part of many groups
     groupsOwning: [{type: String, match: /^[a-zA-Z0-9_]+$/ }],//user can be owner of many groups
 
-    apiKey: {type: String, unique: true, match: /^[a-zA-Z0-9_]+$/ }, //for invalidating sessions by user request, for api interactions...
+    apiKey: {type: String, required: false, unique: true, match: /^[a-zA-Z0-9_]*$/ }, //for invalidating sessions by user request, for api interactions...
 
     active: Boolean,
     root: Boolean,
