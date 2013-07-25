@@ -43,7 +43,8 @@
     "should": "~1.2.2",
     "mocha": "~1.12.0",
     "grunt-mocha-cov": "0.0.7",
-    "blanket": "~1.1.5"
+    "blanket": "~1.1.5",
+    "request":"*"
   },
   "optionalDependencies": {
     "hiredis": "*"

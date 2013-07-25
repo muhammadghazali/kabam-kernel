@@ -5,6 +5,7 @@ var should = require('should'),
   mwcCore = require('./../index.js'),
   events = require('events'),
   config = require('./../example/config.json').development,
+  request = require('request'),
   blanket = require('blanket');
 
 var MWC = new mwcCore(config);
@@ -175,11 +176,11 @@ describe('mwcCore', function() {
     it('exposes mongoose model of users', function() {
       MWC.MODEL.Users.should.be.a('function');
     });
-
+/*/
     it('exposes mongoose model of documents', function() {
       MWC.MODEL.Documents.should.be.a('function');
     });
-
+//*/
     it('exposes an ExpressJS application', function() {
       MWC.app.should.be.a('function');
       MWC.app.get('port').should.equal(3000);
@@ -300,8 +301,8 @@ describe('mwcCore', function() {
     var usersFound;
     before(function (done) {
       MWC.MODEL.Users.create({
-        'username': 'testSubject47',
-        'email': 'ostroumov@teksi.ru',
+        'username': 'testSubject47111',
+        'email': 'ostroumov4@teksi.ru',
         'apiKey': 'vseBydetHorosho'
       }, function (err, userCreated) {
         if (err) {
@@ -309,10 +310,10 @@ describe('mwcCore', function() {
         }
         async.parallel({
           'byLogin':function(cb){
-            MWC.MODEL.Users.findOneByLoginOrEmail('testSubject47',cb);
+            MWC.MODEL.Users.findOneByLoginOrEmail('testSubject47111',cb);
           },
           'byEmail':function(cb){
-            MWC.MODEL.Users.findOneByLoginOrEmail('ostroumov@teksi.ru',cb);
+            MWC.MODEL.Users.findOneByLoginOrEmail('ostroumov4@teksi.ru',cb);
           },
           'byApiKey':function(cb){
             MWC.MODEL.Users.findOneByApiKey('vseBydetHorosho',cb);
@@ -329,8 +330,8 @@ describe('mwcCore', function() {
     });
 
     it('we created correct user to be sure',function(){
-      usersFound.created.username.should.be.equal('testSubject47');
-      usersFound.created.email.should.be.equal('ostroumov@teksi.ru');
+      usersFound.created.username.should.be.equal('testSubject47111');
+      usersFound.created.email.should.be.equal('ostroumov4@teksi.ru');
       usersFound.created.apiKey.should.be.equal('vseBydetHorosho');
     });
 
@@ -350,6 +351,7 @@ describe('mwcCore', function() {
       usersFound.created.remove(done);
     });
   });
+/*/
   describe('Testing mwc_core mongoose model of users group managment', function () {
     describe('createGroup', function () {
 
@@ -357,7 +359,8 @@ describe('mwcCore', function() {
       before(function (done) {
         MWC.MODEL.Users.create({
           'username': 'testSubject47',
-          'email': 'ostroumov@teksi.ru'
+          'email': 'ostroumov6@teksi.ru',
+          'apiKey':'lalala1'
         }, function (err, userCreated) {
           if (err) {
             throw err;
@@ -378,14 +381,17 @@ describe('mwcCore', function() {
       });
 
       after(function (done) {
-        async.parallel([
+        async.waterfall([
           function(cb){
             user.remove(cb);
           },
           function(cb){
             MWC.MODEL.Users.deleteGroup(group.name,cb);
           }
-        ],done);
+        ],function(err,after){
+          if(err) throw err;
+          done();
+        });
       });
     });
 
@@ -396,13 +402,15 @@ describe('mwcCore', function() {
           'user1': function (cb) {
             MWC.MODEL.Users.create({
               'username': 'testSubject47',
-              'email': 'ostroumov@teksi.ru'
+              'email': 'ostroumov1@teksi.ru',
+              'apiKey':'lalala'
             }, cb);
           },
           'user2': function (cb) {
             MWC.MODEL.Users.create({
-              'username': 'testSubject47_!',
-              'email': 'ostroumov2@teksi.ru'
+              'username': 'testSubject47_aaa',
+              'email': 'ostroumov2@teksi.ru',
+              'apiKey':'lalala1'
             }, cb);
           }}, function (err, usersCreated) {
           if (err) {
@@ -414,10 +422,14 @@ describe('mwcCore', function() {
               MWC.MODEL.Users.createGroup('gosduma',user1.username,function(err2,group){
                 if(err2) throw err2;
                 groupBefore=group;
-
-                MWC.MODEL.Users.
-
-
+                MWC.MODEL.Users.changeOwnershipOfGroup('gosduma',user2.username,function(err3){
+                  if(err3) throw err3;
+                  MWC.MODEL.Users.getGroup('gosduma',function(err4,group2){
+                    if(err4) throw err4;
+                    groupAfter=group2;
+                    done();
+                  });
+                });
               });
             } else {
               throw new Error('Unable to create users!');
@@ -426,7 +438,15 @@ describe('mwcCore', function() {
         });
       });
 
-      it('',function(){});
+      it('creates the group with desired parameters',function(){
+        groupBefore.name.should.be.equal('gosduma');
+        groupBefore.owner.should.be.equal('testSubject47');
+      });
+
+      it('changes the group owner', function(){
+        groupAfter.name.should.be.equal('gosduma');
+        groupAfter.owner.should.be.equal('testSubject47_aaa');
+      });
 
       after(function(done){
         async.parallel({
@@ -443,15 +463,16 @@ describe('mwcCore', function() {
       });
     });
   });
-
+//*/
   describe('Testing mwc_core mongoose model one instance of user:', function () {
     describe('general function are callable', function () {
       var user;
 
       before(function (done) {
         MWC.MODEL.Users.create({
-          'username': 'testSubject47',
-          'email': 'ostroumov@teksi.ru'
+          'username': 'test888',
+          'email': 'ostroumov@teksi.ru',
+          'apiKey':'lalala1'
         }, function (err, userCreated) {
           if (err) {
             throw err;
@@ -485,8 +506,9 @@ describe('mwcCore', function() {
       var user;
       before(function (done) {
         MWC.MODEL.Users.create({
-          'username': 'testSubject47',
-          'email': 'ostroumov@teksi.ru'
+          'username': 'testSubject47_1',
+          'email': 'ostroumov3@teksi.ru',
+          'apiKey':'lalala1_1'
         }, function (err, userCreated) {
           if (err) {
             throw err;
@@ -518,8 +540,8 @@ describe('mwcCore', function() {
       var user;
       before(function (done) {
         MWC.MODEL.Users.create({
-          'username': 'testSubject47',
-          'email': 'ostroumov@teksi.ru',
+          'username': 'testSubject47_2',
+          'email': 'ostroumov_3@teksi.ru',
           'apiKey': 'lalalaDaiMne3Ryblya'
         }, function (err, userCreated) {
           if (err) {
@@ -529,7 +551,7 @@ describe('mwcCore', function() {
             if (err2) {
               throw err2;
             }
-            MWC.MODEL.Users.findOne({'username': 'testSubject47'}, function (err3, userFound) {
+            MWC.MODEL.Users.findOne({'username': 'testSubject47_2'}, function (err3, userFound) {
               if (err3) {
                 throw err3;
               }
