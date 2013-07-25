@@ -176,7 +176,7 @@ describe('mwcCore', function() {
     it('exposes mongoose model of users', function() {
       MWC.MODEL.Users.should.be.a('function');
     });
-/*/
+//*/
     it('exposes mongoose model of documents', function() {
       MWC.MODEL.Documents.should.be.a('function');
     });
@@ -628,11 +628,9 @@ describe('mwcCore', function() {
   });
 
   describe('Testing mwc_core express application', function() {
-
-    it('to be created', function() {
-      throw new Error('Not implemented');
+    it('it exposes a #MWC.app object',function(){
+      MWC.app.should.be.a('function');
     });
-
   });
 
   describe('#MWC.extendCore()', function() {
@@ -731,8 +729,29 @@ describe('mwcCore', function() {
       MWC.setAppMiddlewaresFunctions.should.includeEql({environment:'development','path':'/middleware4Path', 'SettingsFunction':extendAppMiddlewareFunction4});
     });
 
-    it('actually works',function(){
-      throw new Error('todo : create this test!');
+    describe('it actually works',function(){
+      var response,body;
+      before(function(done){
+        request.get('http://localhost:3000/middleware3Path',function (err, res, b){
+          if(err) throw err;
+          response=res;
+          body=b;
+          done();
+        });
+      });
+
+      it('it starts HTTP server on port localhost:3000', function() {
+        response.statusCode.should.equal(404);//this is ok
+      });
+
+      it('this server runs a ExpressJS application',function(){
+        response.headers['x-powered-by'].should.be.equal('Express');
+      });
+
+      it('this application have headers needed by #MWC.appSetMiddlewares',function(){
+        response.headers['middleware1'].should.be.equal('middleware1');
+        response.headers['middleware3'].should.be.equal('middleware3');
+      });
     });
   });
 
@@ -822,10 +841,31 @@ describe('mwcCore', function() {
         MWC.setAppMiddlewaresFunctions.should.includeEql({'path':'/', 'SettingsFunction':extendAppMiddlewareFunctionPlugin});
       });
 
-      it('it works', function () {
-        throw new Error('TODO : write test for it');
-      });
+      describe('it actually works',function(){
+        var response,body;
+        before(function(done){
+          request.get('http://localhost:3000/someRoute',function (err, res, b){
+            if(err) throw err;
+            response=res;
+            body=b;
+            done();
+          });
+        });
 
+        it('it starts HTTP server on port localhost:3000', function() {
+          response.statusCode.should.equal(200);
+          body.should.equal('HI');
+        });
+
+        it('this server runs a ExpressJS application',function(){
+          response.headers['x-powered-by'].should.be.equal('Express');
+        });
+
+        it('this  application have headers needed by #MWC.appSetMiddlewares',function(){
+          response.headers['middleware1'].should.be.equal('middleware1');
+          response.headers['extendappmiddlewarefunctionplugin'].should.be.equal('OK');
+        });
+      });
     });
 
     describe('extendAppRoutes from plugin',function(){
@@ -838,10 +878,35 @@ describe('mwcCore', function() {
         MWC.setAppRoutesFunctions.should.includeEql(extendAppRoutesFunctionPlugin);
       });
 
-      it('it actually works!', function() {
-        throw new Error('TODO : write test for it');
-      });
+      describe('it actually works',function(){
+        var response,body;
+        before(function(done){
+          request.get('http://localhost:3000/newPlugin',function (err, res, b){
+            if(err) throw err;
+            response=res;
+            body=b;
+            done();
+          });
+        });
 
+        it('it starts HTTP server on port localhost:3000', function() {
+          response.statusCode.should.equal(200);
+        });
+
+        it('this server runs a ExpressJS application',function(){
+          response.headers['x-powered-by'].should.be.equal('Express');
+        });
+
+        it('this application have headers needed by #MWC.appSetMiddlewares',function(){
+          response.headers['middleware1'].should.be.equal('middleware1');
+          response.headers['extendappmiddlewarefunctionplugin'].should.be.equal('OK');
+        });
+
+        it('this application serves routes desired', function(){
+          response.statusCode.should.equal(200);
+          body.should.equal('New plugin is installed as object');
+        });
+      });
 
     });
   });
@@ -855,11 +920,29 @@ describe('mwcCore', function() {
   });
 
   describe('#MWC.listen(portNumber)', function() {
-
-    it('to be created', function() {
-      throw new Error('Not implemented');
+    var response,body;
+    before(function(done){
+      request.get('http://localhost:3000/someRoute',function (err, res, b){
+        if(err) throw err;
+        response=res;
+        body=b;
+        done();
+      });
     });
 
+    it('it starts HTTP server on port localhost:3000', function() {
+      response.statusCode.should.equal(200);
+      body.should.equal('HI');
+    });
+
+    it('this server runs a ExpressJS application',function(){
+      response.headers['x-powered-by'].should.be.equal('Express');
+    });
+
+    it('this application have headers needed by #MWC.appSetMiddlewares',function(){
+      response.headers['middleware1'].should.be.equal('middleware1');
+      response.headers['extendappmiddlewarefunctionplugin'].should.be.equal('OK');
+    });
   });
 
   describe('#MWC.listen(http)', function() {
