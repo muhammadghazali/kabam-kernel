@@ -372,10 +372,6 @@ describe('mwcCore', function() {
         group.members.length.should.equal(0);
       });
 
-      it('have to be written', function () {
-        throw new Error('have to be finished');
-      });
-
       after(function (done) {
         async.parallel([
           function(cb){
