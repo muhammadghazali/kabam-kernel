@@ -153,11 +153,6 @@ MWC.usePlugin({
 MWC.listen(3000);
 
 describe('mwcCore', function() {
-  before(function(done){//waiting for mongoDB connection to be established!
-    MWC.on('mongoReady',function(){
-      done();
-    });
-  });
   describe('Testing exposed objects of running mwcCore', function() {
 
     it('can emit and listen to events', function() {
