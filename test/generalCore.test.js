@@ -347,7 +347,7 @@ describe('mwcCore', function() {
   });
   describe('Testing mwc_core mongoose model of users group managment', function () {
     describe('createGroup', function () {
-/*
+
       var user, group;
       before(function (done) {
         MWC.MODEL.Users.create({
@@ -358,7 +358,7 @@ describe('mwcCore', function() {
             throw err;
           }
           user = userCreated;
-          MWC.MODEL.Users.createGroup('gosduma', user.username, function (err, groupCreated) {
+          MWC.MODEL.Users.createGroup('gosduma', userCreated.username, function (err, groupCreated) {
             group = groupCreated;
             done();
           });
@@ -371,11 +371,11 @@ describe('mwcCore', function() {
         group.members.should.be.an.instanceOf(Array);
         group.members.length.should.equal(0);
       });
-*/
+
       it('have to be written', function () {
         throw new Error('have to be finished');
       });
-/*
+
       after(function (done) {
         async.parallel([
           function(cb){
@@ -386,7 +386,6 @@ describe('mwcCore', function() {
           }
         ],done);
       });
-*/
     });
 
     describe('changeGroupOwnership', function () {

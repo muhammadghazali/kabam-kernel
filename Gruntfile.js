@@ -24,15 +24,16 @@ module.exports = function(grunt) {
         options: {
           reporter: 'spec',
           require: ['should'],
+          timeout : 5000
         },
-        src: ['test/**/*.js'],
+        src: ['test/**/*.js']
       },
       ci: {
         options: {
           reporter: 'html-cov',
           require: ['should']
         },
-        src: ['test/**/*.js'],
+        src: ['test/**/*.js']
       }
     },
     watch: {
