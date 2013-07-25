@@ -153,7 +153,6 @@ MWC.usePlugin({
 MWC.listen(3000);
 
 describe('mwcCore', function() {
-
   describe('Testing exposed objects of running mwcCore', function() {
 
     it('can emit and listen to events', function() {
@@ -176,11 +175,11 @@ describe('mwcCore', function() {
     it('exposes mongoose model of users', function() {
       MWC.MODEL.Users.should.be.a('function');
     });
-//*/
+
     it('exposes mongoose model of documents', function() {
       MWC.MODEL.Documents.should.be.a('function');
     });
-//*/
+
     it('exposes an ExpressJS application', function() {
       MWC.app.should.be.a('function');
       MWC.app.get('port').should.equal(3000);
@@ -351,7 +350,6 @@ describe('mwcCore', function() {
       usersFound.created.remove(done);
     });
   });
-/*/
   describe('Testing mwc_core mongoose model of users group managment', function () {
     describe('createGroup', function () {
 
@@ -394,7 +392,7 @@ describe('mwcCore', function() {
         });
       });
     });
-
+/*/
     describe('changeGroupOwnership', function () {
       var user1, user2, groupBefore,groupAfter;
       before(function (done) {
@@ -462,8 +460,9 @@ describe('mwcCore', function() {
         },done);
       });
     });
-  });
 //*/
+  });
+
   describe('Testing mwc_core mongoose model one instance of user:', function () {
     describe('general function are callable', function () {
       var user;
@@ -765,10 +764,31 @@ describe('mwcCore', function() {
       MWC.setAppRoutesFunctions.should.includeEql(extendAppRoutesFunction);
     });
 
-    it('it actually works!', function() {
-      throw new Error('TODO : write test for it');
-    });
+    describe('it actually works',function(){
+      var response,body;
+      before(function(done){
+        request.get('http://localhost:3000/someRoute',function (err, res, b){
+          if(err) throw err;
+          response=res;
+          body=b;
+          done();
+        });
+      });
 
+      it('it starts HTTP server on port localhost:3000', function() {
+        response.statusCode.should.equal(200);
+        body.should.equal('HI');
+      });
+
+      it('this server runs a ExpressJS application',function(){
+        response.headers['x-powered-by'].should.be.equal('Express');
+      });
+
+      it('this application have headers needed by #MWC.appSetMiddlewares',function(){
+        response.headers['middleware1'].should.be.equal('middleware1');
+        response.headers['extendappmiddlewarefunctionplugin'].should.be.equal('OK');
+      });
+    });
   });
 
   describe('#MWC.usePlugin(object)', function () {
