@@ -114,9 +114,7 @@ MWC.prototype.setAppMiddlewares = function (environment, path, settingsFunction)
       pathToUse = '/',
       settingsFunctionToUse = null;
 
-    if(typeof environment === 'function'
-           && typeof path ==='undefined'
-           && typeof settingsFunction ==='undefined'){
+    if(typeof environment === 'function' && typeof path === 'undefined' && typeof settingsFunction === 'undefined'){
         settingsFunctionToUse=environment;
     }
 
@@ -282,7 +280,7 @@ MWC.prototype.ready = function () {
     console.log('Staging environment!');
     thisMWC.app.locals.staging = true;
     thisMWC.app.use(express.responseTime());
-    thisMWC.app.enable('view cache');s
+    thisMWC.app.enable('view cache');
     thisMWC.app.use(express.logger('dev'));
   });
 
