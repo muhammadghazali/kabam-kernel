@@ -70,21 +70,21 @@ var extendAppMiddlewareFunction2=function(core){
   return function(request,response,next){
     response.setHeader('middleware2','middleware2');
     next();
-  }
+  };
 };
 
 var extendAppMiddlewareFunction3=function(core){
   return function(request,response,next){
     response.setHeader('middleware3','middleware3');
     next();
-  }
+  };
 };
 
 var extendAppMiddlewareFunction4=function(core){
   return function(request,response,next){
     response.setHeader('middleware4','middleware4');
     next();
-  }
+  };
 };
 
 MWC.setAppMiddlewares(extendAppMiddlewareFunction1);
@@ -327,11 +327,13 @@ describe('mwcCore', function() {
         });
       });
     });
+
     it('we created correct user to be sure',function(){
       usersFound.created.username.should.be.equal('testSubject47');
       usersFound.created.email.should.be.equal('ostroumov@teksi.ru');
       usersFound.created.apiKey.should.be.equal('vseBydetHorosho');
     });
+
     it('findOneByLoginOrEmail works for login',function(){
       usersFound.created._id.should.eql(usersFound.byLogin._id);
     });
@@ -345,7 +347,7 @@ describe('mwcCore', function() {
     });
 
     after(function (done) {
-      usersFound.created.remove(done)
+      usersFound.created.remove(done);
     });
   });
   describe('Testing mwc_core mongoose model of users group managment', function () {
@@ -389,7 +391,6 @@ describe('mwcCore', function() {
 
     describe('changeGroupOwnership', function () {
       var user1, user2, groupBefore,groupAfter;
-      /*
       before(function (done) {
         async.parallel({
           'user1': function (cb) {
@@ -414,6 +415,7 @@ describe('mwcCore', function() {
                 if(err2) throw err2;
                 groupBefore=group;
 
+                MWC.MODEL.Users.
 
 
               });
@@ -423,14 +425,23 @@ describe('mwcCore', function() {
           }
         });
       });
-      */
 
-      it('have to be written', function () {
-        throw new Error('have to be written');
+      it('',function(){});
+
+      after(function(done){
+        async.parallel({
+          'deletingUser1':function(cb){
+            user1.remove(cb);
+          },
+          'deletingUser2':function(cb){
+            user2.remove(cb);
+          },
+          'deletingGroup':function(cb){
+            groupBefore.remove(cb);
+          }
+        },done);
       });
-
-
-    })
+    });
   });
 
   describe('Testing mwc_core mongoose model one instance of user:', function () {

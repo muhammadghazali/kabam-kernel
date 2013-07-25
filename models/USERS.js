@@ -3,7 +3,7 @@ var async = require('async'),
   rack = hat.rack(),
   crypto = require('crypto'),
   moment = require('moment'),
-  mongooseTypes = require("mongoose-types"); //https://github.com/bnoguchi/mongoose-types
+  mongooseTypes = require('mongoose-types'); //https://github.com/bnoguchi/mongoose-types
 //useTimestamps = mongooseTypes.useTimestamps;
 
 
@@ -13,17 +13,6 @@ function sha512(str) {
 
 function md5(str) {
   return crypto.createHash('md5').update(str).digest('hex').toString();
-}
-
-
-function in_array(what, where) {
-  var len = where.length;
-  for (var i = 0; i < len; i++) {
-    if (what == where[i]) {
-      return true;
-    }
-  }
-  return false;
 }
 
 module.exports = exports = function (mongoose, config) {
@@ -75,7 +64,7 @@ module.exports = exports = function (mongoose, config) {
     if (this.owner === userNameToBeTested) {
       return true;
     } else {
-      return in_array(userNameToBeTested.username, this.members);
+      return (this.members.indexOf(userNameToBeTested.username) !== -1);
     }
   };
   GroupSchema.methods.addMember = function (usernameOrUserObject, callback) {
@@ -279,7 +268,7 @@ module.exports = exports = function (mongoose, config) {
         thisUser.groups.push(groupname);
         thisUser.save(cb);
       }
-    ], callback)
+    ], callback);
   };
 
   UserSchema.methods.removeFromGroup = function (groupname, callback) {
@@ -317,7 +306,7 @@ module.exports = exports = function (mongoose, config) {
         thisUser.groups.splice(groupIndex, 1);
         thisUser.save(cb);
       }
-    ], callback)
+    ], callback);
   };
 
   //for root user only, static UserSchema methods
