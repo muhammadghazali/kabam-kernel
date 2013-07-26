@@ -264,7 +264,7 @@ MWC.prototype.ready = function () {
     throw new Error('Config variable of mongoURL have wrong syntax. Good one is mongodb://username:somePassword@localhost:10053/mwc_dev');
   }
   //injecting default mongoose databases
-  thisMWC.mongoose = mongoose.connect(thisMWC.config.mongoUrl);
+  thisMWC.mongoose = mongoose.connect(thisMWC.config.mongoUrl,{server: { poolSize: 3 }});
   var db = thisMWC.mongoose.connection;
   db.on('connect', function (err) {
     if (err) {
