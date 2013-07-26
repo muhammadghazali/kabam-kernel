@@ -65,7 +65,7 @@ MWC.prototype.extendModel = function (modelName, modelFunction) {
       this.additionalModels.push({'name': modelName, 'initFunction': modelFunction});
       return this;
     } else {
-      throw new Error('MWC.extendModel requires arguments of string of modelName and function(core){...}');
+      throw new Error('MWC.extendModel requires arguments of string of "modelName" and function(core){...}');
     }
   }
 };
@@ -85,6 +85,11 @@ MWC.prototype.setAppParameters = function (environment, settingsFunction) {
     }
     if (environment instanceof Array) {
       environmentToUse = environment;
+      for (var i = 0; i < environment.length;i++){
+        if(typeof environment[i] !== 'string'){
+          throw new Error('#MWC.setAppParameters requires environment name to be a string!');
+        }
+      }
     }
     if (typeof settingsFunction === 'function') {
       if (environmentToUse) {
@@ -126,8 +131,12 @@ MWC.prototype.setAppMiddlewares = function (environment, path, settingsFunction)
       }
       if (environment instanceof Array) {
         environmentToUse = environment;
+        for (var i = 0; i < environment.length;i++){
+          if(typeof environment[i] !== 'string'){
+            throw new Error('#MWC.setAppParameters requires environment name to be a string!');
+          }
+        }
       }
-
       if (typeof path === 'string' && /^\//.test(path)) {
         pathToUse = path;
         if (typeof settingsFunction === 'function') {
@@ -150,14 +159,14 @@ MWC.prototype.setAppMiddlewares = function (environment, path, settingsFunction)
           });
         }
       } else {
-        //we set middleware fol all environments
+        //we set middleware for all environments
         this.setAppMiddlewaresFunctions.push({
           'path': pathToUse,
           'SettingsFunction': settingsFunctionToUse
         });
       }
     } else {
-      throw new Error('Wrong arguments for function MWC.setAppMiddlware([enviromentArrayOrString],[path],settingsFunction(core){...})');
+      throw new Error('Wrong arguments for function MWC.setAppMiddlware(environmentArrayOrStrings, [path], settingsFunction(core){...})');
     }
     return this;
   }
@@ -418,14 +427,7 @@ MWC.prototype.ready = function () {
 
   //setting up the default routes
   usersController(thisMWC.app, thisMWC.config);//restfull api for users
-  documentsController(thisMWC.app, thisMWC.config);//restfull api for users
-
-  thisMWC.app.configure('development', function () {
-    //default route to show plugins installed
-    thisMWC.app.get('/plugins', function (request, response) {
-      response.json(thisMWC.plugins);
-    });
-  });
+  documentsController(thisMWC.app, thisMWC.config);//restfull api for documents
 
   //autorize routes for passport
   initPassport.doInitializePassportRoutes(passport, thisMWC.app, thisMWC.config);
@@ -459,22 +461,6 @@ MWC.prototype.listen = function (httpOrHttpsOrPort) {
   }
 };
 
-//transfer to separate pluggin...
-MWC.prototype.populateDatabase = function (data) {
-  console.log('Populating the database');
-  if (data.users && data.users instanceof Array) {
-    console.log(data.users);
-    for (var i = 0; i < data.users.length; i++) {//todo - get some rest and make it via async.parallel - Anatolij
-      console.log(data.users[i]);
-      this.MODEL.Users.create(data.users[i], function (err, userSaved) {
-        if (err) {
-          throw err;
-        }
-        console.log(userSaved);
-      });
-    }
-  }
-};
 process.on('SIGINT', function () {
   //server.close(); //server is instantained somewere else...
   // calling .shutdown allows your process to exit normally

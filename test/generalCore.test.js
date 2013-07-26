@@ -64,7 +64,7 @@ var extendAppMiddlewareFunction1=function(core){
   return function(request,response,next){
     response.setHeader('middleware1','middleware1');
     next();
-  }
+  };
 };
 
 var extendAppMiddlewareFunction2=function(core){
