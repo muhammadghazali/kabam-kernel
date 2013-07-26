@@ -427,9 +427,17 @@ module.exports = exports = function (mongoose, config) {
     });
   };
 
+  UserSchema.statics.getGroups = function(parameters,callback){
+    if(typeof callback === 'undefined' && typeof parameters === 'function'){
+      Groups.find({},callback);
+    } else {
+      Groups.find(parameters,callback);
+    }
+  };
   UserSchema.statics.getGroup = function (groupname, callback) {
     Groups.findOne({'name': groupname}, callback);
   };
+
   var Groups = mongoose.model('groups', GroupSchema);
   return mongoose.model('users', UserSchema);
 };
