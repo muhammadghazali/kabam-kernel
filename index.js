@@ -209,19 +209,52 @@ MWC.prototype.usePlugin = function (pluginObjectOrName) {
 };
 
 MWC.prototype.ready = function () {
-  var thisMWC = this;
+  var thisMWC = this;//because we sometimes issue closures with thisMWC
   thisMWC.prepared = true;
 
   //injecting redis
   if (thisMWC.config.redis) {
-    thisMWC.redisClient = redis.createClient(thisMWC.config.redis.port, thisMWC.config.redis.host);
+    if (typeof thisMWC.config.redis === 'object') {
+      if (thisMWC.config.redis.port && !(/^[0-9]+$/.test(thisMWC.config.redis.port))) {
+        throw new Error('Config variable of redis has bad value for PORT. Proper values are ' +
+          '{"port":6379,"host":"localhost","auth":"someSecretPassword"} ' +
+          'or "redis://usernameIgnored:someSecretPassword@redis.example.org:6739"');
+      }
+      thisMWC.redisClient = redis.createClient(thisMWC.config.redis.port, thisMWC.config.redis.host);
+      if (typeof thisMWC.config.redis.auth === 'string') {
+        thisMWC.redisClient.auth(thisMWC.config.redis.auth);
+      }
+    } else {
+      if (typeof thisMWC.config.redis === 'string') {
+        var redisConfigUrlParsed = url.parse(thisMWC.config.redis);
+        if (redisConfigUrlParsed) {
+          thisMWC.redisClient = redis.createClient(redisConfigUrlParsed.port, redisConfigUrlParsed.hostname);
+          if (redisConfigUrlParsed.auth && redisConfigUrlParsed.auth.split(':')[1]) {
+            thisMWC.redisClient.auth(redisConfigUrlParsed.auth.split(':')[1]);
+          }
+        } else {
+          throw new Error('Config variable of redis has bad value. Proper values are ' +
+            '{"port":6379,"host":"localhost","auth":"someSecretPassword"} ' +
+            'or "redis://usernameIgnored:someSecretPassword@redis.example.org:6739"');
+        }
+      } else {
+        throw new Error('Config variable of redis has bad value. Proper values are ' +
+          '{"port":6379,"host":"localhost","auth":"someSecretPassword"} ' +
+          'or "redis://usernameIgnored:someSecretPassword@redis.example.org:6739"');
+      }
+    }
   } else {
+    //redis is NOT configured, we use default properties
     thisMWC.redisClient = redis.createClient();
   }
-  //injecting default mongoose databases
+  //sanity check for mongoUrl
   if (!thisMWC.config.mongoUrl) {
     throw new Error('Config variable of mongoURL is missed!');
   }
+  if(!url.parse(thisMWC.config.mongoUrl)){
+    throw new Error('Config variable of mongoURL have wrong syntax. Good one is mongodb://username:somePassword@localhost:10053/mwc_dev');
+  }
+  //injecting default mongoose databases
   thisMWC.mongoose = mongoose.connect(thisMWC.config.mongoUrl);
   var db = thisMWC.mongoose.connection;
   db.on('connect', function (err) {
