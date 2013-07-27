@@ -582,48 +582,87 @@ describe('mwcCore', function() {
       });
     });
 
-    describe('functions of inviteToGroup,isMemberOfGroup,removeFromGroup',function(){
-//      var user,
-//        isMember,
-//        isNotMember,
-//        Users=MWC.MODEL.Users;
-//
-//      before(function(done){
-//        Users.create({
-//          'username': 'testSubject47',
-//          'email': 'ostroumov@teksi.ru'
-//        }, function (err, userCreated) {
-//          if(err) throw err;
-//          user=userCreated;
-//          userCreated.inviteToGroup('gosduma', function(err1){
-//            if(err1) throw err1;
-//            Users.findOne({'username':'testSubject47'},function(err2,userFound){
-//              if(err2) throw err2;
-//              isMember=userFound.isMemberOfGroup('gosduma');
-//              userFound.removeFromGroup('gosduma',function(err3){
-//                if(err3) throw err3;
-//                Users.findOne({'username':'testSubject47'},function(err4,userFound2){
-//                  if(err4) throw err4;
-//                  isMember=userFound2.isMemberOfGroup('gosduma');
-//                  done();
-//                });
-//              });
-//            });
-//          });
-//        });
-//      });
-//
-//      it('isMemberOfGroup returns TRUE if user is in group',function(){
-//        isMember.should.equal(true);
-//      });
-//
-//      it('isMemberOfGroup returns FALSE if user is NOT in group',function(){
-//        isNotMember.should.equal(false);
-//      });
-//
-//      after(function (done) {
-//        user.remove(done)
-//      });
+    describe('function of isMemberOfGroup',function(){
+      var userGlob,
+        groupGlob,
+        isMemberUser,
+        isOwnerUser,
+        isOwnerGroupAsObject,
+        isOwnerGroupAsUsername,
+        isMemberGroupAsObject,
+        isMemberGroupAsUsername;
+
+
+      before(function(done){
+        async.waterfall(
+          [
+            function(cb){
+              MWC.MODEL.Users.create({
+                'username': 'groupOwner1',
+                'email': 'test1@example.org',
+                'apiKey': 'dududu1'
+              },cb);
+            },
+            function(ownerCreated,cb){
+              MWC.MODEL.Users.createGroup('palata1',ownerCreated.username, cb);
+            },
+            function(groupCreated,cb){
+              MWC.MODEL.Users.findOneByLoginOrEmail('groupOwner',function(err,userFound){
+                if(err) throw err;
+                groupGlob = groupCreated;
+                cb(err,userFound,groupCreated);
+              });
+            }],
+            function(err,user,group){
+              if(err) throw err;
+              userGlob=user;
+              isMemberUser=user.isMemberOfGroup(group.name);
+              isOwnerUser=user.isOwnerOfGroup(group.name);
+              isOwnerGroupAsObject=group.isOwner(user);
+              isOwnerGroupAsUsername=group.isOwner(user.username);
+              isMemberGroupAsObject=group.isMember(user);
+              isMemberGroupAsUsername=group.isMember(user.username);
+              done();
+            }
+        )
+      });
+
+      it('User.isMemberOfGroup returns TRUE if user is in group',function(){
+        isMemberUser.should.equal(true);
+      });
+
+      it('User.isOwner returns TRUE if user is group owner',function(){
+        isOwnerUser.should.equal(true);
+      });
+
+
+      it('Group.isOwner returns TRUE if user(obj) is group owner',function(){
+        isOwnerGroupAsObject.should.equal(true);
+      });
+
+      it('Group.isOwner returns TRUE if user(username) is group owner',function(){
+        isOwnerGroupAsUsername.should.equal(true);
+      });
+
+      it('Group.isMember returns TRUE if user(obj) is group owner',function(){
+        isMemberGroupAsObject.should.equal(true);
+      });
+
+      it('Group.isMember returns TRUE if user(username) is group owner',function(){
+        isMemberGroupAsUsername.should.equal(true);
+      });
+
+      after(function (done) {
+        async.waterfall([
+          function(cb){
+            MWC.MODEL.Users.deleteGroup('palata',cb);
+          },
+          function(cb){
+            userGlob.remove(cb);
+          },
+        ],done);
+
+      });
       it('to be redone',function(){
         throw new Error('fails and need to be done')
       });
