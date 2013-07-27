@@ -152,6 +152,11 @@ MWC.usePlugin({
 MWC.listen(3000);
 
 describe('mwcCore', function() {
+
+  after(function(done){
+    MWC.mongoose.connection.close(done);
+  });
+
   describe('Testing exposed objects of running mwcCore', function() {
 
     it('can emit and listen to events', function() {
@@ -354,20 +359,27 @@ describe('mwcCore', function() {
 
       var user, group;
       before(function (done) {
-        MWC.MODEL.Users.create({
-          'username': 'testSubject47',
-          'email': 'ostroumov6@teksi.ru',
-          'apiKey':'lalala1'
-        }, function (err, userCreated) {
-          if (err) {
-            throw err;
-          }
-          user = userCreated;
-          MWC.MODEL.Users.createGroup('gosduma', userCreated.username, function (err, groupCreated) {
-            group = groupCreated;
-            done();
-          });
-        });
+        async.waterfall(
+          [
+            function (cb) {
+              MWC.MODEL.Users.create({
+                'username': 'testSubject47',
+                'email': 'ostroumov6@teksi.ru',
+                'apiKey': 'lalala1'
+              }, cb);
+            },
+            function (userCreated, cb) {
+              if (!userCreated) {
+                cb(new Error('Unable to create user!'));
+              } else {
+                MWC.MODEL.Users.createGroup('gosduma', userCreated.username, function (err, groupCreated) {
+                  user = userCreated;
+                  group = groupCreated;
+                  cb(err, groupCreated);
+                });
+              }
+            }
+          ], done);
       });
 
       it('creates a group with owner needed',function(){
@@ -391,7 +403,7 @@ describe('mwcCore', function() {
         });
       });
     });
-/*/
+//*/
     describe('changeGroupOwnership', function () {
       var user1, user2, groupBefore,groupAfter;
       before(function (done) {

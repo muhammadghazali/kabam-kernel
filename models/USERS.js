@@ -249,16 +249,17 @@ module.exports = exports = function (mongoose, config) {
     async.waterfall([
       function (cb) {
         //do the group exists?
-        Groups.findOne({'name': groupname}, cb);
-      },
-      function (groupThatExists, cb) {
-        if (groupThatExists) {
-          cb(null, groupThatExists);
-        } else {
-          //
-          console.log('creating the group that do not exists');
-          Groups.create({'name': groupname}, cb);
-        }
+        Groups.findOne({'name': groupname}, function(err,group){
+          if(err) {
+            cb(err);
+          } else {
+            if(group){
+              cb(null,group);
+            } else {
+              cb(new Error('Group of "'+groupname+'" do not exists!'));
+            }
+          }
+        });
       },
       function (groupToAddUser, cb) {
         groupToAddUser.members.push(thisUser.username);
@@ -287,14 +288,17 @@ module.exports = exports = function (mongoose, config) {
     async.waterfall([
       function (cb) {
         //do the group exists?
-        Groups.findOne({'name': groupname}, cb);
-      },
-      function (groupThatExists, cb) {
-        if (groupThatExists) {
-          cb(null, groupThatExists);
-        } else {
-          cb(new Error('Group "' + groupname + '" do not exists!'));
-        }
+        Groups.findOne({'name': groupname}, function(err,group){
+          if(err) {
+            cb(err);
+          } else {
+            if(group){
+              cb(null,group);
+            } else {
+              cb(new Error('Group of "'+groupname+'" do not exists!'));
+            }
+          }
+        });
       },
       function (groupToRemoveUserFrom, cb) {
         var userIndex = groupToRemoveUserFrom.members.indexOf(thisUser.username);
@@ -308,6 +312,28 @@ module.exports = exports = function (mongoose, config) {
       }
     ], callback);
   };
+
+  //acl, because GROUPS === ACL
+  UserSchema.methods.grant = function(groubname,callback){
+    return this.inviteToGroup(groubname,callback);
+  };
+
+  UserSchema.methods.revoke = function(groubname,callback){
+    return this.removeFromGroup(groubname,callback);
+  };
+
+//fast finders
+  UserSchema.statics.findOneByLoginOrEmail = function (loginOrEmail, callback) {
+    if (/^[a-zA-Z0-9_]+$/.test(loginOrEmail)) {
+      this.findOne({'username': loginOrEmail}, callback);
+    } else {
+      this.findOne({'email': loginOrEmail}, callback);
+    }
+  };
+  UserSchema.statics.findOneByApiKey = function (apiKey, callback) {
+    this.findOne({'apiKey': apiKey}, callback);
+  };
+
 
   //for root user only, static UserSchema methods
   UserSchema.statics.createGroup = function (groupname, ownerName, callback) {
@@ -348,19 +374,6 @@ module.exports = exports = function (mongoose, config) {
       }
     });
   };
-
-  UserSchema.statics.findOneByLoginOrEmail = function (loginOrEmail, callback) {
-    if (/^[a-zA-Z0-9_]+$/.test(loginOrEmail)) {
-      this.findOne({'username': loginOrEmail}, callback);
-    } else {
-      this.findOne({'email': loginOrEmail}, callback);
-    }
-  };
-
-  UserSchema.statics.findOneByApiKey = function (apiKey, callback) {
-    this.findOne({'apiKey': apiKey}, callback);
-  };
-
 
   UserSchema.statics.deleteGroup = function (groupname, callback) {
     var Users = this;
@@ -419,11 +432,19 @@ module.exports = exports = function (mongoose, config) {
         Groups.findOne({'name': groupname}, cb);
       },
       'newOwner': function (cb) {
-        Users.findOne({'name': ownerName}, cb);
+        Users.findOne({'username': ownerName}, cb);
       }
     }, function (err, result) {
-      result.group.owner = result.newOwner.username;
-      result.group.save(callback);
+      if (err) {
+        callback(err);
+      } else {
+        if (result.group && result.newOwner) {
+          result.group.owner = result.newOwner.username;
+          result.group.save(callback);
+        } else {
+          callback(new Error('User of "'+ownerName+'" or group of  "'+groupname+'" do not exists!'));
+        }
+      }
     });
   };
 
