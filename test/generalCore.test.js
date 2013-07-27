@@ -470,7 +470,7 @@ describe('mwcCore', function() {
         user.remove(done);
       });
     });
-    /*/
+    //*/
     describe('functions grantRole, revokeRole',function(){
       var userWithRole,userWithoutRole;
       before(function(done){
@@ -497,11 +497,14 @@ describe('mwcCore', function() {
             function(cb){
               MWC.MODEL.Users.findOneByLoginOrEmail('test888',cb);
             },
-            function(userFound,cb){
-              userWithoutRole=userFound;
+            function(userFound2,cb){
+              userWithoutRole=userFound2;
               cb();
             }
-          ],done);
+          ],function(err,res){
+            if(err) throw err;
+            done();
+          });
       });
 
       it('grantRole assigned role',function(){
@@ -847,21 +850,5 @@ describe('mwcCore', function() {
       response.headers['extendappmiddlewarefunctionplugin'].should.be.equal('OK');
     });
   });
-/*/
-  describe('#MWC.listen(http)', function() {
 
-    it('to be created', function() {
-      throw new Error('Not implemented');
-    });
-
-  });
-
-  describe('#MWC.listen(https)', function() {
-
-    it('to be created', function() {
-      throw new Error('Not implemented');
-    });
-
-  });
-//*/
 });
