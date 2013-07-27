@@ -9,7 +9,6 @@ var EventEmitter = require('events').EventEmitter,
   redis = require('redis'),
 
   usersModel = require('./models/USERS.js'),
-  documentsModel = require('./models/DOCUMENTS.js'),
 
   http = require('http'),
   https = require('https'),
@@ -21,23 +20,18 @@ var EventEmitter = require('events').EventEmitter,
   RedisStore = require('connect-redis')(express),
 //todo
 //https://hacks.mozilla.org/2012/12/using-secure-client-side-sessions-to-build-simple-and-scalable-node-js-applications-a-node-js-holiday-season-part-3/
-
-
   flashMiddleware = require('connect-flash'),
-
-  usersController = require('./routes/usersController.js'),
-  documentsController = require('./routes/documentsController.js'),
 
   toobusy = require('toobusy');
 
 function MWC(config) {
   EventEmitter.call(this);
   this.config = config;
-  this.setCoreFunctions = [];
+  this.extendCoreFunctions = [];
   this.additionalModels = [];
-  this.setAppParametersFunctions = [];
-  this.setAppMiddlewaresFunctions = [];
-  this.setAppRoutesFunctions = [];
+  this.extendAppFunctions = [];
+  this.extendMiddlewaresFunctions = [];
+  this.extendRoutesFunctions = [];
   return this;
 }
 
@@ -49,7 +43,7 @@ MWC.prototype.extendCore = function (settingsFunction) {
     throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
   } else {
     if (typeof settingsFunction === 'function') {
-      this.setCoreFunctions.push(settingsFunction);
+      this.extendCoreFunctions.push(settingsFunction);
       return this;
     } else {
       throw new Error('MWC.extendCore requires argument of function(core){...}');
@@ -58,8 +52,8 @@ MWC.prototype.extendCore = function (settingsFunction) {
 };
 
 MWC.prototype.extendModel = function (modelName, modelFunction) {
-  if (modelName === 'Users' || modelName === 'Documents') {
-    throw new Error('Error extending model, "Users" and "Documents" are reserved names');
+  if (modelName === 'Users') {
+    throw new Error('Error extending model, "Users" is reserved names');
   } else {
     if (typeof modelName === 'string' && typeof modelFunction === 'function') {
       this.additionalModels.push({'name': modelName, 'initFunction': modelFunction});
@@ -70,7 +64,7 @@ MWC.prototype.extendModel = function (modelName, modelFunction) {
   }
 };
 
-MWC.prototype.setAppParameters = function (environment, settingsFunction) {
+MWC.prototype.extendApp = function (environment, settingsFunction) {
   if (this.prepared) {
     throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
   } else {
@@ -94,13 +88,13 @@ MWC.prototype.setAppParameters = function (environment, settingsFunction) {
     if (typeof settingsFunction === 'function') {
       if (environmentToUse) {
         for (var i = 0; i < environmentToUse.length; i++) {
-          this.setAppParametersFunctions.push({
+          this.extendAppFunctions.push({
             'environment': environmentToUse[i],
             'settingsFunction': settingsFunction
           });
         }
       } else {
-        this.setAppParametersFunctions.push({
+        this.extendAppFunctions.push({
           'settingsFunction': settingsFunction
         });
       }
@@ -111,7 +105,7 @@ MWC.prototype.setAppParameters = function (environment, settingsFunction) {
   }
 };
 
-MWC.prototype.setAppMiddlewares = function (environment, path, settingsFunction) {
+MWC.prototype.extendMiddlewares = function (environment, path, settingsFunction) {
   if (this.prepared) {
     throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
   } else {
@@ -152,7 +146,7 @@ MWC.prototype.setAppMiddlewares = function (environment, path, settingsFunction)
     if (settingsFunctionToUse) {
       if (environmentToUse) {
         for (var i = 0; i < environmentToUse.length; i++) {
-          this.setAppMiddlewaresFunctions.push({
+          this.extendMiddlewaresFunctions.push({
             'environment': environmentToUse[i],
             'path': pathToUse,
             'SettingsFunction': settingsFunctionToUse
@@ -160,7 +154,7 @@ MWC.prototype.setAppMiddlewares = function (environment, path, settingsFunction)
         }
       } else {
         //we set middleware for all environments
-        this.setAppMiddlewaresFunctions.push({
+        this.extendMiddlewaresFunctions.push({
           'path': pathToUse,
           'SettingsFunction': settingsFunctionToUse
         });
@@ -172,12 +166,12 @@ MWC.prototype.setAppMiddlewares = function (environment, path, settingsFunction)
   }
 };
 
-MWC.prototype.extendAppRoutes = function (settingsFunction) {
+MWC.prototype.extendRoutes = function (settingsFunction) {
   if (this.prepared) {
     throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
   } else {
     if (typeof settingsFunction === 'function') {
-      this.setAppRoutesFunctions.push(settingsFunction);
+      this.extendRoutesFunctions.push(settingsFunction);
       return this;
     } else {
       throw new Error('Wrong argument for MWC.extendAppRoutes(function(core){...});');
@@ -204,14 +198,14 @@ MWC.prototype.usePlugin = function (pluginObjectOrName) {
         this.extendModel(x, pluginObjectOrName.extendModel[x]);
       }
     }
-    if (pluginToBeInstalled.setAppParameters) {
-      this.setAppParameters(pluginToBeInstalled.setAppParameters);
+    if (pluginToBeInstalled.extendApp) {
+      this.extendApp(pluginToBeInstalled.extendApp);
     }
-    if (pluginToBeInstalled.setAppMiddlewares) {
-      this.setAppMiddlewares(pluginToBeInstalled.setAppMiddlewares);
+    if (pluginToBeInstalled.extendMiddlewares) {
+      this.extendMiddlewares(pluginToBeInstalled.extendMiddlewares);
     }
-    if (pluginToBeInstalled.extendAppRoutes) {
-      this.extendAppRoutes(pluginToBeInstalled.extendAppRoutes);
+    if (pluginToBeInstalled.extendRoutes) {
+      this.extendRoutes(pluginToBeInstalled.extendRoutes);
     }
     return this;
   }
@@ -278,15 +272,13 @@ MWC.prototype.ready = function () {
     thisMWC.emit('error', err);
   });
   var Users = usersModel(thisMWC.mongoose, thisMWC.config);
-  var Documents = documentsModel(thisMWC.mongoose, thisMWC.config);
 
   thisMWC.MODEL = {
-    'Users': Users,
-    'Documents': Documents
+    'Users': Users
   };
   //doing extendCore
   //extending core by extendCore
-  thisMWC.setCoreFunctions.map(function (settingsFunction) {
+  thisMWC.extendCoreFunctions.map(function (settingsFunction) {
     settingsFunction(thisMWC);
   });
 
@@ -335,7 +327,7 @@ MWC.prototype.ready = function () {
 
   //doing setAppParameters
   //extend vendored application settings
-  thisMWC.setAppParametersFunctions.map(function (func) {
+  thisMWC.extendAppFunctions.map(function (func) {
     if (func.environment) {
       thisMWC.app.configure(func.environment, function () {
         func.settingsFunction(thisMWC);
@@ -363,7 +355,6 @@ MWC.prototype.ready = function () {
   thisMWC.app.use(passport.initialize());
   thisMWC.app.use(passport.session());
 
-  thisMWC.app.use(express.static(path.join(__dirname, 'public')));//static assets, maybe we need to set is as a plugin
 
   //injecting default internals via middleware
   thisMWC.app.use(function (request, response, next) {
@@ -377,7 +368,7 @@ MWC.prototype.ready = function () {
 
   //doing setAppMiddleware
   //extend vendored application middlewares settings
-  thisMWC.setAppMiddlewaresFunctions.map(function (middleware) {
+  thisMWC.extendMiddlewaresFunctions.map(function (middleware) {
     if (middleware.environment) {
 
       thisMWC.app.configure(middleware.environment, function () {
@@ -421,13 +412,9 @@ MWC.prototype.ready = function () {
   //middleware setup finished. adding routes
 
   //doing setAppRoutes
-  thisMWC.setAppRoutesFunctions.map(function (func) {
+  thisMWC.extendRoutesFunctions.map(function (func) {
     func(thisMWC);
   });
-
-  //setting up the default routes
-  usersController(thisMWC.app, thisMWC.config);//restfull api for users
-  documentsController(thisMWC.app, thisMWC.config);//restfull api for documents
 
   //autorize routes for passport
   initPassport.doInitializePassportRoutes(passport, thisMWC.app, thisMWC.config);
@@ -460,6 +447,31 @@ MWC.prototype.listen = function (httpOrHttpsOrPort) {
     this.app.listen(this.app.get('port'));//listening to default port
   }
 };
+
+MWC.prototype.setAppParameters = function(environment, settingsFunction){
+  console.log('setAppParameters is outdated, use extendApp  with the same syntax');
+  this.extendApp(environment, settingsFunction);
+  return this;
+};
+
+MWC.prototype.setAppMiddlewares = function(environment, path, settingsFunctio){
+  console.log('setAppMiddlewares is outdated, use extendMiddlewares with the same syntax');
+  this.extendMiddlewares(environment, path, settingsFunctio);
+  return this;
+};
+
+MWC.prototype.setAppMiddlewares = function(environment, path, settingsFunction){
+  console.log('setAppMiddlewares is outdated, use extendMiddlewares with the same syntax');
+  this.extendMiddlewares(environment, path, settingsFunction);
+  return this;
+};
+
+MWC.prototype.extendAppRoutes = function(settingsFunction){
+  console.log('extendAppRoutes is outdated, use extendRoutes with the same syntax');
+  this.extendRoutes(settingsFunction);
+  return this;
+};
+
 
 process.on('SIGINT', function () {
   //server.close(); //server is instantained somewere else...

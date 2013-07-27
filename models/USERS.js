@@ -21,112 +21,6 @@ module.exports = exports = function (mongoose, config) {
 
   var Schema = mongoose.Schema;
 
-  //group schema, do not exposed by default
-  var GroupSchema = new Schema({
-    name: {type: String, required: true, unique: true, match: /^[a-zA-Z0-9_]+$/ },
-    owner: {type: String, required: true, match: /^[a-zA-Z0-9_]+$/ },
-    members: [
-      {type: String, match: /^[a-zA-Z0-9_]+$/ }
-    ]
-  });
-
-  //GroupSchema.plugin(useTimestamps); //do not works...
-
-  GroupSchema.index({
-    owner: 1,
-    name: 1
-  });
-
-  GroupSchema.methods.isOwner = function (usernameOrUserObject) {
-    var userNameToBeTested = '';
-    if (typeof usernameOrUserObject === 'string') {
-      userNameToBeTested = usernameOrUserObject;
-    } else {
-      if (typeof usernameOrUserObject.username === 'string') {
-        userNameToBeTested = usernameOrUserObject.username;
-      } else {
-        throw new Error('someGroup.isMember(usernameOrUserObject) accepts only Users Mongoose Objects or Strings as argument!');
-      }
-    }
-    return (this.owner === userNameToBeTested);
-  };
-  GroupSchema.methods.isMember = function (usernameOrUserObject) {
-    var userNameToBeTested = '';
-    if (typeof usernameOrUserObject === 'string') {
-      userNameToBeTested = usernameOrUserObject;
-    } else {
-      if (typeof usernameOrUserObject.username === 'string') {
-        userNameToBeTested = usernameOrUserObject.username;
-      } else {
-        throw new Error('someGroup.isMember(usernameOrUserObject) accepts only Users Mongoose Objects or Strings as argument!');
-      }
-    }
-    if (this.owner === userNameToBeTested) {
-      return true;
-    } else {
-      return (this.members.indexOf(userNameToBeTested.username) !== -1);
-    }
-  };
-  GroupSchema.methods.addMember = function (usernameOrUserObject, callback) {
-    var userLoginToBeAdded = '';
-    if (typeof usernameOrUserObject === 'string') {
-      userLoginToBeAdded = usernameOrUserObject;
-    } else {
-      if (typeof usernameOrUserObject.username === 'string') {
-        userLoginToBeAdded = usernameOrUserObject.username;
-      } else {
-        throw new Error('someGroup.isMember(usernameOrUserObject) accepts only Users Mongoose Objects or Strings as argument!');
-      }
-    }
-    if (this.isMember(userLoginToBeAdded)) {
-      callback(new Error('User with login "' + userLoginToBeAdded + '" already is in group of "' + this.name + '"'));
-    } else {
-      this.members.push(userLoginToBeAdded);
-      this.save(callback);
-    }
-    return;
-  };
-  GroupSchema.methods.removeMember = function (usernameOrUserObject, callback) {
-    var userLoginToBeAdded = '';
-    if (typeof usernameOrUserObject === 'string') {
-      userLoginToBeAdded = usernameOrUserObject;
-    } else {
-      if (typeof usernameOrUserObject.username === 'string') {
-        userLoginToBeAdded = usernameOrUserObject.username;
-      } else {
-        throw new Error('someGroup.isMember(usernameOrUserObject) accepts only Users Mongoose Objects or Strings as argument!');
-      }
-    }
-
-    if (this.isMember(userLoginToBeAdded)) {
-      //this.members[indexOfUser]=null; //this is not correct, because
-      //http://stackoverflow.com/questions/500606/javascript-array-delete-elements
-      var indexOfUser = this.members.indexOf(userLoginToBeAdded);
-      this.members.splice(indexOfUser, 1);
-      this.save(callback);
-    } else {
-      callback(new Error('User with login "' + userLoginToBeAdded + '" do not belongs to group of "' + this.name + '"'));
-    }
-    return;
-  };
-  GroupSchema.methods.setOwner = function (usernameOrUserObject, callback) {
-    var userLoginToBeAdded = '';
-    if (typeof usernameOrUserObject === 'string') {
-      userLoginToBeAdded = usernameOrUserObject;
-    } else {
-      if (typeof usernameOrUserObject.username === 'string') {
-        userLoginToBeAdded = usernameOrUserObject.username;
-      } else {
-        throw new Error('someGroup.isMember(usernameOrUserObject) accepts only Users Mongoose Objects or Strings as argument!');
-      }
-    }
-    this.owner = userLoginToBeAdded;
-    this.save(callback);
-    return;
-  };
-
-  //end of group schema
-
 
   var UserSchema = new Schema({
     email: {type: Email, required: true, unique: true},
@@ -134,8 +28,7 @@ module.exports = exports = function (mongoose, config) {
     salt: String,
     password: String,
 
-    groups: [{type: String, match: /^[a-zA-Z0-9_]+$/ }],//user can be part of many groups
-    groupsOwning: [{type: String, match: /^[a-zA-Z0-9_]+$/ }],//user can be owner of many groups
+    roles: [{type: String, match: /^[a-zA-Z0-9_]+$/ }],
 
     apiKey: {type: String, required: false, unique: true, match: /^[a-zA-Z0-9_]*$/ }, //for invalidating sessions by user request, for api interactions...
 
@@ -153,7 +46,8 @@ module.exports = exports = function (mongoose, config) {
   UserSchema.index({
     email: 1,
     username: 1,
-    apiKey: 1
+    apiKey: 1,
+    roles: 1
   });
 //*/todo - re do!
   UserSchema.methods.generateConfirmationLink = function (callback) {
@@ -223,106 +117,29 @@ module.exports = exports = function (mongoose, config) {
     return;
   };
 
-  //group membership check
-  UserSchema.methods.isOwnerOfGroup = function (groupname) {
-    return (this.groupsOwning.indexOf(groupname) !== -1);
-  };
-
-  UserSchema.methods.isMemberOfGroup = function (groupname) {
-    return (this.groups.indexOf(groupname) !== -1);
-  };
-
-  //group managment
-  UserSchema.methods.inviteToGroup = function (groupname, callback) {
-    var thisUser = this;
-
-    if (thisUser.isOwnerOfGroup(groupname)) {
-      callback(new Error('User "' + thisUser.username + '" is an owner of a group "' + groupname + '"'), false);
-      return;
+  //role managmenet
+  UserSchema.methods.grantRole = function (roleName, callback) {
+    if (this.roles.indexOf(roleName) === -1) {
+      this.roles.push(roleName);
+      this.save(callback);
+    } else {
+      callback(new Error('User "' + this.username + '" already have role of "' + roleName + '"'));
     }
-
-    if (thisUser.isMemberOfGroup(groupname)) {
-      callback(new Error('User "' + thisUser.username + '" is a member of a group "' + groupname + '"'), false);
-      return;
+  };
+  UserSchema.methods.hasRole = function (roleName) {
+    return (this.roles.indexOf(roleName) !== -1);
+  };
+  UserSchema.methods.revokeRole = function (roleName, callback) {
+    var roleIndex = this.roles.indexOf(roleName);
+    if (roleIndex === -1) {
+      callback(new Error('User "' + this.username + '" do not have role of "' + roleName + '"'));
+    } else {
+      this.roles.splice(roleIndex, 1);
+      this.save(callback);
     }
-
-    async.waterfall([
-      function (cb) {
-        //do the group exists?
-        Groups.findOne({'name': groupname}, function(err,group){
-          if(err) {
-            cb(err);
-          } else {
-            if(group){
-              cb(null,group);
-            } else {
-              cb(new Error('Group of "'+groupname+'" do not exists!'));
-            }
-          }
-        });
-      },
-      function (groupToAddUser, cb) {
-        groupToAddUser.members.push(thisUser.username);
-        groupToAddUser.save(cb);
-      },
-      function (cb) {
-        thisUser.groups.push(groupname);
-        thisUser.save(cb);
-      }
-    ], callback);
   };
 
-  UserSchema.methods.removeFromGroup = function (groupname, callback) {
-    var thisUser = this;
 
-    if (thisUser.isOwnerOfGroup(groupname)) {
-      callback(new Error('User "' + thisUser.username + '" is an owner of a group "' + groupname + '"'), false);
-      return;
-    }
-
-    if (!thisUser.isMemberOfGroup(groupname)) {
-      callback(new Error('User "' + thisUser.username + '" is NOT a member of a group "' + groupname + '"'), false);
-      return;
-    }
-
-    async.waterfall([
-      function (cb) {
-        //do the group exists?
-        Groups.findOne({'name': groupname}, function(err,group){
-          if(err) {
-            cb(err);
-          } else {
-            if(group){
-              cb(null,group);
-            } else {
-              cb(new Error('Group of "'+groupname+'" do not exists!'));
-            }
-          }
-        });
-      },
-      function (groupToRemoveUserFrom, cb) {
-        var userIndex = groupToRemoveUserFrom.members.indexOf(thisUser.username);
-        groupToRemoveUserFrom.members.splice(userIndex, 1);
-        groupToRemoveUserFrom.save(cb);
-      },
-      function (cb) {
-        var groupIndex = thisUser.groups.indexOf(groupname);
-        thisUser.groups.splice(groupIndex, 1);
-        thisUser.save(cb);
-      }
-    ], callback);
-  };
-
-  //acl, because GROUPS === ACL
-  UserSchema.methods.grant = function(groubname,callback){
-    return this.inviteToGroup(groubname,callback);
-  };
-
-  UserSchema.methods.revoke = function(groubname,callback){
-    return this.removeFromGroup(groubname,callback);
-  };
-
-//fast finders
   UserSchema.statics.findOneByLoginOrEmail = function (loginOrEmail, callback) {
     if (/^[a-zA-Z0-9_]+$/.test(loginOrEmail)) {
       this.findOne({'username': loginOrEmail}, callback);
@@ -330,135 +147,14 @@ module.exports = exports = function (mongoose, config) {
       this.findOne({'email': loginOrEmail}, callback);
     }
   };
+
   UserSchema.statics.findOneByApiKey = function (apiKey, callback) {
     this.findOne({'apiKey': apiKey}, callback);
   };
 
-
-  //for root user only, static UserSchema methods
-  UserSchema.statics.createGroup = function (groupname, ownerName, callback) {
-    var Users = this;
-    async.parallel({
-      'groupCanBeCreated': function (cb) {
-        Groups.findOne({'name': groupname}, function (err, groupFound) {
-          if (err) {
-            cb(err);
-          }
-          if (groupFound) {
-            cb(new Error('Group with name "' + groupname + '" already exists!'), false);
-          } else {
-            cb(null, true);
-          }
-        });
-      },
-      'ownerExists': function (cb) {
-        Users.findOne({'username': ownerName}, function (err, owner) {
-          if (err) {
-            cb(err);
-          }
-          if (owner) {
-            cb(null, owner.username);
-          } else {
-            cb(new Error('User "' + ownerName + '" do not exists!'), false);
-          }
-        });
-      }
-    }, function (err, result) {
-      if (err) {
-        callback(err);
-      }
-      if (result.groupCanBeCreated && result.ownerExists) {
-        Groups.create({'name': groupname, 'owner': result.ownerExists}, callback);
-      } else {
-        callback(new Error('Unable to create group!'));
-      }
-    });
+  UserSchema.statics.getByRole = function (role, callback) {
+    this.find({'roles': [role]}, callback);
   };
 
-  UserSchema.statics.deleteGroup = function (groupname, callback) {
-    var Users = this;
-    Groups.findOne({'name': groupname}, function (err, groupToBeDeleted) {
-      if (groupToBeDeleted) {
-        async.parallel({
-          'groupOwner': function (cb) {
-            Users.findOne({'username': groupToBeDeleted.owner}, cb);
-          },
-          'allGroupMembers': function (cb) {
-            cb(null, groupToBeDeleted.members);
-          },
-          'deletingGroup': function (cb) {
-            groupToBeDeleted.remove(cb);
-          }
-        }, function (err, result) {
-          if (err) {
-            callback(err);
-          } else {
-            async.parallel({
-              'denotingOwner': function (cb) {
-                if (result.groupOwner) {
-                  var groupIndex = result.groupOwner.groupsOwning.indexOf(groupname);
-                  result.groupOwner.groupsOwning.splice(groupIndex, 1);
-                  result.groupOwner.save(cb);
-                } else {
-                  cb(null, true);
-                }
-              },
-              'denotingGroupMembers': function (cb) {
-                async.each(result.allGroupMembers, function (memberName, membersCallback) {
-                  Users.findOne({'name': memberName}, function (err, memberFound) {
-                    if (err) {
-                      membersCallback(err);
-                    }
-                    var groupIndex = memberFound.groups.indexOf(groupname);
-                    memberFound.groups.splice(groupIndex, 1);
-                    memberFound.save(membersCallback);
-                  });
-                }, cb);
-              }
-            }, callback);
-          }
-          return;
-        });
-      } else {
-        callback(new Error('Group of "' + groupname + '" do not exists!'));
-      }
-    });
-  };
-
-  UserSchema.statics.changeOwnershipOfGroup = function (groupname, ownerName, callback) {
-    var Users = this;
-    async.parallel({
-      'group': function (cb) {
-        Groups.findOne({'name': groupname}, cb);
-      },
-      'newOwner': function (cb) {
-        Users.findOne({'username': ownerName}, cb);
-      }
-    }, function (err, result) {
-      if (err) {
-        callback(err);
-      } else {
-        if (result.group && result.newOwner) {
-          result.group.owner = result.newOwner.username;
-          result.group.save(callback);
-        } else {
-          callback(new Error('User of "'+ownerName+'" or group of  "'+groupname+'" do not exists!'));
-        }
-      }
-    });
-  };
-
-  UserSchema.statics.getGroups = function(parameters,callback){
-    if(typeof callback === 'undefined' && typeof parameters === 'function'){
-      Groups.find({},callback);
-    } else {
-      Groups.find(parameters,callback);
-    }
-  };
-  UserSchema.statics.getGroup = function (groupname, callback) {
-    Groups.findOne({'name': groupname}, callback);
-  };
-
-  var Groups = mongoose.model('groups', GroupSchema);
   return mongoose.model('users', UserSchema);
 };

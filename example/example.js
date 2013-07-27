@@ -15,7 +15,7 @@ MWC.extendCore(function (core) {
 });
 
 //set global lever variables for expressJS application
-MWC.setAppParameters(['development', 'staging'], function (core) {
+MWC.extendApp(['development', 'staging'], function (core) {
   core.app.set('TempVar', '42');
 });
 
@@ -33,14 +33,14 @@ MWC.extendModel('Cats', function (mongoose, config) {
 });
 
 //set middleware for development and staging enviroments
-MWC.setAppMiddlewares(['development', 'staging'], function (core) {
+MWC.extendMiddlewares(['development', 'staging'], function (core) {
   return function (req, res, next) {
     res.setHeader('X-Production', 'NO!');
     next();
   };
 });
 //we add some routes
-MWC.extendAppRoutes(
+MWC.extendRoutes(
   function (core) {
     core.app.get('/', function (req, res) {
       var authByGoogleString = (req.user)?'<li><a href="/my">See your profile</a></li>':'<li><a href="/auth/google">Auth by google</a></li>';
@@ -114,9 +114,9 @@ MWC.usePlugin({
     });
     return mongoose.model('dogs', DogsSchema);
   }},
-  'setAppParameters': null, //can be ommited
-  'setAppMiddlewares': null, //can be ommited
-  'extendAppRoutes': function (core) {
+  'extendApp': null, //can be ommited
+  'extendMiddlewares': null, //can be ommited
+  'extendRoutes': function (core) {
     core.app.get('/newPlugin', function (req, res) {
       res.send('New plugin is installed as object');
     });
