@@ -14,25 +14,22 @@ module.exports = function(grunt) {
         options: {
           force: true,
           reporter: 'checkstyle',
-          reporterOutput: 'jshint-result.xml'
+          reporterOutput: 'results/jshint-result.xml'
         },
         src: '<%= jshint.all.src %>'
       }
     },
-    mochacov: {
+    simplemocha: {
+      options: {
+        globals: ['should'],
+        ignoreLeaks: false,
+        ui: 'bdd'
+      },
       all: {
         options: {
-          reporter: 'spec',
-          require: ['should'],
+          reporter: 'spec'
         },
-        src: ['test/**/*.js'],
-      },
-      ci: {
-        options: {
-          reporter: 'html-cov',
-          require: ['should']
-        },
-        src: ['test/**/*.js'],
+        src: [ 'test/**/*.js' ]
       }
     },
     watch: {
@@ -46,10 +43,10 @@ module.exports = function(grunt) {
   // These plugins provide necessary tasks.
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-mocha-cov');
+  grunt.loadNpmTasks('grunt-simple-mocha');
 
   // Tasks
-  grunt.registerTask('test', ['mochacov']);
+  grunt.registerTask('test', ['simplemocha']);
   // Default task.
   grunt.registerTask('default', ['jshint', 'test']);
 

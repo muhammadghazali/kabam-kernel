@@ -4,8 +4,7 @@ var should = require('should'),
   async = require('async'),
   mwcCore = require('./../index.js'),
   events = require('events'),
-  config = require('./../example/config.json').development,
-  blanket = require('blanket');
+  config = require('./../example/config.json').development;
 
 var MWC = new mwcCore(config);
 

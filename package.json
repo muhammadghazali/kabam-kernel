@@ -9,8 +9,7 @@
   },
   "scripts": {
     "start": "node example/example.js",
-    "test": "./node_modules/.bin/mocha --reporter spec",
-    "blanket": { "pattern": ["index.js", "models/**/*.js", "public/**/*.js", "routes/**/*.js"] }
+    "test": "./node_modules/.bin/mocha --reporter spec"
   },
   "repository": {
     "type": "git",
@@ -27,23 +26,22 @@
     "passport-hash": "*",
     "passport-google": "*",
     "passport-github": "*",
-    "passport-twitter":"*",
-    "passport-facebook":"*",
+    "passport-twitter": "*",
+    "passport-facebook": "*",
     "mongoose": "*",
-    "mongoose-types":"*",
+    "mongoose-types": "*",
     "hat": "*",
     "moment": "*",
     "toobusy": "~0.2.3"
   },
   "devDependencies": {
-    "grunt": "~0.4.1",
+    "grunt": "*",
     "grunt-cli": "*",
-    "grunt-contrib-watch": "~0.5.0",
-    "grunt-contrib-jshint": "~0.6.0",
-    "should": "~1.2.2",
-    "mocha": "~1.12.0",
-    "grunt-mocha-cov": "0.0.7",
-    "blanket": "~1.1.5"
+    "grunt-contrib-watch": "*",
+    "grunt-contrib-jshint": "*",
+    "should": "*",
+    "mocha": "*",
+    "grunt-simple-mocha": "*"
   },
   "optionalDependencies": {
     "hiredis": "*"
