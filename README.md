@@ -12,18 +12,18 @@ and some other modules. You can call this function multiple times
 
 2. `extendModel(ModelName,function(mongoose, config){...})` - extend build in mongoose models.
 
-3. `setAppParameters(['development','staging','production','otherEnviroment'],function(core){...})` - set global application parameters, for example
+3. `extendApp(['development','staging','production','otherEnviroment'],function(core){...})` - set global application parameters, for example
 template [engines](http://expressjs.com/api.html#app.engine), 
 [locals](http://expressjs.com/api.html#app.locals) 
 and [other](http://expressjs.com/api.html#app-settings) settings.
 First argument (array of enviroments) is OPTIONAL
 
-4. `setAppMiddlewares(['development','staging','production','otherEnviroment'],'/middlewarePath',function(core){...})` - set application
+4. `extendMiddlewares(['development','staging','production','otherEnviroment'],'/middlewarePath',function(core){...})` - set application
 [middleware](http://expressjs.com/api.html#middleware).
 This function can be executed multiple times, the middlewares applied are used in application in *order* they were issued by this function.
 First argument (array of enviroments), and the second one (the path where to use middleware, the default is "/") are OPTIONAL
 
-5. `extendAppRoutes(function(core){...})` - add custom routes to application
+5. `extendRoutes(function(core){...})` - add custom routes to application
 
 6. `loadPlugin("mwc_plugin_foo")` or `loadPlugin(pluginObj)` - load plugin as object or as a installed [npm](https://npmjs.org/) plugin by name
 See [Plugin creating manual](https://github.com/mywebclass/mwc_core#plugin-creating-manual) for details
@@ -63,7 +63,7 @@ Example
     });
 
     //set global lever variables for expressJS application
-    MWC.setAppParameters(['development', 'staging'], function (core) {
+    MWC.extendApp(['development', 'staging'], function (core) {
       core.app.set('TempVar', '42');
     });
 
@@ -81,14 +81,14 @@ Example
     });
 
     //set middleware for development and staging enviroments
-    MWC.setAppMiddlewares(['development', 'staging'], function (core) {
+    MWC.extendMiddlewares(['development', 'staging'], function (core) {
       return function (req, res, next) {
         res.setHeader('X-Production', 'NO!');
         next();
       };
     });
     //we add some routes
-    MWC.extendAppRoutes(
+    MWC.extendRoutes(
       function (core) {
         core.app.get('/', function (req, res) {
           var authByGoogleString = (req.user)?'<li><a href="/my">See your profile</a></li>':'<li><a href="/auth/google">Auth by google</a></li>';
@@ -162,9 +162,9 @@ Example
         });
         return mongoose.model('dogs', DogsSchema);
       }},
-      'setAppParameters': null, //can be ommited
-      'setAppMiddlewares': null, //can be ommited
-      'extendAppRoutes': function (core) {
+      'extendApp': null, //can be ommited
+      'extendMiddlewares': null, //can be ommited
+      'extendRoutes': function (core) {
         core.app.get('/newPlugin', function (req, res) {
           res.send('New plugin is installed as object');
         });
@@ -337,8 +337,8 @@ Plugin creating manual
 This is typicale plugin code. It is placed there
 [https://github.com/mywebclass/mwc_plugin_example](https://github.com/mywebclass/mwc_plugin_example)
 
-*Important* - when you create plugin, the `setAppParameters`, `setAppMiddlewares` APPLIES to all enviroments!
-Furthemore, `setAppMiddlewares` binds to route '/'
+*Important* - when you create plugin, the `extendApp`, `extendMiddlewares` APPLIES to all enviroments!
+Furthemore, `extendMiddlewares` binds to route '/'
 
 ```javascript
 
@@ -351,18 +351,18 @@ Furthemore, `setAppMiddlewares` binds to route '/'
         },5000);
     };
 
-    exports.setAppParameters = function(core){
+    exports.extendApp = function(core){
 	core.app.set('var1',"42");
     };
 
-    exports.setAppMiddlewares=function(core){
+    exports.extendMiddlewares=function(core){
         return function(request, response, next) {
                 response.setHeader('X-MWC-PLUGIN_EXAMPLE!','THIS ROCKS!');
                 next();
             }
     };
 
-    exports.extendAppRoutes = function(core){
+    exports.extendRoutes = function(core){
         core.app.get('/time',function(request,response){
             response.send('Current time is '+(new Date().toLocaleString()));
         });
@@ -447,14 +447,14 @@ When you call `extendModel(ModelName,function(mongoose, config){...})` you get a
 `extendCore(function(core){...})`.
 
 
-When you call `setAppParameters(function(core){...})`, you can set global application parameters, for example
+When you call `extendApp(function(core){...})`, you can set global application parameters, for example
 template [engines](http://expressjs.com/api.html#app.engine), [locals](http://expressjs.com/api.html#app.locals)
 and [other](http://expressjs.com/api.html#app-settings) settings.
 In code it is called [after settng logging middleware and port](https://github.com/mywebclass/mwc_core/blob/master/index.js#L236).
 You can set any application parameter you want, you have full MWC core internalls at your disposal  
 `MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.MODEL.Users`, `MWC.MODEL.Documents` and custom models from calling `extendModel`.
 
-When you call `setAppMiddlewares(function(core){...})`, you can set app middlewares.
+When you call `extendMiddlewares(function(core){...})`, you can set app middlewares.
 They are [called]((https://github.com/mywebclass/mwc_core/blob/master/index.js#L283) after
 [setting default exposed internals middleware](https://github.com/mywebclass/mwc_core/blob/master/index.js#L271) and before
 [setting error handlers middlewares](https://github.com/mywebclass/mwc_core/blob/master/index.js#L283).
@@ -464,7 +464,7 @@ and exposed internals middleware - where expressJS object of request have functi
 `request.MODEL`,`request.MODEL.Users`,`request.MODEL.Documents`, custom models,`request.MODEL.redisClient`, and `request.user` provided
 by passportjs middleware.
 
-When you call `extendAppRoutes(function(core){})`, you can set the application routes and verbs for them.
+When you call `extendRoutes(function(core){})`, you can set the application routes and verbs for them.
 This is done after defining [router middleware]((https://github.com/mywebclass/mwc_core/blob/master/index.js#L307) )
 (the one that bind nodejs functions to URIs) and before the
 [setting up the default routes for Users and documents](https://github.com/mywebclass/mwc_core/blob/master/index.js#L313)

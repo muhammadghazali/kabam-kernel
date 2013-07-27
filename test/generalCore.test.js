@@ -53,9 +53,9 @@ var extendAppParametersFunction3 = function (core) {
   core.app.set('TempVar3', 'TempVar3');
 };
 
-MWC.setAppParameters(['development', 'staging'], extendAppParametersFunction1);
-MWC.setAppParameters('development', extendAppParametersFunction2);
-MWC.setAppParameters('production', extendAppParametersFunction3);
+MWC.extendApp(['development', 'staging'], extendAppParametersFunction1);
+MWC.extendApp('development', extendAppParametersFunction2);
+MWC.extendApp('production', extendAppParametersFunction3);
 /*
  * Extending middlewares
  */
@@ -87,22 +87,22 @@ var extendAppMiddlewareFunction4=function(core){
   };
 };
 
-MWC.setAppMiddlewares(extendAppMiddlewareFunction1);
-MWC.setAppMiddlewares('staging',extendAppMiddlewareFunction2);
-MWC.setAppMiddlewares(['staging','production'],extendAppMiddlewareFunction3);
-MWC.setAppMiddlewares(['development'],'/middleware3Path',extendAppMiddlewareFunction3);
-MWC.setAppMiddlewares('development','/middleware4Path',extendAppMiddlewareFunction4);
+MWC.extendMiddlewares(extendAppMiddlewareFunction1);
+MWC.extendMiddlewares('staging',extendAppMiddlewareFunction2);
+MWC.extendMiddlewares(['staging','production'],extendAppMiddlewareFunction3);
+MWC.extendMiddlewares(['development'],'/middleware3Path',extendAppMiddlewareFunction3);
+MWC.extendMiddlewares('development','/middleware4Path',extendAppMiddlewareFunction4);
 
 /* Adding custom routes
  *
  */
 
-var extendAppRoutesFunction = function (core){
+var extendRoutesFunction = function (core){
   core.app.get('/someRoute',function (req,res){
     res.send('HI');
   });
 };
-MWC.extendAppRoutes(extendAppRoutesFunction);
+MWC.extendRoutes(extendRoutesFunction);
 
 //load plugin as an object
 
@@ -123,7 +123,7 @@ var extendAppMiddlewareFunctionPlugin = function (core){
   };
 };
 
-var extendAppRoutesFunctionPlugin = function (core) {
+var extendRoutesFunctionPlugin = function (core) {
   core.app.get('/newPlugin', function (req, res) {
     res.send('New plugin is installed as object');
   });
@@ -142,9 +142,9 @@ var extendModelFunctionPlugin = function (mongoose, config) {
 MWC.usePlugin({
   'extendCore': extendCoreFunctionPlugin,
   'extendModel':{'Dogs':extendModelFunctionPlugin},
-  'setAppParameters': extendAppParametersFunctionPlugin,
-  'setAppMiddlewares': extendAppMiddlewareFunctionPlugin,
-  'extendAppRoutes': extendAppRoutesFunctionPlugin
+  'extendApp': extendAppParametersFunctionPlugin,
+  'extendMiddlewares': extendAppMiddlewareFunctionPlugin,
+  'extendRoutes': extendRoutesFunctionPlugin
 });
 
 
@@ -175,10 +175,6 @@ describe('mwcCore', function() {
       MWC.MODEL.Users.should.be.a('function');
     });
 
-    it('exposes mongoose model of documents', function() {
-      MWC.MODEL.Documents.should.be.a('function');
-    });
-
     it('exposes an ExpressJS application', function() {
       MWC.app.should.be.a('function');
       MWC.app.get('port').should.equal(3000);
@@ -198,19 +194,19 @@ describe('mwcCore', function() {
       }).should.throw('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
 
       (function() {
-        MWC.setAppParameters(['development', 'staging'], function() {
+        MWC.extendApp(['development', 'staging'], function() {
           throw new Error('Core app parameters were extended for READIED application!');
         });
       }).should.throw('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
 
       (function() {
-        MWC.setAppMiddlewares(['development', 'staging'], function() {
+        MWC.extendMiddlewares(['development', 'staging'], function() {
           throw new Error('Core app middlewares were extended for READIED application!');
         });
       }).should.throw('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
 
       (function() {
-        MWC.extendAppRoutes(function() {
+        MWC.extendRoutes(function() {
           throw new Error('Core app routes were extended for READIED application!');
         });
       }).should.throw('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
@@ -281,19 +277,9 @@ describe('mwcCore', function() {
     it('exposes function create',function(){
       MWC.MODEL.Users.create.should.be.a('function');
     });
-    it('exposes function createGroup',function(){
-      MWC.MODEL.Users.createGroup.should.be.a('function');
+    it('exposes function getByRole',function(){
+      MWC.MODEL.Users.getByRole.should.be.a('function');
     });
-    it('exposes function deleteGroup',function(){
-      MWC.MODEL.Users.deleteGroup.should.be.a('function');
-    });
-    it('exposes function changeOwnershipOfGroup',function(){
-      MWC.MODEL.Users.changeOwnershipOfGroup.should.be.a('function');
-    });
-    it('exposes function getGroup',function(){
-      MWC.MODEL.Users.getGroup.should.be.a('function');
-    });
-
   });
   describe('Testing mwc_core mongoose model of users finders',function(){
     var usersFound;
@@ -349,119 +335,6 @@ describe('mwcCore', function() {
       usersFound.created.remove(done);
     });
   });
-  describe('Testing mwc_core mongoose model of users group managment', function () {
-    describe('createGroup', function () {
-
-      var user, group;
-      before(function (done) {
-        MWC.MODEL.Users.create({
-          'username': 'testSubject47',
-          'email': 'ostroumov6@teksi.ru',
-          'apiKey':'lalala1'
-        }, function (err, userCreated) {
-          if (err) {
-            throw err;
-          }
-          user = userCreated;
-          MWC.MODEL.Users.createGroup('gosduma', userCreated.username, function (err, groupCreated) {
-            group = groupCreated;
-            done();
-          });
-        });
-      });
-
-      it('creates a group with owner needed',function(){
-        group.owner.should.equal('testSubject47');
-        group.name.should.equal('gosduma');
-        group.members.should.be.an.instanceOf(Array);
-        group.members.length.should.equal(0);
-      });
-
-      after(function (done) {
-        async.waterfall([
-          function(cb){
-            user.remove(cb);
-          },
-          function(cb){
-            MWC.MODEL.Users.deleteGroup(group.name,cb);
-          }
-        ],function(err,after){
-          if(err) throw err;
-          done();
-        });
-      });
-    });
-/*/
-    describe('changeGroupOwnership', function () {
-      var user1, user2, groupBefore,groupAfter;
-      before(function (done) {
-        async.parallel({
-          'user1': function (cb) {
-            MWC.MODEL.Users.create({
-              'username': 'testSubject47',
-              'email': 'ostroumov1@teksi.ru',
-              'apiKey':'lalala'
-            }, cb);
-          },
-          'user2': function (cb) {
-            MWC.MODEL.Users.create({
-              'username': 'testSubject47_aaa',
-              'email': 'ostroumov2@teksi.ru',
-              'apiKey':'lalala1'
-            }, cb);
-          }}, function (err, usersCreated) {
-          if (err) {
-            throw err;
-          } else {
-            if(usersCreated.user1 && usersCreated.user2){
-              user1=usersCreated.user1;
-              user2=usersCreated.user2;
-              MWC.MODEL.Users.createGroup('gosduma',user1.username,function(err2,group){
-                if(err2) throw err2;
-                groupBefore=group;
-                MWC.MODEL.Users.changeOwnershipOfGroup('gosduma',user2.username,function(err3){
-                  if(err3) throw err3;
-                  MWC.MODEL.Users.getGroup('gosduma',function(err4,group2){
-                    if(err4) throw err4;
-                    groupAfter=group2;
-                    done();
-                  });
-                });
-              });
-            } else {
-              throw new Error('Unable to create users!');
-            }
-          }
-        });
-      });
-
-      it('creates the group with desired parameters',function(){
-        groupBefore.name.should.be.equal('gosduma');
-        groupBefore.owner.should.be.equal('testSubject47');
-      });
-
-      it('changes the group owner', function(){
-        groupAfter.name.should.be.equal('gosduma');
-        groupAfter.owner.should.be.equal('testSubject47_aaa');
-      });
-
-      after(function(done){
-        async.parallel({
-          'deletingUser1':function(cb){
-            user1.remove(cb);
-          },
-          'deletingUser2':function(cb){
-            user2.remove(cb);
-          },
-          'deletingGroup':function(cb){
-            groupBefore.remove(cb);
-          }
-        },done);
-      });
-    });
-//*/
-  });
-
   describe('Testing mwc_core mongoose model one instance of user:', function () {
     describe('general function are callable', function () {
       var user;
@@ -484,11 +357,11 @@ describe('mwcCore', function() {
         user.verifyPassword.should.be.a('function');
         user.setPassword.should.be.a('function');
         user.invalidateSession.should.be.a('function');
-        user.isOwnerOfGroup.should.be.a('function');
-        user.isMemberOfGroup.should.be.a('function');
-        user.inviteToGroup.should.be.a('function');
-        user.isMemberOfGroup.should.be.a('function');
-        user.removeFromGroup.should.be.a('function');
+
+        user.grantRole.should.be.a('function');
+        user.hasRole.should.be.a('function');
+        user.revokeRole.should.be.a('function');
+
         user.getGravatar.should.be.a('function');
       });
 
@@ -569,62 +442,82 @@ describe('mwcCore', function() {
         user.remove(done)
       });
     });
+    describe('functions hasRole',function(){
+      var user;
+      before(function(done){
+        MWC.MODEL.Users.create({
+          'username': 'test888',
+          'email': 'ostroumov@teksi.ru',
+          'apiKey':'lalala1',
+          'roles':'role1'
+        }, function (err, userCreated) {
+          if (err) {
+            throw err;
+          }
+          user = userCreated;
+          done();
+        });
+      });
 
-    describe('functions of inviteToGroup,isMemberOfGroup,removeFromGroup',function(){
-//      var user,
-//        isMember,
-//        isNotMember,
-//        Users=MWC.MODEL.Users;
-//
-//      before(function(done){
-//        Users.create({
-//          'username': 'testSubject47',
-//          'email': 'ostroumov@teksi.ru'
-//        }, function (err, userCreated) {
-//          if(err) throw err;
-//          user=userCreated;
-//          userCreated.inviteToGroup('gosduma', function(err1){
-//            if(err1) throw err1;
-//            Users.findOne({'username':'testSubject47'},function(err2,userFound){
-//              if(err2) throw err2;
-//              isMember=userFound.isMemberOfGroup('gosduma');
-//              userFound.removeFromGroup('gosduma',function(err3){
-//                if(err3) throw err3;
-//                Users.findOne({'username':'testSubject47'},function(err4,userFound2){
-//                  if(err4) throw err4;
-//                  isMember=userFound2.isMemberOfGroup('gosduma');
-//                  done();
-//                });
-//              });
-//            });
-//          });
-//        });
-//      });
-//
-//      it('isMemberOfGroup returns TRUE if user is in group',function(){
-//        isMember.should.equal(true);
-//      });
-//
-//      it('isMemberOfGroup returns FALSE if user is NOT in group',function(){
-//        isNotMember.should.equal(false);
-//      });
-//
-//      after(function (done) {
-//        user.remove(done)
-//      });
-      it('to be redone',function(){
-        throw new Error('fails and need to be done')
+      it('returns true if role assigned',function(){
+        user.hasRole('role1').should.be.true;
+      });
+
+      it('returns false if role is not assigned',function(){
+        user.hasRole('role2').should.be.false;
+      });
+      after(function(done){
+        user.remove(done);
       });
     });
-  });
-  describe('Testing mwc_core mongoose model of documents', function() {
+    /*/
+    describe('functions grantRole, revokeRole',function(){
+      var userWithRole,userWithoutRole;
+      before(function(done){
+        async.waterfall(
+          [
+            function(cb){
+              MWC.MODEL.Users.create({
+                'username': 'test888',
+                'email': 'ostroumov@teksi.ru',
+                'apiKey':'lalala1',
+                'roles':'role1'
+              },cb);
+            },
+            function(userCreated,cb){
+              userCreated.grantRole('role2',cb);
+            },
+            function(cb){
+              MWC.MODEL.Users.findOneByLoginOrEmail('test888',cb);
+            },
+            function(userFound,cb){
+              userWithRole=userFound;
+              userFound.revokeRole('role2',cb);
+            },
+            function(cb){
+              MWC.MODEL.Users.findOneByLoginOrEmail('test888',cb);
+            },
+            function(userFound,cb){
+              userWithoutRole=userFound;
+              cb();
+            }
+          ],done);
+      });
 
-    it('to be created', function() {
-      throw new Error('Not implemented');
+      it('grantRole assigned role',function(){
+        userWithRole.hasRole('role2').should.be.true;
+      });
+
+      it('revokeRole assigned role',function(){
+        userWithoutRole.hasRole('role2').should.be.false;
+      });
+
+      after(function(done){
+        userWithoutRole.remove(done);
+      });
     });
-
+    //*/
   });
-
   describe('Testing mwc_core express application', function() {
     it('it exposes a #MWC.app object',function(){
       MWC.app.should.be.a('function');
@@ -634,8 +527,8 @@ describe('mwcCore', function() {
   describe('#MWC.extendCore()', function() {
 
     it('adds the extending core function to array of MWC.setCoreFunctions', function() {
-      MWC.setCoreFunctions.should.be.an.instanceOf(Array);
-      MWC.setCoreFunctions.should.include(extendCoreFunction);
+      MWC.extendCoreFunctions.should.be.an.instanceOf(Array);
+      MWC.extendCoreFunctions.should.include(extendCoreFunction);
     });
 
     it('actually adds new functions to #MWC',function(){
@@ -670,24 +563,24 @@ describe('mwcCore', function() {
     });
   });
 
-  describe('#MWC.setAppParameters()',function(){
-    it('adds the desired functions to MWC.setAppParametersFunctions',function(){
+  describe('#MWC.extendApp()',function(){
+    it('adds the desired functions to MWC.extendAppFunctions',function(){
       if(typeof process.env.NODE_ENV !== 'undefined'){
         process.env.NODE_ENV.should.be.equal('development');
       }
-      MWC.setAppParametersFunctions.should.be.an.instanceOf(Array);
+      MWC.extendAppFunctions.should.be.an.instanceOf(Array);
     });
     it('it set extendAppParametersFunction1 to development environment',function(){
-      MWC.setAppParametersFunctions.should.includeEql({'environment':'development', 'settingsFunction':extendAppParametersFunction1});
+      MWC.extendAppFunctions.should.includeEql({'environment':'development', 'settingsFunction':extendAppParametersFunction1});
     });
     it('it set extendAppParametersFunction1 to staging environment',function(){
-      MWC.setAppParametersFunctions.should.includeEql({'environment':'staging',     'settingsFunction':extendAppParametersFunction1});
+      MWC.extendAppFunctions.should.includeEql({'environment':'staging',     'settingsFunction':extendAppParametersFunction1});
     });
     it('it set extendAppParametersFunction2 to development environment',function(){
-      MWC.setAppParametersFunctions.should.includeEql({'environment':'development', 'settingsFunction':extendAppParametersFunction2});
+      MWC.extendAppFunctions.should.includeEql({'environment':'development', 'settingsFunction':extendAppParametersFunction2});
     });
     it('it set extendAppParametersFunction3 to production environment',function(){
-      MWC.setAppParametersFunctions.should.includeEql({'environment':'production',  'settingsFunction':extendAppParametersFunction3});
+      MWC.extendAppFunctions.should.includeEql({'environment':'production',  'settingsFunction':extendAppParametersFunction3});
     });
 
     it('actually works',function(){
@@ -699,32 +592,31 @@ describe('mwcCore', function() {
     });
   });
 
-
-  describe('#MWC.setAppMiddlewares()', function() {
-    it('adds the desired functions to MWC.setAppMiddlewaresFunctions',function(){
+  describe('#MWC.extendMiddlewares()', function() {
+    it('adds the desired functions to MWC.extendMiddlewaresFunctions',function(){
       if(typeof process.env.NODE_ENV !== 'undefined'){
         process.env.NODE_ENV.should.be.equal('development');
       }
-      MWC.setAppMiddlewaresFunctions.should.be.an.instanceOf(Array);
+      MWC.extendMiddlewaresFunctions.should.be.an.instanceOf(Array);
     });
 
     it('it set extendAppMiddlewareFunction1 to all environments and path /',function(){
-      MWC.setAppMiddlewaresFunctions.should.includeEql({'path':'/', 'SettingsFunction':extendAppMiddlewareFunction1});
+      MWC.extendMiddlewaresFunctions.should.includeEql({'path':'/', 'SettingsFunction':extendAppMiddlewareFunction1});
     });
     it('it set extendAppParametersFunction2 to staging environment',function(){
-      MWC.setAppMiddlewaresFunctions.should.includeEql({'path':'/', environment:'staging','SettingsFunction':extendAppMiddlewareFunction2});
+      MWC.extendMiddlewaresFunctions.should.includeEql({'path':'/', environment:'staging','SettingsFunction':extendAppMiddlewareFunction2});
     });
     it('it set extendAppParametersFunction3 to staging environment',function(){
-      MWC.setAppMiddlewaresFunctions.should.includeEql({'path':'/', environment:'staging', 'SettingsFunction':extendAppMiddlewareFunction3});
+      MWC.extendMiddlewaresFunctions.should.includeEql({'path':'/', environment:'staging', 'SettingsFunction':extendAppMiddlewareFunction3});
     });
     it('it set extendAppParametersFunction3 to production environment',function(){
-      MWC.setAppMiddlewaresFunctions.should.includeEql({'path':'/', environment:'production', 'SettingsFunction':extendAppMiddlewareFunction3});
+      MWC.extendMiddlewaresFunctions.should.includeEql({'path':'/', environment:'production', 'SettingsFunction':extendAppMiddlewareFunction3});
     });
     it('it set extendAppMiddlewareFunction3 to development environment and path /middleware3Path',function(){
-      MWC.setAppMiddlewaresFunctions.should.includeEql({'path':'/middleware3Path', environment:'development', 'SettingsFunction':extendAppMiddlewareFunction3});
+      MWC.extendMiddlewaresFunctions.should.includeEql({'path':'/middleware3Path', environment:'development', 'SettingsFunction':extendAppMiddlewareFunction3});
     });
     it('it set extendAppMiddlewareFunction4 to development environment and path /middleware4Path',function(){
-      MWC.setAppMiddlewaresFunctions.should.includeEql({environment:'development','path':'/middleware4Path', 'SettingsFunction':extendAppMiddlewareFunction4});
+      MWC.extendMiddlewaresFunctions.should.includeEql({environment:'development','path':'/middleware4Path', 'SettingsFunction':extendAppMiddlewareFunction4});
     });
 
     describe('it actually works',function(){
@@ -746,21 +638,21 @@ describe('mwcCore', function() {
         response.headers['x-powered-by'].should.be.equal('Express');
       });
 
-      it('this application have headers needed by #MWC.appSetMiddlewares',function(){
+      it('this application have headers needed by #MWC.extendMiddlewares',function(){
         response.headers['middleware1'].should.be.equal('middleware1');
         response.headers['middleware3'].should.be.equal('middleware3');
       });
     });
   });
 
-  describe('#MWC.extendAppRoutes()', function() {
+  describe('#MWC.extendRoutes()', function() {
 
     it('adds the desired functions to MWC.setAppRoutesFunctions',function(){
       if(typeof process.env.NODE_ENV !== 'undefined'){
         process.env.NODE_ENV.should.be.equal('development');
       }
-      MWC.setAppRoutesFunctions.should.be.an.instanceOf(Array);
-      MWC.setAppRoutesFunctions.should.includeEql(extendAppRoutesFunction);
+      MWC.extendRoutesFunctions.should.be.an.instanceOf(Array);
+      MWC.extendRoutesFunctions.should.includeEql(extendRoutesFunction);
     });
 
     describe('it actually works',function(){
@@ -783,7 +675,7 @@ describe('mwcCore', function() {
         response.headers['x-powered-by'].should.be.equal('Express');
       });
 
-      it('this application have headers needed by #MWC.appSetMiddlewares',function(){
+      it('this application have headers needed by #MWC.extendMiddlewares',function(){
         response.headers['middleware1'].should.be.equal('middleware1');
         response.headers['extendappmiddlewarefunctionplugin'].should.be.equal('OK');
       });
@@ -794,8 +686,8 @@ describe('mwcCore', function() {
 
     describe('extendCore from plugin', function () {
       it('it adds the extending core function to array of #MWC.setCoreFunctions', function () {
-        MWC.setCoreFunctions.should.be.an.instanceOf(Array);
-        MWC.setCoreFunctions.should.include(extendCoreFunctionPlugin);
+        MWC.extendCoreFunctions.should.be.an.instanceOf(Array);
+        MWC.extendCoreFunctions.should.include(extendCoreFunctionPlugin);
       });
 
       it('it actually adds new functions to #MWC.core', function () {
@@ -830,17 +722,17 @@ describe('mwcCore', function() {
       });
     });
 
-    describe('setAppParameters from plugin', function () {
+    describe('extendApp from plugin', function () {
 
-      it('it adds the desired functions to #MWC.setAppParametersFunctions', function () {
+      it('it adds the desired functions to #MWC.extendAppFunctions', function () {
         if (typeof process.env.NODE_ENV !== 'undefined') {
           process.env.NODE_ENV.should.be.equal('development');
         }
-        MWC.setAppParametersFunctions.should.be.an.instanceOf(Array);
+        MWC.extendAppFunctions.should.be.an.instanceOf(Array);
       });
 
       it('it set extendAppParametersFunctionPlugin to all environments', function () {
-        MWC.setAppParametersFunctions.should.includeEql({'settingsFunction': extendAppParametersFunctionPlugin});
+        MWC.extendAppFunctions.should.includeEql({'settingsFunction': extendAppParametersFunctionPlugin});
       });
 
       it('it works', function () {
@@ -848,16 +740,16 @@ describe('mwcCore', function() {
       });
     });
 
-    describe('setAppMiddlewares from plugin',function() {
-      it('adds the desired functions to MWC.setAppMiddlewaresFunctions',function(){
+    describe('extendMiddlewares from plugin',function() {
+      it('adds the desired functions to MWC.extendMiddlewaresFunctions',function(){
         if(typeof process.env.NODE_ENV !== 'undefined'){
           process.env.NODE_ENV.should.be.equal('development');
         }
-        MWC.setAppMiddlewaresFunctions.should.be.an.instanceOf(Array);
+        MWC.extendMiddlewaresFunctions.should.be.an.instanceOf(Array);
       });
 
       it('it set extendAppMiddlewareFunctionPlugin to all environments and path "/"',function(){
-        MWC.setAppMiddlewaresFunctions.should.includeEql({'path':'/', 'SettingsFunction':extendAppMiddlewareFunctionPlugin});
+        MWC.extendMiddlewaresFunctions.should.includeEql({'path':'/', 'SettingsFunction':extendAppMiddlewareFunctionPlugin});
       });
 
       describe('it actually works',function(){
@@ -880,21 +772,21 @@ describe('mwcCore', function() {
           response.headers['x-powered-by'].should.be.equal('Express');
         });
 
-        it('this  application have headers needed by #MWC.appSetMiddlewares',function(){
+        it('this  application have headers needed by #MWC.extendMiddlewares',function(){
           response.headers['middleware1'].should.be.equal('middleware1');
           response.headers['extendappmiddlewarefunctionplugin'].should.be.equal('OK');
         });
       });
     });
 
-    describe('extendAppRoutes from plugin',function(){
+    describe('extendRoutes from plugin',function(){
 
       it('adds the desired functions to MWC.setAppRoutesFunctions',function(){
         if(typeof process.env.NODE_ENV !== 'undefined'){
           process.env.NODE_ENV.should.be.equal('development');
         }
-        MWC.setAppRoutesFunctions.should.be.an.instanceOf(Array);
-        MWC.setAppRoutesFunctions.should.includeEql(extendAppRoutesFunctionPlugin);
+        MWC.extendRoutesFunctions.should.be.an.instanceOf(Array);
+        MWC.extendRoutesFunctions.should.includeEql(extendRoutesFunctionPlugin);
       });
 
       describe('it actually works',function(){
@@ -916,7 +808,7 @@ describe('mwcCore', function() {
           response.headers['x-powered-by'].should.be.equal('Express');
         });
 
-        it('this application have headers needed by #MWC.appSetMiddlewares',function(){
+        it('this application have headers needed by #MWC.extendMiddlewares',function(){
           response.headers['middleware1'].should.be.equal('middleware1');
           response.headers['extendappmiddlewarefunctionplugin'].should.be.equal('OK');
         });
@@ -928,14 +820,6 @@ describe('mwcCore', function() {
       });
 
     });
-  });
-
-  describe('#MWC.usePlugin(pluginName)', function() {
-
-    it('to be created', function() {
-      throw new Error('Not implemented');
-    });
-
   });
 
   describe('#MWC.listen(portNumber)', function() {
@@ -958,12 +842,12 @@ describe('mwcCore', function() {
       response.headers['x-powered-by'].should.be.equal('Express');
     });
 
-    it('this application have headers needed by #MWC.appSetMiddlewares',function(){
+    it('this application have headers needed by #MWC.extendMiddlewares',function(){
       response.headers['middleware1'].should.be.equal('middleware1');
       response.headers['extendappmiddlewarefunctionplugin'].should.be.equal('OK');
     });
   });
-
+/*/
   describe('#MWC.listen(http)', function() {
 
     it('to be created', function() {
@@ -979,5 +863,5 @@ describe('mwcCore', function() {
     });
 
   });
-
+//*/
 });
