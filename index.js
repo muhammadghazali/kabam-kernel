@@ -370,6 +370,9 @@ MWC.prototype.ready = function () {
 
   //injecting default internals via middleware
   thisMWC.app.use(function (request, response, next) {
+    if(request.session && request.session._csrf){
+      thisMWC.app.locals.csrf = request.session._csrf;
+    }
     request.MODEL = thisMWC.MODEL;
     request.redisClient = thisMWC.redisClient;
     request.emitMWC = function (eventName, eventContent) {
