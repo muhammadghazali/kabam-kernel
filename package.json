@@ -1,6 +1,6 @@
 {
   "name": "mwc_core",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "MyWebClass core node.js application to be extended by loaded automatically middleware plugins",
   "main": "index.js",
   "engines": {
