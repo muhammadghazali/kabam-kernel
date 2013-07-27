@@ -3,9 +3,8 @@ var async = require('async'),
   rack = hat.rack(),
   crypto = require('crypto'),
   moment = require('moment'),
-  mongooseTypes = require("mongoose-types"), //https://github.com/bnoguchi/mongoose-types
-  useTimestamps = mongooseTypes.useTimestamps;
-
+  mongooseTypes = require('mongoose-types'); //https://github.com/bnoguchi/mongoose-types
+//useTimestamps = mongooseTypes.useTimestamps;
 
 
 function sha512(str) {
@@ -16,17 +15,6 @@ function md5(str) {
   return crypto.createHash('md5').update(str).digest('hex').toString();
 }
 
-
-function in_array(what, where) {
-  var len = where.length;
-  for (var i = 0; i < len; i++) {
-    if (what == where[i]) {
-      return true;
-    }
-  }
-  return false;
-}
-
 module.exports = exports = function (mongoose, config) {
   mongooseTypes.loadTypes(mongoose);
   var Email = mongoose.SchemaTypes.Email;
@@ -35,9 +23,11 @@ module.exports = exports = function (mongoose, config) {
 
   //group schema, do not exposed by default
   var GroupSchema = new Schema({
-    owner: String,
-    name: String,
-    members: [String]
+    name: {type: String, required: true, unique: true, match: /^[a-zA-Z0-9_]+$/ },
+    owner: {type: String, required: true, match: /^[a-zA-Z0-9_]+$/ },
+    members: [
+      {type: String, match: /^[a-zA-Z0-9_]+$/ }
+    ]
   });
 
   //GroupSchema.plugin(useTimestamps); //do not works...
@@ -74,7 +64,7 @@ module.exports = exports = function (mongoose, config) {
     if (this.owner === userNameToBeTested) {
       return true;
     } else {
-      return in_array(userNameToBeTested.username, this.members);
+      return (this.members.indexOf(userNameToBeTested.username) !== -1);
     }
   };
   GroupSchema.methods.addMember = function (usernameOrUserObject, callback) {
@@ -139,60 +129,24 @@ module.exports = exports = function (mongoose, config) {
 
 
   var UserSchema = new Schema({
-    email: Email,
-    username: String,
+    email: {type: Email, required: true, unique: true},
+    username: {type: String, required: true, unique: true, match: /^[a-zA-Z0-9_]+$/ },
     salt: String,
     password: String,
 
-    groups: [String],//user can be part of many groups
-    groupsOwning: [String],//user can be owner of many groups
+    groups: [{type: String, match: /^[a-zA-Z0-9_]+$/ }],//user can be part of many groups
+    groupsOwning: [{type: String, match: /^[a-zA-Z0-9_]+$/ }],//user can be owner of many groups
 
-    apiKey: String, //for invalidating sessions by user request, for api interactions...
+    apiKey: {type: String, required: false, unique: true, match: /^[a-zA-Z0-9_]*$/ }, //for invalidating sessions by user request, for api interactions...
 
     active: Boolean,
     root: Boolean,
 
-    activeDate:Date,
-    confirmation:{
-      string:String,
-      date:Date
+    activeDate: Date,
+    confirmation: {
+      string: String,
+      date: Date
     }
-
-    /*/
-     accounts: [
-     {
-     provider: String,
-     id: String,
-     displayName: String,
-     name: {
-     familyName: String,
-     givenName: String,
-     middleName: String
-     },
-     emails: [
-     {
-     value: String,
-     type: {
-     type: String
-     }
-     }
-     ],
-     phoneNumbers: [
-     {
-     value: String,
-     type: {
-     type: String
-     }
-     }
-     ],
-     photos: [
-     {
-     value: String
-     }
-     ]
-     }
-     ],
-     //*/
   });
   //UserSchema.plugin(useTimestamps);//do not works! add createdAt, and updatedAt attributes
 
@@ -201,7 +155,7 @@ module.exports = exports = function (mongoose, config) {
     username: 1,
     apiKey: 1
   });
-//*/
+//*/todo - re do!
   UserSchema.methods.generateConfirmationLink = function (callback) {
     this.confirmation.string = rack();
     this.confirmation.date = new Date();
@@ -234,20 +188,27 @@ module.exports = exports = function (mongoose, config) {
 //*/
 
 
-  UserSchema.methods.getGravatar=function (s,d,r) {
+  UserSchema.methods.getGravatar = function (s, d, r) {
     //https://ru.gravatar.com/site/implement/images/
     //s - image size
     //d - 404,mm,identicon,monsterid,wavatar,retro,blank - style
     //r - g,pg,r,x - rating
-    if(!s) s=300;
-    if(!d) d='wavatar';
-    if(!r) r='g';
-    return 'https://secure.gravatar.com/avatar/'+md5(this.email.toLowerCase().trim())+'.jpg?s='+s+'&d='+d+'&r='+r;
+    if (!s) {
+      s = 300;
+    }
+    if (!d) {
+      d = 'wavatar';
+    }
+    if (!r) {
+      r = 'g';
+    }
+    return 'https://secure.gravatar.com/avatar/' + md5(this.email.toLowerCase().trim()) + '.jpg?s=' + s + '&d=' + d + '&r=' + r;
   };
 
   UserSchema.methods.verifyPassword = function (password) {
-    return sha512('' + this.salt + password) === this.password;
+    return (sha512('' + this.salt + password) === this.password);
   };
+
   UserSchema.methods.setPassword = function (newPassword, callback) {
     var salt = sha512(rack());
     this.salt = salt;
@@ -260,14 +221,15 @@ module.exports = exports = function (mongoose, config) {
     this.apiKey = rack();
     this.save(callback);
     return;
-  }
+  };
 
   //group membership check
   UserSchema.methods.isOwnerOfGroup = function (groupname) {
-    return !(this.groupsOwning.indexOf(groupname) === -1);
+    return (this.groupsOwning.indexOf(groupname) !== -1);
   };
+
   UserSchema.methods.isMemberOfGroup = function (groupname) {
-    return !(this.groups.indexOf(groupname) === -1);
+    return (this.groups.indexOf(groupname) !== -1);
   };
 
   //group managment
@@ -306,7 +268,7 @@ module.exports = exports = function (mongoose, config) {
         thisUser.groups.push(groupname);
         thisUser.save(cb);
       }
-    ], callback)
+    ], callback);
   };
 
   UserSchema.methods.removeFromGroup = function (groupname, callback) {
@@ -344,12 +306,12 @@ module.exports = exports = function (mongoose, config) {
         thisUser.groups.splice(groupIndex, 1);
         thisUser.save(cb);
       }
-    ], callback)
+    ], callback);
   };
 
   //for root user only, static UserSchema methods
   UserSchema.statics.createGroup = function (groupname, ownerName, callback) {
-    var Users=this;
+    var Users = this;
     async.parallel({
       'groupCanBeCreated': function (cb) {
         Groups.findOne({'name': groupname}, function (err, groupFound) {
@@ -387,16 +349,16 @@ module.exports = exports = function (mongoose, config) {
     });
   };
 
-  UserSchema.statics.findOneByLoginOrEmail = function(loginOrEmail,callback){
-    if(/^[a-zA-Z0-9_]+$/.test(loginOrEmail)){
-      this.findOne({'username':loginOrEmail},callback);
+  UserSchema.statics.findOneByLoginOrEmail = function (loginOrEmail, callback) {
+    if (/^[a-zA-Z0-9_]+$/.test(loginOrEmail)) {
+      this.findOne({'username': loginOrEmail}, callback);
     } else {
-      this.findOne({'email':loginOrEmail},callback);
+      this.findOne({'email': loginOrEmail}, callback);
     }
   };
 
-  UserSchema.statics.findOneByApiKey = function(apiKey,callback){
-    this.findOne({'apiKey':apiKey},callback);
+  UserSchema.statics.findOneByApiKey = function (apiKey, callback) {
+    this.findOne({'apiKey': apiKey}, callback);
   };
 
 
@@ -415,32 +377,32 @@ module.exports = exports = function (mongoose, config) {
             groupToBeDeleted.remove(cb);
           }
         }, function (err, result) {
-          if(err) {
+          if (err) {
             callback(err);
           } else {
-          async.parallel({
-            'denotingOwner': function (cb) {
-              if(result.groupOwner){
-                var groupIndex = result.groupOwner.groupsOwning.indexOf(groupname);
-                result.groupOwner.groupsOwning.splice(groupIndex, 1);
-                result.groupOwner.save(cb);
-              } else {
-                cb(null,true);
+            async.parallel({
+              'denotingOwner': function (cb) {
+                if (result.groupOwner) {
+                  var groupIndex = result.groupOwner.groupsOwning.indexOf(groupname);
+                  result.groupOwner.groupsOwning.splice(groupIndex, 1);
+                  result.groupOwner.save(cb);
+                } else {
+                  cb(null, true);
+                }
+              },
+              'denotingGroupMembers': function (cb) {
+                async.each(result.allGroupMembers, function (memberName, membersCallback) {
+                  Users.findOne({'name': memberName}, function (err, memberFound) {
+                    if (err) {
+                      membersCallback(err);
+                    }
+                    var groupIndex = memberFound.groups.indexOf(groupname);
+                    memberFound.groups.splice(groupIndex, 1);
+                    memberFound.save(membersCallback);
+                  });
+                }, cb);
               }
-            },
-            'denotingGroupMembers': function (cb) {
-              async.each(result.allGroupMembers, function (memberName, membersCallback) {
-                Users.findOne({'name': memberName}, function (err, memberFound) {
-                  if (err) {
-                    membersCallback(err);
-                  }
-                  var groupIndex = memberFound.groups.indexOf(groupname);
-                  memberFound.groups.splice(groupIndex, 1);
-                  memberFound.save(membersCallback);
-                });
-              }, cb);
-            }
-          }, callback);
+            }, callback);
           }
           return;
         });
@@ -465,9 +427,17 @@ module.exports = exports = function (mongoose, config) {
     });
   };
 
-  UserSchema.statics.getGroup = function(groupname,callback){
+  UserSchema.statics.getGroups = function(parameters,callback){
+    if(typeof callback === 'undefined' && typeof parameters === 'function'){
+      Groups.find({},callback);
+    } else {
+      Groups.find(parameters,callback);
+    }
+  };
+  UserSchema.statics.getGroup = function (groupname, callback) {
     Groups.findOne({'name': groupname}, callback);
   };
-  var Groups=mongoose.model('groups', GroupSchema);
+
+  var Groups = mongoose.model('groups', GroupSchema);
   return mongoose.model('users', UserSchema);
 };

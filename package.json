@@ -32,7 +32,7 @@
     "mongoose-types": "*",
     "hat": "*",
     "moment": "*",
-    "toobusy": "~0.2.3"
+    "toobusy": "*"
   },
   "devDependencies": {
     "grunt": "*",
@@ -41,7 +41,8 @@
     "grunt-contrib-jshint": "*",
     "should": "*",
     "mocha": "*",
-    "grunt-simple-mocha": "*"
+    "grunt-simple-mocha": "*",
+    "request":"*"
   },
   "optionalDependencies": {
     "hiredis": "*"

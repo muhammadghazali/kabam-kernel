@@ -19,8 +19,8 @@ var EventEmitter = require('events').EventEmitter,
 
 //session storage
   RedisStore = require('connect-redis')(express),
-  //todo
-  //https://hacks.mozilla.org/2012/12/using-secure-client-side-sessions-to-build-simple-and-scalable-node-js-applications-a-node-js-holiday-season-part-3/
+//todo
+//https://hacks.mozilla.org/2012/12/using-secure-client-side-sessions-to-build-simple-and-scalable-node-js-applications-a-node-js-holiday-season-part-3/
 
 
   flashMiddleware = require('connect-flash'),
@@ -48,24 +48,24 @@ MWC.prototype.extendCore = function (settingsFunction) {
   if (this.prepared) {
     throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
   } else {
-    if(typeof settingsFunction === 'function'){
-    this.setCoreFunctions.push(settingsFunction);
-    return this;
-    }  else {
+    if (typeof settingsFunction === 'function') {
+      this.setCoreFunctions.push(settingsFunction);
+      return this;
+    } else {
       throw new Error('MWC.extendCore requires argument of function(core){...}');
     }
   }
 };
 
-MWC.prototype.extendModel = function(modelName,modelFunction){
-  if(modelName === 'Users' || modelName === 'Documents'){
+MWC.prototype.extendModel = function (modelName, modelFunction) {
+  if (modelName === 'Users' || modelName === 'Documents') {
     throw new Error('Error extending model, "Users" and "Documents" are reserved names');
   } else {
-    if(typeof modelName === 'string' && typeof modelFunction === 'function'){
-    this.additionalModels.push({'name':modelName,'initFunction':modelFunction});
-    return this;
-    }  else {
-      throw new Error('MWC.extendModel requires arguments of string of modelName and function(core){...}');
+    if (typeof modelName === 'string' && typeof modelFunction === 'function') {
+      this.additionalModels.push({'name': modelName, 'initFunction': modelFunction});
+      return this;
+    } else {
+      throw new Error('MWC.extendModel requires arguments of string of "modelName" and function(core){...}');
     }
   }
 };
@@ -76,8 +76,8 @@ MWC.prototype.setAppParameters = function (environment, settingsFunction) {
   } else {
     var environmentToUse = null;
     if (typeof settingsFunction === 'undefined') {
-        settingsFunction = environment;
-        environment = null;
+      settingsFunction = environment;
+      environment = null;
     }
     if (typeof environment === 'string') {
       environmentToUse = [];
@@ -85,20 +85,25 @@ MWC.prototype.setAppParameters = function (environment, settingsFunction) {
     }
     if (environment instanceof Array) {
       environmentToUse = environment;
+      for (var i = 0; i < environment.length;i++){
+        if(typeof environment[i] !== 'string'){
+          throw new Error('#MWC.setAppParameters requires environment name to be a string!');
+        }
+      }
     }
-    if(typeof settingsFunction === 'function'){
-        if (environmentToUse) {
-          for (var i = 0; i < environmentToUse.length; i++) {
-            this.setAppParametersFunctions.push({
-              'environment': environmentToUse[i],
-              'settingsFunction': settingsFunction
-            });
-          }
-        } else {
+    if (typeof settingsFunction === 'function') {
+      if (environmentToUse) {
+        for (var i = 0; i < environmentToUse.length; i++) {
           this.setAppParametersFunctions.push({
+            'environment': environmentToUse[i],
             'settingsFunction': settingsFunction
           });
         }
+      } else {
+        this.setAppParametersFunctions.push({
+          'settingsFunction': settingsFunction
+        });
+      }
     } else {
       throw new Error('Wrong arguments for setAppParameters');
     }
@@ -114,52 +119,54 @@ MWC.prototype.setAppMiddlewares = function (environment, path, settingsFunction)
       pathToUse = '/',
       settingsFunctionToUse = null;
 
-    if(typeof environment === 'function'
-           && typeof path ==='undefined'
-           && typeof settingsFunction ==='undefined'){
-        settingsFunctionToUse=environment;
+    if (typeof environment === 'function' && typeof path === 'undefined' && typeof settingsFunction === 'undefined') {
+      settingsFunctionToUse = environment;
     }
 
-    if (typeof environment === 'string' ||  environment instanceof Array) {
+    if (typeof environment === 'string' || environment instanceof Array) {
 
-        if (typeof environment === 'string') {
-          environmentToUse = [];
-          environmentToUse.push(environment);
-        }
-        if (environment instanceof Array) {
-          environmentToUse = environment;
-        }
-
-        if(typeof path === 'string' && /^\//.test(path)){
-          pathToUse=path;
-          if(typeof settingsFunction === 'function'){
-            settingsFunctionToUse=settingsFunction;
+      if (typeof environment === 'string') {
+        environmentToUse = [];
+        environmentToUse.push(environment);
+      }
+      if (environment instanceof Array) {
+        environmentToUse = environment;
+        for (var i = 0; i < environment.length;i++){
+          if(typeof environment[i] !== 'string'){
+            throw new Error('#MWC.setAppParameters requires environment name to be a string!');
           }
-        } else{
-            if(typeof path === 'function'){
-              settingsFunctionToUse=path;
-            }
         }
+      }
+      if (typeof path === 'string' && /^\//.test(path)) {
+        pathToUse = path;
+        if (typeof settingsFunction === 'function') {
+          settingsFunctionToUse = settingsFunction;
+        }
+      } else {
+        if (typeof path === 'function') {
+          settingsFunctionToUse = path;
+        }
+      }
     }
 
-    if(settingsFunctionToUse){
+    if (settingsFunctionToUse) {
       if (environmentToUse) {
         for (var i = 0; i < environmentToUse.length; i++) {
           this.setAppMiddlewaresFunctions.push({
             'environment': environmentToUse[i],
-            'path' : pathToUse,
+            'path': pathToUse,
             'SettingsFunction': settingsFunctionToUse
           });
         }
       } else {
-        //we set middleware fol all environments
+        //we set middleware for all environments
         this.setAppMiddlewaresFunctions.push({
-          'path' : pathToUse,
+          'path': pathToUse,
           'SettingsFunction': settingsFunctionToUse
         });
       }
     } else {
-      throw new Error('Wrong arguments for function MWC.setAppMiddlware([enviromentArrayOrString],[path],settingsFunction(core){...})');
+      throw new Error('Wrong arguments for function MWC.setAppMiddlware(environmentArrayOrStrings, [path], settingsFunction(core){...})');
     }
     return this;
   }
@@ -169,7 +176,7 @@ MWC.prototype.extendAppRoutes = function (settingsFunction) {
   if (this.prepared) {
     throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
   } else {
-    if(typeof settingsFunction === 'function'){
+    if (typeof settingsFunction === 'function') {
       this.setAppRoutesFunctions.push(settingsFunction);
       return this;
     } else {
@@ -192,9 +199,9 @@ MWC.prototype.usePlugin = function (pluginObjectOrName) {
     if (pluginToBeInstalled.extendCore) {
       this.extendCore(pluginToBeInstalled.extendCore);
     }
-    if(pluginToBeInstalled.extendModel && typeof pluginToBeInstalled.extendModel === 'object'){
-      for(var x in pluginToBeInstalled.extendModel){
-        this.extendModel(x,pluginObjectOrName.extendModel[x]);
+    if (pluginToBeInstalled.extendModel && typeof pluginToBeInstalled.extendModel === 'object') {
+      for (var x in pluginToBeInstalled.extendModel) {
+        this.extendModel(x, pluginObjectOrName.extendModel[x]);
       }
     }
     if (pluginToBeInstalled.setAppParameters) {
@@ -211,20 +218,53 @@ MWC.prototype.usePlugin = function (pluginObjectOrName) {
 };
 
 MWC.prototype.ready = function () {
-  var thisMWC = this;
+  var thisMWC = this;//because we sometimes issue closures with thisMWC
   thisMWC.prepared = true;
 
   //injecting redis
   if (thisMWC.config.redis) {
-    thisMWC.redisClient = redis.createClient(thisMWC.config.redis.port, thisMWC.config.redis.host);
+    if (typeof thisMWC.config.redis === 'object') {
+      if (thisMWC.config.redis.port && !(/^[0-9]+$/.test(thisMWC.config.redis.port))) {
+        throw new Error('Config variable of redis has bad value for PORT. Proper values are ' +
+          '{"port":6379,"host":"localhost","auth":"someSecretPassword"} ' +
+          'or "redis://usernameIgnored:someSecretPassword@redis.example.org:6739"');
+      }
+      thisMWC.redisClient = redis.createClient(thisMWC.config.redis.port, thisMWC.config.redis.host);
+      if (typeof thisMWC.config.redis.auth === 'string') {
+        thisMWC.redisClient.auth(thisMWC.config.redis.auth);
+      }
+    } else {
+      if (typeof thisMWC.config.redis === 'string') {
+        var redisConfigUrlParsed = url.parse(thisMWC.config.redis);
+        if (redisConfigUrlParsed) {
+          thisMWC.redisClient = redis.createClient(redisConfigUrlParsed.port, redisConfigUrlParsed.hostname);
+          if (redisConfigUrlParsed.auth && redisConfigUrlParsed.auth.split(':')[1]) {
+            thisMWC.redisClient.auth(redisConfigUrlParsed.auth.split(':')[1]);
+          }
+        } else {
+          throw new Error('Config variable of redis has bad value. Proper values are ' +
+            '{"port":6379,"host":"localhost","auth":"someSecretPassword"} ' +
+            'or "redis://usernameIgnored:someSecretPassword@redis.example.org:6739"');
+        }
+      } else {
+        throw new Error('Config variable of redis has bad value. Proper values are ' +
+          '{"port":6379,"host":"localhost","auth":"someSecretPassword"} ' +
+          'or "redis://usernameIgnored:someSecretPassword@redis.example.org:6739"');
+      }
+    }
   } else {
+    //redis is NOT configured, we use default properties
     thisMWC.redisClient = redis.createClient();
   }
-  //injecting default mongoose databases
-  if(!thisMWC.config.mongoUrl){
+  //sanity check for mongoUrl
+  if (!thisMWC.config.mongoUrl) {
     throw new Error('Config variable of mongoURL is missed!');
   }
-  thisMWC.mongoose = mongoose.connect(thisMWC.config.mongoUrl);
+  if(!url.parse(thisMWC.config.mongoUrl)){
+    throw new Error('Config variable of mongoURL have wrong syntax. Good one is mongodb://username:somePassword@localhost:10053/mwc_dev');
+  }
+  //injecting default mongoose databases
+  thisMWC.mongoose = mongoose.connect(thisMWC.config.mongoUrl,{server: { poolSize: 3 }});
   var db = thisMWC.mongoose.connection;
   db.on('connect', function (err) {
     if (err) {
@@ -251,8 +291,8 @@ MWC.prototype.ready = function () {
   });
 
   //loading custom models
-  thisMWC.additionalModels.map(function(customModel){
-    thisMWC.MODEL[customModel.name] = customModel.initFunction(thisMWC.mongoose,thisMWC.config);
+  thisMWC.additionalModels.map(function (customModel) {
+    thisMWC.MODEL[customModel.name] = customModel.initFunction(thisMWC.mongoose, thisMWC.config);
   });
 
   //setting passport
@@ -282,7 +322,7 @@ MWC.prototype.ready = function () {
     console.log('Staging environment!');
     thisMWC.app.locals.staging = true;
     thisMWC.app.use(express.responseTime());
-    thisMWC.app.enable('view cache');s
+    thisMWC.app.enable('view cache');
     thisMWC.app.use(express.logger('dev'));
   });
 
@@ -301,7 +341,7 @@ MWC.prototype.ready = function () {
         func.settingsFunction(thisMWC);
       });
     } else {
-      if(func && func.settingsFunction){
+      if (func && func.settingsFunction) {
         func.settingsFunction(thisMWC);
       }
     }
@@ -341,12 +381,12 @@ MWC.prototype.ready = function () {
     if (middleware.environment) {
 
       thisMWC.app.configure(middleware.environment, function () {
-        thisMWC.app.use( ((middleware.path)?(middleware.path):'/'), middleware.SettingsFunction(thisMWC));
+        thisMWC.app.use(((middleware.path) ? (middleware.path) : '/'), middleware.SettingsFunction(thisMWC));
       });
 
     } else {
 
-      thisMWC.app.use( ((middleware.path)?(middleware.path):'/'), middleware.SettingsFunction(thisMWC));
+      thisMWC.app.use(((middleware.path) ? (middleware.path) : '/'), middleware.SettingsFunction(thisMWC));
 
     }
   });
@@ -361,7 +401,7 @@ MWC.prototype.ready = function () {
     thisMWC.app.use(express.errorHandler());
   });
 
-  thisMWC.app.configure('staging',function(){
+  thisMWC.app.configure('staging', function () {
     thisMWC.app.use(function (err, req, res, next) {
       thisMWC.emit('error', err);
       res.status(503);
@@ -387,14 +427,7 @@ MWC.prototype.ready = function () {
 
   //setting up the default routes
   usersController(thisMWC.app, thisMWC.config);//restfull api for users
-  documentsController(thisMWC.app, thisMWC.config);//restfull api for users
-
-  thisMWC.app.configure('development', function () {
-    //default route to show plugins installed
-    thisMWC.app.get('/plugins', function (request, response) {
-      response.json(thisMWC.plugins);
-    });
-  });
+  documentsController(thisMWC.app, thisMWC.config);//restfull api for documents
 
   //autorize routes for passport
   initPassport.doInitializePassportRoutes(passport, thisMWC.app, thisMWC.config);
@@ -425,23 +458,6 @@ MWC.prototype.listen = function (httpOrHttpsOrPort) {
     throw new Error('Function MWC.listen(httpOrHttpsOrPort) accepts objects of null, http, https or port\'s number as argument!');
   } else {
     this.app.listen(this.app.get('port'));//listening to default port
-  }
-};
-
-//transfer to separate pluggin...
-MWC.prototype.populateDatabase = function (data) {
-  console.log('Populating the database');
-  if (data.users && data.users instanceof Array) {
-    console.log(data.users);
-    for (var i = 0; i < data.users.length; i++) {//todo - get some rest and make it via async.parallel - Anatolij
-      console.log(data.users[i]);
-      this.MODEL.Users.create(data.users[i], function (err, userSaved) {
-        if (err) {
-          throw err;
-        }
-        console.log(userSaved);
-      });
-    }
   }
 };
 
