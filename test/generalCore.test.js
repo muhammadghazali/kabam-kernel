@@ -470,7 +470,7 @@ describe('mwcCore', function() {
         user.remove(done);
       });
     });
-    //*/
+    /*/
     describe('functions grantRole, revokeRole',function(){
       var userWithRole,userWithoutRole;
       before(function(done){
