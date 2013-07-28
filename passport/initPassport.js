@@ -251,7 +251,7 @@ exports.doInitializePassportRoutes = function (passport, app, config) {
     });
 
 
-  app.post('/logoff', function (request, response) {
+  app.post('/auth/logout', function (request, response) {
     request.logout();
     response.send(200, 'OK');
   });
