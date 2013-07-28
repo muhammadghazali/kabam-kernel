@@ -179,5 +179,32 @@ module.exports = exports = function (core) {
     this.find({'roles': [role]}, callback);
   };
 
+  //register new user
+  UserSchema.statics.signUp = function(username,email,password,callback){
+    this.create({
+      'username':username,
+      'email':email,
+      'apiKey':rack(),
+      'active':false,
+      'root':false,
+      'confirmation':{
+        'string':rack(),
+        'date': new Date()
+      }
+    },function(err,userCreated){
+      if(err) {
+        callback(err);
+      } else {
+        userCreated.setPassword(password,function(err1){
+          if(err1){
+            callback(err1);
+          } else {
+            callback(null,userCreated);
+          }
+        });
+      }
+    });
+  };
+
   return mongoose.model('users', UserSchema);
 };

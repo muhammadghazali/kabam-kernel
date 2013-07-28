@@ -277,64 +277,105 @@ describe('mwcCore', function() {
     it('exposes function create',function(){
       MWC.MODEL.Users.create.should.be.a('function');
     });
+
     it('exposes function getByRole',function(){
       MWC.MODEL.Users.getByRole.should.be.a('function');
     });
-  });
-  describe('Testing mwc_core mongoose model of users finders',function(){
-    var usersFound;
-    before(function (done) {
-      MWC.MODEL.Users.create({
-        'username': 'testSubject47111',
-        'email': 'ostroumov4@teksi.ru',
-        'apiKey': 'vseBydetHorosho'
-      }, function (err, userCreated) {
-        if (err) {
-          throw err;
-        }
-        async.parallel({
-          'byLogin':function(cb){
-            MWC.MODEL.Users.findOneByLoginOrEmail('testSubject47111',cb);
-          },
-          'byEmail':function(cb){
-            MWC.MODEL.Users.findOneByLoginOrEmail('ostroumov4@teksi.ru',cb);
-          },
-          'byApiKey':function(cb){
-            MWC.MODEL.Users.findOneByApiKey('vseBydetHorosho',cb);
-          },
-          'created':function(cb){
-            cb(null,userCreated);
+
+    it('exposes function signUp',function(){
+      MWC.MODEL.Users.signUp.should.be.a('function');
+    });
+
+    describe('finders',function(){
+      var usersFound;
+      before(function (done) {
+        MWC.MODEL.Users.create({
+          'username': 'testSubject47111',
+          'email': 'ostroumov4@teksi.ru',
+          'apiKey': 'vseBydetHorosho'
+        }, function (err, userCreated) {
+          if (err) {
+            throw err;
           }
-        },function(err,res){
-          if(err) throw err;
-          usersFound=res;
-          done();
+          async.parallel({
+            'byLogin':function(cb){
+              MWC.MODEL.Users.findOneByLoginOrEmail('testSubject47111',cb);
+            },
+            'byEmail':function(cb){
+              MWC.MODEL.Users.findOneByLoginOrEmail('ostroumov4@teksi.ru',cb);
+            },
+            'byApiKey':function(cb){
+              MWC.MODEL.Users.findOneByApiKey('vseBydetHorosho',cb);
+            },
+            'created':function(cb){
+              cb(null,userCreated);
+            }
+          },function(err,res){
+            if(err) throw err;
+            usersFound=res;
+            done();
+          });
         });
+      });
+
+      it('we created correct user to be sure',function(){
+        usersFound.created.username.should.be.equal('testSubject47111');
+        usersFound.created.email.should.be.equal('ostroumov4@teksi.ru');
+        usersFound.created.apiKey.should.be.equal('vseBydetHorosho');
+      });
+
+      it('findOneByLoginOrEmail works for login',function(){
+        usersFound.created._id.should.eql(usersFound.byLogin._id);
+      });
+
+      it('findOneByLoginOrEmail works for Email',function(){
+        usersFound.created._id.should.eql(usersFound.byEmail._id);
+      });
+
+      it('findOneByApiKey works',function(){
+        usersFound.created._id.should.eql(usersFound.byApiKey._id);
+      });
+
+      after(function (done) {
+        usersFound.created.remove(done);
       });
     });
 
-    it('we created correct user to be sure',function(){
-      usersFound.created.username.should.be.equal('testSubject47111');
-      usersFound.created.email.should.be.equal('ostroumov4@teksi.ru');
-      usersFound.created.apiKey.should.be.equal('vseBydetHorosho');
-    });
+    describe('signUp',function(){
+      var user;
+      before(function(done){
+        MWC.MODEL.Users.signUp('johndoe','johndoe@example.org','waterfall',function(err,userCreated){
+          if(err) throw err;
+          user=userCreated;
+          done();
+        });
+      });
+      it('creates user with desired username',function(){
+        user.username.should.be.equal('johndoe');
+      });
+      it('creates user with desired email',function(){
+        user.email.should.be.equal('johndoe@example.org');
+      });
+      it('creates user with desired password',function(){
+        user.verifyPassword('waterfall').should.be.true;
+        user.verifyPassword('fiflesAndFuffles').should.be.false;
+      });
+      it('creates user with apiKey present',function(){
+        user.apiKey.length.should.be.above(5);
+      });
+      it('creates user unactivated',function(){
+        user.active.should.be.false;
+      });
+      it('creates user ordinary user, not root',function(){
+        user.root.should.be.false;
+      });
 
-    it('findOneByLoginOrEmail works for login',function(){
-      usersFound.created._id.should.eql(usersFound.byLogin._id);
-    });
-
-    it('findOneByLoginOrEmail works for Email',function(){
-      usersFound.created._id.should.eql(usersFound.byEmail._id);
-    });
-
-    it('findOneByApiKey works',function(){
-      usersFound.created._id.should.eql(usersFound.byApiKey._id);
-    });
-
-    after(function (done) {
-      usersFound.created.remove(done);
+      after(function (done) {
+        user.remove(done)
+      });
     });
   });
+
   describe('Testing mwc_core mongoose model one instance of user:', function () {
     describe('general function are callable', function () {
       var user;
@@ -592,6 +633,7 @@ describe('mwcCore', function() {
       });
     });
   });
+
   describe('Testing mwc_core express application', function() {
     it('it exposes a #MWC.app object',function(){
       MWC.app.should.be.a('function');
