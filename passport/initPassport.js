@@ -6,7 +6,8 @@ var async = require('async'),
   GoogleStrategy = require('passport-google').Strategy,
   GitHubStrategy = require('passport-github').Strategy,
   TwitterStrategy = require('passport-twitter').Strategy,
-  FacebookStrategy = require('passport-facebook').Strategy;
+  FacebookStrategy = require('passport-facebook').Strategy,
+  LinkedInStrategy = require('passport-linkedin').Strategy;
 
 
 exports.doInitializePassportStrategies = function (passport, Users, config) {
@@ -102,6 +103,17 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
       }));
   }
 
+  if (config.passport && config.passport.LINKEDIN_API_KEY && config.passport.LINKEDIN_SECRET_KEY) {
+    passport.use(new LinkedInStrategy({
+        consumerKey: config.passport.LINKEDIN_API_KEY,
+        consumerSecret: config.passport.LINKEDIN_SECRET_KEY,
+        callbackURL: config.hostUrl + 'auth/linkedin/callback'
+      },
+      function (token, tokenSecret, profile, done) {
+        return processProfile(profile, done);
+      }
+    ));
+  }
   //end of initializing passport strategies
 
   //Storing user in session, storage key is username
@@ -225,6 +237,15 @@ exports.doInitializePassportRoutes = function (passport, app, config) {
     app.get('/auth/facebook/callback', passport.authenticate('facebook', { successRedirect: '/', failureRedirect: '/' }));
   }
 
+  if (config.passport && config.passport.LINKEDIN_API_KEY && config.passport.LINKEDIN_SECRET_KEY) {
+    app.get('/auth/linkedin',passport.authenticate('linkedin'),function(req, res){});
+    app.get('/auth/linkedin/callback',passport.authenticate('linkedin', { failureRedirect: '/' }),
+      function(req, res) {
+        res.redirect('/');
+      });
+  }
+
+  //acount confirmation by link in email
   app.get('/confirm/:hash',
     passport.authenticate('hash', { failureRedirect: '/' }),
     function(req, res) {
