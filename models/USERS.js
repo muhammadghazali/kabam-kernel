@@ -15,7 +15,9 @@ function md5(str) {
   return crypto.createHash('md5').update(str).digest('hex').toString();
 }
 
-module.exports = exports = function (mongoose, config) {
+module.exports = exports = function (core) {
+  var mongoose = core.mongoose;
+  var config = core.config;
   mongooseTypes.loadTypes(mongoose);
   var Email = mongoose.SchemaTypes.Email;
 
@@ -139,7 +141,24 @@ module.exports = exports = function (mongoose, config) {
     }
   };
 
+  //notify
+  UserSchema.methods.notify=function(message){
+    if(typeof message === 'string'){
+      core.emit('notify',{
+        'user':this,
+        'type':'text',
+        'message':message
+      });
+    } else {
+      core.emit('notify',{
+        'user':this,
+        'type': (message.type)?(message.type):'text',
+        'message':message
+      });
+    }
+  };
 
+  //finders
   UserSchema.statics.findOneByLoginOrEmail = function (loginOrEmail, callback) {
     if (/^[a-zA-Z0-9_]+$/.test(loginOrEmail)) {
       this.findOne({'username': loginOrEmail}, callback);

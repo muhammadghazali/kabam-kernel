@@ -362,6 +362,8 @@ describe('mwcCore', function() {
         user.hasRole.should.be.a('function');
         user.revokeRole.should.be.a('function');
 
+        user.notify.should.be.a('function');
+
         user.getGravatar.should.be.a('function');
       });
 
@@ -554,7 +556,41 @@ describe('mwcCore', function() {
       });
     });
 
+    describe('testing user notify',function(){
+      var user,
+        messageObj;
+      before(function(done){
+        MWC.MODEL.Users.create({
+          'username': 'test888',
+          'email': 'ostroumov@teksi.ru',
+          'apiKey':'lalala1',
+        }, function (err, userCreated) {
+          if (err) {
+            throw err;
+          }
+          user = userCreated;
 
+          setTimeout(function(){
+            user.notify('Hello!');
+          },300);
+
+          MWC.on('notify',function(message){
+            messageObj=message;
+            done();
+          });
+        });
+      });
+
+      it('makes mwc core emit events with message created properly',function(){
+        messageObj.type.should.be.equal('text');
+        messageObj.user.should.eql(user);
+        messageObj.message.should.be.equal('Hello!');
+      });
+
+      after(function(done){
+        user.remove(done);
+      });
+    });
   });
   describe('Testing mwc_core express application', function() {
     it('it exposes a #MWC.app object',function(){

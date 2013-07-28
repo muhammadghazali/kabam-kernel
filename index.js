@@ -284,7 +284,7 @@ MWC.prototype.ready = function () {
   db.on('error', function (err) {
     thisMWC.emit('error', err);
   });
-  var Users = usersModel(thisMWC.mongoose, thisMWC.config);
+  var Users = usersModel(thisMWC);
 
   thisMWC.MODEL = {
     'Users': Users
@@ -295,7 +295,7 @@ MWC.prototype.ready = function () {
     settingsFunction(thisMWC);
   });
 
-  //loading custom models
+  //loading custom models //todo - maybe redo
   thisMWC.additionalModels.map(function (customModel) {
     thisMWC.MODEL[customModel.name] = customModel.initFunction(thisMWC.mongoose, thisMWC.config);
   });
