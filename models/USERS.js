@@ -129,7 +129,11 @@ module.exports = exports = function (core) {
     }
   };
   UserSchema.methods.hasRole = function (roleName) {
-    return (this.roles.indexOf(roleName) !== -1);
+    if(this.root){
+      return true;
+    } else {
+      return (this.roles.indexOf(roleName) !== -1);
+    }
   };
   UserSchema.methods.revokeRole = function (roleName, callback) {
     var roleIndex = this.roles.indexOf(roleName);
