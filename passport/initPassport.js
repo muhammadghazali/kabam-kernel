@@ -1,4 +1,7 @@
-var LocalStrategy = require('passport-local').Strategy,
+var async = require('async'),
+  hat = require('hat'),
+  rack = hat.rack(),
+  LocalStrategy = require('passport-local').Strategy,
   HashStrategy = require('passport-hash').Strategy,
   GoogleStrategy = require('passport-google').Strategy,
   GitHubStrategy = require('passport-github').Strategy,
@@ -136,10 +139,87 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
 }
 exports.doInitializePassportRoutes = function (passport, app, config) {
 
+  //registration by username, password and email
+  //todo - implement the https://npmjs.org/packages/captcha
+  app.post('/auth/signup',function(request,response){
+    async.waterfall(
+      [
+        function (cb) {
+          request.MODEL.Users.create({
+            'username': request.body.username,
+            'email': request.body.email,
+            'apiKey': rack(),
+            'confirmation':{
+              'string':rack(),
+              'date': new Date()
+            }
+          }, function (err, userCreated) {
+            cb(err, userCreated);
+          });
+        },
+        function (userCreatedReadyForSettingPassword, cb) {
+          userCreatedReadyForSettingPassword.setPassword(request.params.password, function (err) {
+            cb(err,userCreatedReadyForSettingPassword);
+          });
+        },
+        function (userToNeNotified,cb){
+          //to be implemented
+          //userToNeNotified.notify()
+          cb(null, true)
+        }
+      ], function (err, result) {
+        if(err) throw err;
+        if(result){
+          request.flash('info','You have been registered! Please, check your email for instructions!');
+          response.redirect('/');
+        }
+      });
+  });
+
+  //verify that login/email is not busy! - to be called by ajax
+  app.get('/auth/isBusy',function(request,response){
+    async.parallel({
+      'username_ok':function(cb){
+        var username=request.query.username;
+        if(username){
+          if(/^[a-zA-Z0-9_]{3,32}$/.test(username)){ //username looks OK
+            request.MODEL.Users.findOne({'username':username},function(err,userFound){
+              cb(err, userFound?true:false);
+            });
+          } else {
+            cb(null,false);//username looks bad
+          }
+        } else {
+          cb(null,false);//username is empty
+        }
+      },
+      'email_ok':function(cb){
+        var email=request.query.email;
+        if(email){
+          // https://github.com/chriso/node-validator/blob/master/lib/validators.js#L27
+          if(/^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/.test(email)){ //email looks OK
+            request.MODEL.Users.findOne({'email':email},function(err,userFound){
+              cb(err, userFound?true:false);
+            });
+          } else {
+            cb(null,false);//email looks bad
+          }
+        } else {
+          cb(null,false);//email is empty
+        }
+      }
+    },function(err,results){
+      if(err) throw err;
+      response.json(results)
+    });
+  });
+
   //google works alwayes, it do not need tunning
   app.get('/auth/google', passport.authenticate('google'));
   app.get('/auth/google/return', passport.authenticate('google', { failureRedirect: '/', successRedirect: '/' }));
 
+  //autorization by password and username
+  app.post('/auth/login',passport.authenticate('local',{successRedirect: '/',failureRedirect: '/',failureFlash: true}));
 
   if (config.passport && config.passport.GITHUB_CLIENT_ID && config.passport.GITHUB_CLIENT_SECRET) {
     //if we have set parameters for github, enable the github passport strategy
