@@ -44,183 +44,189 @@ Plugins
 
 Example
 =======
+
 ```javascript
+var mwcCore = require('./../index.js');
+//setting up the config
+var MWC = new mwcCore(require('./config.json')[(process.env.NODE_ENV) ? (process.env.NODE_ENV) : 'development']);
 
-    var mwcCore = require('./../index.js');
-    //setting up the config
-    var MWC = new mwcCore(require('./config.json')[(process.env.NODE_ENV) ? (process.env.NODE_ENV) : 'development']);
+//we extend the mwc_core instance
+MWC.extendCore(function(core) {
+  //starting coocoo clock)
+  setInterval(function() {
+    core.emit('Coocoo!', 'Time now is ' + (new Date().toLocaleTimeString()));
+  }, 5000);
+  //adding custom function to MWC module
+  core.getSum = function(a, b) {
+    return a + b;
+  };
+});
 
-    //we extend the mwc_core instance
-    MWC.extendCore(function (core) {
-      //starting coocoo clock)
-      setInterval(function () {
-        core.emit('Coocoo!', 'Time now is ' + (new Date().toLocaleTimeString()));
-      }, 5000);
-      //adding custom function to MWC module
-      core.getSum = function (a, b) {
-        return a + b;
-      };
+//set global lever variables for expressJS application
+MWC.extendApp(['development', 'staging'], function(core) {
+  core.app.set('TempVar', '42');
+});
+
+
+MWC.extendModel('Cats', function(mongoose, config) {
+  var CatsSchema = new mongoose.Schema({
+    'nickname': String
+  });
+
+  CatsSchema.index({
+    nickname: 1
+  });
+
+  return mongoose.model('cats', CatsSchema);
+});
+
+//set middleware for development and staging enviroments
+MWC.extendMiddlewares(['development', 'staging'], function(core) {
+  return function(req, res, next) {
+    res.setHeader('X-Production', 'NO!');
+    next();
+  };
+});
+//we add some routes
+MWC.extendRoutes(
+  function(core) {
+    core.app.get('/', function(req, res) {
+      var authByGoogleString = (req.user) ? '<li><a href="/my">See your profile</a></li>' : '<li><a href="/auth/google">Auth by google</a></li>';
+
+      res.send('<html>' +
+        '<head>MyWebClass Core Example</head>' +
+        '<body>' +
+        '<p>TempVar is ' + core.app.get('TempVar') + '</p>' +
+        '<p>Hello, friend! You can do this things:</p><ul>' +
+        '<li>See current <a href="/time">time</a>.</li>' +
+        '<li>See <a href="/team">team</a> on this server.</li>' +
+        '<li>See all <a href="/redis">redis</a> keys stored.</li>' +
+        authByGoogleString +
+        '<li>See this server <a href="/config">parameters</a>.</li>' +
+        '<li>See users <a href="/api/users">api endpoint</a> on this server.</li>' +
+        '<li>See <a href="/plugins">plugins</a> installed on this server.</li>' +
+        '<li><a href="/honeypot">Notify</a> admin of your presense.</li>' +
+        '<li>See this application <a href="https://github.com/mywebclass/mwc_plugin_example">source on Github</a></li>' +
+        '</ul></body>' +
+        '</html>');
     });
 
-    //set global lever variables for expressJS application
-    MWC.extendApp(['development', 'staging'], function (core) {
-      core.app.set('TempVar', '42');
+    //we use Mongoose Model in this route
+    core.app.get('/team', function(request, response) {
+      request.MODEL.Users.find({
+        active: 1
+      }, function(err, users) {
+        if (err) {
+          throw err;
+        }
+        response.json({
+          'Team': users
+        });
+      });
+    });
+    //we use exposed Redis client. In a rather stupid way.
+    core.app.get('/redis', function(request, response) {
+      request.redisClient.keys('*', function(err, keys) {
+        response.json(keys);
+      });
     });
 
+    //making mousetrap - when user visits this url, MWC emmits the event
+    core.app.get('/honeypot', function(request, response) {
+      request.emitMWC('honeypot accessed', 'Somebody with IP of ' + request.ip + ' accessed the honeypot');
+      response.send('Administrator was notified about your actions!');
+    });
 
-    MWC.extendModel('Cats', function (mongoose, config) {
-      var CatsSchema = new mongoose.Schema({
+    core.app.get('/kittens', function(request, response) {
+      request.MODEL.Cats.find({}, function(err, cats) {
+        if (err) throw err;
+        response.json(cats);
+      });
+    });
+
+    core.app.get('/dogs', function(request, response) {
+      request.MODEL.Dogs.find({}, function(err, dogs) {
+        if (err) throw err;
+        response.json(dogs);
+      });
+    });
+
+  }
+);
+
+//injecting plugin as an object
+MWC.usePlugin({
+  'extendCore': null, //can be ommited
+  'extendModel': {
+    'Dogs': function(mongoose, config) {
+      var DogsSchema = new mongoose.Schema({
         'nickname': String
       });
-
-      CatsSchema.index({
+      DogsSchema.index({
         nickname: 1
       });
-
-      return mongoose.model('cats', CatsSchema);
-    });
-
-    //set middleware for development and staging enviroments
-    MWC.extendMiddlewares(['development', 'staging'], function (core) {
-      return function (req, res, next) {
-        res.setHeader('X-Production', 'NO!');
-        next();
-      };
-    });
-    //we add some routes
-    MWC.extendRoutes(
-      function (core) {
-        core.app.get('/', function (req, res) {
-          var authByGoogleString = (req.user)?'<li><a href="/my">See your profile</a></li>':'<li><a href="/auth/google">Auth by google</a></li>';
-
-          res.send('<html>' +
-            '<head>MyWebClass Core Example</head>' +
-            '<body>' +
-            '<p>TempVar is ' + core.app.get('TempVar') + '</p>' +
-            '<p>Hello, friend! You can do this things:</p><ul>' +
-            '<li>See current <a href="/time">time</a>.</li>' +
-            '<li>See <a href="/team">team</a> on this server.</li>' +
-            '<li>See all <a href="/redis">redis</a> keys stored.</li>' +
-            authByGoogleString +
-            '<li>See this server <a href="/config">parameters</a>.</li>' +
-            '<li>See users <a href="/api/users">api endpoint</a> on this server.</li>' +
-            '<li>See <a href="/plugins">plugins</a> installed on this server.</li>' +
-            '<li><a href="/honeypot">Notify</a> admin of your presense.</li>' +
-            '<li>See this application <a href="https://github.com/mywebclass/mwc_plugin_example">source on Github</a></li>' +
-            '</ul></body>' +
-            '</html>');
-        });
-
-        //we use Mongoose Model in this route
-        core.app.get('/team', function (request, response) {
-          request.MODEL.Users.find({active: 1}, function (err, users) {
-            if (err) {
-              throw err;
-            }
-            response.json({'Team': users});
-          });
-        });
-        //we use exposed Redis client. In a rather stupid way.
-        core.app.get('/redis', function (request, response) {
-          request.redisClient.keys('*', function (err, keys) {
-            response.json(keys);
-          });
-        });
-
-        //making mousetrap - when user visits this url, MWC emmits the event
-        core.app.get('/honeypot', function (request, response) {
-          request.emitMWC('honeypot accessed', 'Somebody with IP of ' + request.ip + ' accessed the honeypot');
-          response.send('Administrator was notified about your actions!');
-        });
-
-        core.app.get('/kittens',function(request,response){
-          request.MODEL.Cats.find({},function(err,cats){
-            if(err) throw err;
-            response.json(cats);
-          });
-        });
-
-        core.app.get('/dogs',function(request,response){
-          request.MODEL.Dogs.find({},function(err,dogs){
-            if(err) throw err;
-            response.json(dogs);
-          });
-        });
-
-      }
-    );
-
-    //injecting plugin as an object
-    MWC.usePlugin({
-      'extendCore': null, //can be ommited
-      'extendModel':{'Dogs':function (mongoose, config) {
-        var DogsSchema = new mongoose.Schema({
-          'nickname': String
-        });
-        DogsSchema.index({
-          nickname: 1
-        });
-        return mongoose.model('dogs', DogsSchema);
-      }},
-      'extendApp': null, //can be ommited
-      'extendMiddlewares': null, //can be ommited
-      'extendRoutes': function (core) {
-        core.app.get('/newPlugin', function (req, res) {
-          res.send('New plugin is installed as object');
-        });
-      }
-    });
-
-    try{
-      //injecting plugin as an name of installe npm package!
-      MWC.usePlugin('mwc_plugin_example');
-    } catch (e){
-      if(e.code === 'MODULE_NOT_FOUND'){
-        console.error('mwc_plugin_example is not installed.');
-      }
+      return mongoose.model('dogs', DogsSchema);
     }
-
-
-    //api/user works from box
-    //api/documents works from box
-
-    //binding application to port
-    MWC.listen(3000);
-
-    //testing custom function defined on line 10
-    console.log('Sum of 2 and 2 is ' + MWC.getSum(2, 2));
-
-    //listening of MWC events. 'Coocoo!' is emmited by mwc_plugin_example every 5 seconds
-    MWC.on('Coocoo!', function (message) {
-      console.log('Coocoo! Coocoo! ' + message);
+  },
+  'extendApp': null, //can be ommited
+  'extendMiddlewares': null, //can be ommited
+  'extendRoutes': function(core) {
+    core.app.get('/newPlugin', function(req, res) {
+      res.send('New plugin is installed as object');
     });
+  }
+});
 
-    MWC.on('honeypot accessed', function (message) {
-      console.log('Attention! Somebody tries to hack us! ' + message);
-    });
-
-    setTimeout(function(){
-      MWC.MODEL.Cats.create({nickname:'Chubais'},function(err,cat){
-        if(err) throw err;
-        if(cat){
-          console.log('Skoro tolko koshki rodyatsya!');
-          console.log('Happy birthday, '+cat.nickname);
-        }
-      });
-    },5000);
-
-    setTimeout(function(){
-      MWC.MODEL.Dogs.create({nickname:'Laika'},function(err,dog){
-        if(err) throw err;
-        if(dog){
-          console.log('Happy birthday, '+dog.nickname);
-        }
-      });
-    },4000);
+try {
+  //injecting plugin as an name of installe npm package!
+  MWC.usePlugin('mwc_plugin_example');
+} catch (e) {
+  if (e.code === 'MODULE_NOT_FOUND') {
+    console.error('mwc_plugin_example is not installed.');
+  }
+}
 
 
+//api/user works from box
+//api/documents works from box
 
+//binding application to port
+MWC.listen(3000);
 
+//testing custom function defined on line 10
+console.log('Sum of 2 and 2 is ' + MWC.getSum(2, 2));
+
+//listening of MWC events. 'Coocoo!' is emmited by mwc_plugin_example every 5 seconds
+MWC.on('Coocoo!', function(message) {
+  console.log('Coocoo! Coocoo! ' + message);
+});
+
+MWC.on('honeypot accessed', function(message) {
+  console.log('Attention! Somebody tries to hack us! ' + message);
+});
+
+setTimeout(function() {
+  MWC.MODEL.Cats.create({
+    nickname: 'Chubais'
+  }, function(err, cat) {
+    if (err) throw err;
+    if (cat) {
+      console.log('Skoro tolko koshki rodyatsya!');
+      console.log('Happy birthday, ' + cat.nickname);
+    }
+  });
+}, 5000);
+
+setTimeout(function() {
+  MWC.MODEL.Dogs.create({
+    nickname: 'Laika'
+  }, function(err, dog) {
+    if (err) throw err;
+    if (dog) {
+      console.log('Happy birthday, ' + dog.nickname);
+    }
+  });
+}, 4000);
 ```
 
 What exposable parts the MWC instance do have?
@@ -275,14 +281,15 @@ When we add some pluggins, they can add more internals to MWC object.
 
 Furthemore, MWC extends the [request](http://expressjs.com/api.html#req.params) object of ExpressJS application
 with
+
 ```javascript
-    MWC.app.get('/someURI',function(request,response){
-     //request.user - passport.js authentication middleware user representation
-     //request.MODEL.users
-     //request.MODEL.documents
-     //request.redisClient
-     //request.emitMWC('it works!'); //event emmiter, coupled to MWC event emmiter
-    });
+MWC.app.get('/someURI', function(request, response) {
+  //request.user - passport.js authentication middleware user representation
+  //request.MODEL.users
+  //request.MODEL.documents
+  //request.redisClient
+  //request.emitMWC('it works!'); //event emmiter, coupled to MWC event emmiter
+});
 ```
 
 Installation
@@ -342,70 +349,71 @@ This is typicale plugin code. It is placed there
 Furthemore, `extendMiddlewares` binds to route '/'
 
 ```javascript
+var os = require('os');
 
-    var os = require('os');
+exports.extendCore = function(core) {
+  //some other Cocoo clock
+  setInterval(function() {
+    core.emit('Coocoo!', 'Dzin!');
+  }, 5000);
+};
 
-    exports.extendCore = function(core){
-        //some other Cocoo clock
-        setInterval(function(){
-            core.emit('Coocoo!','Dzin!');
-        },5000);
-    };
+exports.extendApp = function(core) {
+  core.app.set('var1', "42");
+};
 
-    exports.extendApp = function(core){
-	core.app.set('var1',"42");
-    };
+exports.extendMiddlewares = function(core) {
+  return function(request, response, next) {
+    response.setHeader('X-MWC-PLUGIN_EXAMPLE!', 'THIS ROCKS!');
+    next();
+  }
+};
 
-    exports.extendMiddlewares=function(core){
-        return function(request, response, next) {
-                response.setHeader('X-MWC-PLUGIN_EXAMPLE!','THIS ROCKS!');
-                next();
-            }
-    };
-
-    exports.extendRoutes = function(core){
-        core.app.get('/time',function(request,response){
-            response.send('Current time is '+(new Date().toLocaleString()));
-        });
+exports.extendRoutes = function(core) {
+  core.app.get('/time', function(request, response) {
+    response.send('Current time is ' + (new Date().toLocaleString()));
+  });
 
 
-        core.app.get('/config',function(request,response){
-            response.json(
-                {
-                    'current_time': (new Date().toLocaleString()),
-                    'NODE_ENV': process.env.NODE_ENV,
-                    'OS':{
-                        'hostname':os.hostname(),
-                        'arch':os.arch(),
-                        'type':os.type(),
-                        'platform':os.platform(),
-                        'release':os.release(),
-                        'NodeJS version':process.version
-                    }
-                });
-        });
+  core.app.get('/config', function(request, response) {
+    response.json({
+      'current_time': (new Date().toLocaleString()),
+      'NODE_ENV': process.env.NODE_ENV,
+      'OS': {
+        'hostname': os.hostname(),
+        'arch': os.arch(),
+        'type': os.type(),
+        'platform': os.platform(),
+        'release': os.release(),
+        'NodeJS version': process.version
+      }
+    });
+  });
 
-        //we use Mongoose Model in this route
-        core.app.get('/team',function(request,response){
-            request.MODEL.Users.find({active:1},function(err,users){
-                if(err) throw err;
-                response.json({'Team':users});
-            });
-        });
-        //we use exposed Redis client. In a rather stupid way.
-        core.app.get('/redis',function(request,response){
-            request.redisClient.keys('*',function(err,keys){
-                response.json(keys);
-            });
-        });
+  //we use Mongoose Model in this route
+  core.app.get('/team', function(request, response) {
+    request.MODEL.Users.find({
+      active: 1
+    }, function(err, users) {
+      if (err) throw err;
+      response.json({
+        'Team': users
+      });
+    });
+  });
+  //we use exposed Redis client. In a rather stupid way.
+  core.app.get('/redis', function(request, response) {
+    request.redisClient.keys('*', function(err, keys) {
+      response.json(keys);
+    });
+  });
 
-        //making mousetrap - when user visits this url, MWC emmits the event
-        core.app.get('/honeypot',function(request,response){
-            request.emitMWC('honeypot accessed','Somebody with IP of '+request.ip+' accessed the honeypot');
-            response.send('Administrator was notified about your actions!');
-        });
-    };
-
+  //making mousetrap - when user visits this url, MWC emmits the event
+  core.app.get('/honeypot', function(request, response) {
+    request.emitMWC('honeypot accessed', 'Somebody with IP of ' + request.ip + ' accessed the honeypot');
+    response.send('Administrator was notified about your actions!');
+  });
+};
 ```
 
 Lifecycle of mwc_core module and how can we extend it
@@ -416,22 +424,20 @@ And every call of extending functions shedule some customization for this applic
 I think i will post a bad example, and explain, why this is bad
 
 ```javascript
-
-    MWC.extendCore = function(core){
-            core.sum=function(a,b){
-                return(a+b);
-            }
-            //set expressJS route
-            core.app.get('/someUrl',function(req,res){
-              res.send('Hello!');
-            });
-            //set middleware
-            core.app.use('/someUrl',function(req,res,next){
-              res.setHeader('x-bad-practice','yea!');
-              next();
-            });
-        }
-
+MWC.extendCore = function(core) {
+  core.sum = function(a, b) {
+    return (a + b);
+  }
+  //set expressJS route
+  core.app.get('/someUrl', function(req, res) {
+    res.send('Hello!');
+  });
+  //set middleware
+  core.app.use('/someUrl', function(req, res, next) {
+    res.setHeader('x-bad-practice', 'yea!');
+    next();
+  });
+}
 ```
 
 And this code will be erroneus, because it violates the desired lifespan of application.
