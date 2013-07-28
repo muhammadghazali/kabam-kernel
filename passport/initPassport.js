@@ -10,6 +10,31 @@ var async = require('async'),
 
 
 exports.doInitializePassportStrategies = function (passport, Users, config) {
+  function processProfile(profile,done){
+    var email = profile.emails[0].value;
+    if(email){
+      console.log(profile);
+      Users.findOne({'email': email, active: true}, function (err, userFound) {
+        if (err) {
+          return done(err, false, {'message': 'Database broken...'});
+        } else {
+          console.log(userFound);
+          if (userFound) {
+            return done(err, userFound, {message: 'Welcome, ' + userFound.username});
+          } else {
+            //model.UserModel.create({email:email},function(err,userCreated){
+            return done(err, false, { message: 'Access denied!' });//todo - i am not sure if user can register by singing in with Google Acount
+            //});
+          }
+        }
+      });
+    } else {
+      return done(new Error('There is something strange instead of user profile'));
+    }
+  };
+
+
+
   //initializing passport strategies
   passport.use(new LocalStrategy(
     function (username, password, done) {
@@ -41,18 +66,7 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
       realm: config.hostUrl
     },
     function (identifier, profile, done) {
-      var email = profile.emails[0].value;
-      console.log(profile);
-      Users.findOne({'email': email, active: true}, function (err, userFound) {
-        console.log(userFound);
-        if (userFound) {
-          done(err, userFound, {message: 'Welcome, ' + userFound.username});
-        } else {
-          //model.UserModel.create({email:email},function(err,userCreated){
-          done(err, false, { message: 'Access denied!' });//todo - i am not sure if user can register by singing in with Google Acount
-          //});
-        }
-      });
+      return processProfile(profile,done);
     }
   ));
 
@@ -63,18 +77,7 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
       clientSecret: config.passport.GITHUB_CLIENT_SECRET,
       callbackURL: config.hostUrl + 'auth/github/callback'
     }, function (accessToken, refreshToken, profile, done) {
-      var email = profile.emails[0].value;
-      console.log(profile);
-      Users.findOne({'email': email, active: true}, function (err, userFound) {
-        console.log(userFound);
-        if (userFound) {
-          done(err, userFound, {message: 'Welcome, ' + userFound.username});
-        } else {
-          //model.UserModel.create({email:email},function(err,userCreated){
-          done(err, false, { message: 'Access denied!' });//todo - i am not sure if user can register by singing in with Github Account
-          //});
-        }
-      });
+      return processProfile(profile,done);
     }));
   }
 
@@ -84,18 +87,7 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
       consumerSecret: config.passport.TWITTER_CONSUMER_SECRET,
       callbackURL: config.hostUrl + 'auth/twitter/callback'
     }, function (token, tokenSecret, profile, done) {
-      var email = profile.emails[0].value;
-      console.log(profile);
-      Users.findOne({'email': email, active: true}, function (err, userFound) {
-        console.log(userFound);
-        if (userFound) {
-          done(err, userFound, {message: 'Welcome, ' + userFound.username});
-        } else {
-          //model.UserModel.create({email:email},function(err,userCreated){
-          done(err, false, { message: 'Access denied!' });//todo - i am not sure if user can register by singing in with Twitter Account
-          //});
-        }
-      });
+      return processProfile(profile,done);
     }));
   }
 
@@ -106,18 +98,7 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
         callbackURL: config.hostUrl + 'auth/facebook/callback'
       },
       function(accessToken, refreshToken, profile, done) {
-        var email = profile.emails[0].value;
-        console.log(profile);
-        Users.findOne({'email': email, active: true}, function (err, userFound) {
-          console.log(userFound);
-          if (userFound) {
-            done(err, userFound, {message: 'Welcome, ' + userFound.username});
-          } else {
-            //model.UserModel.create({email:email},function(err,userCreated){
-            done(err, false, { message: 'Access denied!' });//todo - i am not sure if user can register by singing in with Facebook Account
-            //});
-          }
-        });
+        return processProfile(profile,done);
       }));
   }
 
