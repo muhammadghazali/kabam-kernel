@@ -1,6 +1,6 @@
 {
-  "name": "mwc_core",
-  "version": "0.0.2",
+  "name": "mwc_kernel",
+  "version": "0.1.0",
   "description": "MyWebClass core node.js application to be extended by loaded automatically middleware plugins",
   "main": "index.js",
   "engines": {
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:mywebclass/mwc_core.git"
+    "url": "git@github.com:mywebclass/mwc_kernel.git"
   },
   "dependencies": {
     "async": "*",
@@ -54,6 +54,6 @@
   "author": "Anatolij Ostroumov",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mywebclass/mwc_core/issues"
+    "url": "https://github.com/mywebclass/mwc_kernel/issues"
   }
 }

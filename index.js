@@ -198,11 +198,23 @@ MWC.prototype.usePlugin = function (pluginObjectOrName) {
         this.extendModel(x, pluginObjectOrName.extendModel[x]);
       }
     }
+    if(pluginToBeInstalled.setAppParameters && typeof pluginToBeInstalled.extendApp === 'undefined'){
+      console.log('Plugin is outdated! Use extendApp instead of setAppParameters with same syntax!');
+      pluginToBeInstalled.extendApp=pluginToBeInstalled.setAppParameters;
+    }
     if (pluginToBeInstalled.extendApp) {
       this.extendApp(pluginToBeInstalled.extendApp);
     }
+    if(pluginToBeInstalled.setAppMiddlewares && typeof pluginToBeInstalled.extendMiddlewares === 'undefined'){
+      console.log('Plugin is outdated! Use extendMiddlewares instead of setAppMiddlewares with same syntax!');
+      pluginToBeInstalled.extendMiddlewares=pluginToBeInstalled.setAppMiddlewares;
+    }
     if (pluginToBeInstalled.extendMiddlewares) {
       this.extendMiddlewares(pluginToBeInstalled.extendMiddlewares);
+    }
+    if(pluginToBeInstalled.extendAppRoutes && typeof pluginToBeInstalled.extendRoutes === 'undefined'){
+      console.log('Plugin is outdated! Use extendMiddlewares instead of setAppMiddlewares with same syntax!');
+      pluginToBeInstalled.extendRoutes=pluginToBeInstalled.extendAppRoutes;
     }
     if (pluginToBeInstalled.extendRoutes) {
       this.extendRoutes(pluginToBeInstalled.extendRoutes);
@@ -358,6 +370,10 @@ MWC.prototype.ready = function () {
 
   //injecting default internals via middleware
   thisMWC.app.use(function (request, response, next) {
+    if(request.session && request.session._csrf){
+      thisMWC.app.locals.csrf = request.session._csrf;
+    }
+    thisMWC.app.locals.flash = request.flash();
     request.MODEL = thisMWC.MODEL;
     request.redisClient = thisMWC.redisClient;
     request.emitMWC = function (eventName, eventContent) {

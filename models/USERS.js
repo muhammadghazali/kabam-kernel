@@ -21,8 +21,6 @@ module.exports = exports = function (mongoose, config) {
 
   var Schema = mongoose.Schema;
 
-  //end of group schema
-
 
   var UserSchema = new Schema({
     email: {type: Email, required: true, unique: true},

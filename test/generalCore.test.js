@@ -470,9 +470,9 @@ describe('mwcCore', function() {
         user.remove(done);
       });
     });
-    //*/
-    describe('functions grantRole, revokeRole',function(){
-      var userWithRole,userWithoutRole;
+
+    describe('functions grantRole',function(){
+      var userWithRole;
       before(function(done){
         async.waterfall(
           [
@@ -480,28 +480,23 @@ describe('mwcCore', function() {
               MWC.MODEL.Users.create({
                 'username': 'test888',
                 'email': 'ostroumov@teksi.ru',
-                'apiKey':'lalala1',
-                'roles':'role1'
+                'apiKey':'lalala1'
               },cb);
             },
-            function(userCreated,cb){
-              userCreated.grantRole('role2',cb);
+            function(aaa,cb){
+              MWC.MODEL.Users.findOneByLoginOrEmail('test888',function(err,userFound){
+                userFound.grantRole('role2',function(err){
+                  cb(err,true);
+                });
+              });
             },
-            function(cb){
-              MWC.MODEL.Users.findOneByLoginOrEmail('test888',cb);
-            },
-            function(userFound,cb){
-              userWithRole=userFound;
-              userFound.revokeRole('role2',cb);
-            },
-            function(cb){
-              MWC.MODEL.Users.findOneByLoginOrEmail('test888',cb);
-            },
-            function(userFound2,cb){
-              userWithoutRole=userFound2;
-              cb();
+            function(granted,cb){
+              MWC.MODEL.Users.findOneByLoginOrEmail('test888',function(err,userFound){
+                cb(err,userFound);
+              });
             }
-          ],function(err,res){
+          ],function(err,userFound){
+            userWithRole = userFound;
             if(err) throw err;
             done();
           });
@@ -511,15 +506,55 @@ describe('mwcCore', function() {
         userWithRole.hasRole('role2').should.be.true;
       });
 
-      it('revokeRole assigned role',function(){
-        userWithoutRole.hasRole('role2').should.be.false;
+      after(function(done){
+        userWithRole.remove(done);
+      });
+    });
+
+    describe('functions revokeRole',function(){
+      var userWithOutRole;
+      before(function(done){
+        async.waterfall(
+          [
+            function(cb){
+              MWC.MODEL.Users.create({
+                'username': 'test888',
+                'email': 'ostroumov@teksi.ru',
+                'apiKey':'lalala1',
+                'roles':['role1','role2']
+              },cb);
+            },
+            function(aaa,cb){
+              MWC.MODEL.Users.findOneByLoginOrEmail('test888',function(err,userFound){
+                userFound.revokeRole('role2',function(err){
+                  cb(err,true);
+                });
+              });
+            },
+            function(granted,cb){
+              MWC.MODEL.Users.findOneByLoginOrEmail('test888',function(err,userFound){
+                cb(err,userFound);
+              });
+            }
+          ],function(err,userFound){
+            userWithOutRole = userFound;
+            if(err) throw err;
+            done();
+          });
+      });
+      it('revokeRole leaved other roles intact',function(){
+        userWithOutRole.hasRole('role1').should.be.true;
+      });
+      it('revokeRole removed desired role',function(){
+        userWithOutRole.hasRole('role2').should.be.false;
       });
 
       after(function(done){
-        userWithoutRole.remove(done);
+        userWithOutRole.remove(done);
       });
     });
-    //*/
+
+
   });
   describe('Testing mwc_core express application', function() {
     it('it exposes a #MWC.app object',function(){
