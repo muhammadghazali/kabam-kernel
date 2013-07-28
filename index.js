@@ -476,12 +476,6 @@ MWC.prototype.setAppMiddlewares = function(environment, path, settingsFunctio){
   return this;
 };
 
-MWC.prototype.setAppMiddlewares = function(environment, path, settingsFunction){
-  console.log('setAppMiddlewares is outdated, use extendMiddlewares with the same syntax');
-  this.extendMiddlewares(environment, path, settingsFunction);
-  return this;
-};
-
 MWC.prototype.extendAppRoutes = function(settingsFunction){
   console.log('extendAppRoutes is outdated, use extendRoutes with the same syntax');
   this.extendRoutes(settingsFunction);
