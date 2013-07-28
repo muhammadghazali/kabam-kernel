@@ -373,6 +373,7 @@ MWC.prototype.ready = function () {
     if(request.session && request.session._csrf){
       thisMWC.app.locals.csrf = request.session._csrf;
     }
+    thisMWC.app.locals.flash = request.flash();
     request.MODEL = thisMWC.MODEL;
     request.redisClient = thisMWC.redisClient;
     request.emitMWC = function (eventName, eventContent) {
