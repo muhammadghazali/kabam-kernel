@@ -292,6 +292,31 @@ MWC.app.get('/someURI', function(request, response) {
 });
 ```
 
+The model of User
+=======
+This system use mongoose model to represent users. It have this methods.
+
+1. `MWC.MODEL.findOneByLoginOrEmail(string,function(err,userFound){...})` - founds one user, that have `username` or `email`  equal to `string`
+2. `MWC.MODEL.findOneByApiKey(string,function(err,userFound){...})` - founds one user, that have `apiKey` equal to `string`
+3. `MWC.MODEL.getByRole(string,function(err,userFound){...})` - founds users, that have `role` of string
+
+Methods to one instance of class User
+
+1. `user.getGravatar(size,type,rating)` - returns users gravatar - see [https://en.gravatar.com/site/implement/images/](https://en.gravatar.com/site/implement/images/)
+2. `user.verifyPassword('passwordToCheck')` - returns true if password is correct, or false if password is wrong
+3. `user.setPassword('newPassword',function(err){...})` - resets the users password, saves the instance to database
+4. `user.invalidateSession(function(err){...})` - changes `apiKey` to random value, saves the instance to database
+5. `user.hasRole('roleName')` - returns true if user have role of `roleName`, or false id do not
+6. `user.grantRole('roleName',function(err){...})` - grant the user the new role of `roleName`, saves the instance to database
+7. `user.revokeRole('roleName',function(err){...})` - revoke the role of `roleName` from user and  saves the instance to database
+8. `user.notify(messageObj)` - notifyes the user with message of messageObj. Depending on the type of messageObj it is processed accordingly.
+There is plugin of [https://github.com/mywebclass/mwc_plugin_notify_by_email](https://github.com/mywebclass/mwc_plugin_notify_by_email)
+that sends SOME notifications as emails to user. There will be other plugins that can notify users by other means
+
+
+
+
+
 Installation
 =======
 
