@@ -134,39 +134,18 @@ exports.doInitializePassportRoutes = function (passport, app, config) {
 
   //registration by username, password and email
   //todo - implement the https://npmjs.org/packages/captcha
-  app.post('/auth/signup',function(request,response){
-    async.waterfall(
-      [
-        function (cb) {
-          request.MODEL.Users.create({
-            'username': request.body.username,
-            'email': request.body.email,
-            'apiKey': rack(),
-            'confirmation':{
-              'string':rack(),
-              'date': new Date()
-            }
-          }, function (err, userCreated) {
-            cb(err, userCreated);
-          });
-        },
-        function (userCreatedReadyForSettingPassword, cb) {
-          userCreatedReadyForSettingPassword.setPassword(request.params.password, function (err) {
-            cb(err,userCreatedReadyForSettingPassword);
-          });
-        },
-        function (userToNeNotified,cb){
-          //to be implemented
-          //userToNeNotified.notify()
-          cb(null, true)
+  app.post('/auth/signup', function (request, response) {
+    request.MODEL.Users.signUp(request.body.username, request.body.email, request.body.password,
+      function (err, userCreated) {
+        if (err) {
+          request.flash('error', err.message);
+        } else {
+          userCreated.notify({'type': 'email', 'subject': "Account confirmation", 'message': {'template': 'signin'}});
+          request.flash('info', 'You have been registered! Please, check your email for instructions!');
         }
-      ], function (err, result) {
-        if(err) throw err;
-        if(result){
-          request.flash('info','You have been registered! Please, check your email for instructions!');
-          response.redirect('/');
-        }
-      });
+        response.redirect('/');
+      }
+    );
   });
 
   //verify that login/email is not busy! - to be called by ajax
