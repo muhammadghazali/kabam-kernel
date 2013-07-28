@@ -40,6 +40,10 @@ Plugins
 
  - [mwc_plugin_hogan_express](https://github.com/mywebclass/mwc_plugin_hogan_express) [![Build Status](https://travis-ci.org/mywebclass/mwc_plugin_hogan_express.png?branch=master)](https://travis-ci.org/mywebclass/mwc_plugin_hogan_express) - plugin to add support for [hogan-express template engine](https://github.com/vol4ok/hogan-express).
 
+ - [https://github.com/mywebclass/mwc_plugin_notify_by_email](https://github.com/mywebclass/mwc_plugin_notify_by_email) - plugin to notify users by email
+
+ - [https://github.com/mywebclass/mwc_plugin_gridfs](https://github.com/mywebclass/mwc_plugin_gridfs) - plugin to use gridfs
+
 [Plugin compatibility wiki](https://github.com/mywebclass/mwc_core/wiki/Plugin-compatibility-guide)
 
 Example
@@ -296,9 +300,9 @@ The model of User
 =======
 This system use mongoose model to represent users. It have this methods.
 
-1. `MWC.MODEL.findOneByLoginOrEmail(string,function(err,userFound){...})` - founds one user, that have `username` or `email`  equal to `string`
-2. `MWC.MODEL.findOneByApiKey(string,function(err,userFound){...})` - founds one user, that have `apiKey` equal to `string`
-3. `MWC.MODEL.getByRole(string,function(err,userFound){...})` - founds users, that have `role` of string
+1. `MWC.MODEL.findOneByLoginOrEmail(string,function(err,userFound){...})` - finds one user, that have `username` or `email`  equal to `string`
+2. `MWC.MODEL.findOneByApiKey(string,function(err,userFound){...})` - finds one user, that have `apiKey` equal to `string`
+3. `MWC.MODEL.getByRole(string,function(err,userFound){...})` - finds users, that have `role` of string
 
 Methods to one instance of class User
 
@@ -306,7 +310,7 @@ Methods to one instance of class User
 2. `user.verifyPassword('passwordToCheck')` - returns true if password is correct, or false if password is wrong
 3. `user.setPassword('newPassword',function(err){...})` - resets the users password, saves the instance to database
 4. `user.invalidateSession(function(err){...})` - changes `apiKey` to random value, saves the instance to database
-5. `user.hasRole('roleName')` - returns true if user have role of `roleName`, or false id do not
+5. `user.hasRole('roleName')` - returns true if user have role of `roleName`, or false if user do not have the role
 6. `user.grantRole('roleName',function(err){...})` - grant the user the new role of `roleName`, saves the instance to database
 7. `user.revokeRole('roleName',function(err){...})` - revoke the role of `roleName` from user and  saves the instance to database
 8. `user.notify(messageObj)` - notifyes the user with message of messageObj. Depending on the type of messageObj it is processed accordingly.
