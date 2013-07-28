@@ -42,7 +42,7 @@ Plugins
 
  - [https://github.com/mywebclass/mwc_plugin_notify_by_email](https://github.com/mywebclass/mwc_plugin_notify_by_email) - plugin to notify users by email
 
- - [https://github.com/mywebclass/mwc_plugin_gridfs](https://github.com/mywebclass/mwc_plugin_gridfs) - plugin to use gridfs
+ - [https://github.com/mywebclass/mwc_plugin_gridfs](https://github.com/mywebclass/mwc_plugin_gridfs) [![Build Status](https://travis-ci.org/mywebclass/mwc_plugin_gridfs.png?branch=master)](https://travis-ci.org/mywebclass/mwc_plugin_gridfs) - plugin to use gridfs
 
 [Plugin compatibility wiki](https://github.com/mywebclass/mwc_core/wiki/Plugin-compatibility-guide)
 
