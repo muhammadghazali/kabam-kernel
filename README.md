@@ -9,7 +9,7 @@ Important
 Without understanding how [express.js framework](http://expressjs.com/) operates, including
 
  - concept of [app](http://expressjs.com/api.html#express), 
- - concept of [middleware](http://expressjs.com/api.html#middleware) 
+ - concept of [middleware](http://expressjs.com/api.html#middleware) and how [it can be used](http://webapplog.com/intro-to-express-js-parameters-error-handling-and-other-middleware/)
  - concept of chaining the middlewares (this is example of adding middleware to a chain [to count users online](http://expressjs.com/guide.html#users-online))
  - concept [route](http://expressjs.com/api.html#app.VERB) 
 
