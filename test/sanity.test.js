@@ -116,6 +116,20 @@ describe('sanity test', function () {
       }).should.throw('Wrong arguments for setAppParameters(arrayOrStringOfEnvironments,settingsFunction)');
     });
 
+    it('throws proper error for MWC.extendApp([{a:1},{b:1}],function(core){});', function () {
+      (function () {
+        var MWC = new mwcCore(config);
+        MWC.extendApp([{a:1},{b:1}],function(core){});
+      }).should.throw('#MWC.setAppParameters requires environment name to be a string!');
+    });
+
+    it('throws proper error for MWC.extendApp({b:1},function(core){});', function () {
+      (function () {
+        var MWC = new mwcCore(config);
+        MWC.extendApp([{a:1},{b:1}],function(core){});
+      }).should.throw('#MWC.setAppParameters requires environment name to be a string!');
+    });
+
     it('throws proper error for MWC.extendMiddlewares("i am pineapple!");', function () {
       (function () {
         var MWC = new mwcCore(config);
