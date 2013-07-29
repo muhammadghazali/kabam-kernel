@@ -81,7 +81,6 @@ describe('sanity test', function () {
           'mongoUrl':'mongodb://user111:111password111@localhost:10053/app111',
           'redis':"I am banana!"
         });
-
       }).should.throw('Config.redis have to be a string like redis://usernameIgnored:password@localhost:6379 or object like { "host":"localhost","port":6379 }');
     });
   });
@@ -89,18 +88,25 @@ describe('sanity test', function () {
 
   describe('MWC throws errors when we try to call extending functions with strange arguments', function () {
 
-    it('throws proper error for MWC.extendCore("i am pineapple!");', function () {
+    it('throws proper error for MWC.extendCore("i am pineapple!")', function () {
       (function () {
         var MWC = new mwcCore(config);
         MWC.extendCore('i am pineapple!');
       }).should.throw('MWC.extendCore requires argument of function(core){...}');
     });
 
-    it('throws proper error for MWC.extendModel("i am pineapple!");', function () {
+    it('throws proper error for MWC.extendModel("i am pineapple!")', function () {
       (function () {
         var MWC = new mwcCore(config);
         MWC.extendModel('i am pineapple!');
       }).should.throw('MWC.extendModel requires arguments of string of "modelName" and function(core){...}');
+    });
+
+    it('throws proper error for trying MWC.extendModel("Users",function()), because  "Users" is reserved name', function () {
+      (function () {
+        var MWC = new mwcCore(config);
+        MWC.extendModel('Users',function(){});
+      }).should.throw('Error extending model, "Users" is reserved name');
     });
 
     it('throws proper error for MWC.extendApp("i am pineapple!");', function () {

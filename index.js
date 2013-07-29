@@ -73,7 +73,7 @@ MWC.prototype.extendCore = function (settingsFunction) {
 
 MWC.prototype.extendModel = function (modelName, modelFunction) {
   if (modelName === 'Users') {
-    throw new Error('Error extending model, "Users" is reserved names');
+    throw new Error('Error extending model, "Users" is reserved name');
   } else {
     if (typeof modelName === 'string' && typeof modelFunction === 'function') {
       this.additionalModels.push({'name': modelName, 'initFunction': modelFunction});
