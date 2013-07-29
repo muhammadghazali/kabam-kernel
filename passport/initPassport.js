@@ -156,7 +156,7 @@ exports.doInitializePassportRoutes = function (passport, app, config) {
         if(username){
           if(/^[a-zA-Z0-9_]{3,32}$/.test(username)){ //username looks OK
             request.MODEL.Users.findOne({'username':username},function(err,userFound){
-              cb(err, userFound?true:false);
+              cb(err, (userFound?true:false));
             });
           } else {
             cb(null,false);//username looks bad

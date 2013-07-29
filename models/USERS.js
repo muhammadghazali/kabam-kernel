@@ -1,10 +1,8 @@
 var async = require('async'),
   hat = require('hat'),
   rack = hat.rack(),
-  crypto = require('crypto'),
-  moment = require('moment'),
-  mongooseTypes = require('mongoose-types'); //https://github.com/bnoguchi/mongoose-types
-//useTimestamps = mongooseTypes.useTimestamps;
+  crypto = require('crypto');
+
 
 
 function sha512(str) {
@@ -18,30 +16,31 @@ function md5(str) {
 module.exports = exports = function (core) {
   var mongoose = core.mongoose;
   var config = core.config;
-  mongooseTypes.loadTypes(mongoose);
-  var Email = mongoose.SchemaTypes.Email;
 
   var Schema = mongoose.Schema;
 
-
   var UserSchema = new Schema({
-    email: {type: Email, required: true, unique: true},
-    username: {type: String, required: true, unique: true, match: /^[a-zA-Z0-9_]+$/ },
-    salt: String,
-    password: String,
+    email: {type: String, required: true, unique: true, match: /^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/},
 
+    username: {type: String, unique: true, match: /^[a-zA-Z0-9_]+$/, sparse: true},
+    //sparse - it means it be unique, if not null  http://stackoverflow.com/questions/7955040/mongodb-mongoose-unique-if-not-null
+    salt: String,//string to hash password
+    password: String,//hashed password
+
+    //api key interaction
+    apiKey: {type: String, required: true, unique: true, match: /^[a-zA-Z0-9_]+$/ }, //for invalidating sessions by user request, for api interactions...
+    apiKeyCreatedAt: Date,
+
+    
+    //role management
+    root: Boolean,
     roles: [{type: String, match: /^[a-zA-Z0-9_]+$/ }],
 
-    apiKey: {type: String, required: false, unique: true, match: /^[a-zA-Z0-9_]*$/ }, //for invalidating sessions by user request, for api interactions...
+    //profile status
+    emailVerified: Boolean, //profile is activated
+    profileComplete:Boolean, //profile is complete - it means, it have email, username and password set!
 
-    active: Boolean,
-    root: Boolean,
-
-    activeDate: Date,
-    confirmation: {
-      string: String,
-      date: Date
-    }
+    profile: Object //this is user profile object. it can store anything! - age, postal address, occupation. everything! todo - embedded document?
   });
   //UserSchema.plugin(useTimestamps);//do not works! add createdAt, and updatedAt attributes
 
@@ -51,39 +50,8 @@ module.exports = exports = function (core) {
     apiKey: 1,
     roles: 1
   });
-//*/todo - re do!
-  UserSchema.methods.generateConfirmationLink = function (callback) {
-    this.confirmation.string = rack();
-    this.confirmation.date = new Date();
-    this.save(callback);
-    return;
-  };
-  UserSchema.methods.activateUser = function (confirmationString, callback) {
-    var err;
-    if (typeof confirmationString !== 'undefined') {
-      if (confirmationString !== this.confirmation.string) {
-        err = new Error('Confirmation Strings don\'t match');
-        callback(err);
-      }
-      var originalDate = moment(this.confirmation.date),
-        now = moment(),
-        expired = (typeof config.confirmationLinkExpireHours === 'undefined') ? 1 :
-          config.confirmationLinkExpireHours;
-
-      if (now.isAfter(originalDate.add('hours', expired))) {
-        err = new Error('The link has expired.');
-        callback(err);
-      }
-    }
-    this.confirmation = null;
-    this.activeDate = new Date();
-    this.active = true;
-    this.save(callback);
-    return;
-  };
-//*/
-
-
+  
+  
   UserSchema.methods.getGravatar = function (s, d, r) {
     //https://ru.gravatar.com/site/implement/images/
     //s - image size
@@ -114,7 +82,7 @@ module.exports = exports = function (core) {
   };
 
   UserSchema.methods.invalidateSession = function (callback) {
-    this.apiKey = rack();
+    this.apiKey = sha512(rack());
     this.save(callback);
     return;
   };
@@ -179,18 +147,16 @@ module.exports = exports = function (core) {
     this.find({'roles': [role]}, callback);
   };
 
-  //register new user
+  //signup new user by username, email, password,
   UserSchema.statics.signUp = function(username,email,password,callback){
     this.create({
       'username':username,
       'email':email,
-      'apiKey':rack(),
-      'active':false,
+      'apiKey':sha512(rack()),
+      'emailVerified':false,
       'root':false,
-      'confirmation':{
-        'string':rack(),
-        'date': new Date()
-      }
+      'profileComplete':true,
+      'apiKeyCreatedAt':new Date()
     },function(err,userCreated){
       if(err) {
         callback(err);
@@ -202,6 +168,74 @@ module.exports = exports = function (core) {
             callback(null,userCreated);
           }
         });
+      }
+    });
+  };
+
+  //signup new user by email only - for example, when he sign in by google, facebook and other oauth providers
+  //account is set as uncompleted!
+  UserSchema.statics.signUpByEmailOnly = function (email, callback) {
+    this.create({
+      'email': email,
+      'emailVerified': true, //email is verified!
+      'profileComplete': false,
+      'apiKey': sha512(rack()),
+      'root':false,
+      'apiKeyCreatedAt':new Date()
+    }, function (err, userCreated) {
+      if (err) {
+        callback(err);
+      } else {
+        userCreated.setPassword(rack(), function (err1) {//because leaving user without password is stupid
+          if (err1) {
+            callback(err1);
+          } else {
+            callback(null, userCreated);
+          }
+        });
+      }
+    });
+  };
+  //complete account
+  UserSchema.methods.completeProfile = function(username,password,callback){
+    if(typeof this.username === 'undefined' && this.profileComplete === false){
+      this.username = username;
+      this.setPassword(password,callback);
+    } else {
+      callback(new Error('Account is completed!'));
+    }
+  };
+  
+  
+  UserSchema.statics.findOneByApiKeyAndVerify = function(apiKey,callback){
+    this.findOneByApiKey(apiKey,function(err,userFound){
+      if(err){
+        callback(err);
+      } else {
+        if(userFound && userFound.emailVerified === false && (new Date().getTime() - userFound.apiKeyCreatedAt.getTime())<30*60*1000) {
+          userFound.emailVerified = true;
+          userFound.save(function(err1){
+            callback(err1,userFound);
+          });
+        } else {
+          callback(new Error('Activation key is wrong or outdated!'));
+        }
+      }
+    });
+  };
+
+  UserSchema.statics.findOneByApiKeyAndResetPassword = function(apiKey, password, callback){
+    this.findOneByApiKey(apiKey,function(err,userFound){
+      if(err) {
+        callback(err);
+      } else {
+        if(userFound && (new Date().getTime() - userFound.apiKeyCreatedAt.getTime())>30*60*1000){
+          userFound.setPassword(password,function(err1){
+            callback(err1,userFound);
+          });
+        } else {
+          callback(new Error('Activation key is wrong or outdated!'));
+        }
       }
     });
   };

@@ -286,6 +286,14 @@ describe('mwcCore', function() {
       MWC.MODEL.Users.signUp.should.be.a('function');
     });
 
+    it('exposes function findOneByApiKeyAndVerify',function(){
+      MWC.MODEL.Users.findOneByApiKeyAndVerify.should.be.a('function');
+    });
+
+    it('exposes function findOneByApiKeyAndResetPassword',function(){
+      MWC.MODEL.Users.findOneByApiKeyAndResetPassword.should.be.a('function');
+    });
+    
     describe('finders',function(){
       var usersFound;
       before(function (done) {
@@ -356,17 +364,31 @@ describe('mwcCore', function() {
       it('creates user with desired email',function(){
         user.email.should.be.equal('johndoe@example.org');
       });
+
+      it('creates user with LOOOONG salt and password',function(){
+        user.apiKey.length.should.be.above(63);
+        user.apiKey.length.should.be.above(63);
+      });
+
       it('creates user with desired password',function(){
         user.verifyPassword('waterfall').should.be.true;
         user.verifyPassword('fiflesAndFuffles').should.be.false;
       });
+
       it('creates user with apiKey present',function(){
         user.apiKey.length.should.be.above(5);
       });
-      it('creates user unactivated',function(){
-        user.active.should.be.false;
+
+      it('creates user with actual apiKey',function(){
+        var ago = new Date().getTime() - user.apiKeyCreatedAt.getTime();
+        ago.should.be.below(10*1000); //10 seconds
       });
-      it('creates user ordinary user, not root',function(){
+
+      it('creates user with emailVerified being FALSE',function(){
+        user.emailVerified.should.be.false;
+      });
+
+      it('creates ordinary user, not root',function(){
         user.root.should.be.false;
       });
 
@@ -374,7 +396,85 @@ describe('mwcCore', function() {
         user.remove(done)
       });
     });
+    describe('signUpByEmailOnly',function(){
+      var user;
+      before(function(done){
+        MWC.MODEL.Users.signUpByEmailOnly('johndoe@example.org',function(err,userCreated){
+          if(err) throw err;
+          user=userCreated;
+          done();
+        });
+      });
+
+      it('creates user without username',function(){
+        should.not.exist(user.username);
+      });
+
+      it('creates user with LOOOONG salt and password',function(){
+        user.apiKey.length.should.be.above(63);
+        user.apiKey.length.should.be.above(63);
+      });
+
+      it('creates user with apiKey present',function(){
+        user.apiKey.length.should.be.above(5);
+      });
+
+      it('creates user with actual apiKey',function(){
+        var ago = new Date().getTime() - user.apiKeyCreatedAt.getTime();
+        ago.should.be.below(10*1000); //10 seconds
+      });
+
+      it('creates user with emailVerified being TRUE',function(){
+        user.emailVerified.should.be.true;
+      });
+
+      it('creates ordinary user, not root',function(){
+        user.root.should.be.false;
+      });
+
+      after(function (done) {
+        user.remove(done)
+      });
+    });
+    describe('findOneByApiKeyAndVerify',function(){
+      var user,userBeingActivated;
+      before(function (done) {
+        MWC.MODEL.Users.create({
+          'username': 'oneByApiKey',
+          'email': 'oneByApiKey@teksi.ru',
+          'apiKey': 'vseBydetHoroshooneByApiKey',
+          'emailVerified':false,
+          'apiKeyCreatedAt':new Date()
+        }, function (err, userCreated) {
+          if(err) throw err;
+          user=userCreated;
+          MWC.MODEL.Users.findOneByApiKeyAndVerify('vseBydetHoroshooneByApiKey',function(err,userActivated){
+            userBeingActivated=userActivated;
+            done();
+          });
+        });
+      });
+
+      it('it finds the user we created',function(){
+        userBeingActivated._id.should.eql(user._id);
+      });
+
+      it('set emailVerified to TRUE',function(){
+        userBeingActivated.emailVerified.should.be.true;
+      });
+
+      after(function (done) {
+        user.remove(done);
+      });
+    });
+    describe('findOneByApiKeyAndResetPassword',function(){
+
+
+
+    });
   });
+
+
 
   describe('Testing mwc_core mongoose model one instance of user:', function () {
     describe('general function are callable', function () {
@@ -545,7 +645,7 @@ describe('mwcCore', function() {
           });
       });
 
-      it('grantRole assigned role',function(){
+      it('grants assigned role',function(){
         userWithRole.hasRole('role2').should.be.true;
       });
 
@@ -604,7 +704,7 @@ describe('mwcCore', function() {
         MWC.MODEL.Users.create({
           'username': 'test888',
           'email': 'ostroumov@teksi.ru',
-          'apiKey':'lalala1',
+          'apiKey':'lalala1'
         }, function (err, userCreated) {
           if (err) {
             throw err;
