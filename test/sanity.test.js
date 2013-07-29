@@ -8,10 +8,8 @@ var should = require('should'),
   request = require('request');
 
 
-
-
 describe('sanity test', function () {
-  describe('MWC throws errors when we have strange config object',function(){
+  describe('MWC throws errors when we have strange config object', function () {
 
     it('throws proper error for empty config object', function () {
       (function () {
@@ -28,47 +26,47 @@ describe('sanity test', function () {
 
     it('throws proper error for config without hostUrl', function () {
       (function () {
-        var MWC = new mwcCore({'hostUrl':null});
+        var MWC = new mwcCore({'hostUrl': null});
       }).should.throw('Config.hostUrl have to be valid hostname - for example, http://example.org/ with http(s) on start and "/" at end!!!');
     });
 
     it('throws proper error for config with bad hostUrl', function () {
       (function () {
-        var MWC = new mwcCore({'hostUrl':'I am pineapple!'});
+        var MWC = new mwcCore({'hostUrl': 'I am pineapple!'});
       }).should.throw('Config.hostUrl have to be valid hostname - for example, http://example.org/ with http(s) on start and "/" at end!!!');
     });
 
     it('throws proper error for undefined secret string', function () {
       (function () {
-        var MWC = new mwcCore({'hostUrl':'http://example.org/'});
+        var MWC = new mwcCore({'hostUrl': 'http://example.org/'});
       }).should.throw('Config.secret is not set or is to short!');
     });
 
     it('throws proper error for short secret string', function () {
       (function () {
-        var MWC = new mwcCore({'hostUrl':'http://example.org/', secret:'123'});
+        var MWC = new mwcCore({'hostUrl': 'http://example.org/', secret: '123'});
       }).should.throw('Config.secret is not set or is to short!');
     });
 
     it('throws proper error for empty mongoUrl string', function () {
       (function () {
-        var MWC = new mwcCore({'hostUrl':'http://example.org/', secret:'lalalalala1111'});
+        var MWC = new mwcCore({'hostUrl': 'http://example.org/', secret: 'lalalalala1111'});
       }).should.throw('Config.mongoUrl have to be valid mongoose URI - for example mongodb://user111:111password111@localhost:10053/app111');
     });
 
     it('throws proper error for "I am banana!" mongoUrl string', function () {
       (function () {
-        var MWC = new mwcCore({'hostUrl':'http://example.org', secret:'lalalalala1111', 'mongoUrl':'I am banana!'});
+        var MWC = new mwcCore({'hostUrl': 'http://example.org', secret: 'lalalalala1111', 'mongoUrl': 'I am banana!'});
       }).should.throw('Config.mongoUrl have to be valid mongoose URI - for example mongodb://user111:111password111@localhost:10053/app111');
     });
 
     it('throws proper error for redis object without host, port', function () {
       (function () {
         var MWC = new mwcCore({
-          'hostUrl':'http://example.org',
-          'secret':'lalalalala1111',
-          'mongoUrl':'mongodb://user111:111password111@localhost:10053/app111',
-          'redis':{'notHost':'localhost', 'notPort':6379}
+          'hostUrl': 'http://example.org',
+          'secret': 'lalalalala1111',
+          'mongoUrl': 'mongodb://user111:111password111@localhost:10053/app111',
+          'redis': {'notHost': 'localhost', 'notPort': 6379}
         });
       }).should.throw('Config.redis have to be a string like redis://usernameIgnored:password@localhost:6379 or object like { "host":"localhost","port":6379 }');
     });
@@ -76,10 +74,10 @@ describe('sanity test', function () {
     it('throws proper error for "I am banana!" as redis string', function () {
       (function () {
         var MWC = new mwcCore({
-          'hostUrl':'http://example.org',
-          'secret':'lalalalala1111',
-          'mongoUrl':'mongodb://user111:111password111@localhost:10053/app111',
-          'redis':"I am banana!"
+          'hostUrl': 'http://example.org',
+          'secret': 'lalalalala1111',
+          'mongoUrl': 'mongodb://user111:111password111@localhost:10053/app111',
+          'redis': "I am banana!"
         });
       }).should.throw('Config.redis have to be a string like redis://usernameIgnored:password@localhost:6379 or object like { "host":"localhost","port":6379 }');
     });
@@ -105,7 +103,8 @@ describe('sanity test', function () {
     it('throws proper error for trying MWC.extendModel("Users",function()), because  "Users" is reserved name', function () {
       (function () {
         var MWC = new mwcCore(config);
-        MWC.extendModel('Users',function(){});
+        MWC.extendModel('Users', function () {
+        });
       }).should.throw('Error extending model, "Users" is reserved name');
     });
 
@@ -119,14 +118,22 @@ describe('sanity test', function () {
     it('throws proper error for MWC.extendApp([{a:1},{b:1}],function(core){});', function () {
       (function () {
         var MWC = new mwcCore(config);
-        MWC.extendApp([{a:1},{b:1}],function(core){});
+        MWC.extendApp([
+          {a: 1},
+          {b: 1}
+        ], function (core) {
+        });
       }).should.throw('#MWC.setAppParameters requires environment name to be a string!');
     });
 
     it('throws proper error for MWC.extendApp({b:1},function(core){});', function () {
       (function () {
         var MWC = new mwcCore(config);
-        MWC.extendApp([{a:1},{b:1}],function(core){});
+        MWC.extendApp([
+          {a: 1},
+          {b: 1}
+        ], function (core) {
+        });
       }).should.throw('#MWC.setAppParameters requires environment name to be a string!');
     });
 
