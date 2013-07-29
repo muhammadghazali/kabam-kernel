@@ -393,6 +393,9 @@ MWC.prototype.ready = function () {
     if(request.session && request.session._csrf){
       thisMWC.app.locals.csrf = request.session._csrf;
     }
+    if(request.user){
+      thisMWC.app.locals.myself = request.user; //inject user's model values to template
+    }
     thisMWC.app.locals.flash = request.flash();
     request.MODEL = thisMWC.MODEL;
     request.redisClient = thisMWC.redisClient;
