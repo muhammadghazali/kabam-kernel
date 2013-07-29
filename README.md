@@ -1,11 +1,27 @@
 mwc_core
 ========
 
-MyWebClass core node.js application to be extended by loaded automatically middleware plugins.
-Technically this is a Factory class to vendor [express.js](http://expressjs.com/) applications, 
-that can be easily extended by 6 functions.
+MyWebClass core node.js application to be extended by plugins.
 
-0. Constructor - create application object using configuration object.
+Important
+=======
+
+Without understanding how [express.js framework](http://expressjs.com/) operates, including
+
+ - concept of [app](http://expressjs.com/api.html#express), 
+ - concept of [middleware](http://expressjs.com/api.html#middleware) 
+ - concept of chaining the middlewares (this is example of adding middleware to a chain [to count users online](http://expressjs.com/guide.html#users-online))
+ - concept [route](http://expressjs.com/api.html#app.VERB) 
+
+this module is hard to understand. Please, read this information above before processing with this plugin.
+
+Introduction
+=======
+
+Technically this is a Factory class to vendor [express.js](http://expressjs.com/) applications, 
+that can be easily extended by 6 mixin type functions.
+
+0. `new mwcCore(configObj)` - create application object using [configuration object](https://github.com/mywebclass/mwc_kernel/blob/master/example/config.json) specified.
 
 1. `extendCore(function(core){...})` - extend object created, including expressJS application
 and some other modules. You can call this function multiple times
