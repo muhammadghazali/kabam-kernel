@@ -101,7 +101,7 @@ MWC.prototype.extendApp = function (environment, settingsFunction) {
       environmentToUse = environment;
       for (var i = 0; i < environment.length;i++){
         if(typeof environment[i] !== 'string'){
-          throw new Error('#MWC.setAppParameters requires environment name to be a string!');
+          throw new Error('#MWC.extendApp requires environment name to be a string!');
         }
       }
     }
@@ -119,7 +119,7 @@ MWC.prototype.extendApp = function (environment, settingsFunction) {
         });
       }
     } else {
-      throw new Error('Wrong arguments for setAppParameters(arrayOrStringOfEnvironments,settingsFunction)');
+      throw new Error('Wrong arguments for extendApp(arrayOrStringOfEnvironments,settingsFunction)');
     }
     return this;
   }
@@ -147,14 +147,18 @@ MWC.prototype.extendMiddlewares = function (environment, path, settingsFunction)
         environmentToUse = environment;
         for (var i = 0; i < environment.length;i++){
           if(typeof environment[i] !== 'string'){
-            throw new Error('#MWC.setAppParameters requires environment name to be a string!');
+            throw new Error('#MWC.extendMiddlewares requires environment name to be a string!');
           }
         }
       }
-      if (typeof path === 'string' && /^\//.test(path)) {
-        pathToUse = path;
-        if (typeof settingsFunction === 'function') {
-          settingsFunctionToUse = settingsFunction;
+      if (typeof path === 'string') {
+        if(/^\//.test(path)){
+          pathToUse = path;
+          if (typeof settingsFunction === 'function') {
+            settingsFunctionToUse = settingsFunction;
+          }
+        } else {
+          throw new Error('#MWC.extendMiddlewares path to be a middleware valid path, that starts from "/"!');
         }
       } else {
         if (typeof path === 'function') {
@@ -180,7 +184,7 @@ MWC.prototype.extendMiddlewares = function (environment, path, settingsFunction)
         });
       }
     } else {
-      throw new Error('Wrong arguments for function MWC.setAppMiddlware(environmentArrayOrStrings, [path], settingsFunction(core){...})');
+      throw new Error('Wrong arguments for function MWC.extendMiddlewares(environmentArrayOrStrings, [path], settingsFunction(core){...})');
     }
     return this;
   }
