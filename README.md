@@ -391,7 +391,7 @@ This is typicale plugin code. It is placed there
 [https://github.com/mywebclass/mwc_plugin_example](https://github.com/mywebclass/mwc_plugin_example)
 
 *Important* - when you create plugin, the `extendApp`, `extendMiddlewares` APPLIES to all enviroments!
-Furthemore, `extendMiddlewares` binds to route '/'
+Furthermore, `extendMiddlewares` binds to route '/'
 
 ```javascript
 var os = require('os');
@@ -485,7 +485,7 @@ MWC.extendCore = function(core) {
 }
 ```
 
-And this code will be erroneus, because it violates the desired lifespan of application.
+And this code will be erroneous, because it violates the desired lifespan of application.
 Because on stage of extending core, there is no core.app variable.
 
 This is the way of things it is intended to work

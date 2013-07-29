@@ -28,6 +28,7 @@
     "passport-github": "*",
     "passport-twitter": "*",
     "passport-facebook": "*",
+    "passport-linkedin":"*",
     "mongoose": "*",
     "mongoose-types": "*",
     "hat": "*",

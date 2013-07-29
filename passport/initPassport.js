@@ -6,14 +6,47 @@ var async = require('async'),
   GoogleStrategy = require('passport-google').Strategy,
   GitHubStrategy = require('passport-github').Strategy,
   TwitterStrategy = require('passport-twitter').Strategy,
-  FacebookStrategy = require('passport-facebook').Strategy;
+  FacebookStrategy = require('passport-facebook').Strategy,
+  LinkedInStrategy = require('passport-linkedin').Strategy;
 
 
 exports.doInitializePassportStrategies = function (passport, Users, config) {
+
+  function processProfile(profile, done) {
+    var email = profile.emails[0].value;
+    if (email) {
+      console.log('==============');
+      console.log(profile);
+      console.log('==============');
+      Users.findOne({'email': email}, function (err, userFound) {
+        if (err) {
+          return done(err, false, {'message': 'Database broken...'});
+        } else {
+          console.log('==============');
+          console.log(userFound);
+          console.log('==============');
+          if (err) {
+            return done(err);
+          } else {
+            if (userFound) {
+              return done(err, userFound, {message: 'Welcome, ' + userFound.username});
+            } else {
+              Users.signUpByEmailOnly(email, function (err1, userCreated) {
+                return done(err1, userCreated, { message: 'Please, complete your account!' });
+              });
+            }
+          }
+        }
+      });
+    } else {
+      return done(new Error('There is something strange instead of user profile'));
+    }
+  };
+
   //initializing passport strategies
   passport.use(new LocalStrategy(
     function (username, password, done) {
-      Users.findOne({username: username, active: true}, function (err, user) {
+      Users.findOne({username: username}, function (err, user) {
         if (err) {
           return done(err, false, {'message': 'Database broken...'});
         } else {
@@ -33,7 +66,9 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
 
   //used for verify account by email
   passport.use(new HashStrategy(function(hash,done){
-    //todo - need to refactor user class for it...
+    Users.findOneByApiKeyAndVerify(hash,function(err,userFound){
+      done(err,userFound);
+    });
   }));
 
   passport.use(new GoogleStrategy({
@@ -41,40 +76,17 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
       realm: config.hostUrl
     },
     function (identifier, profile, done) {
-      var email = profile.emails[0].value;
-      console.log(profile);
-      Users.findOne({'email': email, active: true}, function (err, userFound) {
-        console.log(userFound);
-        if (userFound) {
-          done(err, userFound, {message: 'Welcome, ' + userFound.username});
-        } else {
-          //model.UserModel.create({email:email},function(err,userCreated){
-          done(err, false, { message: 'Access denied!' });//todo - i am not sure if user can register by singing in with Google Acount
-          //});
-        }
-      });
+      return processProfile(profile,done);
     }
   ));
 
   if (config.passport && config.passport.GITHUB_CLIENT_ID && config.passport.GITHUB_CLIENT_SECRET) {
-    //if we have set parameters for github, enable the github passport strategy
     passport.use(new GitHubStrategy({
       clientID: config.passport.GITHUB_CLIENT_ID,
       clientSecret: config.passport.GITHUB_CLIENT_SECRET,
       callbackURL: config.hostUrl + 'auth/github/callback'
     }, function (accessToken, refreshToken, profile, done) {
-      var email = profile.emails[0].value;
-      console.log(profile);
-      Users.findOne({'email': email, active: true}, function (err, userFound) {
-        console.log(userFound);
-        if (userFound) {
-          done(err, userFound, {message: 'Welcome, ' + userFound.username});
-        } else {
-          //model.UserModel.create({email:email},function(err,userCreated){
-          done(err, false, { message: 'Access denied!' });//todo - i am not sure if user can register by singing in with Github Account
-          //});
-        }
-      });
+      return processProfile(profile,done);
     }));
   }
 
@@ -84,18 +96,7 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
       consumerSecret: config.passport.TWITTER_CONSUMER_SECRET,
       callbackURL: config.hostUrl + 'auth/twitter/callback'
     }, function (token, tokenSecret, profile, done) {
-      var email = profile.emails[0].value;
-      console.log(profile);
-      Users.findOne({'email': email, active: true}, function (err, userFound) {
-        console.log(userFound);
-        if (userFound) {
-          done(err, userFound, {message: 'Welcome, ' + userFound.username});
-        } else {
-          //model.UserModel.create({email:email},function(err,userCreated){
-          done(err, false, { message: 'Access denied!' });//todo - i am not sure if user can register by singing in with Twitter Account
-          //});
-        }
-      });
+      return processProfile(profile,done);
     }));
   }
 
@@ -106,21 +107,21 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
         callbackURL: config.hostUrl + 'auth/facebook/callback'
       },
       function(accessToken, refreshToken, profile, done) {
-        var email = profile.emails[0].value;
-        console.log(profile);
-        Users.findOne({'email': email, active: true}, function (err, userFound) {
-          console.log(userFound);
-          if (userFound) {
-            done(err, userFound, {message: 'Welcome, ' + userFound.username});
-          } else {
-            //model.UserModel.create({email:email},function(err,userCreated){
-            done(err, false, { message: 'Access denied!' });//todo - i am not sure if user can register by singing in with Facebook Account
-            //});
-          }
-        });
+        return processProfile(profile,done);
       }));
   }
 
+  if (config.passport && config.passport.LINKEDIN_API_KEY && config.passport.LINKEDIN_SECRET_KEY) {
+    passport.use(new LinkedInStrategy({
+        consumerKey: config.passport.LINKEDIN_API_KEY,
+        consumerSecret: config.passport.LINKEDIN_SECRET_KEY,
+        callbackURL: config.hostUrl + 'auth/linkedin/callback'
+      },
+      function (token, tokenSecret, profile, done) {
+        return processProfile(profile, done);
+      }
+    ));
+  }
   //end of initializing passport strategies
 
   //Storing user in session, storage key is username
@@ -134,46 +135,25 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
     });
   });
   //end of setting passport
+};
 
 
-}
 exports.doInitializePassportRoutes = function (passport, app, config) {
 
   //registration by username, password and email
   //todo - implement the https://npmjs.org/packages/captcha
-  app.post('/auth/signup',function(request,response){
-    async.waterfall(
-      [
-        function (cb) {
-          request.MODEL.Users.create({
-            'username': request.body.username,
-            'email': request.body.email,
-            'apiKey': rack(),
-            'confirmation':{
-              'string':rack(),
-              'date': new Date()
-            }
-          }, function (err, userCreated) {
-            cb(err, userCreated);
-          });
-        },
-        function (userCreatedReadyForSettingPassword, cb) {
-          userCreatedReadyForSettingPassword.setPassword(request.params.password, function (err) {
-            cb(err,userCreatedReadyForSettingPassword);
-          });
-        },
-        function (userToNeNotified,cb){
-          //to be implemented
-          //userToNeNotified.notify()
-          cb(null, true)
+  app.post('/auth/signup', function (request, response) {
+    request.MODEL.Users.signUp(request.body.username, request.body.email, request.body.password,
+      function (err, userCreated) {
+        if (err) {
+          request.flash('error', err.message);
+        } else {
+          userCreated.notify({'type': 'email', 'subject': "Account confirmation", 'message': {'template': 'signin'}});
+          request.flash('info', 'You have been registered! Please, check your email for instructions!');
         }
-      ], function (err, result) {
-        if(err) throw err;
-        if(result){
-          request.flash('info','You have been registered! Please, check your email for instructions!');
-          response.redirect('/');
-        }
-      });
+        response.redirect('/');
+      }
+    );
   });
 
   //verify that login/email is not busy! - to be called by ajax
@@ -184,7 +164,7 @@ exports.doInitializePassportRoutes = function (passport, app, config) {
         if(username){
           if(/^[a-zA-Z0-9_]{3,32}$/.test(username)){ //username looks OK
             request.MODEL.Users.findOne({'username':username},function(err,userFound){
-              cb(err, userFound?true:false);
+              cb(err, (userFound?true:false));
             });
           } else {
             cb(null,false);//username looks bad
@@ -212,6 +192,38 @@ exports.doInitializePassportRoutes = function (passport, app, config) {
       if(err) throw err;
       response.json(results)
     });
+  });
+
+  //route to complete profile
+  app.post('/auth/completeProfile',function(request,response){
+    if(request.user){
+      request.user.completeProfile(request.body.username,request.body.password,function(err){
+        if(err){
+          request.flash('error',err.message);
+        } else {
+          request.flash('success','Thanks! Your profile is completed!')
+        }
+        response.redirect('back');
+      });
+    } else {
+      response.send(403);
+    }
+  });
+
+  app.post('/auth/resetPassword',function(request,response){
+    if(request.body.apiKey && request.body.password){
+      request.MODEL.Users.findOneByApiKeyAndResetPassword(request.body.apiKey, request.body.password, function(err){
+        if(err){
+          request.flash('error',err.message);
+        } else {
+          request.flash('success','Thanks! Your password is reseted!')
+        }
+        response.redirect('/');
+      });
+    } else {
+      response.send(400, 'Wrong request! apiKey and password are missed!');
+    }
+
   });
 
   //google works alwayes, it do not need tunning
@@ -244,6 +256,15 @@ exports.doInitializePassportRoutes = function (passport, app, config) {
     app.get('/auth/facebook/callback', passport.authenticate('facebook', { successRedirect: '/', failureRedirect: '/' }));
   }
 
+  if (config.passport && config.passport.LINKEDIN_API_KEY && config.passport.LINKEDIN_SECRET_KEY) {
+    app.get('/auth/linkedin',passport.authenticate('linkedin'),function(req, res){});
+    app.get('/auth/linkedin/callback',passport.authenticate('linkedin', { failureRedirect: '/' }),
+      function(req, res) {
+        res.redirect('/');
+      });
+  }
+
+  //acount confirmation by link in email
   app.get('/confirm/:hash',
     passport.authenticate('hash', { failureRedirect: '/' }),
     function(req, res) {

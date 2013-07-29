@@ -99,7 +99,7 @@ MWC.prototype.extendApp = function (environment, settingsFunction) {
         });
       }
     } else {
-      throw new Error('Wrong arguments for setAppParameters');
+      throw new Error('Wrong arguments for setAppParameters(arrayOrStringOfEnvironments,settingsFunction)');
     }
     return this;
   }
@@ -386,15 +386,11 @@ MWC.prototype.ready = function () {
   //extend vendored application middlewares settings
   thisMWC.extendMiddlewaresFunctions.map(function (middleware) {
     if (middleware.environment) {
-
       thisMWC.app.configure(middleware.environment, function () {
-        thisMWC.app.use(((middleware.path) ? (middleware.path) : '/'), middleware.SettingsFunction(thisMWC));
+        thisMWC.app.use(middleware.path, middleware.SettingsFunction(thisMWC));
       });
-
     } else {
-
-      thisMWC.app.use(((middleware.path) ? (middleware.path) : '/'), middleware.SettingsFunction(thisMWC));
-
+      thisMWC.app.use(middleware.path, middleware.SettingsFunction(thisMWC));
     }
   });
 
@@ -403,7 +399,8 @@ MWC.prototype.ready = function () {
   //initialize router middleware!!!
 
 
-  //setting error handler middlewares, after ROUTER middleware
+  //setting error handler middlewares, after ROUTER middleware,
+  // so we can simply throw errors in routes and they will be catch here!
   thisMWC.app.configure('development', function () {
     thisMWC.app.use(express.errorHandler());
   });
@@ -432,13 +429,22 @@ MWC.prototype.ready = function () {
     func(thisMWC);
   });
 
-  //autorize routes for passport
+  //set authorization routes for passport
   initPassport.doInitializePassportRoutes(passport, thisMWC.app, thisMWC.config);
 
   //catch all verb to show 404 error to wrong routes
   thisMWC.app.get('*', function (request, response) {
     response.send(404);
   });
+
+  process.on('SIGINT', function () {
+    console.log('MWC IS GOING TO SHUT DOWN....')
+    thisMWC.mongoose.connection.close();
+    // calling .shutdown allows your process to exit normally
+    toobusy.shutdown();
+    process.exit();
+  });
+
   return thisMWC;
 };
 
@@ -483,11 +489,6 @@ MWC.prototype.extendAppRoutes = function(settingsFunction){
 };
 
 
-process.on('SIGINT', function () {
-  //server.close(); //server is instantained somewere else...
-  // calling .shutdown allows your process to exit normally
-  toobusy.shutdown();
-  process.exit();
-});
+
 
 module.exports = exports = MWC;
