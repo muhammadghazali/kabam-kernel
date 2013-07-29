@@ -30,9 +30,7 @@
     "passport-facebook": "*",
     "passport-linkedin":"*",
     "mongoose": "*",
-    "mongoose-types": "*",
     "hat": "*",
-    "moment": "*",
     "toobusy": "*"
   },
   "devDependencies": {
