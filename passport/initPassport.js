@@ -11,21 +11,30 @@ var async = require('async'),
 
 
 exports.doInitializePassportStrategies = function (passport, Users, config) {
-  function processProfile(profile,done){
+
+  function processProfile(profile, done) {
     var email = profile.emails[0].value;
-    if(email){
+    if (email) {
+      console.log('==============');
       console.log(profile);
-      Users.findOne({'email': email, active: true}, function (err, userFound) {
+      console.log('==============');
+      Users.findOne({'email': email}, function (err, userFound) {
         if (err) {
           return done(err, false, {'message': 'Database broken...'});
         } else {
+          console.log('==============');
           console.log(userFound);
-          if (userFound) {
-            return done(err, userFound, {message: 'Welcome, ' + userFound.username});
+          console.log('==============');
+          if (err) {
+            return done(err);
           } else {
-            //model.UserModel.create({email:email},function(err,userCreated){
-            return done(err, false, { message: 'Access denied!' });//todo - i am not sure if user can register by singing in with Google Acount
-            //});
+            if (userFound) {
+              return done(err, userFound, {message: 'Welcome, ' + userFound.username});
+            } else {
+              Users.signUpByEmailOnly(email, function (err1, userCreated) {
+                return done(err1, userCreated, { message: 'Please, complete your account!' });
+              });
+            }
           }
         }
       });
@@ -34,12 +43,10 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
     }
   };
 
-
-
   //initializing passport strategies
   passport.use(new LocalStrategy(
     function (username, password, done) {
-      Users.findOne({username: username, active: true}, function (err, user) {
+      Users.findOne({username: username}, function (err, user) {
         if (err) {
           return done(err, false, {'message': 'Database broken...'});
         } else {
@@ -59,7 +66,9 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
 
   //used for verify account by email
   passport.use(new HashStrategy(function(hash,done){
-    //todo - need to refactor user class for it...
+    Users.findOneByApiKeyAndVerify(hash,function(err,userFound){
+      done(err,userFound);
+    });
   }));
 
   passport.use(new GoogleStrategy({
@@ -72,7 +81,6 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
   ));
 
   if (config.passport && config.passport.GITHUB_CLIENT_ID && config.passport.GITHUB_CLIENT_SECRET) {
-    //if we have set parameters for github, enable the github passport strategy
     passport.use(new GitHubStrategy({
       clientID: config.passport.GITHUB_CLIENT_ID,
       clientSecret: config.passport.GITHUB_CLIENT_SECRET,
@@ -127,9 +135,9 @@ exports.doInitializePassportStrategies = function (passport, Users, config) {
     });
   });
   //end of setting passport
+};
 
 
-}
 exports.doInitializePassportRoutes = function (passport, app, config) {
 
   //registration by username, password and email
@@ -184,6 +192,38 @@ exports.doInitializePassportRoutes = function (passport, app, config) {
       if(err) throw err;
       response.json(results)
     });
+  });
+
+  //route to complete profile
+  app.post('/auth/completeProfile',function(request,response){
+    if(request.user){
+      request.user.completeProfile(request.body.username,request.body.password,function(err){
+        if(err){
+          request.flash('error',err.message);
+        } else {
+          request.flash('success','Thanks! Your profile is completed!')
+        }
+        response.redirect('back');
+      });
+    } else {
+      response.send(403);
+    }
+  });
+
+  app.post('/auth/resetPassword',function(request,response){
+    if(request.body.apiKey && request.body.password){
+      request.MODEL.Users.findOneByApiKeyAndResetPassword(request.body.apiKey, request.body.password, function(err){
+        if(err){
+          request.flash('error',err.message);
+        } else {
+          request.flash('success','Thanks! Your password is reseted!')
+        }
+        response.redirect('/');
+      });
+    } else {
+      response.send(400, 'Wrong request! apiKey and password are missed!');
+    }
+
   });
 
   //google works alwayes, it do not need tunning
