@@ -468,9 +468,55 @@ describe('mwcCore', function() {
       });
     });
     describe('findOneByApiKeyAndResetPassword',function(){
+      var user,userWithPasswordReseted;
+      before(function(done){
+        async.waterfall([
 
+          function (cb) {
+            MWC.MODEL.Users.create({
+              'username': 'iForgotMyPassWordIamStupid',
+              'email': 'iForgotMyPassWordIamStupid@teksi.ru',
+              'apiKey': 'iForgotMyPassWordIamStupid1111',
+              'emailVerified': true,
+              'apiKeyCreatedAt': new Date()
+            }, function (err, userCreated) {
+              user=userCreated;
+              userCreated.setPassword('lalala',function(err){
+                cb(err, userCreated);
+              });
+            });
+          },
+          function(user1,cb){
+            MWC.MODEL.Users.findOneByApiKeyAndResetPassword('iForgotMyPassWordIamStupid1111','lalala2',function(err1,userChanged){
+              if(err1){
+                cb(err1);
+              } else {
+                cb(null,userChanged);
+              }
+            });
+          }
+        ],
+          function (err,userChanged2) {
+            if (err) {
+              throw err;
+            }
+            userWithPasswordReseted=userChanged2;
+            done();
+          });
+      });
 
+      it('it finds the user we created',function(){
+        userWithPasswordReseted._id.should.eql(user._id);
+      });
 
+      it('and the user have new password',function(){
+        userWithPasswordReseted.verifyPassword('lalala1').should.be.false;
+        userWithPasswordReseted.verifyPassword('lalala2').should.be.true;
+      });
+
+      after(function (done) {
+        user.remove(done);
+      });
     });
   });
 
@@ -504,8 +550,8 @@ describe('mwcCore', function() {
         user.revokeRole.should.be.a('function');
 
         user.notify.should.be.a('function');
-
         user.getGravatar.should.be.a('function');
+        user.completeProfile.should.be.a('function');
       });
 
       it('user instance creates a proper gravatar url', function () {
@@ -550,7 +596,7 @@ describe('mwcCore', function() {
         user.remove(done)
       });
     });
-    describe('functions invalidateSession', function () {
+    describe('function invalidateSession', function () {
       var user;
       before(function (done) {
         MWC.MODEL.Users.create({
@@ -585,7 +631,7 @@ describe('mwcCore', function() {
         user.remove(done)
       });
     });
-    describe('functions hasRole',function(){
+    describe('function hasRole',function(){
       var user;
       before(function(done){
         MWC.MODEL.Users.create({
@@ -614,7 +660,7 @@ describe('mwcCore', function() {
       });
     });
 
-    describe('functions grantRole',function(){
+    describe('function grantRole',function(){
       var userWithRole;
       before(function(done){
         async.waterfall(
@@ -654,7 +700,7 @@ describe('mwcCore', function() {
       });
     });
 
-    describe('functions revokeRole',function(){
+    describe('function revokeRole',function(){
       var userWithOutRole;
       before(function(done){
         async.waterfall(
@@ -697,7 +743,7 @@ describe('mwcCore', function() {
       });
     });
 
-    describe('testing user notify',function(){
+    describe('function notify',function(){
       var user,
         messageObj;
       before(function(done){
@@ -726,6 +772,51 @@ describe('mwcCore', function() {
         messageObj.type.should.be.equal('text');
         messageObj.user.should.eql(user);
         messageObj.message.should.be.equal('Hello!');
+      });
+
+      after(function(done){
+        user.remove(done);
+      });
+    });
+
+    describe('completeProfile',function(){
+      var user,userCompleted;
+      before(function(done){
+        MWC.MODEL.Users.create({
+          'email': 'emptyness@teksi.ru',
+          'apiKey':'lalala1',
+          'profileComplete':false,
+          'emailVerified':true
+        }, function (err, userCreated) {
+          if (err) {
+            throw err;
+          }
+          user = userCreated;
+          userCreated.completeProfile('Anatolij','thePerpendicularReality',function(err1){
+            if(err1) throw err1;
+            MWC.MODEL.Users.findOneByLoginOrEmail('Anatolij',function(err2,userFound){
+              if(err2) throw err2;
+              userCompleted=userFound;
+              done();
+            });
+          });
+        });
+      });
+
+      it('it finds the user we created',function(){
+        userCompleted._id.should.eql(user._id);
+      });
+
+      it('set profileComplete to TRUE',function(){
+        userCompleted.profileComplete.should.be.true;
+      });
+
+      it('sets the username properly', function(){
+        userCompleted.username.should.be.equal('Anatolij');
+      });
+
+      it('sets the password properly', function(){
+        userCompleted.verifyPassword('thePerpendicularReality').should.be.true;
       });
 
       after(function(done){

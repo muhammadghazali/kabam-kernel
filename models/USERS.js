@@ -200,6 +200,7 @@ module.exports = exports = function (core) {
   UserSchema.methods.completeProfile = function(username,password,callback){
     if(typeof this.username === 'undefined' && this.profileComplete === false){
       this.username = username;
+      this.profileComplete = true;
       this.setPassword(password,callback);
     } else {
       callback(new Error('Account is completed!'));
@@ -229,7 +230,7 @@ module.exports = exports = function (core) {
       if(err) {
         callback(err);
       } else {
-        if(userFound && (new Date().getTime() - userFound.apiKeyCreatedAt.getTime())>30*60*1000){
+        if(userFound && (new Date().getTime() - userFound.apiKeyCreatedAt.getTime())<30*60*1000){
           userFound.setPassword(password,function(err1){
             callback(err1,userFound);
           });
