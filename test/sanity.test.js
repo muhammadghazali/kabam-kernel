@@ -11,10 +11,83 @@ var should = require('should'),
 
 
 describe('sanity test', function () {
+  describe('MWC throws errors when we have strange config object',function(){
+
+    it('throws proper error for empty config object', function () {
+      (function () {
+        var MWC = new mwcCore();
+      }).should.throw('Config is not an object!');
+    });
+
+    it('throws proper error for config object being not object', function () {
+      (function () {
+        var MWC = new mwcCore('I am pineapple!');
+      }).should.throw('Config is not an object!');
+    });
 
 
+    it('throws proper error for config without hostUrl', function () {
+      (function () {
+        var MWC = new mwcCore({'hostUrl':null});
+      }).should.throw('Config.hostUrl have to be valid hostname - for example, http://example.org/ with http(s) on start and "/" at end!!!');
+    });
 
-  describe('MWC throws errors when we try to call extending function with strange arguments', function () {
+    it('throws proper error for config with bad hostUrl', function () {
+      (function () {
+        var MWC = new mwcCore({'hostUrl':'I am pineapple!'});
+      }).should.throw('Config.hostUrl have to be valid hostname - for example, http://example.org/ with http(s) on start and "/" at end!!!');
+    });
+
+    it('throws proper error for undefined secret string', function () {
+      (function () {
+        var MWC = new mwcCore({'hostUrl':'http://example.org/'});
+      }).should.throw('Config.secret is not set or is to short!');
+    });
+
+    it('throws proper error for short secret string', function () {
+      (function () {
+        var MWC = new mwcCore({'hostUrl':'http://example.org/', secret:'123'});
+      }).should.throw('Config.secret is not set or is to short!');
+    });
+
+    it('throws proper error for empty mongoUrl string', function () {
+      (function () {
+        var MWC = new mwcCore({'hostUrl':'http://example.org/', secret:'lalalalala1111'});
+      }).should.throw('Config.mongoUrl have to be valid mongoose URI - for example mongodb://user111:111password111@localhost:10053/app111');
+    });
+
+    it('throws proper error for "I am banana!" mongoUrl string', function () {
+      (function () {
+        var MWC = new mwcCore({'hostUrl':'http://example.org', secret:'lalalalala1111', 'mongoUrl':'I am banana!'});
+      }).should.throw('Config.mongoUrl have to be valid mongoose URI - for example mongodb://user111:111password111@localhost:10053/app111');
+    });
+
+    it('throws proper error for redis object without host, port', function () {
+      (function () {
+        var MWC = new mwcCore({
+          'hostUrl':'http://example.org',
+          'secret':'lalalalala1111',
+          'mongoUrl':'mongodb://user111:111password111@localhost:10053/app111',
+          'redis':{'notHost':'localhost', 'notPort':6379}
+        });
+      }).should.throw('Config.redis have to be a string like redis://usernameIgnored:password@localhost:6379 or object like { "host":"localhost","port":6379 }');
+    });
+
+    it('throws proper error for "I am banana!" as redis string', function () {
+      (function () {
+        var MWC = new mwcCore({
+          'hostUrl':'http://example.org',
+          'secret':'lalalalala1111',
+          'mongoUrl':'mongodb://user111:111password111@localhost:10053/app111',
+          'redis':"I am banana!"
+        });
+
+      }).should.throw('Config.redis have to be a string like redis://usernameIgnored:password@localhost:6379 or object like { "host":"localhost","port":6379 }');
+    });
+  });
+
+
+  describe('MWC throws errors when we try to call extending functions with strange arguments', function () {
 
     it('throws proper error for MWC.extendCore("i am pineapple!");', function () {
       (function () {
@@ -50,7 +123,6 @@ describe('sanity test', function () {
         MWC.extendRoutes('i am pineapple!');
       }).should.throw('Wrong argument for MWC.extendAppRoutes(function(core){...});');
     });
-
 
   });
 

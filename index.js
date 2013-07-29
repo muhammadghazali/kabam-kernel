@@ -25,6 +25,26 @@ var EventEmitter = require('events').EventEmitter,
   toobusy = require('toobusy');
 
 function MWC(config) {
+  if(typeof config !== 'object'){
+    throw new Error('Config is not an object!');
+  }
+  if(!(config.hostUrl && url.parse(config.hostUrl)['hostname'])){
+    throw new Error('Config.hostUrl have to be valid hostname - for example, http://example.org/ with http(s) on start and "/" at end!!!');
+  }
+
+  if(!(config.secret && config.secret.length>9)){
+    throw new Error('Config.secret is not set or is to short!');
+  }
+
+  if(!(config.mongoUrl && url.parse(config.mongoUrl)['protocol']=== 'mongodb:')){
+    throw new Error('Config.mongoUrl have to be valid mongoose URI - for example mongodb://user111:111password111@localhost:10053/app111');
+  }
+
+  if(config.redis){
+    if(!((config.redis.port && config.redis.host) || typeof config.redis === 'string' && url.parse(config.redis)['protocol']=== 'redis:')){
+      throw new Error('Config.redis have to be a string like redis://usernameIgnored:password@localhost:6379 or object like { "host":"localhost","port":6379 }');
+    }
+  }
   EventEmitter.call(this);
   this.config = config;
   this.extendCoreFunctions = [];
