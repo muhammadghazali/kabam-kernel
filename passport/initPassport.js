@@ -216,7 +216,7 @@ exports.doInitializePassportRoutes = function (passport, app, config) {
         if(err){
           request.flash('error',err.message);
         } else {
-          request.flash('success','Thanks! Your password is reseted!')
+          request.flash('success','Thanks! Your password is reset!')
         }
         response.redirect('/');
       });
