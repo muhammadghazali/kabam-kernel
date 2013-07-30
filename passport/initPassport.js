@@ -13,11 +13,11 @@ var async = require('async'),
 exports.doInitializePassportStrategies = function (passport, Users, config) {
 
   function processProfile(profile, done) {
+    console.log('==============');
+    console.log(profile);
+    console.log('==============');
     var email = profile.emails[0].value;
     if (email) {
-      console.log('==============');
-      console.log(profile);
-      console.log('==============');
       Users.findOne({'email': email}, function (err, userFound) {
         if (err) {
           return done(err, false, {'message': 'Database broken...'});
