@@ -401,6 +401,7 @@ MWC.prototype.ready = function () {
       thisMWC.app.locals.myself = request.user; //inject user's model values to template
     }
     thisMWC.app.locals.flash = request.flash();
+    thisMWC.app.locals.hostUrl = thisMWC.config.hostUrl;
     request.MODEL = thisMWC.MODEL;
     request.redisClient = thisMWC.redisClient;
     request.emitMWC = function (eventName, eventContent) {
