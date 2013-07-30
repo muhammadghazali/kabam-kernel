@@ -148,7 +148,7 @@ exports.doInitializePassportRoutes = function (passport, app, config) {
         if (err) {
           request.flash('error', err.message);
         } else {
-          userCreated.notify({'type': 'email', 'subject': "Account confirmation", 'message': {'template': 'signin'}});
+          userCreated.notify({'type':'email','subject': "Account confirmation", 'template': 'signin'});
           request.flash('info', 'You have been registered! Please, check your email for instructions!');
         }
         response.redirect('/');
@@ -265,7 +265,7 @@ exports.doInitializePassportRoutes = function (passport, app, config) {
   }
 
   //acount confirmation by link in email
-  app.get('/confirm/:hash',
+  app.get('/auth/confirm/:hash',
     passport.authenticate('hash', { failureRedirect: '/' }),
     function(req, res) {
       res.redirect('/');
