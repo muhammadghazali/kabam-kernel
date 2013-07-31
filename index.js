@@ -517,6 +517,8 @@ MWC.prototype.extendAppRoutes = function(settingsFunction){
 };
 
 
-
+MWC.create = function(config){
+  return new MWC(config);
+}
 
 module.exports = exports = MWC;
