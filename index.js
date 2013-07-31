@@ -504,9 +504,9 @@ MWC.prototype.setAppParameters = function(environment, settingsFunction){
   return this;
 };
 
-MWC.prototype.setAppMiddlewares = function(environment, path, settingsFunctio){
+MWC.prototype.setAppMiddlewares = function(environment, path, settingsFunction){
   console.log('setAppMiddlewares is outdated, use extendMiddlewares with the same syntax');
-  this.extendMiddlewares(environment, path, settingsFunctio);
+  this.extendMiddlewares(environment, path, settingsFunction);
   return this;
 };
 
@@ -521,4 +521,4 @@ MWC.create = function(config){
   return new MWC(config);
 }
 
-module.exports = exports = MWC;
+module.exports = exports = MWC.create;

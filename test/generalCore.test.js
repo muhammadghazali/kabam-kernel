@@ -7,7 +7,7 @@ var should = require('should'),
   config = require('./../example/config.json').development,
   request = require('request');
 
-var MWC = mwcCore.create(config);
+var MWC = mwcCore(config);
 
 /*
  * Extending core
