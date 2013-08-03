@@ -137,7 +137,7 @@ try{
 //api/documents works from box
 
 //binding application to port
-MWC.listen(3000);
+MWC.listen();
 
 //testing custom function defined on line 10
 console.log('Sum of 2 and 2 is ' + MWC.getSum(2, 2));
