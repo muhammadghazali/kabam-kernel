@@ -833,7 +833,7 @@ describe('mwcCore', function() {
 
   describe('#MWC.extendCore()', function() {
 
-    it('adds the extending core function to array of MWC.setCoreFunctions', function() {
+    it('adds the extending core function to array of MWC._extendCoreFunctions', function() {
       MWC._extendCoreFunctions.should.be.an.instanceOf(Array);
       MWC._extendCoreFunctions.should.include(extendCoreFunction);
     });
@@ -954,7 +954,7 @@ describe('mwcCore', function() {
 
   describe('#MWC.extendRoutes()', function() {
 
-    it('adds the desired functions to MWC.setAppRoutesFunctions',function(){
+    it('adds the desired functions to MWC._extendRoutesFunctions',function(){
       if(typeof process.env.NODE_ENV !== 'undefined'){
         process.env.NODE_ENV.should.be.equal('development');
       }
@@ -992,7 +992,7 @@ describe('mwcCore', function() {
   describe('#MWC.usePlugin(object)', function () {
 
     describe('extendCore from plugin', function () {
-      it('it adds the extending core function to array of #MWC.setCoreFunctions', function () {
+      it('it adds the extending core function to array of #MWC._extendCoreFunctions', function () {
         MWC._extendCoreFunctions.should.be.an.instanceOf(Array);
         MWC._extendCoreFunctions.should.include(extendCoreFunctionPlugin);
       });
@@ -1088,7 +1088,7 @@ describe('mwcCore', function() {
 
     describe('extendRoutes from plugin',function(){
 
-      it('adds the desired functions to MWC.setAppRoutesFunctions',function(){
+      it('adds the desired functions to MWC._extendRoutesFunctions',function(){
         if(typeof process.env.NODE_ENV !== 'undefined'){
           process.env.NODE_ENV.should.be.equal('development');
         }
