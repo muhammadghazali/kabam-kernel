@@ -168,11 +168,11 @@ describe('mwcCore', function() {
     });
 
     it('exposes mongoose model',function(){
-      MWC.MODEL.should.be.a('object');
+      MWC.model.should.be.a('object');
     });
 
     it('exposes mongoose model of users', function() {
-      MWC.MODEL.Users.should.be.a('function');
+      MWC.model.Users.should.be.a('function');
     });
 
     it('exposes an ExpressJS application', function() {
@@ -257,47 +257,47 @@ describe('mwcCore', function() {
   });
   describe('Testing mwc_core mongoose model of users:', function(){
     it('exposes function find',function(){
-      MWC.MODEL.Users.find.should.be.a('function');
+      MWC.model.Users.find.should.be.a('function');
     });
     it('exposes function findOne',function(){
-      MWC.MODEL.Users.findOne.should.be.a('function');
+      MWC.model.Users.findOne.should.be.a('function');
     });
     it('exposes function findOneByLoginOrEmail',function(){
-      MWC.MODEL.Users.findOneByLoginOrEmail.should.be.a('function');
+      MWC.model.Users.findOneByLoginOrEmail.should.be.a('function');
     });
     it('exposes function findOneByApiKey',function(){
-      MWC.MODEL.Users.findOneByApiKey.should.be.a('function');
+      MWC.model.Users.findOneByApiKey.should.be.a('function');
     });
     it('exposes function count',function(){
-      MWC.MODEL.Users.count.should.be.a('function');
+      MWC.model.Users.count.should.be.a('function');
     });
     it('exposes function remove',function(){
-      MWC.MODEL.Users.remove.should.be.a('function');
+      MWC.model.Users.remove.should.be.a('function');
     });
     it('exposes function create',function(){
-      MWC.MODEL.Users.create.should.be.a('function');
+      MWC.model.Users.create.should.be.a('function');
     });
 
     it('exposes function getByRole',function(){
-      MWC.MODEL.Users.getByRole.should.be.a('function');
+      MWC.model.Users.getByRole.should.be.a('function');
     });
 
     it('exposes function signUp',function(){
-      MWC.MODEL.Users.signUp.should.be.a('function');
+      MWC.model.Users.signUp.should.be.a('function');
     });
 
     it('exposes function findOneByApiKeyAndVerify',function(){
-      MWC.MODEL.Users.findOneByApiKeyAndVerify.should.be.a('function');
+      MWC.model.Users.findOneByApiKeyAndVerify.should.be.a('function');
     });
 
     it('exposes function findOneByApiKeyAndResetPassword',function(){
-      MWC.MODEL.Users.findOneByApiKeyAndResetPassword.should.be.a('function');
+      MWC.model.Users.findOneByApiKeyAndResetPassword.should.be.a('function');
     });
-    
+
     describe('finders',function(){
       var usersFound;
       before(function (done) {
-        MWC.MODEL.Users.create({
+        MWC.model.Users.create({
           'username': 'testSubject47111',
           'email': 'ostroumov4@teksi.ru',
           'apiKey': 'vseBydetHorosho'
@@ -307,13 +307,13 @@ describe('mwcCore', function() {
           }
           async.parallel({
             'byLogin':function(cb){
-              MWC.MODEL.Users.findOneByLoginOrEmail('testSubject47111',cb);
+              MWC.model.Users.findOneByLoginOrEmail('testSubject47111',cb);
             },
             'byEmail':function(cb){
-              MWC.MODEL.Users.findOneByLoginOrEmail('ostroumov4@teksi.ru',cb);
+              MWC.model.Users.findOneByLoginOrEmail('ostroumov4@teksi.ru',cb);
             },
             'byApiKey':function(cb){
-              MWC.MODEL.Users.findOneByApiKey('vseBydetHorosho',cb);
+              MWC.model.Users.findOneByApiKey('vseBydetHorosho',cb);
             },
             'created':function(cb){
               cb(null,userCreated);
@@ -352,7 +352,7 @@ describe('mwcCore', function() {
     describe('signUp',function(){
       var user;
       before(function(done){
-        MWC.MODEL.Users.signUp('johndoe','johndoe@example.org','waterfall',function(err,userCreated){
+        MWC.model.Users.signUp('johndoe','johndoe@example.org','waterfall',function(err,userCreated){
           if(err) throw err;
           user=userCreated;
           done();
@@ -399,7 +399,7 @@ describe('mwcCore', function() {
     describe('signUpByEmailOnly',function(){
       var user;
       before(function(done){
-        MWC.MODEL.Users.signUpByEmailOnly('johndoe@example.org',function(err,userCreated){
+        MWC.model.Users.signUpByEmailOnly('johndoe@example.org',function(err,userCreated){
           if(err) throw err;
           user=userCreated;
           done();
@@ -439,7 +439,7 @@ describe('mwcCore', function() {
     describe('findOneByApiKeyAndVerify',function(){
       var user,userBeingActivated;
       before(function (done) {
-        MWC.MODEL.Users.create({
+        MWC.model.Users.create({
           'username': 'oneByApiKey',
           'email': 'oneByApiKey@teksi.ru',
           'apiKey': 'vseBydetHoroshooneByApiKey',
@@ -448,7 +448,7 @@ describe('mwcCore', function() {
         }, function (err, userCreated) {
           if(err) throw err;
           user=userCreated;
-          MWC.MODEL.Users.findOneByApiKeyAndVerify('vseBydetHoroshooneByApiKey',function(err,userActivated){
+          MWC.model.Users.findOneByApiKeyAndVerify('vseBydetHoroshooneByApiKey',function(err,userActivated){
             userBeingActivated=userActivated;
             done();
           });
@@ -473,7 +473,7 @@ describe('mwcCore', function() {
         async.waterfall([
 
           function (cb) {
-            MWC.MODEL.Users.create({
+            MWC.model.Users.create({
               'username': 'iForgotMyPassWordIamStupid',
               'email': 'iForgotMyPassWordIamStupid@teksi.ru',
               'apiKey': 'iForgotMyPassWordIamStupid1111',
@@ -487,7 +487,7 @@ describe('mwcCore', function() {
             });
           },
           function(user1,cb){
-            MWC.MODEL.Users.findOneByApiKeyAndResetPassword('iForgotMyPassWordIamStupid1111','lalala2',function(err1,userChanged){
+            MWC.model.Users.findOneByApiKeyAndResetPassword('iForgotMyPassWordIamStupid1111','lalala2',function(err1,userChanged){
               if(err1){
                 cb(err1);
               } else {
@@ -527,7 +527,7 @@ describe('mwcCore', function() {
       var user;
 
       before(function (done) {
-        MWC.MODEL.Users.create({
+        MWC.model.Users.create({
           'username': 'test888',
           'email': 'ostroumov@teksi.ru',
           'apiKey':'lalala1'
@@ -565,7 +565,7 @@ describe('mwcCore', function() {
     describe('functions setPassword, verifyPassword', function () {
       var user;
       before(function (done) {
-        MWC.MODEL.Users.create({
+        MWC.model.Users.create({
           'username': 'testSubject47_1',
           'email': 'ostroumov3@teksi.ru',
           'apiKey':'lalala1_1'
@@ -599,7 +599,7 @@ describe('mwcCore', function() {
     describe('function invalidateSession', function () {
       var user;
       before(function (done) {
-        MWC.MODEL.Users.create({
+        MWC.model.Users.create({
           'username': 'testSubject47_2',
           'email': 'ostroumov_3@teksi.ru',
           'apiKey': 'lalalaDaiMne3Ryblya'
@@ -611,7 +611,7 @@ describe('mwcCore', function() {
             if (err2) {
               throw err2;
             }
-            MWC.MODEL.Users.findOne({'username': 'testSubject47_2'}, function (err3, userFound) {
+            MWC.model.Users.findOne({'username': 'testSubject47_2'}, function (err3, userFound) {
               if (err3) {
                 throw err3;
               }
@@ -634,7 +634,7 @@ describe('mwcCore', function() {
     describe('function hasRole',function(){
       var user;
       before(function(done){
-        MWC.MODEL.Users.create({
+        MWC.model.Users.create({
           'username': 'test888',
           'email': 'ostroumov@teksi.ru',
           'apiKey':'lalala1',
@@ -666,21 +666,21 @@ describe('mwcCore', function() {
         async.waterfall(
           [
             function(cb){
-              MWC.MODEL.Users.create({
+              MWC.model.Users.create({
                 'username': 'test888',
                 'email': 'ostroumov@teksi.ru',
                 'apiKey':'lalala1'
               },cb);
             },
             function(aaa,cb){
-              MWC.MODEL.Users.findOneByLoginOrEmail('test888',function(err,userFound){
+              MWC.model.Users.findOneByLoginOrEmail('test888',function(err,userFound){
                 userFound.grantRole('role2',function(err){
                   cb(err,true);
                 });
               });
             },
             function(granted,cb){
-              MWC.MODEL.Users.findOneByLoginOrEmail('test888',function(err,userFound){
+              MWC.model.Users.findOneByLoginOrEmail('test888',function(err,userFound){
                 cb(err,userFound);
               });
             }
@@ -706,7 +706,7 @@ describe('mwcCore', function() {
         async.waterfall(
           [
             function(cb){
-              MWC.MODEL.Users.create({
+              MWC.model.Users.create({
                 'username': 'test888',
                 'email': 'ostroumov@teksi.ru',
                 'apiKey':'lalala1',
@@ -714,14 +714,14 @@ describe('mwcCore', function() {
               },cb);
             },
             function(aaa,cb){
-              MWC.MODEL.Users.findOneByLoginOrEmail('test888',function(err,userFound){
+              MWC.model.Users.findOneByLoginOrEmail('test888',function(err,userFound){
                 userFound.revokeRole('role2',function(err){
                   cb(err,true);
                 });
               });
             },
             function(granted,cb){
-              MWC.MODEL.Users.findOneByLoginOrEmail('test888',function(err,userFound){
+              MWC.model.Users.findOneByLoginOrEmail('test888',function(err,userFound){
                 cb(err,userFound);
               });
             }
@@ -747,7 +747,7 @@ describe('mwcCore', function() {
       var user,
         messageObj;
       before(function(done){
-        MWC.MODEL.Users.create({
+        MWC.model.Users.create({
           'username': 'test888',
           'email': 'ostroumov@teksi.ru',
           'apiKey':'lalala1'
@@ -782,7 +782,7 @@ describe('mwcCore', function() {
     describe('completeProfile',function(){
       var user,userCompleted;
       before(function(done){
-        MWC.MODEL.Users.create({
+        MWC.model.Users.create({
           'email': 'emptyness@teksi.ru',
           'apiKey':'lalala1',
           'profileComplete':false,
@@ -794,7 +794,7 @@ describe('mwcCore', function() {
           user = userCreated;
           userCreated.completeProfile('Anatolij','thePerpendicularReality',function(err1){
             if(err1) throw err1;
-            MWC.MODEL.Users.findOneByLoginOrEmail('Anatolij',function(err2,userFound){
+            MWC.model.Users.findOneByLoginOrEmail('Anatolij',function(err2,userFound){
               if(err2) throw err2;
               userCompleted=userFound;
               done();
@@ -848,24 +848,24 @@ describe('mwcCore', function() {
     it('adds the extending model function to array of #MWC.additionalModels',function(){
       MWC.additionalModels.should.includeEql({'name':'Cats','initFunction':extendModelFunction});
     });
-    it('adds the model of "Cats" to #MWC.MODEL.Cats',function(){
-      MWC.MODEL.Cats.should.be.a('function');
+    it('adds the model of "Cats" to #MWC.model.Cats',function(){
+      MWC.model.Cats.should.be.a('function');
     });
     describe('and the "Cats" model looks like mongoose model',function(){
       it('exposes function find',function(){
-        MWC.MODEL.Cats.find.should.be.a('function');
+        MWC.model.Cats.find.should.be.a('function');
       });
       it('exposes function findOne',function(){
-        MWC.MODEL.Cats.findOne.should.be.a('function');
+        MWC.model.Cats.findOne.should.be.a('function');
       });
       it('exposes function count',function(){
-        MWC.MODEL.Cats.count.should.be.a('function');
+        MWC.model.Cats.count.should.be.a('function');
       });
       it('exposes function remove',function(){
-        MWC.MODEL.Cats.remove.should.be.a('function');
+        MWC.model.Cats.remove.should.be.a('function');
       });
       it('exposes function create',function(){
-        MWC.MODEL.Cats.create.should.be.a('function');
+        MWC.model.Cats.create.should.be.a('function');
       });
     });
   });
@@ -1007,24 +1007,24 @@ describe('mwcCore', function() {
       it('adds the extending model function to array of #MWC.additionalModels',function(){
         MWC.additionalModels.should.includeEql({'name':'Dogs','initFunction':extendModelFunctionPlugin});
       });
-      it('adds the model of "Dogs" to #MWC.MODEL.Dogs',function(){
-        MWC.MODEL.Dogs.should.be.a('function');
+      it('adds the model of "Dogs" to #MWC.model.Dogs',function(){
+        MWC.model.Dogs.should.be.a('function');
       });
       describe('and the "Dogs" model looks like mongoose model',function(){
         it('exposes function find',function(){
-          MWC.MODEL.Dogs.find.should.be.a('function');
+          MWC.model.Dogs.find.should.be.a('function');
         });
         it('exposes function findOne',function(){
-          MWC.MODEL.Dogs.findOne.should.be.a('function');
+          MWC.model.Dogs.findOne.should.be.a('function');
         });
         it('exposes function count',function(){
-          MWC.MODEL.Dogs.count.should.be.a('function');
+          MWC.model.Dogs.count.should.be.a('function');
         });
         it('exposes function remove',function(){
-          MWC.MODEL.Dogs.remove.should.be.a('function');
+          MWC.model.Dogs.remove.should.be.a('function');
         });
         it('exposes function create',function(){
-          MWC.MODEL.Dogs.create.should.be.a('function');
+          MWC.model.Dogs.create.should.be.a('function');
         });
       });
     });

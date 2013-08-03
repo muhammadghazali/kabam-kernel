@@ -8,13 +8,13 @@ var EventEmitter = require('events').EventEmitter,
   mongoose = require('mongoose'),
   redis = require('redis'),
 
-  usersModel = require('./models/USERS.js'),
+  usersModel = require('./models/Users.js'),
 
   http = require('http'),
   https = require('https'),
 //passport middleware
   passport = require('passport'),
-  initPassport = require('./passport/initPassport.js'),
+  initPassport = require('./lib/passport/initPassport.js'),
 
 //session storage
   RedisStore = require('connect-redis')(express),
@@ -309,7 +309,7 @@ MWC.prototype.ready = function () {
   });
   var Users = usersModel(thisMWC);
 
-  thisMWC.MODEL = {
+  thisMWC.model = {
     'Users': Users
   };
   //doing extendCore
@@ -320,7 +320,7 @@ MWC.prototype.ready = function () {
 
   //loading custom models //todo - maybe redo
   thisMWC.additionalModels.map(function (customModel) {
-    thisMWC.MODEL[customModel.name] = customModel.initFunction(thisMWC.mongoose, thisMWC.config);
+    thisMWC.model[customModel.name] = customModel.initFunction(thisMWC.mongoose, thisMWC.config);
   });
 
   //setting passport
@@ -402,7 +402,7 @@ MWC.prototype.ready = function () {
     }
     thisMWC.app.locals.flash = request.flash();
     thisMWC.app.locals.hostUrl = thisMWC.config.hostUrl;
-    request.MODEL = thisMWC.MODEL;
+    request.model = thisMWC.model;
     request.redisClient = thisMWC.redisClient;
     request.emitMWC = function (eventName, eventContent) {
       thisMWC.emit(eventName, eventContent);
