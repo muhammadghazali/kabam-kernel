@@ -8,17 +8,17 @@ Important
 
 Without understanding how [express.js framework](http://expressjs.com/) operates, including
 
- - concept of [app](http://expressjs.com/api.html#express), 
+ - concept of [app](http://expressjs.com/api.html#express),
  - concept of [middleware](http://expressjs.com/api.html#middleware) and how [it can be used](http://webapplog.com/intro-to-express-js-parameters-error-handling-and-other-middleware/)
  - concept of chaining the middlewares (this is example of adding middleware to a chain [to count users online](http://expressjs.com/guide.html#users-online))
- - concept [route](http://expressjs.com/api.html#app.VERB) 
+ - concept [route](http://expressjs.com/api.html#app.VERB)
 
 this module is hard to understand. Please, read this information above before processing with this plugin.
 
 Introduction
 =======
 
-Technically this is a Factory class to vendor [express.js](http://expressjs.com/) applications, 
+Technically this is a Factory class to vendor [express.js](http://expressjs.com/) applications,
 that can be easily extended by 6 mixin type functions.
 
 0. `new mwcCore(configObj)` - create application object using [configuration object](https://github.com/mywebclass/mwc_kernel/blob/master/example/config.json) specified.
@@ -29,8 +29,8 @@ and some other modules. You can call this function multiple times
 2. `extendModel(ModelName,function(mongoose, config){...})` - extend build in mongoose models.
 
 3. `extendApp(['development','staging','production','otherEnviroment'],function(core){...})` - set global application parameters, for example
-template [engines](http://expressjs.com/api.html#app.engine), 
-[locals](http://expressjs.com/api.html#app.locals) 
+template [engines](http://expressjs.com/api.html#app.engine),
+[locals](http://expressjs.com/api.html#app.locals)
 and [other](http://expressjs.com/api.html#app-settings) settings.
 First argument (array of enviroments) is OPTIONAL
 
@@ -50,7 +50,7 @@ Plugins
 =======
 
  - [mwc_plugin_example](https://github.com/mywebclass/mwc_plugin_example) [![Build Status](https://travis-ci.org/mywebclass/mwc_plugin_example.png)](https://travis-ci.org/mywebclass/mwc_plugin_example) demonstration plugin
- 
+
  - [mwc_plugin_spine](https://github.com/mywebclass/mwc_plugin_spine) [![Build Status](https://travis-ci.org/mywebclass/mwc_plugin_spine.png)](https://travis-ci.org/mywebclass/mwc_plugin_spine)  plugint that add task queue for application,
  based on  [Assemblage](https://github.com/pipedrive/assemblage) node module.
 
@@ -133,7 +133,7 @@ MWC.extendRoutes(
 
     //we use Mongoose Model in this route
     core.app.get('/team', function(request, response) {
-      request.MODEL.Users.find({
+      request.model.Users.find({
         active: 1
       }, function(err, users) {
         if (err) {
@@ -158,14 +158,14 @@ MWC.extendRoutes(
     });
 
     core.app.get('/kittens', function(request, response) {
-      request.MODEL.Cats.find({}, function(err, cats) {
+      request.model.Cats.find({}, function(err, cats) {
         if (err) throw err;
         response.json(cats);
       });
     });
 
     core.app.get('/dogs', function(request, response) {
-      request.MODEL.Dogs.find({}, function(err, dogs) {
+      request.model.Dogs.find({}, function(err, dogs) {
         if (err) throw err;
         response.json(dogs);
       });
@@ -226,7 +226,7 @@ MWC.on('honeypot accessed', function(message) {
 });
 
 setTimeout(function() {
-  MWC.MODEL.Cats.create({
+  MWC.model.Cats.create({
     nickname: 'Chubais'
   }, function(err, cat) {
     if (err) throw err;
@@ -238,7 +238,7 @@ setTimeout(function() {
 }, 5000);
 
 setTimeout(function() {
-  MWC.MODEL.Dogs.create({
+  MWC.model.Dogs.create({
     nickname: 'Laika'
   }, function(err, dog) {
     if (err) throw err;
@@ -292,8 +292,8 @@ and for `https` server in this way
 
 3. `MWC.mongoose` - is a [mongoose](https://npmjs.org/package/mongoose) instance, used by this applications.
 
-4. `MWC.MODEL` - is a object, that includes [mongoose models](http://mongoosejs.com/docs/guide.html), used by this application.
-For now, there is `MWC.MODEL.Users` and `MWC.MODEL.Documents` objects in it
+4. `MWC.model` - is a object, that includes [mongoose models](http://mongoosejs.com/docs/guide.html), used by this application.
+For now, there is `MWC.model.Users` and `MWC.model.Documents` objects in it
 
 5. `MWC.redisClient` - is a ready to use [redis](https://npmjs.org/package/redis) client used by application
 
@@ -305,8 +305,8 @@ with
 ```javascript
 MWC.app.get('/someURI', function(request, response) {
   //request.user - passport.js authentication middleware user representation
-  //request.MODEL.users
-  //request.MODEL.documents
+  //request.model.users
+  //request.model.documents
   //request.redisClient
   //request.emitMWC('it works!'); //event emmiter, coupled to MWC event emmiter
 });
@@ -316,9 +316,9 @@ The model of User
 =======
 This system use mongoose model to represent users. It have this methods.
 
-1. `MWC.MODEL.findOneByLoginOrEmail(string,function(err,userFound){...})` - finds one user, that have `username` or `email`  equal to `string`
-2. `MWC.MODEL.findOneByApiKey(string,function(err,userFound){...})` - finds one user, that have `apiKey` equal to `string`
-3. `MWC.MODEL.getByRole(string,function(err,userFound){...})` - finds users, that have `role` of string
+1. `MWC.model.findOneByLoginOrEmail(string,function(err,userFound){...})` - finds one user, that have `username` or `email`  equal to `string`
+2. `MWC.model.findOneByApiKey(string,function(err,userFound){...})` - finds one user, that have `apiKey` equal to `string`
+3. `MWC.model.getByRole(string,function(err,userFound){...})` - finds users, that have `role` of string
 
 Methods to one instance of class User
 
@@ -437,7 +437,7 @@ exports.extendRoutes = function(core) {
 
   //we use Mongoose Model in this route
   core.app.get('/team', function(request, response) {
-    request.MODEL.Users.find({
+    request.model.Users.find({
       active: 1
     }, function(err, users) {
       if (err) throw err;
@@ -492,7 +492,7 @@ This is the way of things it is intended to work
 When you call the `extendCore(function(core){...})`, you can add global core functions and variables,
 but not anything other touching the application, middlewares or routes.
 In code it is called right after initializing [mongoose routes](https://github.com/mywebclass/mwc_core/blob/master/index.js#L195)
-core have event emmiter capabilities `MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.MODEL.Users`, `MWC.MODEL.Documents` (exposed as mongoose schemas).
+core have event emmiter capabilities `MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.model.Users`, `MWC.model.Documents` (exposed as mongoose schemas).
 Nothing more!
 
 When you call `extendModel(ModelName,function(mongoose, config){...})` you get all the enviroment created after calling
@@ -503,17 +503,17 @@ When you call `extendApp(function(core){...})`, you can set global application p
 template [engines](http://expressjs.com/api.html#app.engine), [locals](http://expressjs.com/api.html#app.locals)
 and [other](http://expressjs.com/api.html#app-settings) settings.
 In code it is called [after settng logging middleware and port](https://github.com/mywebclass/mwc_core/blob/master/index.js#L236).
-You can set any application parameter you want, you have full MWC core internalls at your disposal  
-`MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.MODEL.Users`, `MWC.MODEL.Documents` and custom models from calling `extendModel`.
+You can set any application parameter you want, you have full MWC core internalls at your disposal
+`MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.model.Users`, `MWC.model.Documents` and custom models from calling `extendModel`.
 
 When you call `extendMiddlewares(function(core){...})`, you can set app middlewares.
 They are [called]((https://github.com/mywebclass/mwc_core/blob/master/index.js#L283) after
 [setting default exposed internals middleware](https://github.com/mywebclass/mwc_core/blob/master/index.js#L271) and before
 [setting error handlers middlewares](https://github.com/mywebclass/mwc_core/blob/master/index.js#L283).
 
-So, you have the full power of core internals - (`emit`,`on`), `redisClient`, and `MODEL.Users`, `MODEL.Documents`
+So, you have the full power of core internals - (`emit`,`on`), `redisClient`, and `model.Users`, `model.Documents`
 and exposed internals middleware - where expressJS object of request have functions of `request.mwcEmit`,
-`request.MODEL`,`request.MODEL.Users`,`request.MODEL.Documents`, custom models,`request.MODEL.redisClient`, and `request.user` provided
+`request.model`,`request.model.Users`,`request.model.Documents`, custom models,`request.model.redisClient`, and `request.user` provided
 by passportjs middleware.
 
 When you call `extendRoutes(function(core){})`, you can set the application routes and verbs for them.
@@ -523,7 +523,5 @@ This is done after defining [router middleware]((https://github.com/mywebclass/m
 and routes for passport.js authentication.
 
 It is worth saying, that you also have expressJS object of every route defined to  have functions of `request.mwcEmit`,
-`request.MODEL`,`request.MODEL.Users`,`request.MODEL.Documents`, custom models,`request.MODEL.redisClient`, and `request.user` provided
+`request.model`,`request.model.Users`,`request.model.Documents`, custom models,`request.model.redisClient`, and `request.user` provided
 by [passportjs](http://passportjs.org) middleware.
-
-

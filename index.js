@@ -4,9 +4,8 @@ var EventEmitter = require('events').EventEmitter,
   async = require('async'),
   util = require('util'),
   express = require('express'),
-
+  redisManager = require('./lib/redisManager'),
   mongoose = require('mongoose'),
-  redis = require('redis'),
 
   usersModel = require('./models/Users.js'),
 
@@ -40,11 +39,8 @@ function MWC(config) {
     throw new Error('Config.mongoUrl have to be valid mongoose URI - for example mongodb://user111:111password111@localhost:10053/app111');
   }
 
-  if(config.redis){
-    if(!((config.redis.port && config.redis.host) || typeof config.redis === 'string' && url.parse(config.redis)['protocol']=== 'redis:')){
-      throw new Error('Config.redis have to be a string like redis://usernameIgnored:password@localhost:6379 or object like { "host":"localhost","port":6379 }');
-    }
-  }
+  redisManager.validateConfig(config.redis);
+
   EventEmitter.call(this);
   this.config = config;
   this.extendCoreFunctions = [];
@@ -252,40 +248,8 @@ MWC.prototype.ready = function () {
   thisMWC.prepared = true;
 
   //injecting redis
-  if (thisMWC.config.redis) {
-    if (typeof thisMWC.config.redis === 'object') {
-      if (thisMWC.config.redis.port && !(/^[0-9]+$/.test(thisMWC.config.redis.port))) {
-        throw new Error('Config variable of redis has bad value for PORT. Proper values are ' +
-          '{"port":6379,"host":"localhost","auth":"someSecretPassword"} ' +
-          'or "redis://usernameIgnored:someSecretPassword@redis.example.org:6739"');
-      }
-      thisMWC.redisClient = redis.createClient(thisMWC.config.redis.port, thisMWC.config.redis.host);
-      if (typeof thisMWC.config.redis.auth === 'string') {
-        thisMWC.redisClient.auth(thisMWC.config.redis.auth);
-      }
-    } else {
-      if (typeof thisMWC.config.redis === 'string') {
-        var redisConfigUrlParsed = url.parse(thisMWC.config.redis);
-        if (redisConfigUrlParsed) {
-          thisMWC.redisClient = redis.createClient(redisConfigUrlParsed.port, redisConfigUrlParsed.hostname);
-          if (redisConfigUrlParsed.auth && redisConfigUrlParsed.auth.split(':')[1]) {
-            thisMWC.redisClient.auth(redisConfigUrlParsed.auth.split(':')[1]);
-          }
-        } else {
-          throw new Error('Config variable of redis has bad value. Proper values are ' +
-            '{"port":6379,"host":"localhost","auth":"someSecretPassword"} ' +
-            'or "redis://usernameIgnored:someSecretPassword@redis.example.org:6739"');
-        }
-      } else {
-        throw new Error('Config variable of redis has bad value. Proper values are ' +
-          '{"port":6379,"host":"localhost","auth":"someSecretPassword"} ' +
-          'or "redis://usernameIgnored:someSecretPassword@redis.example.org:6739"');
-      }
-    }
-  } else {
-    //redis is NOT configured, we use default properties
-    thisMWC.redisClient = redis.createClient();
-  }
+  thisMWC.redisClient = redisManager.create(thisMWC.config.redis);
+
   //sanity check for mongoUrl
   if (!thisMWC.config.mongoUrl) {
     throw new Error('Config variable of mongoURL is missed!');
@@ -519,6 +483,6 @@ MWC.prototype.extendAppRoutes = function(settingsFunction){
 
 MWC.create = function(config){
   return new MWC(config);
-}
+};
 
 module.exports = exports = MWC.create;
