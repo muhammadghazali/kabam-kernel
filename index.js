@@ -244,25 +244,9 @@ MWC.prototype.ready = function () {
   //injecting redis
   thisMWC.redisClient = redisManager.create(thisMWC.config.redis);
 
-  //injecting default mongoose databases
+  // initializing MongoDB and Core Models
   thisMWC.mongoose = mongooseManager.create(thisMWC.config.mongoUrl);
-
-  //thisMWC.injectEmit(thisMWC.mongoose);
-
-  var db = thisMWC.mongoose.connection;
-  db.on('connect', function (err) {
-    if (err) {
-      thisMWC.emit('error', err);
-    } else {
-      console.log('Mongo connection established!');
-      thisMWC.emit('mongoReady');
-    }
-  });
-
-  db.on('error', function (err) {
-    thisMWC.emit('error', err);
-  });
-
+  thisMWC.mongoose.setConnectEvent(thisMWC);
   thisMWC.model = mongooseManager.initModels(thisMWC);
 
   //doing extendCore
