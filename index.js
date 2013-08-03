@@ -6,9 +6,6 @@ var EventEmitter = require('events').EventEmitter,
   express = require('express'),
   mongooseManager = require('./lib/mongooseManager'),
   redisManager = require('./lib/redisManager'),
-
-  usersModel = require('./models/Users.js'),
-
   http = require('http'),
   https = require('https'),
 //passport middleware
@@ -250,6 +247,8 @@ MWC.prototype.ready = function () {
   //injecting default mongoose databases
   thisMWC.mongoose = mongooseManager.create(thisMWC.config.mongoUrl);
 
+  //thisMWC.injectEmit(thisMWC.mongoose);
+
   var db = thisMWC.mongoose.connection;
   db.on('connect', function (err) {
     if (err) {
@@ -259,15 +258,12 @@ MWC.prototype.ready = function () {
       thisMWC.emit('mongoReady');
     }
   });
+
   db.on('error', function (err) {
     thisMWC.emit('error', err);
   });
 
-  var Users = usersModel(thisMWC);
-
-  thisMWC.model = {
-    'Users': Users
-  };
+  thisMWC.model = mongooseManager.initModels(thisMWC);
 
   //doing extendCore
   //extending core by extendCore
@@ -281,14 +277,14 @@ MWC.prototype.ready = function () {
   });
 
   //setting passport
-  initPassport.doInitializePassportStrategies(passport, Users, thisMWC.config);
+  initPassport.doInitializePassportStrategies(passport, thisMWC.model.Users, thisMWC.config);
 
   //start vendoring expressJS application
   thisMWC.app = express();
 
   thisMWC.app.set('port', process.env.PORT || 3000);
 
-//too busy middleware which blocks requests when we're too busy
+  //too busy middleware which blocks requests when we're too busy
   thisMWC.app.use(function (req, res, next) {
     if (toobusy()) {
       res.send(503, 'I am busy right now, sorry.');
@@ -361,9 +357,7 @@ MWC.prototype.ready = function () {
     thisMWC.app.locals.hostUrl = thisMWC.config.hostUrl;
     request.model = thisMWC.model;
     request.redisClient = thisMWC.redisClient;
-    request.emitMWC = function (eventName, eventContent) {
-      thisMWC.emit(eventName, eventContent);
-    };
+    thisMWC.injectEmit(request);
     next();
   });
 
@@ -423,7 +417,7 @@ MWC.prototype.ready = function () {
   });
 
   process.on('SIGINT', function () {
-    console.log('MWC IS GOING TO SHUT DOWN....')
+    console.log('MWC IS GOING TO SHUT DOWN....');
     thisMWC.mongoose.connection.close();
     // calling .shutdown allows your process to exit normally
     toobusy.shutdown();
@@ -473,6 +467,12 @@ MWC.prototype.extendAppRoutes = function(settingsFunction){
   return this;
 };
 
+MWC.prototype.injectEmit = function(object) {
+  var thisMWC = this;
+  object.emitMWC = function (eventName, eventContent) {
+    thisMWC.emit(eventName, eventContent);
+  };
+};
 
 MWC.create = function(config){
   return new MWC(config);

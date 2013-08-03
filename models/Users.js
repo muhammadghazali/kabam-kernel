@@ -3,8 +3,6 @@ var async = require('async'),
   rack = hat.rack(),
   crypto = require('crypto');
 
-
-
 function sha512(str) {
   return crypto.createHash('sha512').update(str).digest('hex').toString();
 }
@@ -13,9 +11,8 @@ function md5(str) {
   return crypto.createHash('md5').update(str).digest('hex').toString();
 }
 
-module.exports = exports = function (core) {
-  var mongoose = core.mongoose;
-  var config = core.config;
+module.exports = exports = function (mwc) {
+  var mongoose = mwc.mongoose;
 
   var Schema = mongoose.Schema;
 
@@ -31,7 +28,7 @@ module.exports = exports = function (core) {
     apiKey: {type: String, required: true, unique: true, match: /^[a-zA-Z0-9_]+$/ }, //for invalidating sessions by user request, for api interactions...
     apiKeyCreatedAt: Date,
 
-    
+
     //role management
     root: Boolean,
     roles: [{type: String, match: /^[a-zA-Z0-9_]+$/ }],
@@ -50,8 +47,8 @@ module.exports = exports = function (core) {
     apiKey: 1,
     roles: 1
   });
-  
-  
+
+
   UserSchema.methods.getGravatar = function (s, d, r) {
     //https://ru.gravatar.com/site/implement/images/
     //s - image size
@@ -116,13 +113,13 @@ module.exports = exports = function (core) {
   //notify
   UserSchema.methods.notify=function(message){
     if(typeof message === 'string'){
-      core.emit('notify',{
+      mwc.emit('notify',{
         'user':this,
         'type':'text',
         'message':message
       });
     } else {
-      core.emit('notify',{
+      mwc.emit('notify',{
         'user':this,
         'type': (message.type)?(message.type):'text',
         'message':message
@@ -206,8 +203,8 @@ module.exports = exports = function (core) {
       callback(new Error('Account is completed!'));
     }
   };
-  
-  
+
+
   UserSchema.statics.findOneByApiKeyAndVerify = function(apiKey,callback){
     this.findOneByApiKey(apiKey,function(err,userFound){
       if(err){
