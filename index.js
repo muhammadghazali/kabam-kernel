@@ -3,49 +3,47 @@ var EventEmitter = require('events').EventEmitter,
   url = require('url'),
   async = require('async'),
   util = require('util'),
-  express = require('express'),
-  mongooseManager = require('./lib/mongooseManager'),
-  redisManager = require('./lib/redisManager'),
   http = require('http'),
   https = require('https'),
-//passport middleware
-  passport = require('passport'),
-  initPassport = require('./lib/passport/initPassport.js'),
-
-//session storage
-  RedisStore = require('connect-redis')(express),
-//todo
-//https://hacks.mozilla.org/2012/12/using-secure-client-side-sessions-to-build-simple-and-scalable-node-js-applications-a-node-js-holiday-season-part-3/
-  flashMiddleware = require('connect-flash'),
-
+  appManager = require('./lib/appManager'),
+  mongooseManager = require('./lib/mongooseManager'),
+  redisManager = require('./lib/redisManager'),
   toobusy = require('toobusy');
 
 function MWC(config) {
-  if(typeof config !== 'object'){
-    throw new Error('Config is not an object!');
-  }
-  if(!(config.hostUrl && url.parse(config.hostUrl)['hostname'])){
-    throw new Error('Config.hostUrl have to be valid hostname - for example, http://example.org/ with http(s) on start and "/" at end!!!');
-  }
-
-  if(!(config.secret && config.secret.length>9)){
-    throw new Error('Config.secret is not set or is to short!');
-  }
-
-  mongooseManager.validateConfig(config.mongoUrl);
-  redisManager.validateConfig(config.redis);
 
   EventEmitter.call(this);
+
+  this.validateConfig(config);
   this.config = config;
   this.extendCoreFunctions = [];
   this.additionalModels = [];
   this.extendAppFunctions = [];
   this.extendMiddlewaresFunctions = [];
   this.extendRoutesFunctions = [];
+
   return this;
 }
 
 util.inherits(MWC, EventEmitter);
+
+MWC.prototype.validateConfig = function(config) {
+  // General check
+  if (typeof config !== 'object') {
+    throw new Error('Config is not an object!');
+  }
+  if (!(config.hostUrl && url.parse(config.hostUrl)['hostname'])) {
+    throw new Error('Config.hostUrl have to be valid hostname - for example, http://example.org/ with http(s) on start and "/" at end!!!');
+  }
+  if (!(config.secret && config.secret.length>9)) {
+    throw new Error('Config.secret is not set or is to short!');
+  }
+
+  mongooseManager.validateConfig(config.mongoUrl);
+  redisManager.validateConfig(config.redis);
+
+  return true;
+};
 
 //extending application
 MWC.prototype.extendCore = function (settingsFunction) {
@@ -260,153 +258,12 @@ MWC.prototype.ready = function () {
     thisMWC.model[customModel.name] = customModel.initFunction(thisMWC.mongoose, thisMWC.config);
   });
 
-  //setting passport
-  initPassport.doInitializePassportStrategies(passport, thisMWC.model.Users, thisMWC.config);
+  //initialize expressJS application
+  thisMWC.app = appManager.create(thisMWC.config, thisMWC);
+  appManager.extendApp(thisMWC);
 
-  //start vendoring expressJS application
-  thisMWC.app = express();
-
-  thisMWC.app.set('port', process.env.PORT || 3000);
-
-  //too busy middleware which blocks requests when we're too busy
-  thisMWC.app.use(function (req, res, next) {
-    if (toobusy()) {
-      res.send(503, 'I am busy right now, sorry.');
-    } else {
-      next();
-    }
-  });
-  thisMWC.app.configure('development', function () {
-    console.log('Development environment!');
-    thisMWC.app.use(express.responseTime());
-    thisMWC.app.use(express.logger('dev'));
-    thisMWC.app.locals.development = true;
-  });
-
-  thisMWC.app.configure('staging', function () {
-    console.log('Staging environment!');
-    thisMWC.app.locals.staging = true;
-    thisMWC.app.use(express.responseTime());
-    thisMWC.app.enable('view cache');
-    thisMWC.app.use(express.logger('dev'));
-  });
-
-  thisMWC.app.configure('production', function () {
-    console.log('Production environment!');
-    thisMWC.app.locals.production = true;
-    thisMWC.app.enable('view cache');
-    thisMWC.app.use(express.logger('short'));
-  });
-
-  //doing setAppParameters
-  //extend vendored application settings
-  thisMWC.extendAppFunctions.map(function (func) {
-    if (func.environment) {
-      thisMWC.app.configure(func.environment, function () {
-        func.settingsFunction(thisMWC);
-      });
-    } else {
-      if (func && func.settingsFunction) {
-        func.settingsFunction(thisMWC);
-      }
-    }
-  });
-
-  thisMWC.app.use(express.compress());
-  thisMWC.app.use(express.favicon());
-  thisMWC.app.use(express.bodyParser());
-  thisMWC.app.use(express.methodOverride());
-  thisMWC.app.use(express.cookieParser(thisMWC.config.secret));
-  thisMWC.app.use(express.session({
-    secret: thisMWC.config.secret,
-    store: new RedisStore({prefix: 'mwc_core_',client:thisMWC.redisClient}),
-    expireAfterSeconds: 180,
-    httpOnly: true
-  }));
-  thisMWC.app.use(express.csrf());
-  thisMWC.app.use(flashMiddleware());
-  thisMWC.app.use(passport.initialize());
-  thisMWC.app.use(passport.session());
-
-
-  //injecting default internals via middleware
-  thisMWC.app.use(function (request, response, next) {
-    if(request.session && request.session._csrf){
-      thisMWC.app.locals.csrf = request.session._csrf;
-    }
-    if(request.user){
-      thisMWC.app.locals.myself = request.user; //inject user's model values to template
-    }
-    thisMWC.app.locals.flash = request.flash();
-    thisMWC.app.locals.hostUrl = thisMWC.config.hostUrl;
-    request.model = thisMWC.model;
-    request.redisClient = thisMWC.redisClient;
-    thisMWC.injectEmit(request);
-    next();
-  });
-
-  //doing setAppMiddleware
-  //extend vendored application middlewares settings
-  thisMWC.extendMiddlewaresFunctions.map(function (middleware) {
-    if (middleware.environment) {
-      thisMWC.app.configure(middleware.environment, function () {
-        thisMWC.app.use(middleware.path, middleware.SettingsFunction(thisMWC));
-      });
-    } else {
-      thisMWC.app.use(middleware.path, middleware.SettingsFunction(thisMWC));
-    }
-  });
-
-  //initialize router middleware!!!
-  thisMWC.app.use(thisMWC.app.router);
-  //initialize router middleware!!!
-
-
-  //setting error handler middlewares, after ROUTER middleware,
-  // so we can simply throw errors in routes and they will be catch here!
-  thisMWC.app.configure('development', function () {
-    thisMWC.app.use(express.errorHandler());
-  });
-
-  thisMWC.app.configure('staging', function () {
-    thisMWC.app.use(function (err, req, res, next) {
-      thisMWC.emit('error', err);
-      res.status(503);
-      res.header('Retry-After', 360);
-      res.json(err);
-    });
-  });
-
-  thisMWC.app.configure('production', function () {
-    thisMWC.app.use(function (err, req, res, next) {
-      thisMWC.emit('error', err);
-      res.status(503);
-      res.header('Retry-After', 360);
-      res.send('Error 503. There are problems on our server. We will fix them soon!');//todo - change to our page...
-    });
-  });
-  //middleware setup finished. adding routes
-
-  //doing setAppRoutes
-  thisMWC.extendRoutesFunctions.map(function (func) {
-    func(thisMWC);
-  });
-
-  //set authorization routes for passport
-  initPassport.doInitializePassportRoutes(passport, thisMWC.app, thisMWC.config);
-
-  //catch all verb to show 404 error to wrong routes
-  thisMWC.app.get('*', function (request, response) {
-    response.send(404);
-  });
-
-  process.on('SIGINT', function () {
-    console.log('MWC IS GOING TO SHUT DOWN....');
-    thisMWC.mongoose.connection.close();
-    // calling .shutdown allows your process to exit normally
-    toobusy.shutdown();
-    process.exit();
-  });
+  // set shutdown procedure
+  process.on('SIGINT', thisMWC.shutdown);
 
   return thisMWC;
 };
@@ -449,6 +306,17 @@ MWC.prototype.extendAppRoutes = function(settingsFunction){
   console.log('extendAppRoutes is outdated, use extendRoutes with the same syntax');
   this.extendRoutes(settingsFunction);
   return this;
+};
+
+MWC.prototype.shutdown = function () {
+
+  console.log('MWC IS GOING TO SHUT DOWN....');
+  this.mongoose.connection.close();
+
+  // calling .shutdown allows your process to exit normally
+  toobusy.shutdown();
+  process.exit();
+
 };
 
 MWC.prototype.injectEmit = function(object) {
