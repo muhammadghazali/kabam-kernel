@@ -9,6 +9,7 @@ var should = require('should'),
 
 
 describe('sanity test', function () {
+
   describe('MWC throws errors when we have strange config object', function () {
 
     it('throws proper error for empty config object', function () {
@@ -51,7 +52,7 @@ describe('sanity test', function () {
     it('throws proper error for empty mongoUrl string', function () {
       (function () {
         var MWC = mwcCore({'hostUrl': 'http://example.org/', secret: 'lalalalala1111'});
-      }).should.throw('Config.mongoUrl have to be valid mongoose URI - for example mongodb://user111:111password111@localhost:10053/app111');
+      }).should.throw('Config variable of mongoURL is missed!');
     });
 
     it('throws proper error for "I am banana!" mongoUrl string', function () {

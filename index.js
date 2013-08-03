@@ -4,8 +4,8 @@ var EventEmitter = require('events').EventEmitter,
   async = require('async'),
   util = require('util'),
   express = require('express'),
+  mongooseManager = require('./lib/mongooseManager'),
   redisManager = require('./lib/redisManager'),
-  mongoose = require('mongoose'),
 
   usersModel = require('./models/Users.js'),
 
@@ -35,10 +35,7 @@ function MWC(config) {
     throw new Error('Config.secret is not set or is to short!');
   }
 
-  if(!(config.mongoUrl && url.parse(config.mongoUrl)['protocol']=== 'mongodb:')){
-    throw new Error('Config.mongoUrl have to be valid mongoose URI - for example mongodb://user111:111password111@localhost:10053/app111');
-  }
-
+  mongooseManager.validateConfig(config.mongoUrl);
   redisManager.validateConfig(config.redis);
 
   EventEmitter.call(this);
@@ -250,15 +247,9 @@ MWC.prototype.ready = function () {
   //injecting redis
   thisMWC.redisClient = redisManager.create(thisMWC.config.redis);
 
-  //sanity check for mongoUrl
-  if (!thisMWC.config.mongoUrl) {
-    throw new Error('Config variable of mongoURL is missed!');
-  }
-  if(!url.parse(thisMWC.config.mongoUrl)){
-    throw new Error('Config variable of mongoURL have wrong syntax. Good one is mongodb://username:somePassword@localhost:10053/mwc_dev');
-  }
   //injecting default mongoose databases
-  thisMWC.mongoose = mongoose.connect(thisMWC.config.mongoUrl,{server: { poolSize: 3 }});
+  thisMWC.mongoose = mongooseManager.create(thisMWC.config.mongoUrl);
+
   var db = thisMWC.mongoose.connection;
   db.on('connect', function (err) {
     if (err) {
@@ -271,11 +262,13 @@ MWC.prototype.ready = function () {
   db.on('error', function (err) {
     thisMWC.emit('error', err);
   });
+
   var Users = usersModel(thisMWC);
 
   thisMWC.model = {
     'Users': Users
   };
+
   //doing extendCore
   //extending core by extendCore
   thisMWC.extendCoreFunctions.map(function (settingsFunction) {
