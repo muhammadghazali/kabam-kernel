@@ -312,7 +312,7 @@ MWC.prototype.shutdown = function () {
 
   console.log('MWC IS GOING TO SHUT DOWN....');
   this.mongoose.connection.close();
-
+  this.redisClient.end();
   // calling .shutdown allows your process to exit normally
   toobusy.shutdown();
   process.exit();
