@@ -319,7 +319,7 @@ MWC.prototype.ready = function () {
   thisMWC.app.use(express.cookieParser(thisMWC.config.secret));
   thisMWC.app.use(express.session({
     secret: thisMWC.config.secret,
-    store: new RedisStore({prefix: 'mwc_core_'}),//todo - client session store
+    store: new RedisStore({prefix: 'mwc_core_',client:thisMWC.redisClient}),
     expireAfterSeconds: 180,
     httpOnly: true
   }));
