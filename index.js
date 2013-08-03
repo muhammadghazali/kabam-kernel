@@ -5,9 +5,9 @@ var EventEmitter = require('events').EventEmitter,
   util = require('util'),
   http = require('http'),
   https = require('https'),
-  appManager = require('./lib/appManager'),
-  mongooseManager = require('./lib/mongooseManager'),
-  redisManager = require('./lib/redisManager'),
+  appManager = require('./lib/appManager.js'),
+  mongooseManager = require('./lib/mongooseManager.js'),
+  redisManager = require('./lib/redisManager.js'),
   toobusy = require('toobusy');
 
 function MWC(config) {
