@@ -16,11 +16,11 @@ function MWC(config) {
 
   this.validateConfig(config);
   this.config = config;
-  this.extendCoreFunctions = [];
-  this.additionalModels = [];
-  this.extendAppFunctions = [];
-  this.extendMiddlewaresFunctions = [];
-  this.extendRoutesFunctions = [];
+  this._extendCoreFunctions = [];
+  this._additionalModels = [];
+  this._extendAppFunctions = [];
+  this._extendMiddlewaresFunctions = [];
+  this._extendRoutesFunctions = [];
 
   return this;
 }
@@ -51,7 +51,7 @@ MWC.prototype.extendCore = function (settingsFunction) {
     throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
   } else {
     if (typeof settingsFunction === 'function') {
-      this.extendCoreFunctions.push(settingsFunction);
+      this._extendCoreFunctions.push(settingsFunction);
       return this;
     } else {
       throw new Error('MWC.extendCore requires argument of function(core){...}');
@@ -64,7 +64,7 @@ MWC.prototype.extendModel = function (modelName, modelFunction) {
     throw new Error('Error extending model, "Users" is reserved name');
   } else {
     if (typeof modelName === 'string' && typeof modelFunction === 'function') {
-      this.additionalModels.push({'name': modelName, 'initFunction': modelFunction});
+      this._additionalModels.push({'name': modelName, 'initFunction': modelFunction});
       return this;
     } else {
       throw new Error('MWC.extendModel requires arguments of string of "modelName" and function(core){...}');
@@ -96,13 +96,13 @@ MWC.prototype.extendApp = function (environment, settingsFunction) {
     if (typeof settingsFunction === 'function') {
       if (environmentToUse) {
         for (var i = 0; i < environmentToUse.length; i++) {
-          this.extendAppFunctions.push({
+          this._extendAppFunctions.push({
             'environment': environmentToUse[i],
             'settingsFunction': settingsFunction
           });
         }
       } else {
-        this.extendAppFunctions.push({
+        this._extendAppFunctions.push({
           'settingsFunction': settingsFunction
         });
       }
@@ -158,7 +158,7 @@ MWC.prototype.extendMiddlewares = function (environment, path, settingsFunction)
     if (settingsFunctionToUse) {
       if (environmentToUse) {
         for (var i = 0; i < environmentToUse.length; i++) {
-          this.extendMiddlewaresFunctions.push({
+          this._extendMiddlewaresFunctions.push({
             'environment': environmentToUse[i],
             'path': pathToUse,
             'SettingsFunction': settingsFunctionToUse
@@ -166,7 +166,7 @@ MWC.prototype.extendMiddlewares = function (environment, path, settingsFunction)
         }
       } else {
         //we set middleware for all environments
-        this.extendMiddlewaresFunctions.push({
+        this._extendMiddlewaresFunctions.push({
           'path': pathToUse,
           'SettingsFunction': settingsFunctionToUse
         });
@@ -183,7 +183,7 @@ MWC.prototype.extendRoutes = function (settingsFunction) {
     throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
   } else {
     if (typeof settingsFunction === 'function') {
-      this.extendRoutesFunctions.push(settingsFunction);
+      this._extendRoutesFunctions.push(settingsFunction);
       return this;
     } else {
       throw new Error('Wrong argument for MWC.extendAppRoutes(function(core){...});');
@@ -249,12 +249,12 @@ MWC.prototype.ready = function () {
 
   //doing extendCore
   //extending core by extendCore
-  thisMWC.extendCoreFunctions.map(function (settingsFunction) {
+  thisMWC._extendCoreFunctions.map(function (settingsFunction) {
     settingsFunction(thisMWC);
   });
 
   //loading custom models //todo - maybe redo
-  thisMWC.additionalModels.map(function (customModel) {
+  thisMWC._additionalModels.map(function (customModel) {
     thisMWC.model[customModel.name] = customModel.initFunction(thisMWC.mongoose, thisMWC.config);
   });
 

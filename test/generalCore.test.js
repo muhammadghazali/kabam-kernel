@@ -834,8 +834,8 @@ describe('mwcCore', function() {
   describe('#MWC.extendCore()', function() {
 
     it('adds the extending core function to array of MWC.setCoreFunctions', function() {
-      MWC.extendCoreFunctions.should.be.an.instanceOf(Array);
-      MWC.extendCoreFunctions.should.include(extendCoreFunction);
+      MWC._extendCoreFunctions.should.be.an.instanceOf(Array);
+      MWC._extendCoreFunctions.should.include(extendCoreFunction);
     });
 
     it('actually adds new functions to #MWC',function(){
@@ -845,8 +845,8 @@ describe('mwcCore', function() {
   });
 
   describe('#MWC.extendModel()',function(){
-    it('adds the extending model function to array of #MWC.additionalModels',function(){
-      MWC.additionalModels.should.includeEql({'name':'Cats','initFunction':extendModelFunction});
+    it('adds the extending model function to array of #MWC._additionalModels',function(){
+      MWC._additionalModels.should.includeEql({'name':'Cats','initFunction':extendModelFunction});
     });
     it('adds the model of "Cats" to #MWC.model.Cats',function(){
       MWC.model.Cats.should.be.a('function');
@@ -871,23 +871,23 @@ describe('mwcCore', function() {
   });
 
   describe('#MWC.extendApp()',function(){
-    it('adds the desired functions to MWC.extendAppFunctions',function(){
+    it('adds the desired functions to MWC._extendAppFunctions',function(){
       if(typeof process.env.NODE_ENV !== 'undefined'){
         process.env.NODE_ENV.should.be.equal('development');
       }
-      MWC.extendAppFunctions.should.be.an.instanceOf(Array);
+      MWC._extendAppFunctions.should.be.an.instanceOf(Array);
     });
     it('it set extendAppParametersFunction1 to development environment',function(){
-      MWC.extendAppFunctions.should.includeEql({'environment':'development', 'settingsFunction':extendAppParametersFunction1});
+      MWC._extendAppFunctions.should.includeEql({'environment':'development', 'settingsFunction':extendAppParametersFunction1});
     });
     it('it set extendAppParametersFunction1 to staging environment',function(){
-      MWC.extendAppFunctions.should.includeEql({'environment':'staging',     'settingsFunction':extendAppParametersFunction1});
+      MWC._extendAppFunctions.should.includeEql({'environment':'staging',     'settingsFunction':extendAppParametersFunction1});
     });
     it('it set extendAppParametersFunction2 to development environment',function(){
-      MWC.extendAppFunctions.should.includeEql({'environment':'development', 'settingsFunction':extendAppParametersFunction2});
+      MWC._extendAppFunctions.should.includeEql({'environment':'development', 'settingsFunction':extendAppParametersFunction2});
     });
     it('it set extendAppParametersFunction3 to production environment',function(){
-      MWC.extendAppFunctions.should.includeEql({'environment':'production',  'settingsFunction':extendAppParametersFunction3});
+      MWC._extendAppFunctions.should.includeEql({'environment':'production',  'settingsFunction':extendAppParametersFunction3});
     });
 
     it('actually works',function(){
@@ -900,30 +900,30 @@ describe('mwcCore', function() {
   });
 
   describe('#MWC.extendMiddlewares()', function() {
-    it('adds the desired functions to MWC.extendMiddlewaresFunctions',function(){
+    it('adds the desired functions to MWC._extendMiddlewaresFunctions',function(){
       if(typeof process.env.NODE_ENV !== 'undefined'){
         process.env.NODE_ENV.should.be.equal('development');
       }
-      MWC.extendMiddlewaresFunctions.should.be.an.instanceOf(Array);
+      MWC._extendMiddlewaresFunctions.should.be.an.instanceOf(Array);
     });
 
     it('it set extendAppMiddlewareFunction1 to all environments and path /',function(){
-      MWC.extendMiddlewaresFunctions.should.includeEql({'path':'/', 'SettingsFunction':extendAppMiddlewareFunction1});
+      MWC._extendMiddlewaresFunctions.should.includeEql({'path':'/', 'SettingsFunction':extendAppMiddlewareFunction1});
     });
     it('it set extendAppParametersFunction2 to staging environment',function(){
-      MWC.extendMiddlewaresFunctions.should.includeEql({'path':'/', environment:'staging','SettingsFunction':extendAppMiddlewareFunction2});
+      MWC._extendMiddlewaresFunctions.should.includeEql({'path':'/', environment:'staging','SettingsFunction':extendAppMiddlewareFunction2});
     });
     it('it set extendAppParametersFunction3 to staging environment',function(){
-      MWC.extendMiddlewaresFunctions.should.includeEql({'path':'/', environment:'staging', 'SettingsFunction':extendAppMiddlewareFunction3});
+      MWC._extendMiddlewaresFunctions.should.includeEql({'path':'/', environment:'staging', 'SettingsFunction':extendAppMiddlewareFunction3});
     });
     it('it set extendAppParametersFunction3 to production environment',function(){
-      MWC.extendMiddlewaresFunctions.should.includeEql({'path':'/', environment:'production', 'SettingsFunction':extendAppMiddlewareFunction3});
+      MWC._extendMiddlewaresFunctions.should.includeEql({'path':'/', environment:'production', 'SettingsFunction':extendAppMiddlewareFunction3});
     });
     it('it set extendAppMiddlewareFunction3 to development environment and path /middleware3Path',function(){
-      MWC.extendMiddlewaresFunctions.should.includeEql({'path':'/middleware3Path', environment:'development', 'SettingsFunction':extendAppMiddlewareFunction3});
+      MWC._extendMiddlewaresFunctions.should.includeEql({'path':'/middleware3Path', environment:'development', 'SettingsFunction':extendAppMiddlewareFunction3});
     });
     it('it set extendAppMiddlewareFunction4 to development environment and path /middleware4Path',function(){
-      MWC.extendMiddlewaresFunctions.should.includeEql({environment:'development','path':'/middleware4Path', 'SettingsFunction':extendAppMiddlewareFunction4});
+      MWC._extendMiddlewaresFunctions.should.includeEql({environment:'development','path':'/middleware4Path', 'SettingsFunction':extendAppMiddlewareFunction4});
     });
 
     describe('it actually works',function(){
@@ -958,8 +958,8 @@ describe('mwcCore', function() {
       if(typeof process.env.NODE_ENV !== 'undefined'){
         process.env.NODE_ENV.should.be.equal('development');
       }
-      MWC.extendRoutesFunctions.should.be.an.instanceOf(Array);
-      MWC.extendRoutesFunctions.should.includeEql(extendRoutesFunction);
+      MWC._extendRoutesFunctions.should.be.an.instanceOf(Array);
+      MWC._extendRoutesFunctions.should.includeEql(extendRoutesFunction);
     });
 
     describe('it actually works',function(){
@@ -993,8 +993,8 @@ describe('mwcCore', function() {
 
     describe('extendCore from plugin', function () {
       it('it adds the extending core function to array of #MWC.setCoreFunctions', function () {
-        MWC.extendCoreFunctions.should.be.an.instanceOf(Array);
-        MWC.extendCoreFunctions.should.include(extendCoreFunctionPlugin);
+        MWC._extendCoreFunctions.should.be.an.instanceOf(Array);
+        MWC._extendCoreFunctions.should.include(extendCoreFunctionPlugin);
       });
 
       it('it actually adds new functions to #MWC.core', function () {
@@ -1004,8 +1004,8 @@ describe('mwcCore', function() {
     });
 
     describe('extendModel from plugin', function() {
-      it('adds the extending model function to array of #MWC.additionalModels',function(){
-        MWC.additionalModels.should.includeEql({'name':'Dogs','initFunction':extendModelFunctionPlugin});
+      it('adds the extending model function to array of #MWC._additionalModels',function(){
+        MWC._additionalModels.should.includeEql({'name':'Dogs','initFunction':extendModelFunctionPlugin});
       });
       it('adds the model of "Dogs" to #MWC.model.Dogs',function(){
         MWC.model.Dogs.should.be.a('function');
@@ -1031,15 +1031,15 @@ describe('mwcCore', function() {
 
     describe('extendApp from plugin', function () {
 
-      it('it adds the desired functions to #MWC.extendAppFunctions', function () {
+      it('it adds the desired functions to #MWC._extendAppFunctions', function () {
         if (typeof process.env.NODE_ENV !== 'undefined') {
           process.env.NODE_ENV.should.be.equal('development');
         }
-        MWC.extendAppFunctions.should.be.an.instanceOf(Array);
+        MWC._extendAppFunctions.should.be.an.instanceOf(Array);
       });
 
       it('it set extendAppParametersFunctionPlugin to all environments', function () {
-        MWC.extendAppFunctions.should.includeEql({'settingsFunction': extendAppParametersFunctionPlugin});
+        MWC._extendAppFunctions.should.includeEql({'settingsFunction': extendAppParametersFunctionPlugin});
       });
 
       it('it works', function () {
@@ -1048,15 +1048,15 @@ describe('mwcCore', function() {
     });
 
     describe('extendMiddlewares from plugin',function() {
-      it('adds the desired functions to MWC.extendMiddlewaresFunctions',function(){
+      it('adds the desired functions to MWC._extendMiddlewaresFunctions',function(){
         if(typeof process.env.NODE_ENV !== 'undefined'){
           process.env.NODE_ENV.should.be.equal('development');
         }
-        MWC.extendMiddlewaresFunctions.should.be.an.instanceOf(Array);
+        MWC._extendMiddlewaresFunctions.should.be.an.instanceOf(Array);
       });
 
       it('it set extendAppMiddlewareFunctionPlugin to all environments and path "/"',function(){
-        MWC.extendMiddlewaresFunctions.should.includeEql({'path':'/', 'SettingsFunction':extendAppMiddlewareFunctionPlugin});
+        MWC._extendMiddlewaresFunctions.should.includeEql({'path':'/', 'SettingsFunction':extendAppMiddlewareFunctionPlugin});
       });
 
       describe('it actually works',function(){
@@ -1092,8 +1092,8 @@ describe('mwcCore', function() {
         if(typeof process.env.NODE_ENV !== 'undefined'){
           process.env.NODE_ENV.should.be.equal('development');
         }
-        MWC.extendRoutesFunctions.should.be.an.instanceOf(Array);
-        MWC.extendRoutesFunctions.should.includeEql(extendRoutesFunctionPlugin);
+        MWC._extendRoutesFunctions.should.be.an.instanceOf(Array);
+        MWC._extendRoutesFunctions.should.includeEql(extendRoutesFunctionPlugin);
       });
 
       describe('it actually works',function(){
