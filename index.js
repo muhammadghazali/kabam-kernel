@@ -326,6 +326,14 @@ MWC.prototype.injectEmit = function(object) {
   };
 };
 
+//Use this function with great caution! Because usually redis-database-as-a-service providers have
+//strict connection limit!!! and every one redis client created like this consumes one connection!
+//Usually, MWC needs only one redis client connection
+//BTW, redis is NOT MySQL - we can't increase speed with connection pooling!
+MWC.prototype.createRedisClient = function(){
+  return redisManager.create(this.config.redis);
+};
+
 MWC.create = function(config){
   return new MWC(config);
 };
