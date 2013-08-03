@@ -49,21 +49,15 @@ module.exports = exports = function (mwc) {
   });
 
 
-  UserSchema.methods.getGravatar = function (s, d, r) {
+  UserSchema.methods.getGravatar = function (size, type, rating) {
     //https://ru.gravatar.com/site/implement/images/
     //s - image size
     //d - 404,mm,identicon,monsterid,wavatar,retro,blank - style
     //r - g,pg,r,x - rating
-    if (!s) {
-      s = 300;
-    }
-    if (!d) {
-      d = 'wavatar';
-    }
-    if (!r) {
-      r = 'g';
-    }
-    return 'https://secure.gravatar.com/avatar/' + md5(this.email.toLowerCase().trim()) + '.jpg?s=' + s + '&d=' + d + '&r=' + r;
+    size = size?size:300;
+    type = type?type:'wavatar';
+    rating = rating?rating:'g';
+    return 'https://secure.gravatar.com/avatar/' + md5(this.email.toLowerCase().trim()) + '.jpg?s=' + size + '&d=' + type + '&r=' + rating;
   };
 
   UserSchema.methods.verifyPassword = function (password) {
