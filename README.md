@@ -49,8 +49,11 @@ See [Plugin creating manual](https://github.com/mywebclass/mwc_core#plugin-creat
 Plugins
 =======
 
+
  - [mwc_plugin_example](https://github.com/mywebclass/mwc_plugin_example) [![Build Status](https://travis-ci.org/mywebclass/mwc_plugin_example.png)](https://travis-ci.org/mywebclass/mwc_plugin_example) demonstration plugin
- 
+
+ - [mwc_heroku](https://github.com/mywebclass/mwc_heroku) - plugin to simplify deploy and configuring on [heroku cloud hosting](http://heroku.com).
+
  - [mwc_plugin_spine](https://github.com/mywebclass/mwc_plugin_spine) [![Build Status](https://travis-ci.org/mywebclass/mwc_plugin_spine.png)](https://travis-ci.org/mywebclass/mwc_plugin_spine)  plugint that add task queue for application,
  based on  [Assemblage](https://github.com/pipedrive/assemblage) node module.
 
@@ -59,6 +62,8 @@ Plugins
  - [https://github.com/mywebclass/mwc_plugin_notify_by_email](https://github.com/mywebclass/mwc_plugin_notify_by_email) - plugin to notify users by email
 
  - [https://github.com/mywebclass/mwc_plugin_gridfs](https://github.com/mywebclass/mwc_plugin_gridfs) [![Build Status](https://travis-ci.org/mywebclass/mwc_plugin_gridfs.png?branch=master)](https://travis-ci.org/mywebclass/mwc_plugin_gridfs) - plugin to use gridfs
+
+ - [https://github.com/mywebclass/mwc_plugin_socket_io/](https://github.com/mywebclass/mwc_plugin_socket_io) - plugin to notify users by socket.io events
 
 [Plugin compatibility wiki](https://github.com/mywebclass/mwc_core/wiki/Plugin-compatibility-guide)
 
@@ -133,7 +138,7 @@ MWC.extendRoutes(
 
     //we use Mongoose Model in this route
     core.app.get('/team', function(request, response) {
-      request.MODEL.Users.find({
+      request.model.Users.find({
         active: 1
       }, function(err, users) {
         if (err) {
@@ -158,14 +163,14 @@ MWC.extendRoutes(
     });
 
     core.app.get('/kittens', function(request, response) {
-      request.MODEL.Cats.find({}, function(err, cats) {
+      request.model.Cats.find({}, function(err, cats) {
         if (err) throw err;
         response.json(cats);
       });
     });
 
     core.app.get('/dogs', function(request, response) {
-      request.MODEL.Dogs.find({}, function(err, dogs) {
+      request.model.Dogs.find({}, function(err, dogs) {
         if (err) throw err;
         response.json(dogs);
       });
@@ -226,7 +231,7 @@ MWC.on('honeypot accessed', function(message) {
 });
 
 setTimeout(function() {
-  MWC.MODEL.Cats.create({
+  MWC.model.Cats.create({
     nickname: 'Chubais'
   }, function(err, cat) {
     if (err) throw err;
@@ -238,7 +243,7 @@ setTimeout(function() {
 }, 5000);
 
 setTimeout(function() {
-  MWC.MODEL.Dogs.create({
+  MWC.model.Dogs.create({
     nickname: 'Laika'
   }, function(err, dog) {
     if (err) throw err;
@@ -292,8 +297,8 @@ and for `https` server in this way
 
 3. `MWC.mongoose` - is a [mongoose](https://npmjs.org/package/mongoose) instance, used by this applications.
 
-4. `MWC.MODEL` - is a object, that includes [mongoose models](http://mongoosejs.com/docs/guide.html), used by this application.
-For now, there is `MWC.MODEL.Users` and `MWC.MODEL.Documents` objects in it
+4. `MWC.model` - is a object, that includes [mongoose models](http://mongoosejs.com/docs/guide.html), used by this application.
+For now, there is `MWC.model.Users` and `MWC.model.Documents` objects in it
 
 5. `MWC.redisClient` - is a ready to use [redis](https://npmjs.org/package/redis) client used by application
 
@@ -305,8 +310,8 @@ with
 ```javascript
 MWC.app.get('/someURI', function(request, response) {
   //request.user - passport.js authentication middleware user representation
-  //request.MODEL.users
-  //request.MODEL.documents
+  //request.model.users
+  //request.model.documents
   //request.redisClient
   //request.emitMWC('it works!'); //event emmiter, coupled to MWC event emmiter
 });
@@ -316,9 +321,9 @@ The model of User
 =======
 This system use mongoose model to represent users. It have this methods.
 
-1. `MWC.MODEL.findOneByLoginOrEmail(string,function(err,userFound){...})` - finds one user, that have `username` or `email`  equal to `string`
-2. `MWC.MODEL.findOneByApiKey(string,function(err,userFound){...})` - finds one user, that have `apiKey` equal to `string`
-3. `MWC.MODEL.getByRole(string,function(err,userFound){...})` - finds users, that have `role` of string
+1. `MWC.model.findOneByLoginOrEmail(string,function(err,userFound){...})` - finds one user, that have `username` or `email`  equal to `string`
+2. `MWC.model.findOneByApiKey(string,function(err,userFound){...})` - finds one user, that have `apiKey` equal to `string`
+3. `MWC.model.getByRole(string,function(err,userFound){...})` - finds users, that have `role` of string
 
 Methods to one instance of class User
 
@@ -437,7 +442,7 @@ exports.extendRoutes = function(core) {
 
   //we use Mongoose Model in this route
   core.app.get('/team', function(request, response) {
-    request.MODEL.Users.find({
+    request.model.Users.find({
       active: 1
     }, function(err, users) {
       if (err) throw err;
@@ -492,7 +497,7 @@ This is the way of things it is intended to work
 When you call the `extendCore(function(core){...})`, you can add global core functions and variables,
 but not anything other touching the application, middlewares or routes.
 In code it is called right after initializing [mongoose routes](https://github.com/mywebclass/mwc_core/blob/master/index.js#L195)
-core have event emmiter capabilities `MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.MODEL.Users`, `MWC.MODEL.Documents` (exposed as mongoose schemas).
+core have event emmiter capabilities `MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.model.Users`, `MWC.model.Documents` (exposed as mongoose schemas).
 Nothing more!
 
 When you call `extendModel(ModelName,function(mongoose, config){...})` you get all the enviroment created after calling
@@ -503,17 +508,17 @@ When you call `extendApp(function(core){...})`, you can set global application p
 template [engines](http://expressjs.com/api.html#app.engine), [locals](http://expressjs.com/api.html#app.locals)
 and [other](http://expressjs.com/api.html#app-settings) settings.
 In code it is called [after settng logging middleware and port](https://github.com/mywebclass/mwc_core/blob/master/index.js#L236).
-You can set any application parameter you want, you have full MWC core internalls at your disposal  
-`MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.MODEL.Users`, `MWC.MODEL.Documents` and custom models from calling `extendModel`.
+You can set any application parameter you want, you have full MWC core internalls at your disposal
+`MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.model.Users`, `MWC.model.Documents` and custom models from calling `extendModel`.
 
 When you call `extendMiddlewares(function(core){...})`, you can set app middlewares.
 They are [called]((https://github.com/mywebclass/mwc_core/blob/master/index.js#L283) after
 [setting default exposed internals middleware](https://github.com/mywebclass/mwc_core/blob/master/index.js#L271) and before
 [setting error handlers middlewares](https://github.com/mywebclass/mwc_core/blob/master/index.js#L283).
 
-So, you have the full power of core internals - (`emit`,`on`), `redisClient`, and `MODEL.Users`, `MODEL.Documents`
+So, you have the full power of core internals - (`emit`,`on`), `redisClient`, and `model.Users`, `model.Documents`
 and exposed internals middleware - where expressJS object of request have functions of `request.mwcEmit`,
-`request.MODEL`,`request.MODEL.Users`,`request.MODEL.Documents`, custom models,`request.MODEL.redisClient`, and `request.user` provided
+`request.model`,`request.model.Users`,`request.model.Documents`, custom models,`request.model.redisClient`, and `request.user` provided
 by passportjs middleware.
 
 When you call `extendRoutes(function(core){})`, you can set the application routes and verbs for them.
@@ -523,7 +528,5 @@ This is done after defining [router middleware]((https://github.com/mywebclass/m
 and routes for passport.js authentication.
 
 It is worth saying, that you also have expressJS object of every route defined to  have functions of `request.mwcEmit`,
-`request.MODEL`,`request.MODEL.Users`,`request.MODEL.Documents`, custom models,`request.MODEL.redisClient`, and `request.user` provided
+`request.model`,`request.model.Users`,`request.model.Documents`, custom models,`request.model.redisClient`, and `request.user` provided
 by [passportjs](http://passportjs.org) middleware.
-
-
