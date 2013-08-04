@@ -138,6 +138,34 @@ module.exports = exports = function (mwc) {
     this.find({'roles': [role]}, callback);
   };
 
+
+  UserSchema.statics.processOAuthProfile = function(email,done){
+    var Users=this;
+    if (email) {
+      Users.findOne({'email': email}, function (err, userFound) {
+        if (err) {
+          return done(err, false, {'message': 'Database broken...'});
+        } else {
+          console.log('==============');
+          console.log(userFound);
+          console.log('==============');
+          if (err) {
+            return done(err);
+          } else {
+            if (userFound) {
+              return done(err, userFound, {message: 'Welcome, ' + userFound.username});
+            } else {
+              Users.signUpByEmailOnly(email, function (err1, userCreated) {
+                return done(err1, userCreated, { message: 'Please, complete your account!' });
+              });
+            }
+          }
+        }
+      });
+    } else {
+      return done(new Error('There is something strange instead of user profile'));
+    }
+  }
   //signup new user by username, email, password,
   UserSchema.statics.signUp = function(username,email,password,callback){
     this.create({

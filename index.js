@@ -115,7 +115,12 @@ MWC.prototype.extendApp = function (environment, settingsFunction) {
 };
 
 MWC.prototype.extendStrategies = function(strategyObject){
+  if(typeof strategyObject !== 'object') throw new Error('mwc.extendStrategies requires strategyObject to be an object');
+  if(typeof strategyObject.strategy !== 'function') throw new Error('mwc.extendStrategies requires strategyObject.strategy to be a proper function!');
+  if(typeof strategyObject.routes !== 'function') throw new Error('mwc.extendStrategies requires strategyObject.routes to be a proper function!');
 
+  this._additionalStrategies.push(strategyObject);
+  return this;
 };
 
 MWC.prototype.extendMiddlewares = function (environment, path, settingsFunction) {
@@ -264,7 +269,7 @@ MWC.prototype.ready = function () {
   });
 
   //initialize expressJS application
-  thisMWC.app = appManager.create(thisMWC.config, thisMWC);
+  thisMWC.app = appManager.create(thisMWC);
   appManager.extendApp(thisMWC);
 
   // set shutdown procedure
@@ -316,7 +321,9 @@ MWC.prototype.extendAppRoutes = function(settingsFunction){
 MWC.prototype.shutdown = function () {
 
   console.log('MWC IS GOING TO SHUT DOWN....');
-  this.mongoose.connection.close();
+  if(this.mongoose.connection){
+    this.mongoose.connection.close();
+  }
   this.redisClient.end();
   // calling .shutdown allows your process to exit normally
   toobusy.shutdown();
