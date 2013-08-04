@@ -1,6 +1,6 @@
 var mwcCore = require('./../index.js');
 //setting up the config
-var MWC = new mwcCore(require('./config.json')[(process.env.NODE_ENV) ? (process.env.NODE_ENV) : 'development']);
+var MWC = mwcCore(require('./config.json')[(process.env.NODE_ENV) ? (process.env.NODE_ENV) : 'development']);
 
 //we extend the mwc_core instance
 MWC.extendCore(function (core) {
