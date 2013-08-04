@@ -305,7 +305,7 @@ describe('mwcCore', function() {
         MWC.model.Users.create({
           'username': 'testSubject47111',
           'email': 'ostroumov4@teksi.ru',
-          'apiKey': 'vseBydetHorosho',
+          'apiKey': 'vseBydetHorosho'
         }, function (err, userCreated) {
           if (err) {
             throw err;
