@@ -546,13 +546,38 @@ describe('mwcCore', function() {
         user._id.should.eql(userFound._id);
       });
 
+      it('user is not verified as we need it',function(){
+        user.emailVerified.should.be.false;
+      });
+
+      it('user have complete profile as we need it',function(){
+        user.profileComplete.should.be.true;
+      });
+
       after(function (done) {
         user.remove(done)
       });
     });
 
     describe('processOAuthProfile for user NOT in database',function(){
-      it('creates a uncompleted profile for this user');
+      var user;
+      before(function(done){
+          MWC.model.Users.processOAuthProfile('johndoe@mail.ru',function(error,userFromProfile){
+            if(error) throw error;
+            user=userFromProfile;
+            done();
+          });
+        });
+
+      it('creates a uncompleted profile for this user',function(){
+        user.email.should.be.equal('johndoe@mail.ru');
+        user.emailVerified.should.be.true;
+        user.profileComplete.should.be.false;
+      });
+
+      after(function (done) {
+        user.remove(done)
+      });
     });
   });
 
