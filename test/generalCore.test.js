@@ -294,6 +294,11 @@ describe('mwcCore', function() {
       MWC.model.Users.findOneByApiKeyAndResetPassword.should.be.a('function');
     });
 
+    it('exposes function processOAuthProfile',function(){
+      MWC.model.Users.processOAuthProfile.should.be.a('function');
+    });
+
+
     describe('finders',function(){
       var usersFound;
       before(function (done) {
@@ -396,6 +401,7 @@ describe('mwcCore', function() {
         user.remove(done)
       });
     });
+
     describe('signUpByEmailOnly',function(){
       var user;
       before(function(done){
@@ -436,6 +442,7 @@ describe('mwcCore', function() {
         user.remove(done)
       });
     });
+
     describe('findOneByApiKeyAndVerify',function(){
       var user,userBeingActivated;
       before(function (done) {
@@ -467,6 +474,7 @@ describe('mwcCore', function() {
         user.remove(done);
       });
     });
+
     describe('findOneByApiKeyAndResetPassword',function(){
       var user,userWithPasswordReseted;
       before(function(done){
@@ -518,6 +526,14 @@ describe('mwcCore', function() {
         user.remove(done);
       });
     });
+
+    describe('processOAuthProfile for user in database',function(){
+      it('finds exactly the user we need');
+    });
+
+    describe('processOAuthProfile for user NOT in database',function(){
+      it('creates a uncompleted profile for this user');
+    });
   });
 
 
@@ -562,6 +578,7 @@ describe('mwcCore', function() {
         user.remove(done)
       });
     });
+
     describe('functions setPassword, verifyPassword', function () {
       var user;
       before(function (done) {
@@ -596,6 +613,7 @@ describe('mwcCore', function() {
         user.remove(done)
       });
     });
+
     describe('function invalidateSession', function () {
       var user;
       before(function (done) {
@@ -631,6 +649,7 @@ describe('mwcCore', function() {
         user.remove(done)
       });
     });
+
     describe('function hasRole',function(){
       var user;
       before(function(done){
