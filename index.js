@@ -19,6 +19,7 @@ function MWC(config) {
   this._extendCoreFunctions = [];
   this._additionalModels = [];
   this._extendAppFunctions = [];
+  this._additionalStrategies = [];
   this._extendMiddlewaresFunctions = [];
   this._extendRoutesFunctions = [];
 
@@ -111,6 +112,10 @@ MWC.prototype.extendApp = function (environment, settingsFunction) {
     }
     return this;
   }
+};
+
+MWC.prototype.extendStrategies = function(strategyObject){
+
 };
 
 MWC.prototype.extendMiddlewares = function (environment, path, settingsFunction) {
