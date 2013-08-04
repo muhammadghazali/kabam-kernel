@@ -305,7 +305,7 @@ describe('mwcCore', function() {
         MWC.model.Users.create({
           'username': 'testSubject47111',
           'email': 'ostroumov4@teksi.ru',
-          'apiKey': 'vseBydetHorosho'
+          'apiKey': 'vseBydetHorosho',
         }, function (err, userCreated) {
           if (err) {
             throw err;
@@ -579,9 +579,126 @@ describe('mwcCore', function() {
         user.remove(done)
       });
     });
+
+    describe('keychain',function(){
+
+      describe('findByKeychain',function(){
+        var user,userFound;
+
+        before(function (done) {
+          MWC.model.Users.create({
+            'username': 'test888',
+            'email': 'ostroumov@teksi.ru',
+            'apiKey':'lalala1',
+            'keychain':{
+              'github':11111
+            }
+          }, function (err, userCreated) {
+            if (err) {
+              throw err;
+            }
+            user = userCreated;
+            MWC.model.Users.findOneByKeychain('github',11111,function(err,usr){
+              userFound=usr;
+              done();
+            });
+          });
+        });
+
+        it('finds correct user',function(){
+          userFound._id.should.eql(user._id);
+        });
+
+        after(function (done) {
+          user.remove(done)
+        });
+      });
+
+      describe('setKeyChain',function(){
+        var user,userUpdated;
+
+        before(function (done) {
+          MWC.model.Users.create({
+            'username': 'test888',
+            'email': 'ostroumov@teksi.ru',
+            'apiKey':'lalala1',
+            'keychain':{
+              'github':11111
+            }
+          }, function (err, userCreated) {
+            if (err) {
+              throw err;
+            }
+            user = userCreated;
+            user.setKeyChain('someProvider',1,function(err2){
+              if(err2) throw err2;
+              MWC.model.Users.findOneByKeychain('someProvider',1,function(err,usr){
+                userUpdated=usr;
+                done();
+            });
+          });
+        });
+
+        it('finds correct user',function(){
+          userUpdated._id.should.eql(user._id);
+        });
+
+          it('finds correct user',function(){
+            userUpdated.keychain.github.should.be.equal(11111);
+            userUpdated.keychain.someProvider.should.be.equal(1);
+          });
+
+
+        after(function (done) {
+          user.remove(done)
+        });
+      });
+    });
+
+      describe('revokeKeyChain',function(){
+        var user,userUpdated;
+
+        before(function (done) {
+          MWC.model.Users.create({
+            'username': 'test888',
+            'email': 'ostroumov@teksi.ru',
+            'apiKey':'lalala1',
+            'keychain':{
+              'github':11111,
+              'someProvider':1
+            }
+          }, function (err, userCreated) {
+            if (err) {
+              throw err;
+            }
+            user = userCreated;
+            user.setKeyChain('someProvider',1,function(err2){
+              if(err2) throw err2;
+              MWC.model.Users.revokeKeyChain('someProvider',function(err,usr){
+                userUpdated=usr;
+                done();
+              });
+            });
+          });
+
+          it('finds correct user',function(){
+            userUpdated._id.should.eql(user._id);
+          });
+
+          it('finds correct user',function(){
+            userUpdated.keychain.github.should.be.equal(11111);
+            should.not.exist(userUpdated.keychain.someProvider);
+          });
+
+
+          after(function (done) {
+            user.remove(done)
+          });
+        });
+      });
+    });
+
   });
-
-
 
   describe('Testing mwc_core mongoose model one instance of user:', function () {
     describe('general function are callable', function () {

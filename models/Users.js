@@ -37,6 +37,9 @@ module.exports = exports = function (mwc) {
     emailVerified: Boolean, //profile is activated
     profileComplete:Boolean, //profile is complete - it means, it have email, username and password set!
 
+    //keychain
+    keychain:Object,
+
     profile: Object //this is user profile object. it can store anything! - age, postal address, occupation. everything! todo - embedded document?
   });
   //UserSchema.plugin(useTimestamps);//do not works! add createdAt, and updatedAt attributes
@@ -45,6 +48,7 @@ module.exports = exports = function (mwc) {
     email: 1,
     username: 1,
     apiKey: 1,
+    keychain:1,
     roles: 1
   });
 
@@ -226,7 +230,26 @@ module.exports = exports = function (mwc) {
     }
   };
 
+  //keychain - used for authorizing via oauth profiles that do not expose valid email address - github for example
+  UserSchema.methods.setKeyChain = function(provider,id,callback){
+    this.keychain.provider=id;
+    this.save(callback);
+  };
 
+  UserSchema.methods.revokeKeyChain = function(provider,callback){
+    this.keychain[provider]=null;
+    this.save(callback);
+  };
+
+  UserSchema.statics.findOneByKeychain = function(provider,id,callback){
+    var key = 'keychain.'+provider,
+      needle={};
+
+    needle[key]=id;
+    this.findOne(needle,callback);
+  };
+
+  //finders-setters
   UserSchema.statics.findOneByApiKeyAndVerify = function(apiKey,callback){
     this.findOneByApiKey(apiKey,function(err,userFound){
       if(err){
