@@ -232,7 +232,12 @@ module.exports = exports = function (mwc) {
 
   //keychain - used for authorizing via oauth profiles that do not expose valid email address - github for example
   UserSchema.methods.setKeyChain = function(provider,id,callback){
-    this.keychain.provider=id;
+    if(this.keychain){
+      this.keychain[''+provider] = id;
+    } else {
+      this.keychain={};
+      this.keychain[''+provider] = id;
+    }
     this.save(callback);
   };
 
