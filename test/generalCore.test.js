@@ -528,7 +528,27 @@ describe('mwcCore', function() {
     });
 
     describe('processOAuthProfile for user in database',function(){
-      it('finds exactly the user we need');
+      var user,userFound;
+      before(function(done){
+        MWC.model.Users.signUp('johnDoe','johndoe@example.org','suzan123', function(err,userCreated){
+          if(err) throw err;
+          user=userCreated;
+          MWC.model.Users.processOAuthProfile('johndoe@example.org',function(error,userFromProfile){
+            if(error) throw error;
+            userFound=userFromProfile;
+            done();
+          });
+
+        });
+      });
+
+      it('finds exactly the user we need',function(){
+        user._id.should.eql(userFound._id);
+      });
+
+      after(function (done) {
+        user.remove(done)
+      });
     });
 
     describe('processOAuthProfile for user NOT in database',function(){
