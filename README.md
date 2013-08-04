@@ -51,6 +51,9 @@ Plugins
 
  - [mwc_plugin_example](https://github.com/mywebclass/mwc_plugin_example) [![Build Status](https://travis-ci.org/mywebclass/mwc_plugin_example.png)](https://travis-ci.org/mywebclass/mwc_plugin_example) demonstration plugin
 
+
+ - [mwc_heroku](https://github.com/mywebclass/mwc_heroku) - plugin to simplify deploy and configuring on [heroku cloud hosting](http://heroku.com).
+
  - [mwc_plugin_spine](https://github.com/mywebclass/mwc_plugin_spine) [![Build Status](https://travis-ci.org/mywebclass/mwc_plugin_spine.png)](https://travis-ci.org/mywebclass/mwc_plugin_spine)  plugint that add task queue for application,
  based on  [Assemblage](https://github.com/pipedrive/assemblage) node module.
 
@@ -59,6 +62,8 @@ Plugins
  - [https://github.com/mywebclass/mwc_plugin_notify_by_email](https://github.com/mywebclass/mwc_plugin_notify_by_email) - plugin to notify users by email
 
  - [https://github.com/mywebclass/mwc_plugin_gridfs](https://github.com/mywebclass/mwc_plugin_gridfs) [![Build Status](https://travis-ci.org/mywebclass/mwc_plugin_gridfs.png?branch=master)](https://travis-ci.org/mywebclass/mwc_plugin_gridfs) - plugin to use gridfs
+
+ - [https://github.com/mywebclass/mwc_plugin_socket_io/](https://github.com/mywebclass/mwc_plugin_socket_io) - plugin to notify users by socket.io events
 
 [Plugin compatibility wiki](https://github.com/mywebclass/mwc_core/wiki/Plugin-compatibility-guide)
 
@@ -513,7 +518,7 @@ They are [called]((https://github.com/mywebclass/mwc_core/blob/master/index.js#L
 
 So, you have the full power of core internals - (`emit`,`on`), `redisClient`, and `model.Users`, `model.Documents`
 and exposed internals middleware - where expressJS object of request have functions of `request.mwcEmit`,
-`request.model`,`request.model.Users`,`request.model.Documents`, custom models,`request.model.redisClient`, and `request.user` provided
+`request.model`,`request.model.Users`,`request.model.Documents`, custom models,`request.redisClient`, and `request.user` provided
 by passportjs middleware.
 
 When you call `extendRoutes(function(core){})`, you can set the application routes and verbs for them.
@@ -523,5 +528,7 @@ This is done after defining [router middleware]((https://github.com/mywebclass/m
 and routes for passport.js authentication.
 
 It is worth saying, that you also have expressJS object of every route defined to  have functions of `request.mwcEmit`,
-`request.model`,`request.model.Users`,`request.model.Documents`, custom models,`request.model.redisClient`, and `request.user` provided
+`request.MODEL`,`request.MODEL.Users`,`request.MODEL.Documents`, custom models,`request.redisClient`, and `request.user` provided
 by [passportjs](http://passportjs.org) middleware.
+
+
