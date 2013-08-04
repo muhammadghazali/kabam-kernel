@@ -13,7 +13,16 @@ var EventEmitter = require('events').EventEmitter,
 function MWC(config) {
 
   EventEmitter.call(this);
-
+  if (typeof config === 'object') {
+  if(process.env.redisUrl && !config.redis){
+//Using redis configuration from enviromental value
+    config.redis=process.env.redisUrl;
+  }
+  if(process.env.mongoUrl && !config.mongoUrl){
+//Using mongo configuration from enviromental value
+    config.mongoUrl=process.env.mongoUrl;
+  }
+  }
   this.validateConfig(config);
   this.config = config;
   this._extendCoreFunctions = [];
