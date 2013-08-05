@@ -131,7 +131,6 @@ MWC.prototype.extendStrategies = function(strategyObject){
   if(typeof strategyObject !== 'object') throw new Error('mwc.extendStrategies requires strategyObject to be an object');
   if(typeof strategyObject.strategy !== 'function') throw new Error('mwc.extendStrategies requires strategyObject.strategy to be a proper function!');
   if(typeof strategyObject.routes !== 'function') throw new Error('mwc.extendStrategies requires strategyObject.routes to be a proper function!');
-
   this._additionalStrategies.push(strategyObject);
   return this;
 };
@@ -338,6 +337,12 @@ MWC.prototype.listen = function (httpOrHttpsOrPort) {
 MWC.prototype.setAppParameters = function(environment, settingsFunction){
   console.log('setAppParameters is outdated, use extendApp  with the same syntax');
   this.extendApp(environment, settingsFunction);
+  return this;
+};
+
+MWC.prototype.extendMiddlewares = function(environment, path, settingsFunction){
+  console.log('extendMiddlewares is outdated, use extendMiddleware with the same syntax');
+  this.extendMiddleware(environment, path, settingsFunction);
   return this;
 };
 
