@@ -34,6 +34,7 @@ function MWC(config) {
   this._additionalStrategies = [];
   this._extendMiddlewaresFunctions = [];
   this._extendRoutesFunctions = [];
+  this._listeners = {};
 
   return this;
 }
@@ -212,7 +213,7 @@ MWC.prototype.extendRoutes = function (settingsFunction) {
     }
   }
 };
-
+//todo - refactor
 MWC.prototype.usePlugin = function (pluginObjectOrName) {
   if (this.prepared) {
     throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
@@ -257,6 +258,20 @@ MWC.prototype.usePlugin = function (pluginObjectOrName) {
   }
 };
 
+
+MWC.prototype.extendListeners = function (eventName, eventHandlerFunction) {
+  if (typeof eventName === "string" && typeof eventHandlerFunction === "function") {
+    if (typeof this._listeners[eventName] === "undefined") {
+      this._listeners[eventName] = eventHandlerFunction;
+      return this;
+    } else {
+      throw new Error('Unable set listener for event ' + eventName + '! Event name is occupied!');
+    }
+  } else {
+    throw new Error('#MWC.extendListeners(eventName,eventHandlerFunction) have wrong arguments!');
+  }
+};
+
 MWC.prototype.ready = function () {
   var thisMWC = this;//because we sometimes issue closures with thisMWC
   thisMWC.prepared = true;
@@ -290,6 +305,10 @@ MWC.prototype.ready = function () {
 
   // set shutdown procedure
   process.on('SIGINT', thisMWC.shutdown);
+
+  for(var eventName in thisMWC._listeners){
+    thisMWC.on(eventName, thisMWC._listeners[eventName]);
+  }
 
   return thisMWC;
 };

@@ -2,17 +2,8 @@ var mwcCore = require('./../index.js');
 //setting up the config
 var MWC = mwcCore(require('./config.json')[(process.env.NODE_ENV) ? (process.env.NODE_ENV) : 'development']);
 
-//we extend the mwc_core instance
-MWC.extendCore(function (core) {
-  //starting coocoo clock)
-  setInterval(function () {
-    core.emit('Coocoo!', 'Time now is ' + (new Date().toLocaleTimeString()));
-  }, 5000);
-  //adding custom function to MWC module
-  core.getSum = function (a, b) {
-    return a + b;
-  };
-});
+MWC.extendCore('getSum',function(a,b){return a+b;});
+
 
 //set global lever variables for expressJS application
 MWC.extendApp(['development', 'staging'], function (core) {
@@ -65,7 +56,7 @@ MWC.extendRoutes(
 
     //we use Mongoose Model in this route
     core.app.get('/team', function (request, response) {
-      request.MODEL.Users.find({active: 1}, function (err, users) {
+      request.model.Users.find({active: 1}, function (err, users) {
         if (err) {
           throw err;
         }
@@ -86,14 +77,14 @@ MWC.extendRoutes(
     });
 
     core.app.get('/kittens',function(request,response){
-      request.MODEL.Cats.find({},function(err,cats){
+      request.model.Cats.find({},function(err,cats){
         if(err) throw err;
         response.json(cats);
       });
     });
 
     core.app.get('/dogs',function(request,response){
-      request.MODEL.Dogs.find({},function(err,dogs){
+      request.model.Dogs.find({},function(err,dogs){
         if(err) throw err;
         response.json(dogs);
       });
@@ -123,18 +114,24 @@ MWC.usePlugin({
   }
 });
 
-try{
-  //injecting plugin as an name of installe npm package!
-  MWC.usePlugin('mwc_plugin_example');
-} catch (e){
-  if(e.code === 'MODULE_NOT_FOUND'){
-    console.error('mwc_plugin_example is not installed.');
-  }
-}
+//try{
+//  //injecting plugin as an name of installe npm package!
+//  MWC.usePlugin('mwc_plugin_example');
+//} catch (e){
+//  if(e.code === 'MODULE_NOT_FOUND'){
+//    console.error('mwc_plugin_example is not installed.');
+//  }
+//}
 
+//listening of MWC events. 'Coocoo!' is emmited by mwc_plugin_example every 5 seconds
+MWC.extendListeners('Coocoo!',function (message) {
+  console.log('Coocoo! Coocoo! ' + message);
+});
 
-//api/user works from box
-//api/documents works from box
+MWC.extendListeners('honeypot accessed',function (message) {
+  console.log('Attention! Somebody tries to hack us! ' + message);
+});
+
 
 //binding application to port
 MWC.listen();
@@ -142,17 +139,14 @@ MWC.listen();
 //testing custom function defined on line 10
 console.log('Sum of 2 and 2 is ' + MWC.getSum(2, 2));
 
-//listening of MWC events. 'Coocoo!' is emmited by mwc_plugin_example every 5 seconds
-MWC.on('Coocoo!', function (message) {
-  console.log('Coocoo! Coocoo! ' + message);
-});
 
-MWC.on('honeypot accessed', function (message) {
-  console.log('Attention! Somebody tries to hack us! ' + message);
-});
+setInterval(function () {
+  MWC.emit('Coocoo!', 'Time now is ' + (new Date().toLocaleTimeString()));
+}, 5000);
+
 
 setTimeout(function(){
-  MWC.MODEL.Cats.create({nickname:'Chubais'},function(err,cat){
+  MWC.model.Cats.create({nickname:'Chubais'},function(err,cat){
     if(err) throw err;
     if(cat){
       console.log('Skoro tolko koshki rodyatsya!');
@@ -162,7 +156,7 @@ setTimeout(function(){
 },5000);
 
 setTimeout(function(){
-  MWC.MODEL.Dogs.create({nickname:'Laika'},function(err,dog){
+  MWC.model.Dogs.create({nickname:'Laika'},function(err,dog){
     if(err) throw err;
     if(dog){
       console.log('Happy birthday, '+dog.nickname);
