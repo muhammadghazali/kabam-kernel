@@ -17,26 +17,165 @@ function MWC(config) {
 
   EventEmitter.call(this);
   if (typeof config === 'object') {
-  if(process.env.redisUrl && !config.redis){
+    if (process.env.redisUrl && !config.redis) {
 //Using redis configuration from enviromental value
-    config.redis=process.env.redisUrl;
-  }
-  if(process.env.mongoUrl && !config.mongoUrl){
+      config.redis = process.env.redisUrl;
+    }
+    if (process.env.mongoUrl && !config.mongoUrl) {
 //Using mongo configuration from enviromental value
-    config.mongoUrl=process.env.mongoUrl;
-  }
+      config.mongoUrl = process.env.mongoUrl;
+    }
   }
   this.validateConfig(config);
   this.config = config;
-  this._extendCoreFunctions = [];
-  this._additionalModels = [];
+
+  var _extendCoreFunctions = [],//privileged field
+    _additionalModels = [],
+    _listeners = {};
+
   this._extendAppFunctions = [];
   this._additionalStrategies = [];
   this._extendMiddlewareFunctions = [];
   this._extendRoutesFunctions = [];
-  this._listeners = {};
 
-  return this;
+  var thisMWC = this;//http://www.crockford.com/javascript/private.html
+
+  //privileged functions
+  /**
+   * @ngdoc function
+   * @name mwc.extendCore
+   * @description
+   * Perform dependency injection on the mwc object.
+   * If mwc do not have fieldName property/method, this method is created as public property/method
+   * @param {string} fieldName - field name
+   * @param {object} value - field value - can be string, object, array, function.
+   */
+  this.extendCore = function (fieldName, value) {
+    if (this.prepared) {
+      throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+    } else {
+      if (typeof fieldName === 'string') {
+        _extendCoreFunctions.push({'field': fieldName, 'value': value});
+        return this;
+      } else {
+        throw new Error('MWC.extendCore requires argument of fieldName, value');
+      }
+    }
+  };
+
+  /**
+   * @ngdoc function
+   * @name mwc.extendModel
+   * @description
+   * Perform dependency injection of mongoose models to mwc.model and request.model.
+   * @param {string} modelName - field name
+   * @param {object} modelFunction(mongoose, config) - the first argument is mongoose object, the second one is the
+   * mwc.config object
+   @returns mwc
+   */
+  this.extendModel = function (modelName, modelFunction) {
+    if (modelName === 'Users') {
+      throw new Error('Error extending model, "Users" is reserved name');
+    } else {
+      if (typeof modelName === 'string' && typeof modelFunction === 'function') {
+        _additionalModels.push({'name': modelName, 'initFunction': modelFunction});
+        return this;
+      } else {
+        throw new Error('MWC.extendModel requires arguments of string of "modelName" and function(core){...}');
+      }
+    }
+  };
+
+  /**
+   * @ngdoc function
+   * @name mwc.extendListeners
+   * @param {string} eventName
+   * @param {function} eventHandlerFunction
+   * @returns mwc
+   */
+  this.extendListeners = function (eventName, eventHandlerFunction) {
+    if (typeof eventName === "string" && typeof eventHandlerFunction === "function") {
+      if (typeof _listeners[eventName] === "undefined") {
+        _listeners[eventName] = eventHandlerFunction;
+        return this;
+      } else {
+        throw new Error('Unable set listener for event ' + eventName + '! Event name is occupied!');
+      }
+    } else {
+      throw new Error('#MWC.extendListeners(eventName,eventHandlerFunction) have wrong arguments!');
+    }
+  };
+
+  /**
+   * @ngdoc function
+   * @name mwcKernel.start
+   * @description
+   * Start mwcKernel application
+   * @param {object} howExactly - config object
+   * @param {object} options - config object for http(s) server.
+   * Values:
+   * null - bind expressJS application to default port (process.env.PORT) or 3000 port, returns mwc
+   * number - bind expressJS application to this port, returns mwc
+   * http instance - bind expressJS application to this server, returns this server object with application bound
+   * https instance - bind expressJS application to this server, returns this server object with application bound
+   * string of 'app' - start appliation as standalone object, for background workers and console scripts, returns mwc
+   */
+  this.start = function (howExactly, options) {
+
+    //injecting redis
+    thisMWC.redisClient = redisManager.create(thisMWC.config.redis);
+
+    // initializing MongoDB and Core Models
+    thisMWC.mongoose = mongooseManager.create(thisMWC.config.mongoUrl);
+    thisMWC.mongoose.setConnectEvent(thisMWC);
+    thisMWC.model = mongooseManager.initModels(thisMWC);
+
+    //doing extendCore
+    //extending core by extendCore
+    _extendCoreFunctions.map(function (settingsFunction) {
+      if (typeof thisMWC[settingsFunction.field] === "undefined") {
+        thisMWC[settingsFunction.field] = settingsFunction.value;
+      } else {
+        throw new Error('We try to overwrite kernel field with name of ' + settingsFunction.field + '!');
+      }
+    });
+
+    //loading custom models //todo - maybe redo
+    _additionalModels.map(function (customModel) {
+      thisMWC.model[customModel.name] = customModel.initFunction(thisMWC.mongoose, thisMWC.config);
+    });
+
+    //initialize expressJS application
+    thisMWC.app = appManager.create(thisMWC);
+    appManager.extendApp(thisMWC);
+
+    for (var eventName in _listeners) {
+      if (_listeners.hasOwnProperty(eventName)) {
+        thisMWC.on(eventName, _listeners[eventName]);
+      }
+    }
+
+    if (howExactly) {
+      if (howExactly === 'app') {
+        return thisMWC;
+      }
+
+      if (typeof howExactly === 'number' && howExactly > 0) {
+        thisMWC.app.listen(howExactly);
+        return thisMWC;
+      }
+
+      if (howExactly instanceof http || howExactly instanceof https) {
+        return howExactly.createServer(thisMWC.app, options);//do not forget to set this http(s) for listening.
+      }
+
+      throw new Error('Function MWC.listen(httpOrHttpsOrPort) accepts objects of null, "app", http, https or port\'s number as argument!');
+    } else {
+      this.app.listen(this.app.get('port'));//listening to default port
+      return thisMWC;
+    }
+
+  };
 }
 
 util.inherits(MWC, EventEmitter);
@@ -59,41 +198,7 @@ MWC.prototype.validateConfig = function(config) {
   return true;
 };
 
-//extending application
-/**
- * @ngdoc function
- * @name mwc.extendCore
- * @description
- * Perform dependency injection on the mwc object.
- * If mwc do not have fieldName property/method, this method is created as public property/method
- * @param {string} fieldName - field name
- * @param {object} value - field value - can be string, object, array, function.
- */
-MWC.prototype.extendCore = function (fieldName,value) {
-  if (this.prepared) {
-    throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
-  } else {
-    if (typeof fieldName === 'string') {
-      this._extendCoreFunctions.push({'field':fieldName,'value':value});
-      return this;
-    } else {
-      throw new Error('MWC.extendCore requires argument of fieldName, value');
-    }
-  }
-};
-
-MWC.prototype.extendModel = function (modelName, modelFunction) {
-  if (modelName === 'Users') {
-    throw new Error('Error extending model, "Users" is reserved name');
-  } else {
-    if (typeof modelName === 'string' && typeof modelFunction === 'function') {
-      this._additionalModels.push({'name': modelName, 'initFunction': modelFunction});
-      return this;
-    } else {
-      throw new Error('MWC.extendModel requires arguments of string of "modelName" and function(core){...}');
-    }
-  }
-};
+//todo vvv make privileged
 
 MWC.prototype.extendApp = function (environment, settingsFunction) {
   if (this.prepared) {
@@ -221,6 +326,7 @@ MWC.prototype.extendRoutes = function (settingsFunction) {
     }
   }
 };
+
 //todo - refactor
 MWC.prototype.usePlugin = function (pluginObjectOrName) {
   throw new Error('usePlugin IS BROKEN!');
@@ -268,85 +374,20 @@ MWC.prototype.usePlugin = function (pluginObjectOrName) {
   }
 };
 
+//todo ^^^ make privileged
 
-MWC.prototype.extendListeners = function (eventName, eventHandlerFunction) {
-  if (typeof eventName === "string" && typeof eventHandlerFunction === "function") {
-    if (typeof this._listeners[eventName] === "undefined") {
-      this._listeners[eventName] = eventHandlerFunction;
-      return this;
-    } else {
-      throw new Error('Unable set listener for event ' + eventName + '! Event name is occupied!');
-    }
-  } else {
-    throw new Error('#MWC.extendListeners(eventName,eventHandlerFunction) have wrong arguments!');
-  }
+
+//legacy support, outdated
+MWC.prototype.ready = function (){
+  console.log('MWC.ready is outdated, use MWC.start with the same syntax');
+  return this.start('app');
 };
 
-MWC.prototype.ready = function () {
-  var thisMWC = this;//because we sometimes issue closures with thisMWC
-  thisMWC.prepared = true;
-
-  //injecting redis
-  thisMWC.redisClient = redisManager.create(thisMWC.config.redis);
-
-  // initializing MongoDB and Core Models
-  thisMWC.mongoose = mongooseManager.create(thisMWC.config.mongoUrl);
-  thisMWC.mongoose.setConnectEvent(thisMWC);
-  thisMWC.model = mongooseManager.initModels(thisMWC);
-
-  //doing extendCore
-  //extending core by extendCore
-  thisMWC._extendCoreFunctions.map(function (settingsFunction) {
-    if(typeof thisMWC[settingsFunction.field] === "undefined"){
-      thisMWC[settingsFunction.field]=settingsFunction.value;
-    } else {
-      throw new Error('We try to overwrite kernel field with name of '+settingsFunction.field+'!');
-    }
-  });
-
-  //loading custom models //todo - maybe redo
-  thisMWC._additionalModels.map(function (customModel) {
-    thisMWC.model[customModel.name] = customModel.initFunction(thisMWC.mongoose, thisMWC.config);
-  });
-
-  //initialize expressJS application
-  thisMWC.app = appManager.create(thisMWC);
-  appManager.extendApp(thisMWC);
-
-  // set shutdown procedure
-  process.on('SIGINT', thisMWC.shutdown);
-
-  for(var eventName in thisMWC._listeners){
-    thisMWC.on(eventName, thisMWC._listeners[eventName]);
-  }
-
-  return thisMWC;
+MWC.prototype.listen = function (httpOrHttpsOrPort,options){
+  console.log('MWC.listen is outdated, use MWC.start with the same syntax');
+  return this.start(httpOrHttpsOrPort,options);
 };
 
-MWC.prototype.listen = function (httpOrHttpsOrPort) {
-
-  if (!this.prepared) {
-    this.ready();
-  }
-
-  if (httpOrHttpsOrPort) {
-    if (typeof httpOrHttpsOrPort === 'number' && httpOrHttpsOrPort > 0) {
-      this.app.listen(httpOrHttpsOrPort);
-      return;
-    }
-
-    if (httpOrHttpsOrPort instanceof http || httpOrHttpsOrPort instanceof https) {
-      httpOrHttpsOrPort.createServer(this.app).listen(this.app.get('port'));
-      return;
-    }
-    throw new Error('Function MWC.listen(httpOrHttpsOrPort) accepts objects of null, http, https or port\'s number as argument!');
-  } else {
-    this.app.listen(this.app.get('port'));//listening to default port
-  }
-};
-
-
-//legacy support, outdated vvv
 MWC.prototype.setAppParameters = function(environment, settingsFunction){
   console.log('setAppParameters is outdated, use extendApp  with the same syntax');
   this.extendApp(environment, settingsFunction);
@@ -371,19 +412,6 @@ MWC.prototype.extendAppRoutes = function(settingsFunction){
   return this;
 };
 //legacy support, outdated ^^^
-
-MWC.prototype.shutdown = function () {
-
-  console.log('MWC IS GOING TO SHUT DOWN....');
-  if(this.mongoose.connection){
-    this.mongoose.connection.close();
-  }
-  this.redisClient.end();
-  // calling .shutdown allows your process to exit normally
-  toobusy.shutdown();
-  process.exit();
-
-};
 
 /**
  * @ngdoc function

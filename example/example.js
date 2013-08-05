@@ -6,8 +6,8 @@ MWC.extendCore('getSum',function(a,b){return a+b;});
 
 
 //set global lever variables for expressJS application
-MWC.extendApp(['development', 'staging'], function (core) {
-  core.app.set('TempVar', '42');
+MWC.extendApp(['development', 'staging'], function (app) {
+  app.set('TempVar', '42');
 });
 
 
@@ -56,7 +56,7 @@ MWC.extendRoutes(
 
     //we use Mongoose Model in this route
     core.app.get('/team', function (request, response) {
-      request.model.Users.find({active: 1}, function (err, users) {
+      request.model.Users.find({}, function (err, users) {
         if (err) {
           throw err;
         }
@@ -82,17 +82,17 @@ MWC.extendRoutes(
         response.json(cats);
       });
     });
-
+/*
     core.app.get('/dogs',function(request,response){
       request.model.Dogs.find({},function(err,dogs){
         if(err) throw err;
         response.json(dogs);
       });
     });
-
+*/
   }
 );
-
+/*/
 //injecting plugin as an object
 MWC.usePlugin({
   'extendCore': null, //can be ommited
@@ -113,7 +113,7 @@ MWC.usePlugin({
     });
   }
 });
-
+//*/
 //try{
 //  //injecting plugin as an name of installe npm package!
 //  MWC.usePlugin('mwc_plugin_example');
@@ -134,7 +134,7 @@ MWC.extendListeners('honeypot accessed',function (message) {
 
 
 //binding application to port
-MWC.listen();
+MWC.start();
 
 //testing custom function defined on line 10
 console.log('Sum of 2 and 2 is ' + MWC.getSum(2, 2));
@@ -144,7 +144,7 @@ setInterval(function () {
   MWC.emit('Coocoo!', 'Time now is ' + (new Date().toLocaleTimeString()));
 }, 5000);
 
-
+/*
 setTimeout(function(){
   MWC.model.Cats.create({nickname:'Chubais'},function(err,cat){
     if(err) throw err;
@@ -163,3 +163,4 @@ setTimeout(function(){
     }
   });
 },4000);
+*/
