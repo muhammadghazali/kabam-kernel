@@ -1,4 +1,4 @@
-mwc_core
+mwc_kernel
 ========
 
 MyWebClass core node.js application to be extended by plugins.
@@ -42,7 +42,7 @@ First argument (array of enviroments), and the second one (the path where to use
 5. `extendRoutes(function(core){...})` - add custom routes to application
 
 6. `loadPlugin("mwc_plugin_foo")` or `loadPlugin(pluginObj)` - load plugin as object or as a installed [npm](https://npmjs.org/) plugin by name
-See [Plugin creating manual](https://github.com/mywebclass/mwc_core#plugin-creating-manual) for details
+See [Plugin creating manual](https://github.com/mywebclass/mwc_kernel#plugin-creating-manual) for details
 
 
 
@@ -65,7 +65,7 @@ Plugins
 
  - [https://github.com/mywebclass/mwc_plugin_socket_io/](https://github.com/mywebclass/mwc_plugin_socket_io) - plugin to notify users by socket.io events
 
-[Plugin compatibility wiki](https://github.com/mywebclass/mwc_core/wiki/Plugin-compatibility-guide)
+[Plugin compatibility wiki](https://github.com/mywebclass/mwc_kernel/wiki/Plugin-compatibility-guide)
 
 Example
 =======
@@ -75,7 +75,7 @@ var mwcCore = require('./../index.js');
 //setting up the config
 var MWC = new mwcCore(require('./config.json')[(process.env.NODE_ENV) ? (process.env.NODE_ENV) : 'development']);
 
-//we extend the mwc_core instance
+//we extend the mwc_kernel instance
 MWC.extendCore(function(core) {
   //starting coocoo clock)
   setInterval(function() {
@@ -346,8 +346,8 @@ Installation
 =======
 
 ```shell
-    $ git clone git@github.com:mywebclass/mwc_core.git
-    $ cd mwc_core
+    $ git clone git@github.com:mywebclass/mwc_kernel.git
+    $ cd mwc_kernel
     $ npm install
 ```
 
@@ -387,7 +387,7 @@ or
     $ npm test
 ```
 
-[![Build Status](https://travis-ci.org/mywebclass/mwc_core.png?branch=master)](https://travis-ci.org/mywebclass/mwc_core)
+[![Build Status](https://travis-ci.org/mywebclass/mwc_kernel.png?branch=master)](https://travis-ci.org/mywebclass/mwc_kernel)
 
 Plugin creating manual
 =======
@@ -466,7 +466,7 @@ exports.extendRoutes = function(core) {
 };
 ```
 
-Lifecycle of mwc_core module and how can we extend it
+Lifecycle of mwc_kernel module and how can we extend it
 =======
 *Firstly*, the *core* module in extending functions are THE SAME instance of mwcCore application.
 And every call of extending functions shedule some customization for this application.
@@ -496,7 +496,7 @@ Because on stage of extending core, there is no core.app variable.
 This is the way of things it is intended to work
 When you call the `extendCore(function(core){...})`, you can add global core functions and variables,
 but not anything other touching the application, middlewares or routes.
-In code it is called right after initializing [mongoose routes](https://github.com/mywebclass/mwc_core/blob/master/index.js#L195)
+In code it is called right after initializing [mongoose routes](https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L195)
 core have event emmiter capabilities `MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.model.Users`, `MWC.model.Documents` (exposed as mongoose schemas).
 Nothing more!
 
@@ -507,14 +507,14 @@ When you call `extendModel(ModelName,function(mongoose, config){...})` you get a
 When you call `extendApp(function(core){...})`, you can set global application parameters, for example
 template [engines](http://expressjs.com/api.html#app.engine), [locals](http://expressjs.com/api.html#app.locals)
 and [other](http://expressjs.com/api.html#app-settings) settings.
-In code it is called [after settng logging middleware and port](https://github.com/mywebclass/mwc_core/blob/master/index.js#L236).
+In code it is called [after settng logging middleware and port](https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L236).
 You can set any application parameter you want, you have full MWC core internalls at your disposal
 `MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.model.Users`, `MWC.model.Documents` and custom models from calling `extendModel`.
 
 When you call `extendMiddlewares(function(core){...})`, you can set app middlewares.
-They are [called]((https://github.com/mywebclass/mwc_core/blob/master/index.js#L283) after
-[setting default exposed internals middleware](https://github.com/mywebclass/mwc_core/blob/master/index.js#L271) and before
-[setting error handlers middlewares](https://github.com/mywebclass/mwc_core/blob/master/index.js#L283).
+They are [called]((https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L283) after
+[setting default exposed internals middleware](https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L271) and before
+[setting error handlers middlewares](https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L283).
 
 So, you have the full power of core internals - (`emit`,`on`), `redisClient`, and `model.Users`, `model.Documents`
 and exposed internals middleware - where expressJS object of request have functions of `request.mwcEmit`,
@@ -522,9 +522,9 @@ and exposed internals middleware - where expressJS object of request have functi
 by passportjs middleware.
 
 When you call `extendRoutes(function(core){})`, you can set the application routes and verbs for them.
-This is done after defining [router middleware]((https://github.com/mywebclass/mwc_core/blob/master/index.js#L307) )
+This is done after defining [router middleware]((https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L307) )
 (the one that bind nodejs functions to URIs) and before the
-[setting up the default routes for Users and documents](https://github.com/mywebclass/mwc_core/blob/master/index.js#L313)
+[setting up the default routes for Users and documents](https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L313)
 and routes for passport.js authentication.
 
 It is worth saying, that you also have expressJS object of every route defined to  have functions of `request.mwcEmit`,
