@@ -59,15 +59,15 @@ MWC.prototype.validateConfig = function(config) {
 };
 
 //extending application
-MWC.prototype.extendCore = function (settingsFunction) {
+MWC.prototype.extendCore = function (fieldName,value) {
   if (this.prepared) {
     throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
   } else {
-    if (typeof settingsFunction === 'function') {
-      this._extendCoreFunctions.push(settingsFunction);
+    if (typeof fieldName === 'string') {
+      this._extendCoreFunctions.push({'field':fieldName,'value':value});
       return this;
     } else {
-      throw new Error('MWC.extendCore requires argument of function(core){...}');
+      throw new Error('MWC.extendCore requires argument of fieldName, value');
     }
   }
 };
@@ -272,7 +272,11 @@ MWC.prototype.ready = function () {
   //doing extendCore
   //extending core by extendCore
   thisMWC._extendCoreFunctions.map(function (settingsFunction) {
-    settingsFunction(thisMWC);
+    if(typeof thisMWC[settingsFunction.field] === "undefined"){
+      thisMWC[settingsFunction.field]=settingsFunction.value;
+    } else {
+      throw new Error('We try to overwrite kernel field with name of '+settingsFunction.field+'!');
+    }
   });
 
   //loading custom models //todo - maybe redo
