@@ -1,3 +1,6 @@
+exports.name = 'pluginExample';
+exports.dependencies = ['mwc_plugin_foo','mwc_plugin_bar']; //we throw error it this plugins are not loaded in application
+
 exports.extendCore = {
   'parameterOne': 1,
   'parameterTwo': [1, 2, 3, 4, 5],
@@ -5,8 +8,8 @@ exports.extendCore = {
   'parameterFour': function () {
     return this.parameterOne+this.parameterTwo[0];
   },
-  'getSum': function(a,b){
-    return a+b;
+  'getSum': function (a, b){
+    return a + b;
   }
 };
 
