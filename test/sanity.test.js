@@ -140,46 +140,46 @@ describe('sanity test', function () {
       }).should.throw('#MWC.extendApp requires environment name to be a string!');
     });
 
-    it('throws proper error for MWC.extendMiddlewares("i am pineapple!");', function () {
+    it('throws proper error for MWC.extendMiddleware("i am pineapple!");', function () {
       (function () {
         var MWC = mwcCore(config);
-        MWC.extendMiddlewares('i am pineapple!');
-      }).should.throw('Wrong arguments for function MWC.extendMiddlewares(environmentArrayOrStrings, [path], settingsFunction(core){...})');
+        MWC.extendMiddleware('i am pineapple!');
+      }).should.throw('Wrong arguments for function MWC.extendMiddleware(environmentArrayOrStrings, [path], settingsFunction(core){...})');
     });
 
-    it('throws proper error for MWC.extendMiddlewares([{a:1},{b:1}],function(core){})', function () {
+    it('throws proper error for MWC.extendMiddleware([{a:1},{b:1}],function(core){})', function () {
       (function () {
         var MWC = mwcCore(config);
-        MWC.extendMiddlewares([
+        MWC.extendMiddleware([
           {a: 1},
           {b: 1}
         ], function (core) {
         });
-      }).should.throw('#MWC.extendMiddlewares requires environment name to be a string!');
+      }).should.throw('#MWC.extendMiddleware requires environment name to be a string!');
     });
 
-    it('throws proper error for MWC.extendMiddlewares({a:1},function(core){})', function () {
+    it('throws proper error for MWC.extendMiddleware({a:1},function(core){})', function () {
       (function () {
         var MWC = mwcCore(config);
-        MWC.extendMiddlewares({a: 1}, function (core) {
+        MWC.extendMiddleware({a: 1}, function (core) {
         });
-      }).should.throw('Wrong arguments for function MWC.extendMiddlewares(environmentArrayOrStrings, [path], settingsFunction(core){...})');
+      }).should.throw('Wrong arguments for function MWC.extendMiddleware(environmentArrayOrStrings, [path], settingsFunction(core){...})');
     });
 
-    it('throws proper error for MWC.extendMiddlewares("development","wrongPath",function(core){})', function () {
+    it('throws proper error for MWC.extendMiddleware("development","wrongPath",function(core){})', function () {
       (function () {
         var MWC = mwcCore(config);
-        MWC.extendMiddlewares('development', 'wrongPath', function (core) {
+        MWC.extendMiddleware('development', 'wrongPath', function (core) {
         });
-      }).should.throw('#MWC.extendMiddlewares path to be a middleware valid path, that starts from "/"!');
+      }).should.throw('#MWC.extendMiddleware path to be a middleware valid path, that starts from "/"!');
     });
 
-    it('throws proper error for MWC.extendMiddlewares(["development","staging"],"wrongPath",function(core){})', function () {
+    it('throws proper error for MWC.extendMiddleware(["development","staging"],"wrongPath",function(core){})', function () {
       (function () {
         var MWC = mwcCore(config);
-        MWC.extendMiddlewares(['development', 'staging'], 'wrongPath', function (core) {
+        MWC.extendMiddleware(['development', 'staging'], 'wrongPath', function (core) {
         });
-      }).should.throw('#MWC.extendMiddlewares path to be a middleware valid path, that starts from "/"!');
+      }).should.throw('#MWC.extendMiddleware path to be a middleware valid path, that starts from "/"!');
     });
 
     it('throws proper error for MWC.extendRoutes("i am pineapple!");', function () {

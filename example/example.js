@@ -24,7 +24,7 @@ MWC.extendModel('Cats', function (mongoose, config) {
 });
 
 //set middleware for development and staging enviroments
-MWC.extendMiddlewares(['development', 'staging'], function (core) {
+MWC.extendMiddleware(['development', 'staging'], function (core) {
   return function (req, res, next) {
     res.setHeader('X-Production', 'NO!');
     next();
@@ -106,7 +106,7 @@ MWC.usePlugin({
     return mongoose.model('dogs', DogsSchema);
   }},
   'extendApp': null, //can be ommited
-  'extendMiddlewares': null, //can be ommited
+  "extendMiddleware": null, //can be ommited
   'extendRoutes': function (core) {
     core.app.get('/newPlugin', function (req, res) {
       res.send('New plugin is installed as object');

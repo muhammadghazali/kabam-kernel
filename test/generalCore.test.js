@@ -87,11 +87,11 @@ var extendAppMiddlewareFunction4=function(core){
   };
 };
 
-MWC.extendMiddlewares(extendAppMiddlewareFunction1);
-MWC.extendMiddlewares('staging',extendAppMiddlewareFunction2);
-MWC.extendMiddlewares(['staging','production'],extendAppMiddlewareFunction3);
-MWC.extendMiddlewares(['development'],'/middleware3Path',extendAppMiddlewareFunction3);
-MWC.extendMiddlewares('development','/middleware4Path',extendAppMiddlewareFunction4);
+MWC.extendMiddleware(extendAppMiddlewareFunction1);
+MWC.extendMiddleware('staging',extendAppMiddlewareFunction2);
+MWC.extendMiddleware(['staging','production'],extendAppMiddlewareFunction3);
+MWC.extendMiddleware(['development'],'/middleware3Path',extendAppMiddlewareFunction3);
+MWC.extendMiddleware('development','/middleware4Path',extendAppMiddlewareFunction4);
 
 /* Adding custom routes
  *
@@ -143,7 +143,7 @@ MWC.usePlugin({
   'extendCore': extendCoreFunctionPlugin,
   'extendModel':{'Dogs':extendModelFunctionPlugin},
   'extendApp': extendAppParametersFunctionPlugin,
-  'extendMiddlewares': extendAppMiddlewareFunctionPlugin,
+  "extendMiddleware": extendAppMiddlewareFunctionPlugin,
   'extendRoutes': extendRoutesFunctionPlugin
 });
 
@@ -200,7 +200,7 @@ describe('mwcCore', function() {
       }).should.throw('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
 
       (function() {
-        MWC.extendMiddlewares(['development', 'staging'], function() {
+        MWC.extendMiddleware(['development', 'staging'], function() {
           throw new Error('Core app middlewares were extended for READIED application!');
         });
       }).should.throw('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
@@ -1080,7 +1080,7 @@ describe('mwcCore', function() {
     });
   });
 
-  describe('#MWC.extendMiddlewares()', function() {
+  describe('#MWC.extendMiddleware()', function() {
     it('adds the desired functions to MWC._extendMiddlewaresFunctions',function(){
       if(typeof process.env.NODE_ENV !== 'undefined'){
         process.env.NODE_ENV.should.be.equal('development');
@@ -1126,7 +1126,7 @@ describe('mwcCore', function() {
         response.headers['x-powered-by'].should.be.equal('Express');
       });
 
-      it('this application have headers needed by #MWC.extendMiddlewares',function(){
+      it('this application have headers needed by #MWC.extendMiddleware',function(){
         response.headers['middleware1'].should.be.equal('middleware1');
         response.headers['middleware3'].should.be.equal('middleware3');
       });
@@ -1163,7 +1163,7 @@ describe('mwcCore', function() {
         response.headers['x-powered-by'].should.be.equal('Express');
       });
 
-      it('this application have headers needed by #MWC.extendMiddlewares',function(){
+      it('this application have headers needed by #MWC.extendMiddleware',function(){
         response.headers['middleware1'].should.be.equal('middleware1');
         response.headers['extendappmiddlewarefunctionplugin'].should.be.equal('OK');
       });
@@ -1228,7 +1228,7 @@ describe('mwcCore', function() {
       });
     });
 
-    describe('extendMiddlewares from plugin',function() {
+    describe('extendMiddleware from plugin',function() {
       it('adds the desired functions to MWC._extendMiddlewaresFunctions',function(){
         if(typeof process.env.NODE_ENV !== 'undefined'){
           process.env.NODE_ENV.should.be.equal('development');
@@ -1260,7 +1260,7 @@ describe('mwcCore', function() {
           response.headers['x-powered-by'].should.be.equal('Express');
         });
 
-        it('this  application have headers needed by #MWC.extendMiddlewares',function(){
+        it('this  application have headers needed by #MWC.extendMiddleware',function(){
           response.headers['middleware1'].should.be.equal('middleware1');
           response.headers['extendappmiddlewarefunctionplugin'].should.be.equal('OK');
         });
@@ -1296,7 +1296,7 @@ describe('mwcCore', function() {
           response.headers['x-powered-by'].should.be.equal('Express');
         });
 
-        it('this application have headers needed by #MWC.extendMiddlewares',function(){
+        it('this application have headers needed by #MWC.extendMiddleware',function(){
           response.headers['middleware1'].should.be.equal('middleware1');
           response.headers['extendappmiddlewarefunctionplugin'].should.be.equal('OK');
         });
@@ -1330,7 +1330,7 @@ describe('mwcCore', function() {
       response.headers['x-powered-by'].should.be.equal('Express');
     });
 
-    it('this application have headers needed by #MWC.extendMiddlewares',function(){
+    it('this application have headers needed by #MWC.extendMiddleware',function(){
       response.headers['middleware1'].should.be.equal('middleware1');
       response.headers['extendappmiddlewarefunctionplugin'].should.be.equal('OK');
     });

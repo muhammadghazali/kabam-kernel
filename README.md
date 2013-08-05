@@ -38,7 +38,7 @@ template [engines](http://expressjs.com/api.html#app.engine),
 and [other](http://expressjs.com/api.html#app-settings) settings.
 First argument (array of enviroments) is OPTIONAL
 
-4. `extendMiddlewares(['development','staging','production','otherEnviroment'],'/middlewarePath',function(core){...})` - set application
+4. `extendMiddleware(['development','staging','production','otherEnviroment'],'/middlewarePath',function(core){...})` - set application
 [middleware](http://expressjs.com/api.html#middleware).
 This function can be executed multiple times, the middlewares applied are used in application in *order* they were issued by this function.
 First argument (array of enviroments), and the second one (the path where to use middleware, the default is "/") are OPTIONAL
@@ -110,7 +110,7 @@ MWC.extendModel('Cats', function(mongoose, config) {
 });
 
 //set middleware for development and staging enviroments
-MWC.extendMiddlewares(['development', 'staging'], function(core) {
+MWC.extendMiddleware(['development', 'staging'], function(core) {
   return function(req, res, next) {
     res.setHeader('X-Production', 'NO!');
     next();
@@ -198,7 +198,7 @@ MWC.usePlugin({
     }
   },
   'extendApp': null, //can be ommited
-  'extendMiddlewares': null, //can be ommited
+  'extendMiddleware': null, //can be ommited
   'extendRoutes': function(core) {
     core.app.get('/newPlugin', function(req, res) {
       res.send('New plugin is installed as object');
@@ -399,8 +399,8 @@ Plugin creating manual
 This is typicale plugin code. It is placed there
 [https://github.com/mywebclass/mwc_plugin_example](https://github.com/mywebclass/mwc_plugin_example)
 
-*Important* - when you create plugin, the `extendApp`, `extendMiddlewares` APPLIES to all enviroments!
-Furthermore, `extendMiddlewares` binds to route '/'
+*Important* - when you create plugin, the `extendApp`, `extendMiddleware` APPLIES to all enviroments!
+Furthermore, `extendMiddleware` binds to route '/'
 
 ```javascript
 var os = require('os');
@@ -416,7 +416,7 @@ exports.extendApp = function(core) {
   core.app.set('var1', "42");
 };
 
-exports.extendMiddlewares = function(core) {
+exports.extendMiddleware = function(core) {
   return function(request, response, next) {
     response.setHeader('X-MWC-PLUGIN_EXAMPLE!', 'THIS ROCKS!');
     next();
@@ -515,7 +515,7 @@ In code it is called [after settng logging middleware and port](https://github.c
 You can set any application parameter you want, you have full MWC core internalls at your disposal
 `MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.model.Users`, `MWC.model.Documents` and custom models from calling `extendModel`.
 
-When you call `extendMiddlewares(function(core){...})`, you can set app middlewares.
+When you call `extendMiddleware(function(core){...})`, you can set app middlewares.
 They are [called]((https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L283) after
 [setting default exposed internals middleware](https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L271) and before
 [setting error handlers middlewares](https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L283).

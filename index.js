@@ -136,7 +136,7 @@ MWC.prototype.extendStrategies = function(strategyObject){
   return this;
 };
 
-MWC.prototype.extendMiddlewares = function (environment, path, settingsFunction) {
+MWC.prototype.extendMiddleware = function (environment, path, settingsFunction) {
   if (this.prepared) {
     throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
   } else {
@@ -158,7 +158,7 @@ MWC.prototype.extendMiddlewares = function (environment, path, settingsFunction)
         environmentToUse = environment;
         for (var i = 0; i < environment.length;i++){
           if(typeof environment[i] !== 'string'){
-            throw new Error('#MWC.extendMiddlewares requires environment name to be a string!');
+            throw new Error('#MWC.extendMiddleware requires environment name to be a string!');
           }
         }
       }
@@ -169,7 +169,7 @@ MWC.prototype.extendMiddlewares = function (environment, path, settingsFunction)
             settingsFunctionToUse = settingsFunction;
           }
         } else {
-          throw new Error('#MWC.extendMiddlewares path to be a middleware valid path, that starts from "/"!');
+          throw new Error('#MWC.extendMiddleware path to be a middleware valid path, that starts from "/"!');
         }
       } else {
         if (typeof path === 'function') {
@@ -195,7 +195,7 @@ MWC.prototype.extendMiddlewares = function (environment, path, settingsFunction)
         });
       }
     } else {
-      throw new Error('Wrong arguments for function MWC.extendMiddlewares(environmentArrayOrStrings, [path], settingsFunction(core){...})');
+      throw new Error('Wrong arguments for function MWC.extendMiddleware(environmentArrayOrStrings, [path], settingsFunction(core){...})');
     }
     return this;
   }
@@ -240,15 +240,15 @@ MWC.prototype.usePlugin = function (pluginObjectOrName) {
     if (pluginToBeInstalled.extendApp) {
       this.extendApp(pluginToBeInstalled.extendApp);
     }
-    if(pluginToBeInstalled.setAppMiddlewares && typeof pluginToBeInstalled.extendMiddlewares === 'undefined'){
-      console.log('Plugin is outdated! Use extendMiddlewares instead of setAppMiddlewares with same syntax!');
-      pluginToBeInstalled.extendMiddlewares=pluginToBeInstalled.setAppMiddlewares;
+    if(pluginToBeInstalled.setAppMiddlewares && typeof pluginToBeInstalled.extendMiddleware === 'undefined'){
+      console.log('Plugin is outdated! Use extendMiddleware instead of setAppMiddlewares with same syntax!');
+      pluginToBeInstalled.extendMiddleware=pluginToBeInstalled.setAppMiddlewares;
     }
-    if (pluginToBeInstalled.extendMiddlewares) {
-      this.extendMiddlewares(pluginToBeInstalled.extendMiddlewares);
+    if (pluginToBeInstalled.extendMiddleware) {
+      this.extendMiddleware(pluginToBeInstalled.extendMiddleware);
     }
     if(pluginToBeInstalled.extendAppRoutes && typeof pluginToBeInstalled.extendRoutes === 'undefined'){
-      console.log('Plugin is outdated! Use extendMiddlewares instead of setAppMiddlewares with same syntax!');
+      console.log('Plugin is outdated! Use extendMiddleware instead of setAppMiddlewares with same syntax!');
       pluginToBeInstalled.extendRoutes=pluginToBeInstalled.extendAppRoutes;
     }
     if (pluginToBeInstalled.extendRoutes) {
@@ -342,8 +342,8 @@ MWC.prototype.setAppParameters = function(environment, settingsFunction){
 };
 
 MWC.prototype.setAppMiddlewares = function(environment, path, settingsFunction){
-  console.log('setAppMiddlewares is outdated, use extendMiddlewares with the same syntax');
-  this.extendMiddlewares(environment, path, settingsFunction);
+  console.log('setAppMiddlewares is outdated, use extendMiddleware with the same syntax');
+  this.extendMiddleware(environment, path, settingsFunction);
   return this;
 };
 
