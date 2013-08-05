@@ -1,7 +1,7 @@
 {
   "name": "mwc_kernel",
   "version": "0.1.0",
-  "description": "MyWebClass core node.js application to be extended by loaded automatically middleware plugins",
+  "description": "MyWebClass kernel for building express.js applications with plugins",
   "main": "index.js",
   "engines": {
     "node": "0.10.x",
@@ -49,9 +49,30 @@
   },
   "keywords": [
     "mywebclass",
-    "core"
+    "kernel"
   ],
-  "author": "Anatolij Ostroumov",
+  "author": {
+    "name": "Anatolij Ostroumov",
+    "url":"https://github.com/vodolaz095",
+    "email": "ostroumov095@gmail.com"
+  },
+  "contributors": [
+    {
+      "name": "Anatolij Ostroumov (developer)",
+      "url":"https://github.com/vodolaz095",
+      "email": "ostroumov095@gmail.com"
+    },
+    {
+      "name": "The Budiman (developer)",
+      "url": "http://tbudiman.blogspot.com",
+      "email": "tbudiman@gmail.com"
+    },
+    {
+      "name": "Keith Williams (copyright owner)",
+      "url": "http://mywebclass.org",
+      "email": "keith@mywebclass.org"
+    }
+  ],
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/mywebclass/mwc_kernel/issues"
