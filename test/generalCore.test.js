@@ -1334,6 +1334,16 @@ describe('mwcCore', function() {
       response.headers['middleware1'].should.be.equal('middleware1');
       response.headers['extendappmiddlewarefunctionplugin'].should.be.equal('OK');
     });
+
+    it('this application have proper rate limiting headers',function(){
+      var resetTime=Math.floor(new Date().getTime()/1000)+60;
+      //response.headers.should.equal(1);
+      parseInt(response.headers['x-ratelimit-limit']).should.be.equal(200);
+      parseInt(response.headers['x-ratelimit-reset']).should.be.below(resetTime);
+      parseInt(response.headers['x-ratelimit-reset-in-seconds']).should.be.below(60);
+      parseInt(response.headers['x-ratelimit-remaining']).should.be.below(200);
+    });
+
   });
 
 });
