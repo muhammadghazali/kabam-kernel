@@ -7,6 +7,12 @@ var EventEmitter = require('events').EventEmitter,
   mongooseManager = require('./lib/mongooseManager.js'),
   redisManager = require('./lib/redisManager.js');
 
+/**
+ * @ngdoc function
+ * @name MWC
+ * @constructor
+ * @param {object} config - config object
+ */
 function MWC(config) {
 
   EventEmitter.call(this);
@@ -344,15 +350,30 @@ MWC.prototype.injectEmit = function(object) {
   };
 };
 
-//Use this function with great caution! Because usually redis-database-as-a-service providers have
-//strict connection limit!!! and every one redis client created like this consumes one connection!
-//Usually, MWC needs only one redis client connection
-//BTW, redis is NOT MySQL - we can't increase speed with connection pooling!
-MWC.prototype.createRedisClient = function(){
+/**
+ * @ngdoc function
+ * @name mwc.createRedisClient
+ * @description
+ * Create new redis client
+ *
+ * Use this function with great caution! Because usually redis-database-as-a-service providers have
+ * strict connection limit!!! and every one redis client created like this consumes one connection!
+ * Usually, MWC needs only one redis client connection
+ * BTW, redis is NOT MySQL - we can't increase speed with connection pooling!
+ * @returns {RedisClient} redis client
+ */
+MWC.prototype.createRedisClient = function() {
   return redisManager.create(this.config.redis);
 };
 
-MWC.create = function(config){
+/**
+ * @ngdoc function
+ * @name mwcKernel.create
+ * @description
+ * Create MWC object instance (factory)
+ * @param {object} config - config object
+ */
+MWC.create = function(config) {
   return new MWC(config);
 };
 

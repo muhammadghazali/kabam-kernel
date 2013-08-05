@@ -1,5 +1,9 @@
+@ngdoc overview
+@name README
+@description
+
 mwc_kernel
-========
+==========
 
 MyWebClass core node.js application to be extended by plugins.
 
@@ -21,7 +25,7 @@ Introduction
 Technically this is a Factory class to vendor [express.js](http://expressjs.com/) applications,
 that can be easily extended by 6 mixin type functions.
 
-0. `new mwcCore(configObj)` - create application object using [configuration object](https://github.com/mywebclass/mwc_kernel/blob/master/example/config.json) specified.
+0. `mwcCore(configObj)` - create application object using [configuration object](https://github.com/mywebclass/mwc_kernel/blob/master/example/config.json) specified.
 
 1. `extendCore(function(core){...})` - extend object created, including expressJS application
 and some other modules. You can call this function multiple times
@@ -73,7 +77,7 @@ Example
 ```javascript
 var mwcCore = require('./../index.js');
 //setting up the config
-var MWC = new mwcCore(require('./config.json')[(process.env.NODE_ENV) ? (process.env.NODE_ENV) : 'development']);
+var MWC = mwcCore(require('./config.json')[(process.env.NODE_ENV) ? (process.env.NODE_ENV) : 'development']);
 
 //we extend the mwc_kernel instance
 MWC.extendCore(function(core) {
@@ -530,5 +534,3 @@ and routes for passport.js authentication.
 It is worth saying, that you also have expressJS object of every route defined to  have functions of `request.mwcEmit`,
 `request.MODEL`,`request.MODEL.Users`,`request.MODEL.Documents`, custom models,`request.redisClient`, and `request.user` provided
 by [passportjs](http://passportjs.org) middleware.
-
-

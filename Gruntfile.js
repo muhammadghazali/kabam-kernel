@@ -32,6 +32,27 @@ module.exports = function(grunt) {
         src: [ 'test/**/*.js' ]
       }
     },
+    copy: {
+      readme: {
+        src: 'README.md',
+        dest: 'results/guide.ngdoc'
+      }
+    },
+    ngdocs: {
+      options: {
+        dest: 'results/docs',
+        title: 'mwc kernel',
+        startPage: '/guide'
+      },
+      api: {
+        src: ['index.js', 'lib/**/*.js', 'models/**/*.js'],
+        title: 'MWC Kernel API'
+      },
+      guide: {
+        src: ['results/guide.ngdoc'],
+        title: 'Developer Guide'
+      }
+    },
     watch: {
       gruntfile: {
         files: '<%= jshint.gruntfile.src %>',
@@ -43,11 +64,15 @@ module.exports = function(grunt) {
   // These plugins provide necessary tasks.
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-simple-mocha');
+  grunt.loadNpmTasks('grunt-ngdocs');
 
   // Tasks
   grunt.registerTask('test', ['simplemocha']);
+  grunt.registerTask('docs', ['copy:readme', 'ngdocs']);
+
   // Default task.
-  grunt.registerTask('default', ['jshint', 'test']);
+  grunt.registerTask('default', ['jshint', 'test', 'docs']);
 
 };

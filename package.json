@@ -28,7 +28,7 @@
     "passport-github": "*",
     "passport-twitter": "*",
     "passport-facebook": "*",
-    "passport-linkedin":"*",
+    "passport-linkedin": "*",
     "mongoose": "*",
     "toobusy": "*"
   },
@@ -40,7 +40,9 @@
     "should": "*",
     "mocha": "*",
     "grunt-simple-mocha": "*",
-    "request":"*"
+    "request": "*",
+    "grunt-ngdoc": "*",
+    "grunt-contrib-copy": "*"
   },
   "optionalDependencies": {
     "hiredis": "*"
