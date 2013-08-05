@@ -1335,13 +1335,20 @@ describe('mwcCore', function() {
       response.headers['extendappmiddlewarefunctionplugin'].should.be.equal('OK');
     });
 
-    it('this application have proper rate limiting headers',function(){
+    describe('this application have proper rate limiting headers',function(){
       var resetTime=Math.floor(new Date().getTime()/1000)+60;
-      //response.headers.should.equal(1);
-      parseInt(response.headers['x-ratelimit-limit']).should.be.equal(200);
-      parseInt(response.headers['x-ratelimit-reset']).should.be.below(resetTime);
-      parseInt(response.headers['x-ratelimit-reset-in-seconds']).should.be.below(60);
-      parseInt(response.headers['x-ratelimit-remaining']).should.be.below(200);
+      it('have x-ratelimit-limit to 200',function(){
+        parseInt(response.headers['x-ratelimit-limit']).should.be.equal(200);
+      });
+      it('have the x-ratelimit-reset header with valid value',function(){
+        parseInt(response.headers['x-ratelimit-reset']).should.be.below(resetTime);
+      });
+      it('have the x-ratelimit-reset-in-seconds header with valid value',function(){
+        parseInt(response.headers['x-ratelimit-reset-in-seconds']).should.be.below(61);
+      });
+      it('have the x-ratelimit-remaining header with valid value',function(){
+        parseInt(response.headers['x-ratelimit-remaining']).should.be.below(201);
+      });
     });
 
   });
