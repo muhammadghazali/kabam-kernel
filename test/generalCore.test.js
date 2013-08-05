@@ -1336,7 +1336,7 @@ describe('mwcCore', function() {
     });
 
     describe('this application have proper rate limiting headers',function(){
-      var resetTime=Math.floor(new Date().getTime()/1000)+61;
+      var resetTime=Math.floor(new Date().getTime()/1000)+80;
       it('have x-ratelimit-limit to 200',function(){
         parseInt(response.headers['x-ratelimit-limit']).should.be.equal(200);
       });

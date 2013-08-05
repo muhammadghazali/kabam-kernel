@@ -1,6 +1,4 @@
 var async = require('async'),
-  hat = require('hat'),
-  rack = hat.rack(),
   crypto = require('crypto');
 
 function sha512(str) {
@@ -9,6 +7,14 @@ function sha512(str) {
 
 function md5(str) {
   return crypto.createHash('md5').update(str).digest('hex').toString();
+}
+
+
+var rackSeed=crypto.randomBytes(64);
+function rack(){
+  var result = sha512(rackSeed+crypto.randomBytes(64).toString());
+  rackSeed=result;
+  return result;
 }
 
 module.exports = exports = function (mwc) {
@@ -169,7 +175,7 @@ module.exports = exports = function (mwc) {
     } else {
       return done(new Error('There is something strange instead of user profile'));
     }
-  }
+  };
   //signup new user by username, email, password,
   UserSchema.statics.signUp = function(username,email,password,callback){
     this.create({

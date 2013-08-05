@@ -30,7 +30,6 @@
     "passport-facebook": "*",
     "passport-linkedin":"*",
     "mongoose": "*",
-    "hat": "*",
     "toobusy": "*"
   },
   "devDependencies": {
