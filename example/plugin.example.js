@@ -36,15 +36,16 @@ exports.extendModel = {
   }
 };
 
+//we do it for all application enviroments
+//app - is a expressJS application. it turned out that we do not need core here...
+//config - is a current mwc config object
 exports.extendApp = function (app, config) {
   app.set('someValue',42);
-  //we do it for all application enviroments
-  //app - is a expressJS application. it turned out that we do not need core here...
-  //config - is a current mwc config object
 };
 
-//sorry, only one(!) passportJS strategy per plugin!
 var LinkedInStrategy = require('passport-linkedin').Strategy;
+
+//sorry, only one(!) passportJS strategy per plugin!
 exports.extendStrategy = {
   'strategy': function (core) {
     return new LinkedInStrategy({
@@ -74,8 +75,8 @@ exports.extendStrategy = {
 };
 
 //the most hard to understand function
-//because middleware conseption is trkicky and it do need the core object, for example, in this way
-//or maybe in some other way. But it do need the core!!!
+//because middleware conception is tricky and it do need the core object, for example,
+// in this way or maybe in some other way. But it do need the core!!!
 //for simplicity of code of plugin all middlewares are setted to all enviroments and are mounted to path /
 exports.extendMiddleware = [
   function (core) {
