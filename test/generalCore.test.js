@@ -1081,30 +1081,30 @@ describe('mwcCore', function() {
   });
 
   describe('#MWC.extendMiddleware()', function() {
-    it('adds the desired functions to MWC._extendMiddlewaresFunctions',function(){
+    it('adds the desired functions to MWC._extendMiddlewareFunctions',function(){
       if(typeof process.env.NODE_ENV !== 'undefined'){
         process.env.NODE_ENV.should.be.equal('development');
       }
-      MWC._extendMiddlewaresFunctions.should.be.an.instanceOf(Array);
+      MWC._extendMiddlewareFunctions.should.be.an.instanceOf(Array);
     });
 
     it('it set extendAppMiddlewareFunction1 to all environments and path /',function(){
-      MWC._extendMiddlewaresFunctions.should.includeEql({'path':'/', 'SettingsFunction':extendAppMiddlewareFunction1});
+      MWC._extendMiddlewareFunctions.should.includeEql({'path':'/', 'SettingsFunction':extendAppMiddlewareFunction1});
     });
     it('it set extendAppParametersFunction2 to staging environment',function(){
-      MWC._extendMiddlewaresFunctions.should.includeEql({'path':'/', environment:'staging','SettingsFunction':extendAppMiddlewareFunction2});
+      MWC._extendMiddlewareFunctions.should.includeEql({'path':'/', environment:'staging','SettingsFunction':extendAppMiddlewareFunction2});
     });
     it('it set extendAppParametersFunction3 to staging environment',function(){
-      MWC._extendMiddlewaresFunctions.should.includeEql({'path':'/', environment:'staging', 'SettingsFunction':extendAppMiddlewareFunction3});
+      MWC._extendMiddlewareFunctions.should.includeEql({'path':'/', environment:'staging', 'SettingsFunction':extendAppMiddlewareFunction3});
     });
     it('it set extendAppParametersFunction3 to production environment',function(){
-      MWC._extendMiddlewaresFunctions.should.includeEql({'path':'/', environment:'production', 'SettingsFunction':extendAppMiddlewareFunction3});
+      MWC._extendMiddlewareFunctions.should.includeEql({'path':'/', environment:'production', 'SettingsFunction':extendAppMiddlewareFunction3});
     });
     it('it set extendAppMiddlewareFunction3 to development environment and path /middleware3Path',function(){
-      MWC._extendMiddlewaresFunctions.should.includeEql({'path':'/middleware3Path', environment:'development', 'SettingsFunction':extendAppMiddlewareFunction3});
+      MWC._extendMiddlewareFunctions.should.includeEql({'path':'/middleware3Path', environment:'development', 'SettingsFunction':extendAppMiddlewareFunction3});
     });
     it('it set extendAppMiddlewareFunction4 to development environment and path /middleware4Path',function(){
-      MWC._extendMiddlewaresFunctions.should.includeEql({environment:'development','path':'/middleware4Path', 'SettingsFunction':extendAppMiddlewareFunction4});
+      MWC._extendMiddlewareFunctions.should.includeEql({environment:'development','path':'/middleware4Path', 'SettingsFunction':extendAppMiddlewareFunction4});
     });
 
     describe('it actually works',function(){
@@ -1229,15 +1229,15 @@ describe('mwcCore', function() {
     });
 
     describe('extendMiddleware from plugin',function() {
-      it('adds the desired functions to MWC._extendMiddlewaresFunctions',function(){
+      it('adds the desired functions to MWC._extendMiddlewareFunctions',function(){
         if(typeof process.env.NODE_ENV !== 'undefined'){
           process.env.NODE_ENV.should.be.equal('development');
         }
-        MWC._extendMiddlewaresFunctions.should.be.an.instanceOf(Array);
+        MWC._extendMiddlewareFunctions.should.be.an.instanceOf(Array);
       });
 
       it('it set extendAppMiddlewareFunctionPlugin to all environments and path "/"',function(){
-        MWC._extendMiddlewaresFunctions.should.includeEql({'path':'/', 'SettingsFunction':extendAppMiddlewareFunctionPlugin});
+        MWC._extendMiddlewareFunctions.should.includeEql({'path':'/', 'SettingsFunction':extendAppMiddlewareFunctionPlugin});
       });
 
       describe('it actually works',function(){

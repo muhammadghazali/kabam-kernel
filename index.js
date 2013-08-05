@@ -32,7 +32,7 @@ function MWC(config) {
   this._additionalModels = [];
   this._extendAppFunctions = [];
   this._additionalStrategies = [];
-  this._extendMiddlewaresFunctions = [];
+  this._extendMiddlewareFunctions = [];
   this._extendRoutesFunctions = [];
   this._listeners = {};
 
@@ -60,6 +60,15 @@ MWC.prototype.validateConfig = function(config) {
 };
 
 //extending application
+/**
+ * @ngdoc function
+ * @name mwc.extendCore
+ * @description
+ * Perform dependancy injection on the mwc object.
+ * If mwc do not have fieldName property/method, this method is created as public property/method
+ * @param {string} fieldName - field name
+ * @param {object} value - field value
+ */
 MWC.prototype.extendCore = function (fieldName,value) {
   if (this.prepared) {
     throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
@@ -127,7 +136,7 @@ MWC.prototype.extendApp = function (environment, settingsFunction) {
   }
 };
 
-MWC.prototype.extendStrategies = function(strategyObject){
+MWC.prototype.extendStrategy = function(strategyObject){
   if(typeof strategyObject !== 'object') throw new Error('mwc.extendStrategies requires strategyObject to be an object');
   if(typeof strategyObject.strategy !== 'function') throw new Error('mwc.extendStrategies requires strategyObject.strategy to be a proper function!');
   if(typeof strategyObject.routes !== 'function') throw new Error('mwc.extendStrategies requires strategyObject.routes to be a proper function!');
@@ -180,7 +189,7 @@ MWC.prototype.extendMiddleware = function (environment, path, settingsFunction) 
     if (settingsFunctionToUse) {
       if (environmentToUse) {
         for (var i = 0; i < environmentToUse.length; i++) {
-          this._extendMiddlewaresFunctions.push({
+          this._extendMiddlewareFunctions.push({
             'environment': environmentToUse[i],
             'path': pathToUse,
             'SettingsFunction': settingsFunctionToUse
@@ -188,7 +197,7 @@ MWC.prototype.extendMiddleware = function (environment, path, settingsFunction) 
         }
       } else {
         //we set middleware for all environments
-        this._extendMiddlewaresFunctions.push({
+        this._extendMiddlewareFunctions.push({
           'path': pathToUse,
           'SettingsFunction': settingsFunctionToUse
         });
@@ -336,6 +345,8 @@ MWC.prototype.listen = function (httpOrHttpsOrPort) {
   }
 };
 
+
+//legacy support, outdated vvv
 MWC.prototype.setAppParameters = function(environment, settingsFunction){
   console.log('setAppParameters is outdated, use extendApp  with the same syntax');
   this.extendApp(environment, settingsFunction);
@@ -359,6 +370,7 @@ MWC.prototype.extendAppRoutes = function(settingsFunction){
   this.extendRoutes(settingsFunction);
   return this;
 };
+//legacy support, outdated ^^^
 
 MWC.prototype.shutdown = function () {
 
@@ -373,6 +385,14 @@ MWC.prototype.shutdown = function () {
 
 };
 
+/**
+ * @ngdoc function
+ * @name mwc.injectEmit
+ * @description
+ * Injects a function .emit(eventName,eventObj) for every object. This function
+ * is used for making every object to be able to emit events through mwc
+ * @param {object} object - object to be extended
+ */
 MWC.prototype.injectEmit = function(object) {
   var thisMWC = this;
   object.emitMWC = function (eventName, eventContent) {
