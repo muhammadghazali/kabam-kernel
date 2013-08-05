@@ -214,6 +214,8 @@ MWC.prototype.extendRoutes = function (settingsFunction) {
 };
 //todo - refactor
 MWC.prototype.usePlugin = function (pluginObjectOrName) {
+  throw new Error('usePlugin IS BROKEN!');
+
   if (this.prepared) {
     throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
   } else {
