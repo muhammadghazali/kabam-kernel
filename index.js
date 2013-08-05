@@ -64,10 +64,10 @@ MWC.prototype.validateConfig = function(config) {
  * @ngdoc function
  * @name mwc.extendCore
  * @description
- * Perform dependancy injection on the mwc object.
+ * Perform dependency injection on the mwc object.
  * If mwc do not have fieldName property/method, this method is created as public property/method
  * @param {string} fieldName - field name
- * @param {object} value - field value
+ * @param {object} value - field value - can be string, object, array, function.
  */
 MWC.prototype.extendCore = function (fieldName,value) {
   if (this.prepared) {
