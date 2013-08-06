@@ -2,12 +2,12 @@
 
 var should = require('should'),
   async = require('async'),
-  mwcCore = require('./../index.js'),
+  mwcKernel = require('./../index.js'),
   events = require('events'),
   config = require('./../example/config.json').development,
   request = require('request');
 
-describe('mwcCore', function() {
+describe('Kernel', function() {
 
   var MWC;
 
@@ -121,7 +121,7 @@ describe('mwcCore', function() {
 
 
   before(function(done) {
-    MWC = mwcCore(config);
+    MWC = mwcKernel(config);
 
     MWC.extendCore('sum', function(config){
       return function(a,b){
@@ -162,7 +162,7 @@ describe('mwcCore', function() {
     MWC.mongoose.disconnect();
     done();
   });
-  describe('Testing exposed objects of running mwcCore', function() {
+  describe('Testing exposed objects of running mwcKernel', function() {
 
     it('can emit and listen to events', function() {
       MWC.emit.should.be.a('function');

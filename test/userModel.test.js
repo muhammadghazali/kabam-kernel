@@ -8,7 +8,7 @@ var should = require('should'),
 var MWC = mwcCore(config);
 MWC.start('app');
 
-describe('mwcCore - user model', function() {
+describe('Users model', function() {
 
   describe('Testing mwc_core mongoose model of users:', function(){
     it('exposes function find',function(){
