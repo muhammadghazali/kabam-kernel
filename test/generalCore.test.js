@@ -92,12 +92,6 @@ describe('mwcCore', function() {
 
   //load plugin as an object
 
-  var extendCoreFunctionPlugin = function (core){
-    core.mul=function(a,b){
-      return a*b;
-    };
-  };
-
   var extendAppParametersFunctionPlugin = function (core){
     core.app.set('extendAppParametersFunctionPlugin','extended111');
   };
@@ -149,9 +143,10 @@ describe('mwcCore', function() {
     MWC.extendMiddleware('development','/middleware4Path',extendAppMiddlewareFunction4);
 
     MWC.extendRoutes(extendRoutesFunction);
-    /*/
+    //*/
+
      MWC.usePlugin({
-     'extendCore': extendCoreFunctionPlugin,
+     'extendCore': {'mul':function(config){return function(a,b){return a*b}}},
      'extendModel':{'Dogs':extendModelFunctionPlugin},
      'extendApp': extendAppParametersFunctionPlugin,
      "extendMiddleware": extendAppMiddlewareFunctionPlugin,
@@ -161,9 +156,6 @@ describe('mwcCore', function() {
     //create and start this application
     MWC.start(3000);
     setTimeout(done,1000);
-  });
-  after(function(done){
-    MWC.mongoose.disconnect(done);
   });
 
   describe('Testing exposed objects of running mwcCore', function() {
@@ -393,25 +385,18 @@ describe('mwcCore', function() {
       });
     });
   });
-/*/
+//*/
   describe('#MWC.usePlugin(object)', function () {
 
     describe('extendCore from plugin', function () {
-      it('it adds the extending core function to array of #MWC._extendCoreFunctions', function () {
-        MWC._extendCoreFunctions.should.be.an.instanceOf(Array);
-        MWC._extendCoreFunctions.should.include(extendCoreFunctionPlugin);
-      });
 
       it('it actually adds new functions to #MWC.core', function () {
         MWC.mul.should.be.a('function');
-        MWC.mul(3, 2).should.equal(6);
+        MWC.mul(3,2).should.equal(6);
       });
     });
 
     describe('extendModel from plugin', function() {
-      it('adds the extending model function to array of #MWC._additionalModels',function(){
-        MWC._additionalModels.should.includeEql({'name':'Dogs','initFunction':extendModelFunctionPlugin});
-      });
       it('adds the model of "Dogs" to #MWC.model.Dogs',function(){
         MWC.model.Dogs.should.be.a('function');
       });
@@ -436,33 +421,12 @@ describe('mwcCore', function() {
 
     describe('extendApp from plugin', function () {
 
-      it('it adds the desired functions to #MWC._extendAppFunctions', function () {
-        if (typeof process.env.NODE_ENV !== 'undefined') {
-          process.env.NODE_ENV.should.be.equal('development');
-        }
-        MWC._extendAppFunctions.should.be.an.instanceOf(Array);
-      });
-
-      it('it set extendAppParametersFunctionPlugin to all environments', function () {
-        MWC._extendAppFunctions.should.includeEql({'settingsFunction': extendAppParametersFunctionPlugin});
-      });
-
       it('it works', function () {
         MWC.app.get('extendAppParametersFunctionPlugin').should.equal('extended111');
       });
     });
 
     describe('extendMiddleware from plugin',function() {
-      it('adds the desired functions to MWC._extendMiddlewareFunctions',function(){
-        if(typeof process.env.NODE_ENV !== 'undefined'){
-          process.env.NODE_ENV.should.be.equal('development');
-        }
-        MWC._extendMiddlewareFunctions.should.be.an.instanceOf(Array);
-      });
-
-      it('it set extendAppMiddlewareFunctionPlugin to all environments and path "/"',function(){
-        MWC._extendMiddlewareFunctions.should.includeEql({'path':'/', 'SettingsFunction':extendAppMiddlewareFunctionPlugin});
-      });
 
       describe('it actually works',function(){
         var response,body;
@@ -492,14 +456,6 @@ describe('mwcCore', function() {
     });
 
     describe('extendRoutes from plugin',function(){
-
-      it('adds the desired functions to MWC._extendRoutesFunctions',function(){
-        if(typeof process.env.NODE_ENV !== 'undefined'){
-          process.env.NODE_ENV.should.be.equal('development');
-        }
-        MWC._extendRoutesFunctions.should.be.an.instanceOf(Array);
-        MWC._extendRoutesFunctions.should.includeEql(extendRoutesFunctionPlugin);
-      });
 
       describe('it actually works',function(){
         var response,body;

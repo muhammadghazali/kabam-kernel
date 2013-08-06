@@ -175,7 +175,7 @@ function MWC(config) {
    * @name mwc.extendApp
    * @description
    * Set app parameters - http://expressjs.com/api.html#express - view engine, variables, locals
-   * @param {string / array of strings} environment - application enviroment to use,
+   * @param {string /array/undefined} environment - application environment to use,
    * can be something like 'development', ['development','staging'] or null
    * @param {function} settingsFunction - function(core){....}
    * @example
@@ -232,9 +232,9 @@ function MWC(config) {
    * @name mwc.extendMiddleware
    * @description
    * Adds  new middleware to expressJS application
-   * @param {string / array of strings} environment - application enviroment to use,
+   * @param {string/array/undefined} environment - application enviroment to use,
    * can be something like 'development', ['development','staging'] or null
-   * @param {string} path path to mount middleware - default is /
+   * @param {string/undefined} path path to mount middleware - default is /
    * @param {function} settingsFunction function(core){ return function(req,res,next){.....}}
    * @example
    *
@@ -341,6 +341,84 @@ function MWC(config) {
 
   /**
    * @ngdoc function
+   * @name mwcKernel.usePlugin
+   * @description
+   * Loads plugin from object or npm module
+   * @param {object/string} pluginObjectOrName - config object or plugin name to get by require
+   */
+  this.usePlugin = function (pluginObjectOrName) {
+    if (prepared) {
+      throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+    } else {
+    var pluginToBeInstalled = {};
+    if (typeof pluginObjectOrName === 'string') {
+      pluginToBeInstalled = require('' + pluginObjectOrName);
+    } else {
+      pluginToBeInstalled = pluginObjectOrName;
+    }
+
+    if (pluginToBeInstalled.extendCore) {
+      for (var field in pluginToBeInstalled.extendCore){
+        if(pluginToBeInstalled.extendCore.hasOwnProperty(field)){
+          this.extendCore(field, pluginToBeInstalled.extendCore[field]);
+        }
+      }
+    }
+    if (pluginToBeInstalled.extendModel && typeof pluginToBeInstalled.extendModel === 'object') {
+      for (var x in pluginToBeInstalled.extendModel) {
+        if(pluginToBeInstalled.extendCore.hasOwnProperty(x)){
+          this.extendModel(x, pluginToBeInstalled.extendModel[x]);
+        }
+      }
+    }
+
+    if(typeof pluginToBeInstalled.extendStrategy === 'object'){
+      if(typeof pluginToBeInstalled.extendStrategy.strategy === 'function' && typeof pluginToBeInstalled.extendStrategy.routes === 'function'){
+        this.extendStrategy(pluginToBeInstalled.extendStrategy);
+      } else {
+        throw new Error('extendStrategy of plugin has wrong syntax! strategy and routes have to be functions!');
+      }
+    }
+
+    if(pluginToBeInstalled.setAppParameters && typeof pluginToBeInstalled.extendApp === 'undefined'){
+      console.log('Plugin is outdated! Use extendApp instead of setAppParameters with same syntax!');
+      pluginToBeInstalled.extendApp=pluginToBeInstalled.setAppParameters;
+    }
+
+    if (typeof pluginToBeInstalled.extendApp === 'function') {
+      this.extendApp(pluginToBeInstalled.extendApp);
+    }
+
+    if(pluginToBeInstalled.setAppMiddlewares && typeof pluginToBeInstalled.extendMiddleware === 'undefined'){
+      console.log('Plugin is outdated! Use extendMiddleware instead of setAppMiddlewares with same syntax!');
+      pluginToBeInstalled.extendMiddleware=pluginToBeInstalled.setAppMiddlewares;
+    }
+    if(typeof pluginToBeInstalled.extendMiddleware === 'function') {
+      this.extendMiddleware(pluginToBeInstalled.extendMiddleware);
+    }
+    if(pluginToBeInstalled.extendMiddleware instanceof Array) {
+      for(var i = 0; i<pluginToBeInstalled.extendMiddleware.length; i++){
+        if(typeof pluginToBeInstalled.extendMiddleware[i] === 'function') {
+          this.extendMiddleware(pluginToBeInstalled.extendMiddleware[i]);
+        } else {
+          throw new Error('plugin.extendMiddleware['+i+'] is not a function!');
+        }
+      }
+    }
+    if(pluginToBeInstalled.extendAppRoutes && typeof pluginToBeInstalled.extendRoutes === 'undefined'){
+      console.log('Plugin is outdated! Use extendMiddleware instead of setAppMiddlewares with same syntax!');
+      pluginToBeInstalled.extendRoutes=pluginToBeInstalled.extendAppRoutes;
+    }
+
+    if (typeof pluginToBeInstalled.extendRoutes === 'function') {
+      this.extendRoutes(pluginToBeInstalled.extendRoutes);
+    }
+    return this;
+    }
+  };
+
+  /**
+   * @ngdoc function
    * @name mwcKernel.start
    * @description
    * Start mwcKernel application
@@ -428,56 +506,6 @@ MWC.prototype.validateConfig = function(config) {
 
   return true;
 };
-
-//todo - refactor
-MWC.prototype.usePlugin = function (pluginObjectOrName) {
-  throw new Error('usePlugin IS BROKEN!');
-
-  if (this.prepared) {
-    throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
-  } else {
-    var pluginToBeInstalled = {};
-    if (typeof pluginObjectOrName === 'string') {
-      pluginToBeInstalled = require('' + pluginObjectOrName);
-    } else {
-      pluginToBeInstalled = pluginObjectOrName;
-    }
-
-    if (pluginToBeInstalled.extendCore) {
-      this.extendCore(pluginToBeInstalled.extendCore);
-    }
-    if (pluginToBeInstalled.extendModel && typeof pluginToBeInstalled.extendModel === 'object') {
-      for (var x in pluginToBeInstalled.extendModel) {
-        this.extendModel(x, pluginObjectOrName.extendModel[x]);
-      }
-    }
-    if(pluginToBeInstalled.setAppParameters && typeof pluginToBeInstalled.extendApp === 'undefined'){
-      console.log('Plugin is outdated! Use extendApp instead of setAppParameters with same syntax!');
-      pluginToBeInstalled.extendApp=pluginToBeInstalled.setAppParameters;
-    }
-    if (pluginToBeInstalled.extendApp) {
-      this.extendApp(pluginToBeInstalled.extendApp);
-    }
-    if(pluginToBeInstalled.setAppMiddlewares && typeof pluginToBeInstalled.extendMiddleware === 'undefined'){
-      console.log('Plugin is outdated! Use extendMiddleware instead of setAppMiddlewares with same syntax!');
-      pluginToBeInstalled.extendMiddleware=pluginToBeInstalled.setAppMiddlewares;
-    }
-    if (pluginToBeInstalled.extendMiddleware) {
-      this.extendMiddleware(pluginToBeInstalled.extendMiddleware);
-    }
-    if(pluginToBeInstalled.extendAppRoutes && typeof pluginToBeInstalled.extendRoutes === 'undefined'){
-      console.log('Plugin is outdated! Use extendMiddleware instead of setAppMiddlewares with same syntax!');
-      pluginToBeInstalled.extendRoutes=pluginToBeInstalled.extendAppRoutes;
-    }
-    if (pluginToBeInstalled.extendRoutes) {
-      this.extendRoutes(pluginToBeInstalled.extendRoutes);
-    }
-    return this;
-  }
-};
-
-//todo ^^^ make privileged
-
 
 //legacy support, outdated
 MWC.prototype.ready = function (){
