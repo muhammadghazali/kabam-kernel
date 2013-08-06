@@ -49,14 +49,23 @@ function MWC(config) {
    * Perform dependency injection on the mwc object.
    * If mwc do not have fieldName property/method, this method is created as public property/method
    * @param {string} fieldName - field name
-   * @param {object} value - field value - can be string, object, array, function.
+   * @param {function} factoryFunction - function(config), that is called to return value assigned to fieldName
+   * config is the mwc.config object
+   * @example
+   *
+   * mwc.extendCore('checkSecret',function(config){
+   *   return function(secretToCheck){
+   *     return secretToCheck === config.secret;
+   *   };
+   * };
+   *
    */
-  this.extendCore = function (fieldName, value) {
+  this.extendCore = function (fieldName, factoryFunction) {
     if (prepared) {
       throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
       if (typeof fieldName === 'string') {
-        _extendCoreFunctions.push({'field': fieldName, 'value': value});
+        _extendCoreFunctions.push({'field': fieldName, 'factoryFunction': factoryFunction});
         return this;
       } else {
         throw new Error('MWC.extendCore requires argument of fieldName, value');
@@ -216,7 +225,7 @@ function MWC(config) {
    * Adds  new middleware to expressJS application
    * @param {string / array of strings} environment - application enviroment to use,
    * can be something like 'development', ['development','staging'] or null
-   * @param {string} - path to mount middleware - default is /
+   * @param {string} path path to mount middleware - default is /
    * @param {function} settingsFunction function(core){ return function(req,res,next){.....}}
    * @example
    *
@@ -348,7 +357,7 @@ function MWC(config) {
     //extending core by extendCore
     _extendCoreFunctions.map(function (settingsFunction) {
       if (typeof thisMWC[settingsFunction.field] === "undefined") {
-        thisMWC[settingsFunction.field] = settingsFunction.value;
+        thisMWC[settingsFunction.field] = settingsFunction.factoryFunction(thisMWC.config);
       } else {
         throw new Error('We try to overwrite kernel field with name of ' + settingsFunction.field + '!');
       }
