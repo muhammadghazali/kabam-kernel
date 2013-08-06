@@ -5,11 +5,10 @@ exports.extendCore = {
   'parameterOne': 1,
   'parameterTwo': [1, 2, 3, 4, 5],
   'parameterThree': {},
-  'parameterFour': function () {
-    return this.parameterOne+this.parameterTwo[0];
-  },
-  'getSum': function (a, b){
-    return a + b;
+  'getSum': function (config) {
+    return function (a, b) {
+      return (a + b) * (config.multipyKoefficient);
+    }
   }
 };
 
@@ -39,11 +38,8 @@ exports.extendModel = {
   }
 };
 
-//we do it for all application enviroments
-//app - is a expressJS application. it turned out that we do not need core here...
-//config - is a current mwc config object
-exports.extendApp = function (app, config) {
-  app.set('someValue',42);
+exports.extendApp = function (core) {
+  core.app.set('someValue',42);
 };
 
 var LinkedInStrategy = require('passport-linkedin').Strategy;
@@ -86,9 +82,7 @@ exports.extendMiddleware = [
     return function (request, response, next) {
       request.model.Cats.count({name: 'Grumpy'}, function (err, numberOfCats) {
         if (numberOfCats > core.parameterOne) {
-
           request.getSum = core.getSum; //DI of core methods or values
-
           next();
         } else {
           response.send(500, 'There is not enough cats called "Grumpy" to run this application!');
@@ -100,9 +94,7 @@ exports.extendMiddleware = [
     return function (request, response, next) {
       request.model.Dogs.count({name: 'Strelka'}, function (err, numberOfDogs) {
         if (numberOfDogs > core.parameterOne) {
-
           request.getSum = core.getSum; //DI of core methods or values
-
           next();
         } else {
           response.send(500, 'There is not enough Dogs called "Strelka" to run this application!');
