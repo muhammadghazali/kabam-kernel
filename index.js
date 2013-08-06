@@ -49,7 +49,7 @@ function MWC(config) {
    * Perform dependency injection on the mwc object.
    * If mwc do not have fieldName property/method, this method is created as public property/method
    * @param {string} fieldName - field name
-   * @param {function/object} factoryFunctionOrObject - function(config), that is called to return value assigned to fieldName
+   * @param {function/object/string/number/array} factoryFunctionOrObject - function(config), that is called to return value assigned to fieldName
    * config is the mwc.config object, or just a object, to be setted as mwc public field
    * @example
    *

@@ -11,18 +11,11 @@ describe('mwcCore', function() {
 
   var MWC;
 
-  var factoryFunction = function(config) {
-    return null;
-  };
 
   /*
    * Extending core
    */
-  var extendCoreFunction = function(core, factoryFunction) {
-    core.sum=function(a,b){
-      return (a+b);
-    };
-  };
+
 
   /*
    * Extending model
@@ -136,7 +129,12 @@ describe('mwcCore', function() {
 
     MWC = mwcCore(config);
 
-    MWC.extendCore('test', factoryFunction);
+    MWC.extendCore('sum', function(config){
+      return function(a,b){
+        return a+b;
+      }
+    });
+    MWC.extendCore('SomeVar',42);
 
     MWC.extendModel('Cats',extendModelFunction);
 
@@ -164,6 +162,9 @@ describe('mwcCore', function() {
     MWC.start(3000);
     setTimeout(done,1500);
 
+  });
+  after(function(done){
+    MWC.mongoose.close(done);
   });
 
   describe('Testing exposed objects of running mwcCore', function() {
@@ -279,6 +280,7 @@ describe('mwcCore', function() {
     it('adds the extending core function to array of MWC._extendCoreFunctions - pending, because _extendCoreFunctions is private value');
 
     it('actually adds new functions to #MWC',function(){
+      MWC.SomeVar.should.be.equal(42);
       MWC.sum.should.be.a('function');
       MWC.sum(2,2).should.equal(4);
     });
@@ -389,7 +391,6 @@ describe('mwcCore', function() {
 
       it('this application have headers needed by #MWC.extendMiddleware',function(){
         response.headers['middleware1'].should.be.equal('middleware1');
-        response.headers['extendappmiddlewarefunctionplugin'].should.be.equal('OK');
       });
     });
   });
@@ -556,7 +557,6 @@ describe('mwcCore', function() {
 
     it('this application have headers needed by #MWC.extendMiddleware',function(){
       response.headers['middleware1'].should.be.equal('middleware1');
-      response.headers['extendappmiddlewarefunctionplugin'].should.be.equal('OK');
     });
 
     describe('this application have proper rate limiting headers',function(){
