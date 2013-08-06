@@ -7,151 +7,163 @@ var should = require('should'),
   config = require('./../example/config.json').development,
   request = require('request');
 
-var MWC = mwcCore(config);
-
-/*
- * Extending core
- */
-var extendCoreFunction = function(core){
-  core.sum=function(a,b){
-    return (a+b);
-  };
-};
-
-MWC.extendCore(extendCoreFunction);
-
-/*
- * Extending model
- */
-
-var extendModelFunction = function(mongoose,config){
-  var CatsSchema = new mongoose.Schema({
-    'nickname':String
-  });
-
-  CatsSchema.index({
-    nickname: 1
-  });
-
-  return mongoose.model('cats', CatsSchema);
-};
-
-MWC.extendModel('Cats',extendModelFunction);
-/*
- * Extending Application Parameters
- */
-
-var extendAppParametersFunction1 = function (core) {
-  core.app.set('TempVar1', 'TempVar1');
-};
-
-var extendAppParametersFunction2 = function (core) {
-  core.app.set('TempVar2', 'TempVar2');
-};
-
-var extendAppParametersFunction3 = function (core) {
-  core.app.set('TempVar3', 'TempVar3');
-};
-
-MWC.extendApp(['development', 'staging'], extendAppParametersFunction1);
-MWC.extendApp('development', extendAppParametersFunction2);
-MWC.extendApp('production', extendAppParametersFunction3);
-/*
- * Extending middlewares
- */
-var extendAppMiddlewareFunction1=function(core){
-  return function(request,response,next){
-    response.setHeader('middleware1','middleware1');
-    next();
-  };
-};
-
-var extendAppMiddlewareFunction2=function(core){
-  return function(request,response,next){
-    response.setHeader('middleware2','middleware2');
-    next();
-  };
-};
-
-var extendAppMiddlewareFunction3=function(core){
-  return function(request,response,next){
-    response.setHeader('middleware3','middleware3');
-    next();
-  };
-};
-
-var extendAppMiddlewareFunction4=function(core){
-  return function(request,response,next){
-    response.setHeader('middleware4','middleware4');
-    next();
-  };
-};
-
-MWC.extendMiddleware(extendAppMiddlewareFunction1);
-MWC.extendMiddleware('staging',extendAppMiddlewareFunction2);
-MWC.extendMiddleware(['staging','production'],extendAppMiddlewareFunction3);
-MWC.extendMiddleware(['development'],'/middleware3Path',extendAppMiddlewareFunction3);
-MWC.extendMiddleware('development','/middleware4Path',extendAppMiddlewareFunction4);
-
-/* Adding custom routes
- *
- */
-
-var extendRoutesFunction = function (core){
-  core.app.get('/someRoute',function (req,res){
-    res.send('HI');
-  });
-};
-MWC.extendRoutes(extendRoutesFunction);
-
-//load plugin as an object
-
-var extendCoreFunctionPlugin = function (core){
-  core.mul=function(a,b){
-    return a*b;
-  };
-};
-
-var extendAppParametersFunctionPlugin = function (core){
-  core.app.set('extendAppParametersFunctionPlugin','extended111');
-};
-
-var extendAppMiddlewareFunctionPlugin = function (core){
-  return function(request,response,next){
-    response.setHeader('extendAppMiddlewareFunctionPlugin','OK');
-    next();
-  };
-};
-
-var extendRoutesFunctionPlugin = function (core) {
-  core.app.get('/newPlugin', function (req, res) {
-    res.send('New plugin is installed as object');
-  });
-};
-
-var extendModelFunctionPlugin = function (mongoose, config) {
-  var DogsSchema = new mongoose.Schema({
-    'nickname': String
-  });
-  DogsSchema.index({
-    nickname: 1
-  });
-  return mongoose.model('dogs', DogsSchema);
-};
-
-MWC.usePlugin({
-  'extendCore': extendCoreFunctionPlugin,
-  'extendModel':{'Dogs':extendModelFunctionPlugin},
-  'extendApp': extendAppParametersFunctionPlugin,
-  "extendMiddleware": extendAppMiddlewareFunctionPlugin,
-  'extendRoutes': extendRoutesFunctionPlugin
-});
-
-
-//create and start this application
-MWC.listen(3000);
-
 describe('mwcCore', function() {
+
+  var MWC;
+
+  var factoryFunction = function(config) {
+    return null;
+  };
+
+  /*
+   * Extending core
+   */
+  var extendCoreFunction = function(core, factoryFunction) {
+    core.sum=function(a,b){
+      return (a+b);
+    };
+  };
+
+  /*
+   * Extending model
+   */
+
+  var extendModelFunction = function(mongoose,config){
+    var CatsSchema = new mongoose.Schema({
+      'nickname':String
+    });
+
+    CatsSchema.index({
+      nickname: 1
+    });
+
+    return mongoose.model('cats', CatsSchema);
+  };
+
+  /*
+   * Extending Application Parameters
+   */
+
+  var extendAppParametersFunction1 = function (core) {
+    core.app.set('TempVar1', 'TempVar1');
+  };
+
+  var extendAppParametersFunction2 = function (core) {
+    core.app.set('TempVar2', 'TempVar2');
+  };
+
+  var extendAppParametersFunction3 = function (core) {
+    core.app.set('TempVar3', 'TempVar3');
+  };
+
+  /*
+   * Extending middlewares
+   */
+  var extendAppMiddlewareFunction1=function(core){
+    return function(request,response,next){
+      response.setHeader('middleware1','middleware1');
+      next();
+    };
+  };
+
+  var extendAppMiddlewareFunction2=function(core){
+    return function(request,response,next){
+      response.setHeader('middleware2','middleware2');
+      next();
+    };
+  };
+
+  var extendAppMiddlewareFunction3=function(core){
+    return function(request,response,next){
+      response.setHeader('middleware3','middleware3');
+      next();
+    };
+  };
+
+  var extendAppMiddlewareFunction4=function(core){
+    return function(request,response,next){
+      response.setHeader('middleware4','middleware4');
+      next();
+    };
+  };
+
+  /* Adding custom routes
+   *
+   */
+
+  var extendRoutesFunction = function (core){
+    core.app.get('/someRoute',function (req,res){
+      res.send('HI');
+    });
+  };
+
+  //load plugin as an object
+
+  var extendCoreFunctionPlugin = function (core){
+    core.mul=function(a,b){
+      return a*b;
+    };
+  };
+
+  var extendAppParametersFunctionPlugin = function (core){
+    core.app.set('extendAppParametersFunctionPlugin','extended111');
+  };
+
+  var extendAppMiddlewareFunctionPlugin = function (core){
+    return function(request,response,next){
+      response.setHeader('extendAppMiddlewareFunctionPlugin','OK');
+      next();
+    };
+  };
+
+  var extendRoutesFunctionPlugin = function (core) {
+    core.app.get('/newPlugin', function (req, res) {
+      res.send('New plugin is installed as object');
+    });
+  };
+
+  var extendModelFunctionPlugin = function (mongoose, config) {
+    var DogsSchema = new mongoose.Schema({
+      'nickname': String
+    });
+    DogsSchema.index({
+      nickname: 1
+    });
+    return mongoose.model('dogs', DogsSchema);
+  };
+
+  before(function(done) {
+
+    MWC = mwcCore(config);
+
+    MWC.extendCore('test', factoryFunction);
+
+    MWC.extendModel('Cats',extendModelFunction);
+
+    MWC.extendApp(['development', 'staging'], extendAppParametersFunction1);
+    MWC.extendApp('development', extendAppParametersFunction2);
+    MWC.extendApp('production', extendAppParametersFunction3);
+
+    MWC.extendMiddleware(extendAppMiddlewareFunction1);
+    MWC.extendMiddleware('staging',extendAppMiddlewareFunction2);
+    MWC.extendMiddleware(['staging','production'],extendAppMiddlewareFunction3);
+    MWC.extendMiddleware(['development'],'/middleware3Path',extendAppMiddlewareFunction3);
+    MWC.extendMiddleware('development','/middleware4Path',extendAppMiddlewareFunction4);
+
+    MWC.extendRoutes(extendRoutesFunction);
+
+    MWC.usePlugin({
+      'extendCore': extendCoreFunctionPlugin,
+      'extendModel':{'Dogs':extendModelFunctionPlugin},
+      'extendApp': extendAppParametersFunctionPlugin,
+      "extendMiddleware": extendAppMiddlewareFunctionPlugin,
+      'extendRoutes': extendRoutesFunctionPlugin
+    });
+
+    //create and start this application
+    MWC.listen(3000);
+  });
+
   describe('Testing exposed objects of running mwcCore', function() {
 
     it('can emit and listen to events', function() {
