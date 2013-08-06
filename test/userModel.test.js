@@ -1,5 +1,5 @@
 /*jshint immed: false */
-
+/*/
 var should = require('should'),
   async = require('async'),
   mwcCore = require('./../index.js'),
@@ -761,3 +761,4 @@ describe('Users model', function() {
   });
 
 });
+//*/
