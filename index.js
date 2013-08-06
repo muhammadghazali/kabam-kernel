@@ -49,8 +49,8 @@ function MWC(config) {
    * Perform dependency injection on the mwc object.
    * If mwc do not have fieldName property/method, this method is created as public property/method
    * @param {string} fieldName - field name
-   * @param {function} factoryFunction - function(config), that is called to return value assigned to fieldName
-   * config is the mwc.config object
+   * @param {function/object} factoryFunctionOrObject - function(config), that is called to return value assigned to fieldName
+   * config is the mwc.config object, or just a object, to be setted as mwc public field
    * @example
    *
    * mwc.extendCore('checkSecret',function(config){
@@ -58,14 +58,23 @@ function MWC(config) {
    *     return secretToCheck === config.secret;
    *   };
    * };
+   * mwc.extendCore('someVar',42);
+   * mwc.extendCore('someArray',[1,2,3]);
+   * mwc.extendCore('someObj',{ 'someVal':1});
    *
    */
-  this.extendCore = function (fieldName, factoryFunction) {
+  this.extendCore = function (fieldName, factoryFunctionOrObject) {
     if (prepared) {
       throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
       if (typeof fieldName === 'string') {
-        _extendCoreFunctions.push({'field': fieldName, 'factoryFunction': factoryFunction});
+        if (typeof factoryFunctionOrObject === 'function') {
+          _extendCoreFunctions.push({'field': fieldName, 'factoryFunction': factoryFunctionOrObject});
+        } else {
+          _extendCoreFunctions.push({'field': fieldName, 'factoryFunction': function () {
+            return factoryFunctionOrObject;
+          }});
+        }
         return this;
       } else {
         throw new Error('MWC.extendCore requires argument of fieldName, value');
