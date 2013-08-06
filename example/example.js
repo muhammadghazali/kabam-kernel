@@ -9,6 +9,12 @@ MWC.extendCore('getSum', function (config) {
     return a + b;
   };
 });
+
+MWC.extendCore('getCore',function(config){
+  return function(){
+    return this;
+  }
+});
 MWC.extendCore('TempVar', 42);
 
 
@@ -145,7 +151,7 @@ MWC.start();
 
 //testing custom function defined on line 10
 console.log('Sum of 2 and 2 is ' + MWC.getSum(2, 2));
-
+console.log('Sum of 2 and 2 is ' + MWC.getCore().getSum(2,2));
 
 setInterval(function () {
   MWC.emit('Coocoo!', 'Time now is ' + (new Date().toLocaleTimeString()));
