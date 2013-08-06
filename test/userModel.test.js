@@ -3,17 +3,12 @@
 var should = require('should'),
   async = require('async'),
   mwcCore = require('./../index.js'),
-  events = require('events'),
-  config = require('./../example/config.json').development,
-  request = require('request');
+  config = require('./../example/config.json').development;
 
 var MWC = mwcCore(config);
 MWC.start('app');
 
 describe('mwcCore - user model', function() {
-
-
-
 
   describe('Testing mwc_core mongoose model of users:', function(){
     it('exposes function find',function(){
@@ -764,6 +759,5 @@ describe('mwcCore - user model', function() {
       });
     });
   });
-
 
 });
