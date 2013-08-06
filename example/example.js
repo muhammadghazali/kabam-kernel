@@ -2,12 +2,19 @@ var mwcCore = require('./../index.js');
 //setting up the config
 var MWC = mwcCore(require('./config.json')[(process.env.NODE_ENV) ? (process.env.NODE_ENV) : 'development']);
 
-MWC.extendCore('getSum',function(a,b){return a+b;});
+
+//extending the core
+MWC.extendCore('getSum', function (config) {
+  return function (a, b) {
+    return a + b;
+  };
+});
+MWC.extendCore('TempVar', 42);
 
 
 //set global lever variables for expressJS application
 MWC.extendApp(['development', 'staging'], function (core) {
-  core.app.set('TempVar', '42');
+  core.app.set('TempVar', core.TempVar);
 });
 
 
