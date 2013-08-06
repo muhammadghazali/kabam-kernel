@@ -16,6 +16,7 @@ var EventEmitter = require('events').EventEmitter,
 function MWC(config) {
 
   EventEmitter.call(this);
+
   if (typeof config === 'object') {
     if (process.env.redisUrl && !config.redis) {
 //Using redis configuration from enviromental value
@@ -30,13 +31,13 @@ function MWC(config) {
   this.config = config;
 
   var _extendCoreFunctions = [],//privileged field
+    _extendAppFunctions = [],
     _additionalModels = [],
-    _listeners = {};
-
-  this._extendAppFunctions = [];
-  this._additionalStrategies = [];
-  this._extendMiddlewareFunctions = [];
-  this._extendRoutesFunctions = [];
+    _listeners = {},
+    _additionalStrategies = [],
+    prepared = false,
+    _extendMiddlewareFunctions = [],
+    _extendRoutesFunctions = [];
 
   var thisMWC = this;//http://www.crockford.com/javascript/private.html
 
@@ -51,7 +52,7 @@ function MWC(config) {
    * @param {object} value - field value - can be string, object, array, function.
    */
   this.extendCore = function (fieldName, value) {
-    if (this.prepared) {
+    if (prepared) {
       throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
       if (typeof fieldName === 'string') {
@@ -71,17 +72,35 @@ function MWC(config) {
    * @param {string} modelName - field name
    * @param {object} modelFunction(mongoose, config) - the first argument is mongoose object, the second one is the
    * mwc.config object
-   @returns mwc
+   * @example
+   *
+   * MWC.extendModel('Cats', function (mongoose, config) {
+   *   var CatsSchema = new mongoose.Schema({
+   *     'nickname': String
+   *   });
+   *
+   *   CatsSchema.index({
+   *     nickname: 1
+   *   });
+   *
+   *   return mongoose.model('cats', CatsSchema);
+   * });
+   *
+   * @returns mwc
    */
   this.extendModel = function (modelName, modelFunction) {
-    if (modelName === 'Users') {
-      throw new Error('Error extending model, "Users" is reserved name');
+    if (prepared) {
+      throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
-      if (typeof modelName === 'string' && typeof modelFunction === 'function') {
-        _additionalModels.push({'name': modelName, 'initFunction': modelFunction});
-        return this;
+      if (modelName === 'Users') {
+        throw new Error('Error extending model, "Users" is reserved name');
       } else {
-        throw new Error('MWC.extendModel requires arguments of string of "modelName" and function(core){...}');
+        if (typeof modelName === 'string' && typeof modelFunction === 'function') {
+          _additionalModels.push({'name': modelName, 'initFunction': modelFunction});
+          return this;
+        } else {
+          throw new Error('MWC.extendModel requires arguments of string of "modelName" and function(core){...}');
+        }
       }
     }
   };
@@ -91,18 +110,214 @@ function MWC(config) {
    * @name mwc.extendListeners
    * @param {string} eventName
    * @param {function} eventHandlerFunction
+   * @description - add custom event handler for mwc
+   * @example
+   *  mwc.extendListeners('someEvent', console.log);
    * @returns mwc
    */
   this.extendListeners = function (eventName, eventHandlerFunction) {
-    if (typeof eventName === "string" && typeof eventHandlerFunction === "function") {
-      if (typeof _listeners[eventName] === "undefined") {
-        _listeners[eventName] = eventHandlerFunction;
+    if (prepared) {
+      throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+    } else {
+      if (typeof eventName === "string" && typeof eventHandlerFunction === "function") {
+        if (typeof _listeners[eventName] === "undefined") {
+          _listeners[eventName] = eventHandlerFunction;
+          return this;
+        } else {
+          throw new Error('Unable set listener for event ' + eventName + '! Event name is occupied!');
+        }
+      } else {
+        throw new Error('#MWC.extendListeners(eventName,eventHandlerFunction) have wrong arguments!');
+      }
+    }
+  };
+
+  /**
+   * @ngdoc function
+   * @name mwc.extendStrategy
+   * @description
+   * Loads new passportjs strategies from object
+   * @param {object}strategyObject
+   * @returns this
+   */
+  this.extendStrategy = function(strategyObject){
+    if (prepared) {
+      throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+    } else {
+      if(typeof strategyObject !== 'object') throw new Error('mwc.extendStrategies requires strategyObject to be an object');
+      if(typeof strategyObject.strategy !== 'function') throw new Error('mwc.extendStrategies requires strategyObject.strategy to be a proper function!');
+      if(typeof strategyObject.routes !== 'function') throw new Error('mwc.extendStrategies requires strategyObject.routes to be a proper function!');
+      _additionalStrategies.push(strategyObject);
+      return this;
+    }
+  };
+
+  /**
+   * @ngdoc function
+   * @name mwc.extendApp
+   * @description
+   * Set app parameters - http://expressjs.com/api.html#express - view engine, variables, locals
+   * @param {string / array of strings} environment - application enviroment to use,
+   * can be something like 'development', ['development','staging'] or null
+   * @param {function} settingsFunction - function(core){....}
+   * @example
+   *
+   * mwc.extendApp('development',function(core){
+   *   core.app.locals.environment = 'development';
+   * });
+   *
+   * @returns this
+   */
+  this.extendApp = function (environment, settingsFunction) {
+    if (prepared) {
+      throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+    } else {
+      var environmentToUse = null;
+      if (typeof settingsFunction === 'undefined') {
+        settingsFunction = environment;
+        environment = null;
+      }
+      if (typeof environment === 'string') {
+        environmentToUse = [];
+        environmentToUse.push(environment);
+      }
+      if (environment instanceof Array) {
+        environmentToUse = environment;
+        for (var i = 0; i < environment.length;i++){
+          if(typeof environment[i] !== 'string'){
+            throw new Error('#MWC.extendApp requires environment name to be a string!');
+          }
+        }
+      }
+      if (typeof settingsFunction === 'function') {
+        if (environmentToUse) {
+          for (var i = 0; i < environmentToUse.length; i++) {
+            _extendAppFunctions.push({
+              'environment': environmentToUse[i],
+              'settingsFunction': settingsFunction
+            });
+          }
+        } else {
+          _extendAppFunctions.push({
+            'settingsFunction': settingsFunction
+          });
+        }
+      } else {
+        throw new Error('Wrong arguments for extendApp(arrayOrStringOfEnvironments,settingsFunction)');
+      }
+      return this;
+    }
+  };
+
+  /**
+   * @ngdoc function
+   * @name mwc.extendMiddleware
+   * @description
+   * Adds  new middleware to expressJS application
+   * @param {string / array of strings} environment - application enviroment to use,
+   * can be something like 'development', ['development','staging'] or null
+   * @param {string} - path to mount middleware - default is /
+   * @param {function} settingsFunction function(core){ return function(req,res,next){.....}}
+   * @example
+   *
+   * mwc.extendMiddleware('production',function(core){
+   *   return function(req,res,next){
+   *     res.setHeader('X-production','YES!');
+   *   };
+   * }
+
+   * @returns mwc
+   */
+  this.extendMiddleware = function (environment, path, settingsFunction) {
+    if (prepared) {
+      throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+    } else {
+      var environmentToUse = null,
+        pathToUse = '/',
+        settingsFunctionToUse = null;
+
+      if (typeof environment === 'function' && typeof path === 'undefined' && typeof settingsFunction === 'undefined') {
+        settingsFunctionToUse = environment;
+      }
+
+      if (typeof environment === 'string' || environment instanceof Array) {
+
+        if (typeof environment === 'string') {
+          environmentToUse = [];
+          environmentToUse.push(environment);
+        }
+        if (environment instanceof Array) {
+          environmentToUse = environment;
+          for (var i = 0; i < environment.length;i++){
+            if(typeof environment[i] !== 'string'){
+              throw new Error('#MWC.extendMiddleware requires environment name to be a string!');
+            }
+          }
+        }
+        if (typeof path === 'string') {
+          if(/^\//.test(path)){
+            pathToUse = path;
+            if (typeof settingsFunction === 'function') {
+              settingsFunctionToUse = settingsFunction;
+            }
+          } else {
+            throw new Error('#MWC.extendMiddleware path to be a middleware valid path, that starts from "/"!');
+          }
+        } else {
+          if (typeof path === 'function') {
+            settingsFunctionToUse = path;
+          }
+        }
+      }
+
+      if (settingsFunctionToUse) {
+        if (environmentToUse) {
+          for (var i = 0; i < environmentToUse.length; i++) {
+            _extendMiddlewareFunctions.push({
+              'environment': environmentToUse[i],
+              'path': pathToUse,
+              'SettingsFunction': settingsFunctionToUse
+            });
+          }
+        } else {
+          //we set middleware for all environments
+          _extendMiddlewareFunctions.push({
+            'path': pathToUse,
+            'SettingsFunction': settingsFunctionToUse
+          });
+        }
+      } else {
+        throw new Error('Wrong arguments for function MWC.extendMiddleware(environmentArrayOrStrings, [path], settingsFunction(core){...})');
+      }
+      return this;
+    }
+  };
+
+  /**
+   * @ngdoc function
+   * @name mwc.extendRoutes
+   * @description
+   * Adds new routes to expressJS application
+   * @param {function} settingsFunction
+   * @example
+   *
+   * mwc.extendRoutes(function(core){
+   *   core.app.get('/', function(req,res){
+   *     res.send('Hello!');
+   *   });
+   * }
+   * @returns mwc
+   */
+  this.extendRoutes = function (settingsFunction) {
+    if (prepared) {
+      throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+    } else {
+      if (typeof settingsFunction === 'function') {
+        _extendRoutesFunctions.push(settingsFunction);
         return this;
       } else {
-        throw new Error('Unable set listener for event ' + eventName + '! Event name is occupied!');
+        throw new Error('Wrong argument for MWC.extendAppRoutes(function(core){...});');
       }
-    } else {
-      throw new Error('#MWC.extendListeners(eventName,eventHandlerFunction) have wrong arguments!');
     }
   };
 
@@ -121,13 +336,12 @@ function MWC(config) {
    * string of 'app' - start appliation as standalone object, for background workers and console scripts, returns mwc
    */
   this.start = function (howExactly, options) {
-
+    prepared = true;
     //injecting redis
     thisMWC.redisClient = redisManager.create(thisMWC.config.redis);
 
     // initializing MongoDB and Core Models
     thisMWC.mongoose = mongooseManager.create(thisMWC.config.mongoUrl);
-    thisMWC.mongoose.setConnectEvent(thisMWC);
     thisMWC.model = mongooseManager.initModels(thisMWC);
 
     //doing extendCore
@@ -146,8 +360,7 @@ function MWC(config) {
     });
 
     //initialize expressJS application
-    thisMWC.app = appManager.create(thisMWC);
-    appManager.extendApp(thisMWC);
+   thisMWC.app = appManager(thisMWC, _extendAppFunctions, _additionalStrategies, _extendMiddlewareFunctions, _extendRoutesFunctions);
 
     for (var eventName in _listeners) {
       if (_listeners.hasOwnProperty(eventName)) {
@@ -196,135 +409,6 @@ MWC.prototype.validateConfig = function(config) {
   redisManager.validateConfig(config.redis);
 
   return true;
-};
-
-//todo vvv make privileged
-
-MWC.prototype.extendApp = function (environment, settingsFunction) {
-  if (this.prepared) {
-    throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
-  } else {
-    var environmentToUse = null;
-    if (typeof settingsFunction === 'undefined') {
-      settingsFunction = environment;
-      environment = null;
-    }
-    if (typeof environment === 'string') {
-      environmentToUse = [];
-      environmentToUse.push(environment);
-    }
-    if (environment instanceof Array) {
-      environmentToUse = environment;
-      for (var i = 0; i < environment.length;i++){
-        if(typeof environment[i] !== 'string'){
-          throw new Error('#MWC.extendApp requires environment name to be a string!');
-        }
-      }
-    }
-    if (typeof settingsFunction === 'function') {
-      if (environmentToUse) {
-        for (var i = 0; i < environmentToUse.length; i++) {
-          this._extendAppFunctions.push({
-            'environment': environmentToUse[i],
-            'settingsFunction': settingsFunction
-          });
-        }
-      } else {
-        this._extendAppFunctions.push({
-          'settingsFunction': settingsFunction
-        });
-      }
-    } else {
-      throw new Error('Wrong arguments for extendApp(arrayOrStringOfEnvironments,settingsFunction)');
-    }
-    return this;
-  }
-};
-
-MWC.prototype.extendStrategy = function(strategyObject){
-  if(typeof strategyObject !== 'object') throw new Error('mwc.extendStrategies requires strategyObject to be an object');
-  if(typeof strategyObject.strategy !== 'function') throw new Error('mwc.extendStrategies requires strategyObject.strategy to be a proper function!');
-  if(typeof strategyObject.routes !== 'function') throw new Error('mwc.extendStrategies requires strategyObject.routes to be a proper function!');
-  this._additionalStrategies.push(strategyObject);
-  return this;
-};
-
-MWC.prototype.extendMiddleware = function (environment, path, settingsFunction) {
-  if (this.prepared) {
-    throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
-  } else {
-    var environmentToUse = null,
-      pathToUse = '/',
-      settingsFunctionToUse = null;
-
-    if (typeof environment === 'function' && typeof path === 'undefined' && typeof settingsFunction === 'undefined') {
-      settingsFunctionToUse = environment;
-    }
-
-    if (typeof environment === 'string' || environment instanceof Array) {
-
-      if (typeof environment === 'string') {
-        environmentToUse = [];
-        environmentToUse.push(environment);
-      }
-      if (environment instanceof Array) {
-        environmentToUse = environment;
-        for (var i = 0; i < environment.length;i++){
-          if(typeof environment[i] !== 'string'){
-            throw new Error('#MWC.extendMiddleware requires environment name to be a string!');
-          }
-        }
-      }
-      if (typeof path === 'string') {
-        if(/^\//.test(path)){
-          pathToUse = path;
-          if (typeof settingsFunction === 'function') {
-            settingsFunctionToUse = settingsFunction;
-          }
-        } else {
-          throw new Error('#MWC.extendMiddleware path to be a middleware valid path, that starts from "/"!');
-        }
-      } else {
-        if (typeof path === 'function') {
-          settingsFunctionToUse = path;
-        }
-      }
-    }
-
-    if (settingsFunctionToUse) {
-      if (environmentToUse) {
-        for (var i = 0; i < environmentToUse.length; i++) {
-          this._extendMiddlewareFunctions.push({
-            'environment': environmentToUse[i],
-            'path': pathToUse,
-            'SettingsFunction': settingsFunctionToUse
-          });
-        }
-      } else {
-        //we set middleware for all environments
-        this._extendMiddlewareFunctions.push({
-          'path': pathToUse,
-          'SettingsFunction': settingsFunctionToUse
-        });
-      }
-    } else {
-      throw new Error('Wrong arguments for function MWC.extendMiddleware(environmentArrayOrStrings, [path], settingsFunction(core){...})');
-    }
-    return this;
-  }
-};
-
-MWC.prototype.extendRoutes = function (settingsFunction) {
-  if (this.prepared) {
-    throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
-  } else {
-    if (typeof settingsFunction === 'function') {
-      this._extendRoutesFunctions.push(settingsFunction);
-      return this;
-    } else {
-      throw new Error('Wrong argument for MWC.extendAppRoutes(function(core){...});');
-    }
-  }
 };
 
 //todo - refactor

@@ -6,8 +6,8 @@ MWC.extendCore('getSum',function(a,b){return a+b;});
 
 
 //set global lever variables for expressJS application
-MWC.extendApp(['development', 'staging'], function (app) {
-  app.set('TempVar', '42');
+MWC.extendApp(['development', 'staging'], function (core) {
+  core.app.set('TempVar', '42');
 });
 
 
