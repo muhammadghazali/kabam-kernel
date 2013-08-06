@@ -125,8 +125,8 @@ describe('mwcCore', function() {
     return mongoose.model('dogs', DogsSchema);
   };
 
-  before(function(done) {
 
+  before(function(done) {
     MWC = mwcCore(config);
 
     MWC.extendCore('sum', function(config){
@@ -149,22 +149,21 @@ describe('mwcCore', function() {
     MWC.extendMiddleware('development','/middleware4Path',extendAppMiddlewareFunction4);
 
     MWC.extendRoutes(extendRoutesFunction);
-/*/
-    MWC.usePlugin({
-      'extendCore': extendCoreFunctionPlugin,
-      'extendModel':{'Dogs':extendModelFunctionPlugin},
-      'extendApp': extendAppParametersFunctionPlugin,
-      "extendMiddleware": extendAppMiddlewareFunctionPlugin,
-      'extendRoutes': extendRoutesFunctionPlugin
-    });
-//*/
+    /*/
+     MWC.usePlugin({
+     'extendCore': extendCoreFunctionPlugin,
+     'extendModel':{'Dogs':extendModelFunctionPlugin},
+     'extendApp': extendAppParametersFunctionPlugin,
+     "extendMiddleware": extendAppMiddlewareFunctionPlugin,
+     'extendRoutes': extendRoutesFunctionPlugin
+     });
+     //*/
     //create and start this application
     MWC.start(3000);
-    setTimeout(done,1500);
-
+    setTimeout(done,1000);
   });
   after(function(done){
-    MWC.mongoose.close(done);
+    MWC.mongoose.disconnect(done);
   });
 
   describe('Testing exposed objects of running mwcCore', function() {
