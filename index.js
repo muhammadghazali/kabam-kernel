@@ -67,7 +67,7 @@ function MWC(config) {
     if (prepared) {
       throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
-      if (typeof fieldName === 'string') {
+      if (typeof fieldName === 'string' && typeof factoryFunctionOrObject !=='undefined') {
         if (typeof factoryFunctionOrObject === 'function') {
           _extendCoreFunctions.push({'field': fieldName, 'factoryFunction': factoryFunctionOrObject});
         } else {
@@ -77,7 +77,7 @@ function MWC(config) {
         }
         return this;
       } else {
-        throw new Error('MWC.extendCore requires argument of fieldName, value');
+        throw new Error('MWC.extendCore requires argument of fieldName(string), and value - function(config){} or object!');
       }
     }
   };

@@ -93,7 +93,7 @@ describe('sanity test', function () {
       (function () {
         var MWC = mwcCore(config);
         MWC.extendCore('i am pineapple!');
-      }).should.throw('MWC.extendCore requires argument of function(core){...}');
+      }).should.throw('MWC.extendCore requires argument of fieldName(string), and value - function(config){} or object!');
     });
 
     it('throws proper error for MWC.extendModel("i am pineapple!")', function () {
