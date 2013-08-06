@@ -158,6 +158,10 @@ describe('mwcCore', function() {
     setTimeout(done,1000);
   });
 
+  after(function(done){
+    MWC.mongoose.disconnect();
+    done();
+  });
   describe('Testing exposed objects of running mwcCore', function() {
 
     it('can emit and listen to events', function() {

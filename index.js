@@ -345,6 +345,7 @@ function MWC(config) {
    * @description
    * Loads plugin from object or npm module
    * @param {object/string} pluginObjectOrName - config object or plugin name to get by require
+   * @url https://github.com/mywebclass/mwc_kernel/blob/master/example/plugin.example.js
    */
   this.usePlugin = function (pluginObjectOrName) {
     if (prepared) {
@@ -357,16 +358,16 @@ function MWC(config) {
       pluginToBeInstalled = pluginObjectOrName;
     }
 
-    if (pluginToBeInstalled.extendCore) {
+    if (typeof pluginToBeInstalled.extendCore === 'object') {
       for (var field in pluginToBeInstalled.extendCore){
         if(pluginToBeInstalled.extendCore.hasOwnProperty(field)){
           this.extendCore(field, pluginToBeInstalled.extendCore[field]);
         }
       }
     }
-    if (pluginToBeInstalled.extendModel && typeof pluginToBeInstalled.extendModel === 'object') {
+    if (typeof pluginToBeInstalled.extendModel === 'object') {
       for (var x in pluginToBeInstalled.extendModel) {
-        if(pluginToBeInstalled.extendCore.hasOwnProperty(x)){
+        if(pluginToBeInstalled.extendModel.hasOwnProperty(x)){
           this.extendModel(x, pluginToBeInstalled.extendModel[x]);
         }
       }
@@ -413,6 +414,15 @@ function MWC(config) {
     if (typeof pluginToBeInstalled.extendRoutes === 'function') {
       this.extendRoutes(pluginToBeInstalled.extendRoutes);
     }
+
+    if(typeof pluginToBeInstalled.extendListeners === 'object'){
+      for (var x in pluginToBeInstalled.extendListeners) {
+        if(pluginToBeInstalled.extendListeners.hasOwnProperty(x)){
+          this.extendListeners(x, pluginToBeInstalled.extendListeners[x]);
+        }
+      }
+    }
+
     return this;
     }
   };
