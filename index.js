@@ -449,11 +449,12 @@ function MWC(config) {
    * Start mwcKernel application
    * @param {object} howExactly - config object
    * Values:
-   * null - bind expressJS application to default port (process.env.PORT) or 3000 port, returns mwc
-   * number - bind expressJS application to this port, returns mwc
-   * http instance - bind expressJS application to this server, returns this server object with application bound
-   * https instance - bind expressJS application to this server, returns this server object with application bound
-   * string of 'app' - start appliation as standalone object, for background workers and console scripts, returns mwc
+   *
+   * - null - bind expressJS application to default port (process.env.PORT) or 3000 port, returns mwc
+   * - number - bind expressJS application to this port, returns mwc
+   * - http instance - bind expressJS application to this server, returns this server object with application bound
+   * - https instance - bind expressJS application to this server, returns this server object with application bound
+   * - string of 'app' - start appliation as standalone object, for background workers and console scripts, returns mwc
    *
    * @param {object} options - config object for https server.
    * @url http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener
@@ -496,22 +497,21 @@ function MWC(config) {
       if (howExactly === 'app') {
         return thisMWC;
       }
-
       if (typeof howExactly === 'number' && howExactly > 0) {
         thisMWC.app.listen(howExactly);
         return thisMWC;
       }
-
-      if (howExactly instanceof http || howExactly instanceof https) {
-        return howExactly.createServer(thisMWC.app, options);//do not forget to set this http(s) for listening.
+      if (howExactly instanceof https) {
+        return howExactly.createServer(thisMWC.app);//do not forget to set this http for listening.
       }
-
-      throw new Error('Function MWC.listen(httpOrHttpsOrPort) accepts objects of null, "app", http, https or port\'s number as argument!');
+      if (howExactly instanceof http) {
+        return howExactly.createServer(thisMWC.app, options);//do not forget to set this https for listening.
+      }
+     throw new Error('Function MWC.listen(httpOrHttpsOrPort) accepts objects of null, "app", http, https or port\'s number as argument!');
     } else {
       this.app.listen(this.app.get('port'));//listening to default port
       return thisMWC;
     }
-
   };
 }
 
