@@ -104,7 +104,7 @@ function MWC(config) {
    *   return mongoose.model('cats', CatsSchema);
    * });
    *
-   * @returns mwc
+   * @returns {MWC} mwc object
    */
   this.extendModel = function (modelName, modelFunction) {
     if (prepared) {
@@ -126,12 +126,12 @@ function MWC(config) {
   /**
    * @ngdoc function
    * @name mwc.extendListeners
-   * @param {string} eventName
-   * @param {function} eventHandlerFunction
+   * @param {string} eventName Name of the event
+   * @param {function} eventHandlerFunction Function to handle the event
    * @description - add custom event handler for mwc
    * @example
    *  mwc.extendListeners('someEvent', console.log);
-   * @returns mwc
+   * @returns {MWC} mwc object
    */
   this.extendListeners = function (eventName, eventHandlerFunction) {
     if (prepared) {
@@ -155,8 +155,8 @@ function MWC(config) {
    * @name mwc.extendStrategy
    * @description
    * Loads new passportjs strategies from object
-   * @param {object}strategyObject
-   * @returns this
+   * @param {object} strategyObject Passport's strategy object
+   * @returns {MWC} mwc object
    */
   this.extendStrategy = function(strategyObject){
     if (prepared) {
@@ -184,7 +184,7 @@ function MWC(config) {
    *   core.app.locals.environment = 'development';
    * });
    *
-   * @returns this
+   * @returns {MWC} mwc object
    */
   this.extendApp = function (environment, settingsFunction) {
     if (prepared) {
@@ -243,8 +243,8 @@ function MWC(config) {
    *     res.setHeader('X-production','YES!');
    *   };
    * }
-
-   * @returns mwc
+   *
+   * @returns {MWC} mwc object
    */
   this.extendMiddleware = function (environment, path, settingsFunction) {
     if (prepared) {
@@ -316,7 +316,7 @@ function MWC(config) {
    * @name mwc.extendRoutes
    * @description
    * Adds new routes to expressJS application
-   * @param {function} settingsFunction
+   * @param {function} settingsFunction Settings Function
    * @example
    *
    * mwc.extendRoutes(function(core){
@@ -324,7 +324,7 @@ function MWC(config) {
    *     res.send('Hello!');
    *   });
    * }
-   * @returns mwc
+   * @returns {MWC} mwc object
    */
   this.extendRoutes = function (settingsFunction) {
     if (prepared) {

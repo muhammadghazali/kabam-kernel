@@ -32,6 +32,9 @@ module.exports = function(grunt) {
         src: [ 'test/**/*.js' ]
       }
     },
+    clean: {
+      docs: [ 'results/docs' ]
+    },
     copy: {
       readme: {
         src: 'README.md',
@@ -65,12 +68,13 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-copy');
+  grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-simple-mocha');
   grunt.loadNpmTasks('grunt-ngdocs');
 
   // Tasks
   grunt.registerTask('test', ['simplemocha']);
-  grunt.registerTask('docs', ['copy:readme', 'ngdocs']);
+  grunt.registerTask('docs', ['clean:docs', 'copy:readme', 'ngdocs']);
 
   // Default task.
   grunt.registerTask('default', ['jshint', 'test', 'docs']);

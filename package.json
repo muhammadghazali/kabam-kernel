@@ -42,7 +42,9 @@
     "grunt-simple-mocha": "*",
     "request": "*",
     "grunt-ngdoc": "*",
-    "grunt-contrib-copy": "*"
+    "grunt-contrib-copy": "*",
+    "grunt-ngdocs": "*",
+    "grunt-contrib-clean": "*"
   },
   "optionalDependencies": {
     "hiredis": "*"
@@ -53,18 +55,18 @@
   ],
   "author": {
     "name": "Anatolij Ostroumov",
-    "url":"https://github.com/vodolaz095",
+    "url": "https://github.com/vodolaz095",
     "email": "ostroumov095@gmail.com"
   },
   "contributors": [
     {
       "name": "Anatolij Ostroumov (developer)",
-      "url":"https://github.com/vodolaz095",
+      "url": "https://github.com/vodolaz095",
       "email": "ostroumov095@gmail.com"
     },
     {
       "name": "The Budiman (developer)",
-      "url": "http://tbudiman.blogspot.com",
+      "url": "https://github.com/valmy",
       "email": "tbudiman@gmail.com"
     },
     {
