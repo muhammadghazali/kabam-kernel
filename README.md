@@ -1,5 +1,5 @@
 @ngdoc overview
-@name README
+@name mwc_kernel-index
 @description
 
 mwc_kernel

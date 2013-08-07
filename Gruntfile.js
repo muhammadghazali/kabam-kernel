@@ -38,22 +38,18 @@ module.exports = function(grunt) {
     copy: {
       readme: {
         src: 'README.md',
-        dest: 'results/guide.ngdoc'
+        dest: 'results/index.ngdoc'
       }
     },
     ngdocs: {
       options: {
         dest: 'results/docs',
         title: 'mwc kernel',
-        startPage: '/guide'
+        startPage: '/api'
       },
       api: {
-        src: ['index.js', 'lib/**/*.js', 'models/**/*.js'],
+        src: ['results/index.ngdoc', 'index.js', 'lib/**/*.js', 'models/**/*.js'],
         title: 'MWC Kernel API'
-      },
-      guide: {
-        src: ['results/guide.ngdoc'],
-        title: 'Developer Guide'
       }
     },
     watch: {
