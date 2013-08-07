@@ -41,11 +41,18 @@ module.exports = exports = function (mwc) {
 
     //profile status
     emailVerified: Boolean, //profile is activated
-    profileComplete:Boolean, //profile is complete - it means, it have email, username and password set!
+    profileComplete: Boolean, //profile is complete - it means, it have email, username and password set!
 
     //keychain
-    keychain:Object,
-
+    keychain: {}, // i'm loving mongoose - http://mongoosejs.com/docs/schematypes.html - see mixed
+/*
+    keychain: {//this is temporary approach, because mongoose validation fails. need further research
+      twitter: Number,
+      github : Number,
+      facebook: Number,
+      linkedin: Number
+    },
+*/
     profile: Object //this is user profile object. it can store anything! - age, postal address, occupation. everything! todo - embedded document?
   });
   //UserSchema.plugin(useTimestamps);//do not works! add createdAt, and updatedAt attributes
@@ -236,16 +243,21 @@ module.exports = exports = function (mwc) {
     }
   };
 
-  //keychain - used for authorizing via oauth profiles that do not expose valid email address - github for example
-  UserSchema.methods.setKeyChain = function(provider,id,callback){
-    if(this.keychain){
-      this.keychain[''+provider] = id;
-    } else {
-      this.keychain={};
-      this.keychain[''+provider] = id;
-    }
+  //user profile
+  UserSchema.methods.saveProfile = function(profile,callback){
+    this.profile=profile;
+    this.markModified('profile'); //http://mongoosejs.com/docs/schematypes.html
     this.save(callback);
   };
+
+
+  //keychain - used for authorizing via oauth profiles that do not expose valid email address - github for example
+  UserSchema.methods.setKeyChain = function(provider, id, callback){
+    this.keychain[provider] = id;
+    this.markModified('keychain'); //http://mongoosejs.com/docs/schematypes.html
+    this.save(callback);
+  };
+
 
   UserSchema.methods.revokeKeyChain = function(provider,callback){
     this.keychain[provider]=null;
