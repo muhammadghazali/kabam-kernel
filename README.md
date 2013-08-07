@@ -112,7 +112,7 @@ and for `https` server in this way
         key: fs.readFileSync('test/fixtures/keys/agent2-key.pem'),
         cert: fs.readFileSync('test/fixtures/keys/agent2-cert.pem')
     };
-    MWC.listen(https.createcreateServer(options,MWC.app));
+    MWC.listen(https.createServer(MWC.app,options));
 ```
 
 
@@ -120,7 +120,7 @@ and for `https` server in this way
 3. `MWC.mongoose` - is a [mongoose](https://npmjs.org/package/mongoose) instance, used by this applications.
 
 4. `MWC.model` - is a object, that includes [mongoose models](http://mongoosejs.com/docs/guide.html), used by this application.
-For now, there is `MWC.model.Users` and `MWC.model.Documents` objects in it
+For now, there is `MWC.model.Users` objects in it. But other models can be injected by `MWC.extendModel` function
 
 5. `MWC.redisClient` - is a ready to use [redis](https://npmjs.org/package/redis) client used by application
 
@@ -132,9 +132,8 @@ with
 ```javascript
 MWC.app.get('/someURI', function(request, response) {
   //request.user - passport.js authentication middleware user representation
-  //request.model.users
-  //request.model.documents
-  //request.redisClient
+  //request.model.users - mongoose model of users
+  //request.redisClient - ready to work redis client
   //request.emitMWC('it works!'); //event emmiter, coupled to MWC event emmiter
 });
 ```
@@ -146,6 +145,9 @@ This system use mongoose model to represent users. It have this methods.
 1. `MWC.model.findOneByLoginOrEmail(string,function(err,userFound){...})` - finds one user, that have `username` or `email`  equal to `string`
 2. `MWC.model.findOneByApiKey(string,function(err,userFound){...})` - finds one user, that have `apiKey` equal to `string`
 3. `MWC.model.getByRole(string,function(err,userFound){...})` - finds users, that have `role` of string
+4. `MWC.model.findOneByKeychain('github', 23122, function(err,userFound){...})` - finds user, that has github profile if of 23122
+5. `MWC.model.findOneByApiKeyAndVerify(apiKey,function(err,userFound){...})` - finds user with apiKey given and set his accout as verified
+6. `MWC.model.findOneByApiKeyAndResetPassword(apiKey, password, function(err){...})` - resets password for account with api key given
 
 Methods to one instance of class User
 
@@ -157,6 +159,32 @@ Methods to one instance of class User
 6. `user.grantRole('roleName',function(err){...})` - grant the user the new role of `roleName`, saves the instance to database
 7. `user.revokeRole('roleName',function(err){...})` - revoke the role of `roleName` from user and  saves the instance to database
 8. `user.notify(messageObj)` - notifyes the user with message of messageObj. Depending on the type of messageObj it is processed accordingly.
+
+9. `user.saveProfile(profileObj,callback)` - save JSON formatted profile with any user related information, for example
+
+```javascript
+      user.saveProfile({
+        'firstName':'John',
+        'lastName':'Doe',
+        'age':'32',
+        'sex':'m'
+      }
+```
+
+this data can be retrived from `user.profile`.
+
+10. `user.setKeyChain(provider,id,callback);` - save oAuth provider cretentials to users profile. Example
+
+```javascript
+    user.setKeyChain('github', 23122, function(err){...};
+```
+will attach the github profile with id=23122 to users profile
+
+11. `revokeKeyChain(provider,callback)` - opposite to 10.
+
+
+
+
 There is plugin of [https://github.com/mywebclass/mwc_plugin_notify_by_email](https://github.com/mywebclass/mwc_plugin_notify_by_email)
 that sends SOME notifications as emails to user. There will be other plugins that can notify users by other means
 
