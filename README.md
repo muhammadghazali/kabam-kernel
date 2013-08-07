@@ -74,9 +74,7 @@ Plugins
 Example
 =======
 
-```javascript
-
-```
+[https://github.com/mywebclass/mwc_kernel/blob/master/example/example.js](https://github.com/mywebclass/mwc_kernel/blob/master/example/example.js)
 
 What exposable parts the MWC instance do have?
 =======
