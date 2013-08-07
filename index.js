@@ -52,16 +52,20 @@ function MWC(config) {
    * @param {function/object/string/number/array} factoryFunctionOrObject - function(config), that is called to return value assigned to fieldName
    * config is the mwc.config object, or just a object, to be setted as mwc public field
    * @example
+   * ```javascript
    *
-   * mwc.extendCore('checkSecret',function(config){
-   *   return function(secretToCheck){
-   *     return secretToCheck === config.secret;
-   *   };
-   * };
-   * mwc.extendCore('someVar',42);
-   * mwc.extendCore('someArray',[1,2,3]);
-   * mwc.extendCore('someObj',{ 'someVal':1});
+   *     mwc.extendCore('checkSecret',function(config){
+   *       return function(secretToCheck){
+   *         return secretToCheck === config.secret;
+   *       };
+   *     };
    *
+   *     mwc.extendCore('someVar',42);
+   *     mwc.extendCore('someArray',[1,2,3]);
+   *     mwc.extendCore('someObj',{ 'someVal':1});
+   *
+   *  ```
+   * @returns {MWC} mwc object
    */
   this.extendCore = function (fieldName, factoryFunctionOrObject) {
     if (prepared) {
@@ -87,23 +91,21 @@ function MWC(config) {
    * @name mwc.extendModel
    * @description
    * Perform dependency injection of mongoose models to mwc.model and request.model.
-   * @param {string} modelName - field name
+   * @param {string} modelName - field name, "Users" is reserved field name!
    * @param {object} modelFunction(mongoose, config) - the first argument is mongoose object, the second one is the
    * mwc.config object
    * @example
+   * ```javascript
    *
-   * MWC.extendModel('Cats', function (mongoose, config) {
-   *   var CatsSchema = new mongoose.Schema({
-   *     'nickname': String
-   *   });
+   *     MWC.extendModel('Cats', function (mongoose, config) {
+   *        var CatsSchema = new mongoose.Schema({
+   *         'nickname': String
+   *        });
    *
-   *   CatsSchema.index({
-   *     nickname: 1
-   *   });
+   *       return mongoose.model('cats', CatsSchema);
+   *     });
    *
-   *   return mongoose.model('cats', CatsSchema);
-   * });
-   *
+   * ```
    * @returns {MWC} mwc object
    */
   this.extendModel = function (modelName, modelFunction) {
@@ -130,7 +132,11 @@ function MWC(config) {
    * @param {function} eventHandlerFunction Function to handle the event
    * @description - add custom event handler for mwc
    * @example
-   *  mwc.extendListeners('someEvent', console.log);
+   * ``` javascript
+   *
+   *      mwc.extendListeners('someEvent', console.log);
+   *
+   * ```
    * @returns {MWC} mwc object
    */
   this.extendListeners = function (eventName, eventHandlerFunction) {
@@ -157,6 +163,7 @@ function MWC(config) {
    * Loads new passportjs strategies from object
    * @param {object} strategyObject Passport's strategy object
    * @returns {MWC} mwc object
+   * @url https://github.com/mywebclass/mwc_kernel/blob/master/lib/strategies/github.js
    */
   this.extendStrategy = function(strategyObject){
     if (prepared) {
@@ -180,9 +187,13 @@ function MWC(config) {
    * @param {function} settingsFunction - function(core){....}
    * @example
    *
-   * mwc.extendApp('development',function(core){
-   *   core.app.locals.environment = 'development';
-   * });
+   * ```javascript
+   *
+   *     mwc.extendApp('development',function(core){
+   *       core.app.locals.environment = 'development';
+   *     });
+   *
+   * ```
    *
    * @returns {MWC} mwc object
    */
@@ -233,17 +244,19 @@ function MWC(config) {
    * @description
    * Adds  new middleware to expressJS application
    * @param {string/array/undefined} environment - application enviroment to use,
-   * can be something like 'development', ['development','staging'] or null
+   * can be something like 'development', ['development','staging'] or null (for ALL enviroments)
    * @param {string/undefined} path path to mount middleware - default is /
    * @param {function} settingsFunction function(core){ return function(req,res,next){.....}}
    * @example
+   * ```javascript
    *
-   * mwc.extendMiddleware('production',function(core){
-   *   return function(req,res,next){
-   *     res.setHeader('X-production','YES!');
-   *   };
-   * }
+   *     mwc.extendMiddleware('production',function(core){
+   *       return function(req,res,next){
+   *         res.setHeader('X-production','YES!');
+   *       };
+   *     }
    *
+   * ```
    * @returns {MWC} mwc object
    */
   this.extendMiddleware = function (environment, path, settingsFunction) {
@@ -318,12 +331,14 @@ function MWC(config) {
    * Adds new routes to expressJS application
    * @param {function} settingsFunction Settings Function
    * @example
+   * ```javascript
    *
-   * mwc.extendRoutes(function(core){
-   *   core.app.get('/', function(req,res){
-   *     res.send('Hello!');
-   *   });
-   * }
+   *     mwc.extendRoutes(function(core){
+   *       core.app.get('/', function(req,res){
+   *         res.send('Hello!');
+   *       });
+   *     }
+   * ```
    * @returns {MWC} mwc object
    */
   this.extendRoutes = function (settingsFunction) {
@@ -433,13 +448,16 @@ function MWC(config) {
    * @description
    * Start mwcKernel application
    * @param {object} howExactly - config object
-   * @param {object} options - config object for http(s) server.
    * Values:
    * null - bind expressJS application to default port (process.env.PORT) or 3000 port, returns mwc
    * number - bind expressJS application to this port, returns mwc
    * http instance - bind expressJS application to this server, returns this server object with application bound
    * https instance - bind expressJS application to this server, returns this server object with application bound
    * string of 'app' - start appliation as standalone object, for background workers and console scripts, returns mwc
+   *
+   * @param {object} options - config object for https server.
+   * @url http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener
+   *
    */
   this.start = function (howExactly, options) {
     prepared = true;
@@ -558,7 +576,7 @@ MWC.prototype.extendAppRoutes = function(settingsFunction){
  * @name mwc.injectEmit
  * @description
  * Injects a function .emit(eventName,eventObj) for every object. This function
- * is used for making every object to be able to emit events through mwc
+ * is used for making this object to be able to emit events through mwc
  * @param {object} object - object to be extended
  */
 MWC.prototype.injectEmit = function(object) {
