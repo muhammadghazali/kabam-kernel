@@ -767,6 +767,7 @@ describe('Kernel', function() {
                 'emailVerified': true,
                 'apiKeyCreatedAt': new Date()
               }, function (err, userCreated) {
+                if(err) throw err;
                 user=userCreated;
                 userCreated.setPassword('lalala',function(err){
                   cb(err, userCreated);
@@ -868,7 +869,6 @@ describe('Kernel', function() {
             MWC.model.Users.create({
               'username': 'test888',
               'email': 'ostroumov@teksi.ru',
-              'apiKey':'lalala1',
               'keychain':{
                 'github':11111
               }
@@ -900,7 +900,6 @@ describe('Kernel', function() {
             MWC.model.Users.create({
               'username': 'test888',
               'email': 'ostroumov@teksi.ru',
-              'apiKey':'lalala1',
               'keychain':{
                 'github':11111
               }
@@ -941,7 +940,6 @@ describe('Kernel', function() {
             MWC.model.Users.create({
               'username': 'test888',
               'email': 'ostroumov@teksi.ru',
-              'apiKey':'lalala1',
               'keychain':{
                 'github':11111,
                 'someProvider':1
@@ -985,8 +983,7 @@ describe('Kernel', function() {
         before(function (done) {
           MWC.model.Users.create({
             'username': 'test888',
-            'email': 'ostroumov@teksi.ru',
-            'apiKey':'lalala1'
+            'email': 'ostroumov@teksi.ru'
           }, function (err, userCreated) {
             if (err) {
               throw err;
@@ -1024,8 +1021,7 @@ describe('Kernel', function() {
         before(function (done) {
           MWC.model.Users.create({
             'username': 'testSubject47_1',
-            'email': 'ostroumov3@teksi.ru',
-            'apiKey':'lalala1_1'
+            'email': 'ostroumov3@teksi.ru'
           }, function (err, userCreated) {
             if (err) {
               throw err;
@@ -1059,8 +1055,7 @@ describe('Kernel', function() {
         before(function (done) {
           MWC.model.Users.create({
             'username': 'testSubject47_2',
-            'email': 'ostroumov_3@teksi.ru',
-            'apiKey': 'lalalaDaiMne3Ryblya'
+            'email': 'ostroumov_3@teksi.ru'
           }, function (err, userCreated) {
             if (err) {
               throw err;
@@ -1096,7 +1091,6 @@ describe('Kernel', function() {
           MWC.model.Users.create({
             'username': 'test888',
             'email': 'ostroumov@teksi.ru',
-            'apiKey':'lalala1',
             'roles':'role1'
           }, function (err, userCreated) {
             if (err) {
@@ -1127,8 +1121,7 @@ describe('Kernel', function() {
               function(cb){
                 MWC.model.Users.create({
                   'username': 'test888',
-                  'email': 'ostroumov@teksi.ru',
-                  'apiKey':'lalala1'
+                  'email': 'ostroumov@teksi.ru'
                 },cb);
               },
               function(aaa,cb){
@@ -1168,7 +1161,6 @@ describe('Kernel', function() {
                 MWC.model.Users.create({
                   'username': 'test888',
                   'email': 'ostroumov@teksi.ru',
-                  'apiKey':'lalala1',
                   'roles':['role1','role2']
                 },cb);
               },
@@ -1208,8 +1200,7 @@ describe('Kernel', function() {
         before(function(done){
           MWC.model.Users.create({
             'username': 'test888',
-            'email': 'ostroumov@teksi.ru',
-            'apiKey':'lalala1'
+            'email': 'ostroumov@teksi.ru'
           }, function (err, userCreated) {
             if (err) {
               throw err;
@@ -1243,7 +1234,6 @@ describe('Kernel', function() {
         before(function(done){
           MWC.model.Users.create({
             'email': 'emptyness@teksi.ru',
-            'apiKey':'lalala1',
             'profileComplete':false,
             'emailVerified':true
           }, function (err, userCreated) {

@@ -31,7 +31,7 @@ module.exports = exports = function (mwc) {
     password: String,//hashed password
 
     //api key interaction
-    apiKey: {type: String, required: true, unique: true, match: /^[a-zA-Z0-9_]+$/ }, //for invalidating sessions by user request, for api interactions...
+    apiKey: {type: String, required: true, unique: true, default:rack, match: /^[a-zA-Z0-9_]+$/ }, //for invalidating sessions by user request, for api interactions...
     apiKeyCreatedAt: Date,
 
 
