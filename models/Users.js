@@ -163,9 +163,9 @@ module.exports = exports = function (mwc) {
         if (err) {
           return done(err, false, {'message': 'Database broken...'});
         } else {
-          console.log('==============');
-          console.log(userFound);
-          console.log('==============');
+//          console.log('==============');
+//          console.log(userFound);
+//          console.log('==============');
           if (err) {
             return done(err);
           } else {

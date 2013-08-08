@@ -1,5 +1,4 @@
 /*jshint immed: false */
-
 var should = require('should'),
   async = require('async'),
   mwcKernel = require('./../index.js'),
@@ -146,6 +145,7 @@ describe('Kernel', function() {
     //*/
 
      MWC.usePlugin({
+     'name':'unitTestPlugin',
      'extendCore': {'mul':function(config){return function(a,b){return a*b}}},
      'extendModel':{'Dogs':extendModelFunctionPlugin},
      'extendApp': extendAppParametersFunctionPlugin,
@@ -227,8 +227,6 @@ describe('Kernel', function() {
 
     });
 
-    it('setted the "prepared" property to true - pending, because prepared is private value');
-
   });
 
   describe('Testing mwc_core event emiting system', function() {
@@ -272,17 +270,15 @@ describe('Kernel', function() {
 
   describe('#MWC.extendCore()', function() {
 
-    it('adds the extending core function to array of MWC._extendCoreFunctions - pending, because _extendCoreFunctions is private value');
 
     it('actually adds new functions to #MWC',function(){
-      MWC.SomeVar.should.be.equal(42);
-      MWC.sum.should.be.a('function');
-      MWC.sum(2,2).should.equal(4);
+      MWC.shared.SomeVar.should.be.equal(42);
+      MWC.shared.sum.should.be.a('function');
+      MWC.shared.sum(2,2).should.equal(4);
     });
   });
 
   describe('#MWC.extendModel()',function(){
-    it('adds the extending model function to array of #MWC._additionalModels - pending, because _additionalModels is private value');
 
     it('adds the model of "Cats" to #MWC.model.Cats',function(){
       MWC.model.Cats.should.be.a('function');
@@ -395,8 +391,8 @@ describe('Kernel', function() {
     describe('extendCore from plugin', function () {
 
       it('it actually adds new functions to #MWC.core', function () {
-        MWC.mul.should.be.a('function');
-        MWC.mul(3,2).should.equal(6);
+        MWC.unitTestPlugin.mul.should.be.a('function');
+        MWC.unitTestPlugin.mul(3,2).should.equal(6);
       });
     });
 

@@ -46,11 +46,12 @@ function MWC(config) {
    * @ngdoc function
    * @name mwc.extendCore
    * @description
-   * Perform dependency injection on the mwc object.
+   * Perform dependency injection on the mwc.shared object.
    * If mwc do not have fieldName property/method, this method is created as public property/method
    * @param {string} fieldName - field name
-   * @param {function/object/string/number/array} factoryFunctionOrObject - function(config), that is called to return value assigned to fieldName
-   * config is the mwc.config object, or just a object, to be setted as mwc public field
+   * @param {function/object/string/number/array} factoryFunctionOrObject - function(config),
+   * what is called to return value assigned to fieldName  config is the mwc.config object, or just a object, to be setted as mwc public field
+   * @param namespace - namespace to bind this field. default is 'shared;
    * @example
    * ```javascript
    *
@@ -63,21 +64,32 @@ function MWC(config) {
    *     mwc.extendCore('someVar',42);
    *     mwc.extendCore('someArray',[1,2,3]);
    *     mwc.extendCore('someObj',{ 'someVal':1});
+   *     mwc.extendCore('a',333,'inThatNamespace');
+   *
+   *     mwc.start('app');
+   *
+   *     console.log(mwc.shared.checkSecret('someThing'); //false
+   *     console.log(mwc.shared.someVar); //42
+   *     console.log(mwc.shared.someArray); //[1,2,3]
+   *     console.log(mwc.shared.someObj); //{ 'someVal':1}
+   *     console.log(mwc.inThatNamespace.a); //333
    *
    *  ```
    * @returns {MWC} mwc object
    */
-  this.extendCore = function (fieldName, factoryFunctionOrObject) {
+  this.extendCore = function (fieldName, factoryFunctionOrObject,namespace) {
     if (prepared) {
       throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
+      if(!namespace) namespace='shared';
+
       if (typeof fieldName === 'string' && typeof factoryFunctionOrObject !=='undefined') {
         if (typeof factoryFunctionOrObject === 'function') {
-          _extendCoreFunctions.push({'field': fieldName, 'factoryFunction': factoryFunctionOrObject});
+          _extendCoreFunctions.push({'field': fieldName, 'factoryFunction': factoryFunctionOrObject,'namespace':namespace});
         } else {
           _extendCoreFunctions.push({'field': fieldName, 'factoryFunction': function () {
             return factoryFunctionOrObject;
-          }});
+          },'namespace':namespace});
         }
         return this;
       } else {
@@ -373,10 +385,14 @@ function MWC(config) {
       pluginToBeInstalled = pluginObjectOrName;
     }
 
+    if(typeof pluginToBeInstalled.name === 'string' && /^[a-z0-9_\-]+$/.test(pluginToBeInstalled.name) && pluginObjectOrName.name === 'shared'){
+      throw new Error('Wrong plugin syntax. Plugin name is missed or have wrong syntax!');
+    }
+
     if (typeof pluginToBeInstalled.extendCore === 'object') {
       for (var field in pluginToBeInstalled.extendCore){
         if(pluginToBeInstalled.extendCore.hasOwnProperty(field)){
-          this.extendCore(field, pluginToBeInstalled.extendCore[field]);
+          this.extendCore(field, pluginToBeInstalled.extendCore[field], pluginToBeInstalled.name);
         }
       }
     }
@@ -470,11 +486,16 @@ function MWC(config) {
     thisMWC.model = mongooseManager.createModel(thisMWC, _additionalModels);
 
     _extendCoreFunctions.map(function (settingsFunction) {
-      if (typeof thisMWC[settingsFunction.field] === "undefined") {
-        thisMWC[settingsFunction.field] = settingsFunction.factoryFunction(thisMWC.config);
-      } else {
-        throw new Error('We try to overwrite kernel field with name of ' + settingsFunction.field + '!');
+
+      if (typeof thisMWC[settingsFunction.namespace] === 'undefined') {
+        thisMWC[settingsFunction.namespace] = {};
       }
+      if (typeof thisMWC[settingsFunction.namespace][settingsFunction.field] === 'undefined') {
+        thisMWC[settingsFunction.namespace][settingsFunction.field] = settingsFunction.factoryFunction(thisMWC.config);
+      } else {
+        throw new Error('Kernel namespace collision - namespace "' + settingsFunction.namespace + '" already have field of ' + settingsFunction.field);
+      }
+
     });
 
     //initialize expressJS application
