@@ -462,26 +462,19 @@ function MWC(config) {
    */
   this.start = function (howExactly, options) {
     prepared = true;
+
     //injecting redis
     thisMWC.redisClient = redisManager.create(thisMWC.config.redis);
 
-    // initializing MongoDB and Core Models
-    thisMWC.mongoose = mongooseManager.create(thisMWC.config.mongoUrl);
-    thisMWC.model = mongooseManager.initModels(thisMWC);
+    //injecting mongoose and additional models
+    thisMWC.model = mongooseManager.createModel(thisMWC, _additionalModels);
 
-    //doing extendCore
-    //extending core by extendCore
     _extendCoreFunctions.map(function (settingsFunction) {
       if (typeof thisMWC[settingsFunction.field] === "undefined") {
         thisMWC[settingsFunction.field] = settingsFunction.factoryFunction(thisMWC.config);
       } else {
         throw new Error('We try to overwrite kernel field with name of ' + settingsFunction.field + '!');
       }
-    });
-
-    //loading custom models //todo - maybe redo
-    _additionalModels.map(function (customModel) {
-      thisMWC.model[customModel.name] = customModel.initFunction(thisMWC.mongoose, thisMWC.config);
     });
 
     //initialize expressJS application
