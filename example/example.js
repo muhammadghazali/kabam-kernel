@@ -10,17 +10,12 @@ MWC.extendCore('getSum', function (config) {
   };
 });
 
-MWC.extendCore('getCore',function(config){
-  return function(){
-    return this;
-  }
-});
 MWC.extendCore('TempVar', 42);
 
 
 //set global lever variables for expressJS application
 MWC.extendApp(['development', 'staging'], function (core) {
-  core.app.set('TempVar', core.TempVar);
+  core.app.set('TempVar', core.shared.TempVar);
 });
 
 
