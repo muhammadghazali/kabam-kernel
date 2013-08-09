@@ -22,6 +22,21 @@ module.exports = exports = function (mwc) {
 
   var Schema = mongoose.Schema;
 
+  /**
+   * @ngdoc object
+   * @name user
+   * @description
+   * Mongoose object to represent single user from mongoose users collection
+   */
+
+  /**
+   * @ngdoc object
+   * @name mwc.model.Users
+   * @description
+   * Mongoose object to manipulate users collection
+   */
+
+
   var UserSchema = new Schema({
     email: {type: String, required: true, unique: true, match: /^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/},
 
@@ -56,7 +71,6 @@ module.exports = exports = function (mwc) {
     keychain:1,
     roles: 1
   });
-
 
   /**
    * @ngdoc method
@@ -93,8 +107,8 @@ module.exports = exports = function (mwc) {
    * @methodOf user
    * @description
    * Returns true, if password is correct for this user, or false, if it is not correct
-   * @param {string} password
-   * @returns {boolean}
+   * @param {string} password - password to check
+   * @returns {boolean} - true if password is correct, or false
    *
    * @example
    * ```javascript
@@ -115,8 +129,8 @@ module.exports = exports = function (mwc) {
    * @methodOf user
    * @description
    * Sets new password for user, calls callback when user is saved
-   * @param {string} newPassword
-   * @param {function} callback
+   * @param {string} newPassword - password to be set
+   * @param {function} callback - function is fired when user is saved
    * @example
    * ```javascript
    *
@@ -140,7 +154,7 @@ module.exports = exports = function (mwc) {
    * @methodOf user
    * @description
    * Invalidates the apiKey, which results in immediate logoff for this user, and invalidating the access tokens.
-   * @param {function} callback
+   * @param {function} callback - function is fired when user is saved
    * @example
    * ```javascript
    *
@@ -160,10 +174,10 @@ module.exports = exports = function (mwc) {
    * @ngdoc method
    * @name grantRole
    * @methodOf user
-   * @param {string} roleName
+   * @param {string} roleName - role/permission to grant. Every user can have manifold of roles.
    * @description
    * Grants role to user, fires callback on save
-   * @param {function} callback
+   * @param {function} callback - function is fired when user is saved
    * @example
    * ```javascript
    *
@@ -185,10 +199,10 @@ module.exports = exports = function (mwc) {
    * @ngdoc method
    * @name hasRole
    * @methodOf user
-   * @param {string} roleName
+   * @param {string} roleName - role/permission to rcheck
    * @description
    * Returns true, if user has a role, returns false, if user has not have the role
-   * @returns {boolean}
+   * @returns {boolean} - true if user have role
    * @example
    * ```javascript
    *
@@ -214,10 +228,10 @@ module.exports = exports = function (mwc) {
    * @ngdoc method
    * @name revokeRole
    * @methodOf user
-   * @param {string} roleName
+   * @param {string} roleName - role/permission to revoke.
    * @description
    * Revokes role from user, fires callback on save
-   * @param {function} callback
+   * @param {function} callback - function is fired when user is saved
    * @example
    * ```javascript
    *
@@ -278,8 +292,8 @@ module.exports = exports = function (mwc) {
    * @methodOf mwc.model.Users
    * @description
    * Finds one user by login or email, returns as second argument in callback, first one is error
-   * @param {string} loginOrEmail
-   * @param {function} callback
+   * @param {string} loginOrEmai - login or email of user to be foundl
+   * @param {function} callback - function is fired when user is saved
    * @example
    * ```javascript
    *
@@ -302,8 +316,9 @@ module.exports = exports = function (mwc) {
    * @methodOf mwc.model.Users
    * @description
    * Finds one user by apiKey, returns as second argument in callback, first one is error
-   * @param {string} apiKey
-   * @param {function} callback
+   * @param {string} apiKey - apiKey of user to be foundl
+   * @param {function} callback - function is fired when user is saved
+
    * @example
    * ```javascript
    *
@@ -322,8 +337,8 @@ module.exports = exports = function (mwc) {
    * @methodOf mwc.model.Users
    * @description
    * Finds users who have desired role
-   * @param {string} role
-   * @param {function} callback
+   * @param {string} role - role/permission to search owners of
+   * @param {function} callback - function is fired when users are found
    * @example
    * ```javascript
    *
@@ -342,8 +357,8 @@ module.exports = exports = function (mwc) {
    * @ngdoc method
    * @name processOAuthProfile
    * @methodOf mwc.model.Users
-   * @param {string} email
-   * @param {function} done
+   * @param {string} email - email of user from oauth profile we want to process
+   * @param {function} done - function is fired when users are found
    * @description
    * For some oauth providers, like google, who returns email in user's profile, we can use this email for preliminary
    * registration of user. He has email verified, but profile is not complete, because it do not have username and password
@@ -389,10 +404,10 @@ module.exports = exports = function (mwc) {
    * @ngdoc method
    * @name signUp
    * @methodOf mwc.model.Users
-   * @param {string} username
-   * @param {string}  email
-   * @param {string}  password
-   * @param {function}  callback
+   * @param {string} username - username for new user
+   * @param {string} email - email for new user
+   * @param {string} password - password for new user
+   * @param {function}  callback  - function is fired when user is saved
    * @desription
    * signups new user by username, email, password, fires callback with first argument of error and the second one
    * of user signed it
@@ -426,8 +441,8 @@ module.exports = exports = function (mwc) {
    * @ngdoc method
    * @name signUpByEmailOnly
    * @methodOf mwc.model.Users
-   * @param {string}  email
-   * @param {function}  callback
+   * @param {string}  email  - email for new user
+   * @param {function}  callback  - function is fired when user is saved
    * @description
    * signup new user by email only - for example, when he sign in by google and other oauth providers with email present
    * account is set as uncompleted!
