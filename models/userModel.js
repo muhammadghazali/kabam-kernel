@@ -85,7 +85,6 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
-   * @methodOf User
    * @name User.getGravatar
    * @description
    * Returns the url to current user's gravatar
