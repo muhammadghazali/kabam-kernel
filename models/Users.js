@@ -30,9 +30,15 @@ module.exports = exports = function (mwc) {
    */
 
   /**
-   * @ngdoc object
+   * @ngdoc function
+   * @name mwc.model
+   * @description
+   * Mongooses collections of objects to manipulate data in mongo database
+   */
+
+  /**
+   * @ngdoc function
    * @name mwc.model.Users
-   * @methodOf mwc
    * @description
    * Mongoose object to manipulate users collection
    */
@@ -79,7 +85,7 @@ module.exports = exports = function (mwc) {
    * @description
    * Returns the url to current user's gravatar
    * @url https://er.gravatar.com/site/implement/images/
-   * @methodOf user
+
    * @param {number} size - image size
    * @param {string} type - one of 404, mm, identicon, monsterid, wavatar, retro, blank
    * @param {string} rating - g,pg,r,x - rating of image
@@ -105,7 +111,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name verifyPassword
-   * @methodOf user
    * @description
    * Returns true, if password is correct for this user, or false, if it is not correct
    * @param {string} password - password to check
@@ -127,7 +132,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name setPassword
-   * @methodOf user
    * @description
    * Sets new password for user, calls callback when user is saved
    * @param {string} newPassword - password to be set
@@ -152,7 +156,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name invalidateSession
-   * @methodOf user
    * @description
    * Invalidates the apiKey, which results in immediate logoff for this user, and invalidating the access tokens.
    * @param {function} callback - function is fired when user is saved
@@ -174,7 +177,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name grantRole
-   * @methodOf user
    * @param {string} roleName - role/permission to grant. Every user can have manifold of roles.
    * @description
    * Grants role to user, fires callback on save
@@ -199,7 +201,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name hasRole
-   * @methodOf user
    * @param {string} roleName - role/permission to rcheck
    * @description
    * Returns true, if user has a role, returns false, if user has not have the role
@@ -228,7 +229,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name revokeRole
-   * @methodOf user
    * @param {string} roleName - role/permission to revoke.
    * @description
    * Revokes role from user, fires callback on save
@@ -255,7 +255,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name notify
-   * @methodOf user
    * @description
    * Notifies the current user, using the mwc event emitting system
    * @param {string} [channel] - optional, channel name, default is 'all'
@@ -290,7 +289,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name findOneByLoginOrEmail
-   * @methodOf mwc.model.Users
    * @description
    * Finds one user by login or email, returns as second argument in callback, first one is error
    * @param {string} loginOrEmai - login or email of user to be foundl
@@ -314,7 +312,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name findOneByApiKey
-   * @methodOf mwc.model.Users
    * @description
    * Finds one user by apiKey, returns as second argument in callback, first one is error
    * @param {string} apiKey - apiKey of user to be foundl
@@ -335,7 +332,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name getByRole
-   * @methodOf mwc.model.Users
    * @description
    * Finds users who have desired role
    * @param {string} role - role/permission to search owners of
@@ -357,7 +353,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name processOAuthProfile
-   * @methodOf mwc.model.Users
    * @param {string} email - email of user from oauth profile we want to process
    * @param {function} done - function is fired when users are found
    * @description
@@ -404,7 +399,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name signUp
-   * @methodOf mwc.model.Users
    * @param {string} username - username for new user
    * @param {string} email - email for new user
    * @param {string} password - password for new user
@@ -441,7 +435,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name signUpByEmailOnly
-   * @methodOf mwc.model.Users
    * @param {string}  email  - email for new user
    * @param {function}  callback  - function is fired when user is saved
    * @description
@@ -474,7 +467,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name completeProfile
-   * @methodOf user
    * @description
    * Complete users profile for user created by mwc.model.users.signUpByEmailOnly
    * @param {string} username - username to set for user instance
@@ -494,7 +486,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name saveProfile
-   * @methodOf user
    * @description
    * Saves object as current users profile
    * @param {object} profile - username to set for user instance
@@ -511,7 +502,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name setKeyChain
-   * @methodOf user
    * @description
    * Grants the current user possibility to login through 3rd side oauth provider
    * @param {string} provider - provider name
@@ -541,7 +531,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name revokeKeyChain
-   * @methodOf user
    * @description
    * Revokes the current user possibility to login through 3rd side oauth provider
    * @param {string} provider - provider name
@@ -555,7 +544,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name findOneByKeychain
-   * @methodOf mwc.model.Users
    * @description
    * Finds user that have keychain for this provider and this id
    * @param {string} provider - provider name
@@ -580,7 +568,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name findOneByApiKeyAndVerify
-   * @methodOf mwc.model.Users
    * @description
    * This function is used for verifying users profile from link in email message
    * @param {string} apiKey - apiKey to use
@@ -606,7 +593,6 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name findOneByApiKeyAndVerify
-   * @methodOf mwc.model.Users
    * @description
    * This function is used for reseting users password by link in email with submitting form later
    * @param {string} apiKey - apiKey to use
