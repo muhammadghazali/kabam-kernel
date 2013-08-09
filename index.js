@@ -104,6 +104,8 @@ function MWC(config) {
    * @name mwc.extendModel
    * @description
    * Perform dependency injection of mongoose models to mwc.model and request.model.
+   * When you call `extendModel(modelName,function(mongoose, config){...})` you get all the environment created after calling
+   * `extendCore(function(core){...})`.
    * @param {string} modelName - field name, "Users" is reserved field name!
    * @param {function} modelFunction - function(mongoose, config) - the first argument is mongoose object, the second one is the
    * mwc.config object
