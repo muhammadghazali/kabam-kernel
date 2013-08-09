@@ -338,7 +338,26 @@ module.exports = exports = function (mwc) {
     this.find({'roles': [role]}, callback);
   };
 
-
+  /**
+   * @ngdoc method
+   * @name processOAuthProfile
+   * @methodOf mwc.model.Users
+   * @param {string} email
+   * @param {function} done
+   * @description
+   * For some oauth providers, like google, who returns email in user's profile, we can use this email for preliminary
+   * registration of user. He has email verified, but profile is not complete, because it do not have username and password
+   * If user with such email exists in database, he is authorized
+   * @example
+   * ```javascript
+   *
+   * mwc.model.Users.processOAuthProfile('someEmail@somedomain.com',function(err,user){
+   *   assert.equal(true,user.emailVerified);
+   *   assert.equal(false,user.profileComplete);
+   *   assert.equal('someEmail@somedomain.com',user.email);
+   * });
+   * ```
+   */
   UserSchema.statics.processOAuthProfile = function(email,done){
     var Users=this;
     if (email) {
@@ -366,7 +385,18 @@ module.exports = exports = function (mwc) {
       return done(new Error('There is something strange instead of user profile'));
     }
   };
-  //signup new user by username, email, password,
+  /**
+   * @ngdoc method
+   * @name signUp
+   * @methodOf mwc.model.Users
+   * @param {string} username
+   * @param {string}  email
+   * @param {string}  password
+   * @param {function}  callback
+   * @desription
+   * signups new user by username, email, password, fires callback with first argument of error and the second one
+   * of user signed it
+   */
   UserSchema.statics.signUp = function(username,email,password,callback){
     this.create({
       'username':username,
@@ -392,8 +422,16 @@ module.exports = exports = function (mwc) {
     });
   };
 
-  //signup new user by email only - for example, when he sign in by google, facebook and other oauth providers
-  //account is set as uncompleted!
+  /**
+   * @ngdoc method
+   * @name signUpByEmailOnly
+   * @methodOf mwc.model.Users
+   * @param {string}  email
+   * @param {function}  callback
+   * @description
+   * signup new user by email only - for example, when he sign in by google and other oauth providers with email present
+   * account is set as uncompleted!
+   */
   UserSchema.statics.signUpByEmailOnly = function (email, callback) {
     this.create({
       'email': email,
@@ -416,6 +454,8 @@ module.exports = exports = function (mwc) {
       }
     });
   };
+
+
   //complete account
   UserSchema.methods.completeProfile = function(username,password,callback){
     if(typeof this.username === 'undefined' && this.profileComplete === false){
