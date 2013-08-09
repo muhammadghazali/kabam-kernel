@@ -27,8 +27,10 @@ that can be easily extended by 6 mixin type functions.
 
 0. `mwcCore(configObj)` - create application object using [configuration object](https://github.com/mywebclass/mwc_kernel/blob/master/example/config.json) specified.
 
-1. `extendCore('fieldName',function(config){...})` or `extendCore('fieldName', 'someValue')` - extend object created, including expressJS application
-and some other modules. You can call this function multiple times
+1. `extendCore('fieldName',function(config){...},'nameSpaceName')` or `extendCore('fieldName', 'someValue')` - extend object created, including expressJS application
+and some other modules. You can call this function multiple times. Later this field/method can be called by `mwc.nameSpaceName.fieldName`. `nameSpaceName`
+can be ommited, default value is `shared`
+
 
 2. `extendModel(ModelName,function(mongoose, config){...})` - extend build in mongoose models.
 
