@@ -68,7 +68,7 @@ module.exports = exports = function (mwc) {
    * @param {number} size - image size
    * @param {string} type - one of 404, mm, identicon, monsterid, wavatar, retro, blank
    * @param {string} rating - g,pg,r,x - rating of image
-   * @returns {string}
+   * @returns {string} gravatarUrl
    *
    * @example
    * ```javascript
