@@ -74,7 +74,7 @@ module.exports = exports = function (mwc) {
   });
 
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name getGravatar
    * @description
    * Returns the url to current user's gravatar
@@ -103,7 +103,7 @@ module.exports = exports = function (mwc) {
   };
 
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name verifyPassword
    * @methodOf user
    * @description
@@ -125,7 +125,7 @@ module.exports = exports = function (mwc) {
   };
 
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name setPassword
    * @methodOf user
    * @description
@@ -150,7 +150,7 @@ module.exports = exports = function (mwc) {
   };
 
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name invalidateSession
    * @methodOf user
    * @description
@@ -172,7 +172,7 @@ module.exports = exports = function (mwc) {
   };
 
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name grantRole
    * @methodOf user
    * @param {string} roleName - role/permission to grant. Every user can have manifold of roles.
@@ -197,7 +197,7 @@ module.exports = exports = function (mwc) {
     }
   };
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name hasRole
    * @methodOf user
    * @param {string} roleName - role/permission to rcheck
@@ -226,7 +226,7 @@ module.exports = exports = function (mwc) {
   };
 
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name revokeRole
    * @methodOf user
    * @param {string} roleName - role/permission to revoke.
@@ -253,7 +253,7 @@ module.exports = exports = function (mwc) {
   };
 
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name notify
    * @methodOf user
    * @description
@@ -288,7 +288,7 @@ module.exports = exports = function (mwc) {
 
   //finders
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name findOneByLoginOrEmail
    * @methodOf mwc.model.Users
    * @description
@@ -312,7 +312,7 @@ module.exports = exports = function (mwc) {
   };
 
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name findOneByApiKey
    * @methodOf mwc.model.Users
    * @description
@@ -333,7 +333,7 @@ module.exports = exports = function (mwc) {
   };
 
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name getByRole
    * @methodOf mwc.model.Users
    * @description
@@ -355,7 +355,7 @@ module.exports = exports = function (mwc) {
   };
 
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name processOAuthProfile
    * @methodOf mwc.model.Users
    * @param {string} email - email of user from oauth profile we want to process
@@ -402,7 +402,7 @@ module.exports = exports = function (mwc) {
     }
   };
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name signUp
    * @methodOf mwc.model.Users
    * @param {string} username - username for new user
@@ -439,7 +439,7 @@ module.exports = exports = function (mwc) {
   };
 
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name signUpByEmailOnly
    * @methodOf mwc.model.Users
    * @param {string}  email  - email for new user
@@ -472,7 +472,7 @@ module.exports = exports = function (mwc) {
   };
 
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name completeProfile
    * @methodOf user
    * @description
@@ -492,7 +492,7 @@ module.exports = exports = function (mwc) {
   };
 
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name saveProfile
    * @methodOf user
    * @description
@@ -509,7 +509,7 @@ module.exports = exports = function (mwc) {
 
 
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name setKeyChain
    * @methodOf user
    * @description
@@ -539,7 +539,7 @@ module.exports = exports = function (mwc) {
   };
 
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name revokeKeyChain
    * @methodOf user
    * @description
@@ -553,7 +553,7 @@ module.exports = exports = function (mwc) {
   };
 
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name findOneByKeychain
    * @methodOf mwc.model.Users
    * @description
@@ -578,7 +578,7 @@ module.exports = exports = function (mwc) {
   };
 
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name findOneByApiKeyAndVerify
    * @methodOf mwc.model.Users
    * @description
@@ -604,7 +604,7 @@ module.exports = exports = function (mwc) {
   };
 
   /**
-   * @ngdoc method
+   * @ngdoc function
    * @name findOneByApiKeyAndVerify
    * @methodOf mwc.model.Users
    * @description
