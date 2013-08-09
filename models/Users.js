@@ -471,7 +471,16 @@ module.exports = exports = function (mwc) {
   };
 
 
-  //complete account
+  /**
+   * @ngdoc method
+   * @name completeProfile
+   * @methodOf user
+   * @description
+   * Complete users profile for user created by mwc.model.users.signUpByEmailOnly
+   * @param {string} username - username to set for user instance
+   * @param {string} password - password to set for user instance
+   * @param {function} callback  - function is fired when user is saved
+   */
   UserSchema.methods.completeProfile = function(username,password,callback){
     if(typeof this.username === 'undefined' && this.profileComplete === false){
       this.username = username;
@@ -482,7 +491,16 @@ module.exports = exports = function (mwc) {
     }
   };
 
-  //user profile
+  /**
+   * @ngdoc method
+   * @name saveProfile
+   * @methodOf user
+   * @description
+   * Saves object as current users profile
+   * @param {object} profile - username to set for user instance
+   * @param {function} callback  - function is fired when user is saved
+   */
+
   UserSchema.methods.saveProfile = function(profile,callback){
     this.profile=profile;
     this.markModified('profile'); //http://mongoosejs.com/docs/schematypes.html
@@ -490,19 +508,67 @@ module.exports = exports = function (mwc) {
   };
 
 
-  //keychain - used for authorizing via oauth profiles that do not expose valid email address - github for example
+  /**
+   * @ngdoc method
+   * @name setKeyChain
+   * @methodOf user
+   * @description
+   * Grants the current user possibility to login through 3rd side oauth provider
+   * @param {string} provider - provider name
+   * @param {string} id - provider's user's id
+   * @param {function} callback  - function is fired when user is saved
+   * @example
+   * ```javascript
+   * var userEgorLetov;
+   * mwc.model.Users.findOneByLoginOrEmail('EgorLetov',function(err,user){
+   *   if(err) throw err;
+   *   userEgorLetov=user;
+   *   user.setKeyChain('paradise','with_Iuda',function(err){
+   *    mwc.model.Users.findOneByKeychain('paradise','with_Iuda',function(err,userFound){
+   *      assert.equal(userFound.username, userEgorLetov.username);
+   *    });
+   *   });
+   * });
+   *
+   * ```
+   */
   UserSchema.methods.setKeyChain = function(provider, id, callback){
     this.keychain[provider] = id;
     this.markModified('keychain'); //http://mongoosejs.com/docs/schematypes.html
     this.save(callback);
   };
 
-
+  /**
+   * @ngdoc method
+   * @name revokeKeyChain
+   * @methodOf user
+   * @description
+   * Revokes the current user possibility to login through 3rd side oauth provider
+   * @param {string} provider - provider name
+   * @param {function} callback  - function is fired when user is saved
+   */
   UserSchema.methods.revokeKeyChain = function(provider,callback){
     this.keychain[provider]=null;
     this.save(callback);
   };
 
+  /**
+   * @ngdoc method
+   * @name findOneByKeychain
+   * @methodOf mwc.model.Users
+   * @description
+   * Finds user that have keychain for this provider and this id
+   * @param {string} provider - provider name
+   * @param {string} id - provider's user's id
+   * @param {function} callback  - function is fired when user is saved
+   * @example
+   * ```javascript
+   *    mwc.model.Users.findOneByKeychain('paradise','with_Iuda',function(err,userFound){
+   *      ...
+   *    });
+   *
+   * ```
+   */
   UserSchema.statics.findOneByKeychain = function(provider,id,callback){
     var key = 'keychain.'+provider,
       needle={};
