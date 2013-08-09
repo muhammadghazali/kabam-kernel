@@ -246,8 +246,8 @@ module.exports = exports = function (mwc) {
    * @param {string} [channel] - optional, channel name, default is 'all'
    * @param {string/object} message - something that the notify handler understands
    * @example
-   *
    * ```javascript
+   *
    *     MWC.model.Users.create({'email':'test@rambler.ru'},function(err,userCreated){
    *       user.notify('email','Happy birthday'); // sending email to this user
    *     });
@@ -280,7 +280,13 @@ module.exports = exports = function (mwc) {
    * Finds one user by login or email, returns as second argument in callback, first one is error
    * @param {string} loginOrEmail
    * @param {function} callback
-
+   * @example
+   * ```javascript
+   *
+   *     MWC.model.Users.findOneByLoginOrEmail('test@rambler.ru',function(err,userCreated){
+   *       user.notify('email','Happy birthday'); // sending email to this user
+   *     });
+   * ```
    */
   UserSchema.statics.findOneByLoginOrEmail = function (loginOrEmail, callback) {
     if (/^[a-zA-Z0-9_]+$/.test(loginOrEmail)) {
@@ -292,17 +298,42 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc method
-   * @name findOneByLoginOrEmail
+   * @name findOneByApiKey
    * @methodOf mwc.model.Users
    * @description
    * Finds one user by apiKey, returns as second argument in callback, first one is error
    * @param {string} apiKey
    * @param {function} callback
+   * @example
+   * ```javascript
+   *
+   *     MWC.model.Users.findOneByApiKey('apiKey',function(err,userCreated){
+   *       user.notify('email','Happy birthday'); // sending email to this user
+   *     });
+   * ```
    */
   UserSchema.statics.findOneByApiKey = function (apiKey, callback) {
     this.findOne({'apiKey': apiKey}, callback);
   };
 
+  /**
+   * @ngdoc method
+   * @name getByRole
+   * @methodOf mwc.model.Users
+   * @description
+   * Finds users who have desired role
+   * @param {string} role
+   * @param {function} callback
+   * @example
+   * ```javascript
+   *
+   *     MWC.model.Users.getByRole('admin',function(err,users){
+   *       users.map(function(user){
+   *         user.notify('email','Happy birthday'); // sending email to this user
+   *       })
+   *     });
+   * ```
+   */
   UserSchema.statics.getByRole = function (role, callback) {
     this.find({'roles': [role]}, callback);
   };
