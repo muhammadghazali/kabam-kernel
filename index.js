@@ -364,7 +364,10 @@ function MWC(config) {
    * @ngdoc function
    * @name mwc.extendRoutes
    * @description
-   * Adds new routes to expressJS application
+   * Adds application routes and verbs for them.
+   * ExpressJS object of every routes request have functions of `request.mwcEmit`,
+   * `request.model`,`request.model.User`, `request.emitMWC`, custom models,`request.redisClient`, and `request.user` provided
+   * by [passportjs](http://passportjs.org) middleware.
    * @param {function} settingsFunction Settings Function
    * @example
    * ```javascript
