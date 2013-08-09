@@ -9,7 +9,7 @@ var EventEmitter = require('events').EventEmitter,
 
 /**
  * @ngdoc function
- * @name MWC
+ * @name mwc
  * @constructor
  * @param {object} config - config object
  */
@@ -74,7 +74,7 @@ function MWC(config) {
    *     console.log(mwc.inThatNamespace.a); //333
    *
    *  ```
-   * @returns {MWC} mwc object
+   * @returns {mwc} mwc object
    */
   this.extendCore = function (fieldName, factoryFunctionOrObject,namespace) {
     if (prepared) {
@@ -117,7 +117,7 @@ function MWC(config) {
    *     });
    *
    * ```
-   * @returns {MWC} mwc object
+   * @returns {mwc} mwc object
    */
   this.extendModel = function (modelName, modelFunction) {
     if (prepared) {
@@ -142,7 +142,7 @@ function MWC(config) {
    * @description
    * Loads new passportjs strategies from object
    * @param {object} strategyObject Passport's strategy object
-   * @returns {MWC} mwc object
+   * @returns {mwc} mwc object
    * @url https://github.com/mywebclass/mwc_kernel/blob/master/lib/strategies/github.js
    */
   this.extendStrategy = function(strategyObject){
@@ -175,7 +175,7 @@ function MWC(config) {
    *
    * ```
    *
-   * @returns {MWC} mwc object
+   * @returns {mwc} mwc object
    */
   this.extendApp = function (environment, settingsFunction) {
     if (prepared) {
@@ -237,7 +237,7 @@ function MWC(config) {
    *     }
    *
    * ```
-   * @returns {MWC} mwc object
+   * @returns {mwc} mwc object
    */
   this.extendMiddleware = function (environment, path, settingsFunction) {
     if (prepared) {
@@ -319,7 +319,7 @@ function MWC(config) {
    *       });
    *     }
    * ```
-   * @returns {MWC} mwc object
+   * @returns {mwc} mwc object
    */
   this.extendRoutes = function (settingsFunction) {
     if (prepared) {
@@ -524,7 +524,7 @@ MWC.prototype.validateConfig = function(config) {
  *      mwc.extendListeners('someEvent', console.log);
  *
  * ```
- * @returns {MWC} mwc object
+ * @returns {mwc} mwc object
  */
 MWC.prototype.extendListeners = function (eventName, eventHandlerFunction) {
     if (typeof eventName === "string" && typeof eventHandlerFunction === "function") {
