@@ -336,7 +336,7 @@ function MWC(config) {
 
   /**
    * @ngdoc function
-   * @name mwcKernel.usePlugin
+   * @name mwc.usePlugin
    * @description
    * Loads plugin from object or npm module
    * @param {object/string} pluginObjectOrName - config object or plugin name to get by require
@@ -428,9 +428,9 @@ function MWC(config) {
 
   /**
    * @ngdoc function
-   * @name mwcKernel.start
+   * @name mwc.start
    * @description
-   * Start mwcKernel application
+   * Start mwc application
    * @param {object} howExactly - config object
    * Values:
    *
@@ -604,7 +604,7 @@ MWC.prototype.createRedisClient = function() {
 
 /**
  * @ngdoc function
- * @name mwcKernel.create
+ * @name mwc.create
  * @description
  * Create MWC object instance (factory)
  * @param {object} config - config object
