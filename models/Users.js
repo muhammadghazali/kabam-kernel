@@ -23,7 +23,7 @@ module.exports = exports = function (mwc) {
   var Schema = mongoose.Schema;
 
   /**
-   * @ngdoc object
+   * @ngdoc function
    * @name User
    * @description
    * Mongoose object to represent single user from mongoose users collection
@@ -40,6 +40,7 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc function
    * @name mwc.model.Users
+   * @methodOf mwc.model
    * @description
    * Mongoose object to manipulate users collection
    */
@@ -114,7 +115,6 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
-   * @methodOf User
    * @name User.verifyPassword
    * @description
    * Returns true, if password is correct for this user, or false, if it is not correct
@@ -136,7 +136,6 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
-   * @methodOf User
    * @name User.setPassword
    * @description
    * Sets new password for user, calls callback when user is saved
@@ -161,7 +160,6 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
-   * @methodOf User
    * @name User.invalidateSession
    * @description
    * Invalidates the apiKey, which results in immediate logoff for this user, and invalidating the access tokens.
@@ -183,7 +181,6 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
-   * @methodOf User
    * @name User.grantRole
    * @param {string} roleName - role/permission to grant. Every user can have manifold of roles.
    * @description
@@ -208,7 +205,6 @@ module.exports = exports = function (mwc) {
   };
   /**
    * @ngdoc function
-   * @methodOf User
    * @name User.hasRole
    * @param {string} roleName - role/permission to rcheck
    * @description
@@ -237,7 +233,6 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
-   * @methodOf User
    * @name User.revokeRole
    * @param {string} roleName - role/permission to revoke.
    * @description
@@ -264,7 +259,6 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
-   * @methodOf User
    * @name User.notify
    * @description
    * Notifies the current user, using the mwc event emitting system
@@ -477,7 +471,6 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
-   * @methodOf User
    * @name User.completeProfile
    * @description
    * Complete users profile for user created by mwc.model.users.signUpByEmailOnly
@@ -497,7 +490,6 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
-   * @methodOf User
    * @name User.saveProfile
    * @description
    * Saves object as current users profile
@@ -514,7 +506,6 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
-   * @methodOf User
    * @name User.setKeyChain
    * @description
    * Grants the current user possibility to login through 3rd side oauth provider
@@ -544,7 +535,6 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
-   * @methodOf User
    * @name User.revokeKeyChain
    * @description
    * Revokes the current user possibility to login through 3rd side oauth provider
