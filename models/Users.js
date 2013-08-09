@@ -58,21 +58,57 @@ module.exports = exports = function (mwc) {
   });
 
 
+  /**
+   * @ngdoc method
+   * @name getGravatar
+   * @description
+   * Returns the url to current user's gravatar
+   * @url https://er.gravatar.com/site/implement/images/
+   * @methodOf user
+   * @param {number} size - image size
+   * @param {string} type - one of 404, mm, identicon, monsterid, wavatar, retro, blank
+   * @param {string} rating - g,pg,r,x - rating of image
+   * @returns {string}
+   *
+   * @example
+   * ```javascript
+   *
+   *   MWC.model.Users.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *     console.log(user.getGravatar(140));
+   * // -> https://secure.gravatar.com/avatar/02ba513b62ef9f2f7798b9bac1ccf822?s=140
+   *   });
+   *
+   * ```
+   */
   UserSchema.methods.getGravatar = function (size, type, rating) {
-    //https://ru.gravatar.com/site/implement/images/
-    //s - image size
-    //d - 404,mm,identicon,monsterid,wavatar,retro,blank - style
-    //r - g,pg,r,x - rating
     size = size?size:300;
     type = type?type:'wavatar';
     rating = rating?rating:'g';
     return 'https://secure.gravatar.com/avatar/' + md5(this.email.toLowerCase().trim()) + '.jpg?s=' + size + '&d=' + type + '&r=' + rating;
   };
 
+  /**
+   * @ngdoc method
+   * @name verifyPassword
+   * @methodOf user
+   * @description
+   * Returns true, if password is correct for this user, or false, if it is not correct
+   * @param {string} password
+   * @returns {boolean}
+   */
   UserSchema.methods.verifyPassword = function (password) {
     return (sha512('' + this.salt + password) === this.password);
   };
 
+  /**
+   * @ngdoc method
+   * @name setPassword
+   * @methodOf user
+   * @description
+   * Sets new password for user, calls callback when user is saved
+   * @param {string} newPassword
+   * @param {function} callback
+   */
   UserSchema.methods.setPassword = function (newPassword, callback) {
     var salt = sha512(rack());
     this.salt = salt;
