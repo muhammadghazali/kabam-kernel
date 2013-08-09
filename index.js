@@ -199,9 +199,17 @@ function MWC(config) {
    * @ngdoc function
    * @name mwc.extendApp
    * @description
-   * Set app parameters - http://expressjs.com/api.html#express - view engine, variables, locals
+   * Set app parameters - view engine, variables, locals
+   * When you call `extendApp(function(core){...})`, you can set global application parameters, for example
+   * template [engines](http://expressjs.com/api.html#app.engine), [locals](http://expressjs.com/api.html#app.locals)
+   * and [other](http://expressjs.com/api.html#app-settings) settings.
+   * In code it is called [after setting logging middleware and port](https://github.com/mywebclass/mwc_kernel/blob/master/lib/appManager.js#84).
+   * You can set any application parameter you want, you have full MWC core internals at your disposal
+   * `mwc.emit`,`mwc.on`, `mwc.redisClient`, and `mwc.model.User` and custom models from calling `extendModel`.
+   *
    * @param {string/array/undefined} environment - application environment to use,
    * can be something like 'development', ['development','staging'] or null
+   *
    * @param {function} settingsFunction - function(core){....}
    * @example
    *
