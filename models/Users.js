@@ -195,6 +195,7 @@ module.exports = exports = function (mwc) {
           if(err1){
             callback(err1);
           } else {
+            userCreated.notify('email',{'subject':'Verify your email account!','template':'signin'})
             callback(null,userCreated);
           }
         });
