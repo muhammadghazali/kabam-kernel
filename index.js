@@ -33,7 +33,6 @@ function MWC(config) {
   var _extendCoreFunctions = [],//privileged field
     _extendAppFunctions = [],
     _additionalModels = [],
-    _listeners = {},
     _additionalStrategies = [],
     prepared = false,
     _extendMiddlewareFunctions = [],
@@ -51,7 +50,7 @@ function MWC(config) {
    * @param {string} fieldName - field name
    * @param {function/object/string/number/array} factoryFunctionOrObject - function(config),
    * what is called to return value assigned to fieldName  config is the mwc.config object, or just a object, to be setted as mwc public field
-   * @param namespace - namespace to bind this field. default is 'shared;
+   * @param {string} namespace - namespace to bind this field. default is 'shared;
    * @example
    * ```javascript
    *
@@ -133,37 +132,6 @@ function MWC(config) {
         } else {
           throw new Error('MWC.extendModel requires arguments of string of "modelName" and function(core){...}');
         }
-      }
-    }
-  };
-
-  /**
-   * @ngdoc function
-   * @name mwc.extendListeners
-   * @param {string} eventName Name of the event
-   * @param {function} eventHandlerFunction Function to handle the event
-   * @description - add custom event handler for mwc
-   * @example
-   * ``` javascript
-   *
-   *      mwc.extendListeners('someEvent', console.log);
-   *
-   * ```
-   * @returns {MWC} mwc object
-   */
-  this.extendListeners = function (eventName, eventHandlerFunction) {
-    if (prepared) {
-      throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
-    } else {
-      if (typeof eventName === "string" && typeof eventHandlerFunction === "function") {
-        if (typeof _listeners[eventName] === "undefined") {
-          _listeners[eventName] = eventHandlerFunction;
-          return this;
-        } else {
-          throw new Error('Unable set listener for event ' + eventName + '! Event name is occupied!');
-        }
-      } else {
-        throw new Error('#MWC.extendListeners(eventName,eventHandlerFunction) have wrong arguments!');
       }
     }
   };
@@ -501,12 +469,6 @@ function MWC(config) {
     //initialize expressJS application
    thisMWC.app = appManager(thisMWC, _extendAppFunctions, _additionalStrategies, _extendMiddlewareFunctions, _extendRoutesFunctions);
 
-    for (var eventName in _listeners) {
-      if (_listeners.hasOwnProperty(eventName)) {
-        thisMWC.on(eventName, _listeners[eventName]);
-      }
-    }
-
     if (howExactly) {
       if (howExactly === 'app') {
         return thisMWC;
@@ -547,6 +509,30 @@ MWC.prototype.validateConfig = function(config) {
   redisManager.validateConfig(config.redis);
 
   return true;
+};
+
+
+/**
+ * @ngdoc function
+ * @name mwc.extendListeners
+ * @param {string} eventName Name of the event
+ * @param {function} eventHandlerFunction Function to handle the event
+ * @description - add custom event handler for mwc
+ * @example
+ * ``` javascript
+ *
+ *      mwc.extendListeners('someEvent', console.log);
+ *
+ * ```
+ * @returns {MWC} mwc object
+ */
+MWC.prototype.extendListeners = function (eventName, eventHandlerFunction) {
+    if (typeof eventName === "string" && typeof eventHandlerFunction === "function") {
+      this.on(eventName,eventHandlerFunction);
+      return this;
+    } else {
+      throw new Error('#MWC.extendListeners(eventName,eventHandlerFunction) have wrong arguments!');
+    }
 };
 
 //legacy support, outdated
