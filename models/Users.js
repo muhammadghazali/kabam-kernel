@@ -470,7 +470,6 @@ module.exports = exports = function (mwc) {
     });
   };
 
-
   /**
    * @ngdoc method
    * @name completeProfile
@@ -610,7 +609,7 @@ module.exports = exports = function (mwc) {
    * @description
    * This function is used for reseting users password by link in email with submitting form later
    * @param {string} apiKey - apiKey to use
-   * @param {string} password- new password to set
+   * @param {string} password - new password to set
    * @param {function} callback  - function is fired when user is saved
    */
   UserSchema.statics.findOneByApiKeyAndResetPassword = function(apiKey, password, callback){
