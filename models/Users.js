@@ -95,6 +95,15 @@ module.exports = exports = function (mwc) {
    * Returns true, if password is correct for this user, or false, if it is not correct
    * @param {string} password
    * @returns {boolean}
+   *
+   * @example
+   * ```javascript
+   *
+   *   MWC.model.Users.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *     console.log(user.verifyPassword('someKey'));
+   *   });
+   *
+   * ```
    */
   UserSchema.methods.verifyPassword = function (password) {
     return (sha512('' + this.salt + password) === this.password);
@@ -108,6 +117,14 @@ module.exports = exports = function (mwc) {
    * Sets new password for user, calls callback when user is saved
    * @param {string} newPassword
    * @param {function} callback
+   * @example
+   * ```javascript
+   *
+   *   MWC.model.Users.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *     user.setPassword('someKey', function(err){if err throw err;});
+   *   });
+   *
+   * ```
    */
   UserSchema.methods.setPassword = function (newPassword, callback) {
     var salt = sha512(rack());
@@ -117,21 +134,74 @@ module.exports = exports = function (mwc) {
     return;
   };
 
+  /**
+   * @ngdoc method
+   * @name invalidateSession
+   * @methodOf user
+   * @description
+   * Invalidates the apiKey, which results in immediate logoff for this user, and invalidating the access tokens.
+   * @param {function} callback
+   * @example
+   * ```javascript
+   *
+   *   MWC.model.Users.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *     user.invalidateSession(function(err){if err throw err;});
+   *   });
+   *
+   * ```
+   */
   UserSchema.methods.invalidateSession = function (callback) {
     this.apiKey = sha512(rack());
     this.save(callback);
     return;
   };
 
-  //role managmenet
+  /**
+   * @ngdoc method
+   * @name grantRole
+   * @methodOf user
+   * @param {string} roleName
+   * @description
+   * Grants role to user, fires callback on save
+   * @param {function} callback
+   * @example
+   * ```javascript
+   *
+   *   MWC.model.Users.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *     user.grantRole('rulerOfTheWorld', function(err){if err throw err;});
+   *   });
+   *
+   * ```
+   */
   UserSchema.methods.grantRole = function (roleName, callback) {
     if (this.roles.indexOf(roleName) === -1) {
       this.roles.push(roleName);
       this.save(callback);
     } else {
-      callback(new Error('User "' + this.username + '" already have role of "' + roleName + '"'));
+      callback(null);
     }
   };
+  /**
+   * @ngdoc method
+   * @name hasRole
+   * @methodOf user
+   * @param {string} roleName
+   * @description
+   * Returns true, if user has a role, returns false, if user has not have the role
+   * @returns {boolean}
+   * @example
+   * ```javascript
+   *
+   *   MWC.model.Users.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *     if(user.hasRole('rulerOfTheWorld')){
+   *       ...
+   *     } else {
+   *       ...
+   *     }
+   *   });
+   *
+   * ```
+   */
   UserSchema.methods.hasRole = function (roleName) {
     if(this.root){
       return true;
@@ -139,17 +209,50 @@ module.exports = exports = function (mwc) {
       return (this.roles.indexOf(roleName) !== -1);
     }
   };
+
+  /**
+   * @ngdoc method
+   * @name revokeRole
+   * @methodOf user
+   * @param {string} roleName
+   * @description
+   * Revokes role from user, fires callback on save
+   * @param {function} callback
+   * @example
+   * ```javascript
+   *
+   *   MWC.model.Users.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *     user.revokeRole('rulerOfTheWorld', function(err){if err throw err;});
+   *   });
+   *
+   * ```
+   */
   UserSchema.methods.revokeRole = function (roleName, callback) {
     var roleIndex = this.roles.indexOf(roleName);
     if (roleIndex === -1) {
-      callback(new Error('User "' + this.username + '" do not have role of "' + roleName + '"'));
+      callback(null);
     } else {
       this.roles.splice(roleIndex, 1);
       this.save(callback);
     }
   };
 
-  //notify
+  /**
+   * @ngdoc method
+   * @name notify
+   * @methodOf user
+   * @description
+   * Notifies the current user, using the mwc event emitting system
+   * @param {string} [channel] - optional, channel name, default is 'all'
+   * @param {string/object} message - something that the notify handler understands
+   * @example
+   *
+   * ```javascript
+   *     MWC.model.Users.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *       user.notify('email','Happy birthday'); // sending email to this user
+   *     });
+   * ```
+   */
   UserSchema.methods.notify=function(channel,message){
     var channelToUse,messageToSend;
     if(typeof message === 'undefined' && (typeof channel === 'object' || typeof channel === 'string')){
@@ -169,6 +272,16 @@ module.exports = exports = function (mwc) {
   };
 
   //finders
+  /**
+   * @ngdoc method
+   * @name findOneByLoginOrEmail
+   * @methodOf mwc.model.Users
+   * @description
+   * Finds one user by login or email, returns as second argument in callback, first one is error
+   * @param {string} loginOrEmail
+   * @param {function} callback
+
+   */
   UserSchema.statics.findOneByLoginOrEmail = function (loginOrEmail, callback) {
     if (/^[a-zA-Z0-9_]+$/.test(loginOrEmail)) {
       this.findOne({'username': loginOrEmail}, callback);
@@ -177,6 +290,15 @@ module.exports = exports = function (mwc) {
     }
   };
 
+  /**
+   * @ngdoc method
+   * @name findOneByLoginOrEmail
+   * @methodOf mwc.model.Users
+   * @description
+   * Finds one user by apiKey, returns as second argument in callback, first one is error
+   * @param {string} apiKey
+   * @param {function} callback
+   */
   UserSchema.statics.findOneByApiKey = function (apiKey, callback) {
     this.findOne({'apiKey': apiKey}, callback);
   };
