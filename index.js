@@ -270,7 +270,15 @@ function MWC(config) {
    * @ngdoc function
    * @name mwc.extendMiddleware
    * @description
-   * Adds  new middleware to expressJS application
+   * Adds new middleware to expressJS application
+   * They are [applied]((https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L283) after
+   * [setting default exposed internals middleware](https://github.com/mywebclass/mwc_kernel/blob/master/lib/appManager.js#L114) and before
+   * [setting router middleware](https://github.com/mywebclass/mwc_kernel/blob/master/lib/appManager.js#L142).
+
+   * So, you have the full power of core internals - (`emit`,`on`), `redisClient`, `model.User`
+   * and exposed internals middleware - where expressJS object of request have functions of `request.mwcEmit`,
+   * `request.model`,`request.model.User`, `request.emitMWC`, custom models,`request.redisClient`, and `request.user` provided
+   * by passportjs middleware.
    * @param {string/array/undefined} environment - application enviroment to use,
    * can be something like 'development', ['development','staging'] or null (for ALL enviroments)
    * @param {string/undefined} path path to mount middleware - default is /
