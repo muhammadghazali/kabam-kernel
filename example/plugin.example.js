@@ -88,7 +88,7 @@ exports.extendMiddleware = [
           response.send(500, 'There is not enough cats called "Grumpy" to run this application!');
         }
       });
-    }
+    };
   },
   function (core) {
     return function (request, response, next) {
@@ -100,7 +100,7 @@ exports.extendMiddleware = [
           response.send(500, 'There is not enough Dogs called "Strelka" to run this application!');
         }
       });
-    }
+    };
   }
 ];
 

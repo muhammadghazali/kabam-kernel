@@ -76,19 +76,21 @@ function MWC(config) {
    *  ```
    * @returns {mwc} mwc object
    */
-  this.extendCore = function (fieldName, factoryFunctionOrObject,namespace) {
+  this.extendCore = function (fieldName, factoryFunctionOrObject, namespace) {
     if (prepared) {
       throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
-      if(!namespace) namespace='shared';
+      if (!namespace) {
+        namespace = 'shared';
+      }
 
-      if (typeof fieldName === 'string' && typeof factoryFunctionOrObject !=='undefined') {
+      if (typeof fieldName === 'string' && typeof factoryFunctionOrObject !== 'undefined') {
         if (typeof factoryFunctionOrObject === 'function') {
-          _extendCoreFunctions.push({'field': fieldName, 'factoryFunction': factoryFunctionOrObject,'namespace':namespace});
+          _extendCoreFunctions.push({'field': fieldName, 'factoryFunction': factoryFunctionOrObject, 'namespace': namespace});
         } else {
           _extendCoreFunctions.push({'field': fieldName, 'factoryFunction': function () {
             return factoryFunctionOrObject;
-          },'namespace':namespace});
+          }, 'namespace': namespace});
         }
         return this;
       } else {
@@ -103,7 +105,7 @@ function MWC(config) {
    * @description
    * Perform dependency injection of mongoose models to mwc.model and request.model.
    * @param {string} modelName - field name, "Users" is reserved field name!
-   * @param {object} modelFunction(mongoose, config) - the first argument is mongoose object, the second one is the
+   * @param {function} modelFunction - function(mongoose, config) - the first argument is mongoose object, the second one is the
    * mwc.config object
    * @example
    * ```javascript
@@ -144,14 +146,50 @@ function MWC(config) {
    * @param {object} strategyObject Passport's strategy object
    * @returns {mwc} mwc object
    * @url https://github.com/mywebclass/mwc_kernel/blob/master/lib/strategies/github.js
+   * @example
+   * ```javascript
+   *
+   * mwc.extendStrategy({
+   * 'strategy':function (core) {
+   * return new LinkedInStrategy({
+   *    consumerKey: core.config.passport.LINKEDIN_API_KEY,
+   *    consumerSecret: core.config.passport.LINKEDIN_SECRET_KEY,
+   *    callbackURL: core.config.hostUrl + 'auth/linkedin/callback'
+   *    }, function (token, tokenSecret, profile, done) {
+   *       var email = profile.emails[0].value;
+   *      if (email) {
+   *        core.model.Users.processOAuthProfile(email,done);
+   *      } else {
+   *        return done(new Error('There is something strange instead of user profile'));
+   *      }
+   *  });
+   * },
+   * 'routes':function (passport, core) {
+   *     core.app.get('/auth/linkedin', passport.authenticate('linkedin'),
+   *        function (req, res) {
+   *
+   *     });
+   *     core.app.get('/auth/linkedin/callback', passport.authenticate('linkedin', { failureRedirect: '/' }),
+   *       function (req, res) {
+   *         res.redirect('/');
+   *       });
+   *     };
+   *  });
+   * ```
    */
-  this.extendStrategy = function(strategyObject){
+  this.extendStrategy = function (strategyObject) {
     if (prepared) {
       throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
-      if(typeof strategyObject !== 'object') throw new Error('mwc.extendStrategies requires strategyObject to be an object');
-      if(typeof strategyObject.strategy !== 'function') throw new Error('mwc.extendStrategies requires strategyObject.strategy to be a proper function!');
-      if(typeof strategyObject.routes !== 'function') throw new Error('mwc.extendStrategies requires strategyObject.routes to be a proper function!');
+      if (typeof strategyObject !== 'object') {
+        throw new Error('mwc.extendStrategies requires strategyObject to be an object');
+      }
+      if (typeof strategyObject.strategy !== 'function') {
+        throw new Error('mwc.extendStrategies requires strategyObject.strategy to be a proper function!');
+      }
+      if (typeof strategyObject.routes !== 'function') {
+        throw new Error('mwc.extendStrategies requires strategyObject.routes to be a proper function!');
+      }
       _additionalStrategies.push(strategyObject);
       return this;
     }
@@ -162,7 +200,7 @@ function MWC(config) {
    * @name mwc.extendApp
    * @description
    * Set app parameters - http://expressjs.com/api.html#express - view engine, variables, locals
-   * @param {string /array/undefined} environment - application environment to use,
+   * @param {string/array/undefined} environment - application environment to use,
    * can be something like 'development', ['development','staging'] or null
    * @param {function} settingsFunction - function(core){....}
    * @example
@@ -192,8 +230,8 @@ function MWC(config) {
       }
       if (environment instanceof Array) {
         environmentToUse = environment;
-        for (var i = 0; i < environment.length;i++){
-          if(typeof environment[i] !== 'string'){
+        for (var i = 0; i < environment.length; i++) {
+          if (typeof environment[i] !== 'string') {
             throw new Error('#MWC.extendApp requires environment name to be a string!');
           }
         }
@@ -259,14 +297,14 @@ function MWC(config) {
         }
         if (environment instanceof Array) {
           environmentToUse = environment;
-          for (var i = 0; i < environment.length;i++){
-            if(typeof environment[i] !== 'string'){
+          for (var i = 0; i < environment.length; i++) {
+            if (typeof environment[i] !== 'string') {
               throw new Error('#MWC.extendMiddleware requires environment name to be a string!');
             }
           }
         }
         if (typeof path === 'string') {
-          if(/^\//.test(path)){
+          if (/^\//.test(path)) {
             pathToUse = path;
             if (typeof settingsFunction === 'function') {
               settingsFunctionToUse = settingsFunction;
@@ -346,83 +384,83 @@ function MWC(config) {
     if (prepared) {
       throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
-    var pluginToBeInstalled = {};
-    if (typeof pluginObjectOrName === 'string') {
-      pluginToBeInstalled = require('' + pluginObjectOrName);
-    } else {
-      pluginToBeInstalled = pluginObjectOrName;
-    }
-
-    if(typeof pluginToBeInstalled.name === 'string' && /^[a-z0-9_\-]+$/.test(pluginToBeInstalled.name) && pluginObjectOrName.name === 'shared'){
-      throw new Error('Wrong plugin syntax. Plugin name is missed or have wrong syntax!');
-    }
-
-    if (typeof pluginToBeInstalled.extendCore === 'object') {
-      for (var field in pluginToBeInstalled.extendCore){
-        if(pluginToBeInstalled.extendCore.hasOwnProperty(field)){
-          this.extendCore(field, pluginToBeInstalled.extendCore[field], pluginToBeInstalled.name);
-        }
-      }
-    }
-    if (typeof pluginToBeInstalled.extendModel === 'object') {
-      for (var x in pluginToBeInstalled.extendModel) {
-        if(pluginToBeInstalled.extendModel.hasOwnProperty(x)){
-          this.extendModel(x, pluginToBeInstalled.extendModel[x]);
-        }
-      }
-    }
-
-    if(typeof pluginToBeInstalled.extendStrategy === 'object'){
-      if(typeof pluginToBeInstalled.extendStrategy.strategy === 'function' && typeof pluginToBeInstalled.extendStrategy.routes === 'function'){
-        this.extendStrategy(pluginToBeInstalled.extendStrategy);
+      var pluginToBeInstalled = {};
+      if (typeof pluginObjectOrName === 'string') {
+        pluginToBeInstalled = require('' + pluginObjectOrName);
       } else {
-        throw new Error('extendStrategy of plugin has wrong syntax! strategy and routes have to be functions!');
+        pluginToBeInstalled = pluginObjectOrName;
       }
-    }
 
-    if(pluginToBeInstalled.setAppParameters && typeof pluginToBeInstalled.extendApp === 'undefined'){
-      console.log('Plugin is outdated! Use extendApp instead of setAppParameters with same syntax!');
-      pluginToBeInstalled.extendApp=pluginToBeInstalled.setAppParameters;
-    }
+      if (typeof pluginToBeInstalled.name === 'string' && /^[a-z0-9_\-]+$/.test(pluginToBeInstalled.name) && pluginObjectOrName.name === 'shared') {
+        throw new Error('Wrong plugin syntax. Plugin name is missed or have wrong syntax!');
+      }
 
-    if (typeof pluginToBeInstalled.extendApp === 'function') {
-      this.extendApp(pluginToBeInstalled.extendApp);
-    }
+      if (typeof pluginToBeInstalled.extendCore === 'object') {
+        for (var field in pluginToBeInstalled.extendCore) {
+          if (pluginToBeInstalled.extendCore.hasOwnProperty(field)) {
+            this.extendCore(field, pluginToBeInstalled.extendCore[field], pluginToBeInstalled.name);
+          }
+        }
+      }
+      if (typeof pluginToBeInstalled.extendModel === 'object') {
+        for (var x in pluginToBeInstalled.extendModel) {
+          if (pluginToBeInstalled.extendModel.hasOwnProperty(x)) {
+            this.extendModel(x, pluginToBeInstalled.extendModel[x]);
+          }
+        }
+      }
 
-    if(pluginToBeInstalled.setAppMiddlewares && typeof pluginToBeInstalled.extendMiddleware === 'undefined'){
-      console.log('Plugin is outdated! Use extendMiddleware instead of setAppMiddlewares with same syntax!');
-      pluginToBeInstalled.extendMiddleware=pluginToBeInstalled.setAppMiddlewares;
-    }
-    if(typeof pluginToBeInstalled.extendMiddleware === 'function') {
-      this.extendMiddleware(pluginToBeInstalled.extendMiddleware);
-    }
-    if(pluginToBeInstalled.extendMiddleware instanceof Array) {
-      for(var i = 0; i<pluginToBeInstalled.extendMiddleware.length; i++){
-        if(typeof pluginToBeInstalled.extendMiddleware[i] === 'function') {
-          this.extendMiddleware(pluginToBeInstalled.extendMiddleware[i]);
+      if (typeof pluginToBeInstalled.extendStrategy === 'object') {
+        if (typeof pluginToBeInstalled.extendStrategy.strategy === 'function' && typeof pluginToBeInstalled.extendStrategy.routes === 'function') {
+          this.extendStrategy(pluginToBeInstalled.extendStrategy);
         } else {
-          throw new Error('plugin.extendMiddleware['+i+'] is not a function!');
+          throw new Error('extendStrategy of plugin has wrong syntax! strategy and routes have to be functions!');
         }
       }
-    }
-    if(pluginToBeInstalled.extendAppRoutes && typeof pluginToBeInstalled.extendRoutes === 'undefined'){
-      console.log('Plugin is outdated! Use extendMiddleware instead of setAppMiddlewares with same syntax!');
-      pluginToBeInstalled.extendRoutes=pluginToBeInstalled.extendAppRoutes;
-    }
 
-    if (typeof pluginToBeInstalled.extendRoutes === 'function') {
-      this.extendRoutes(pluginToBeInstalled.extendRoutes);
-    }
+      if (pluginToBeInstalled.setAppParameters && typeof pluginToBeInstalled.extendApp === 'undefined') {
+        console.log('Plugin is outdated! Use extendApp instead of setAppParameters with same syntax!');
+        pluginToBeInstalled.extendApp = pluginToBeInstalled.setAppParameters;
+      }
 
-    if(typeof pluginToBeInstalled.extendListeners === 'object'){
-      for (var x in pluginToBeInstalled.extendListeners) {
-        if(pluginToBeInstalled.extendListeners.hasOwnProperty(x)){
-          this.extendListeners(x, pluginToBeInstalled.extendListeners[x]);
+      if (typeof pluginToBeInstalled.extendApp === 'function') {
+        this.extendApp(pluginToBeInstalled.extendApp);
+      }
+
+      if (pluginToBeInstalled.setAppMiddlewares && typeof pluginToBeInstalled.extendMiddleware === 'undefined') {
+        console.log('Plugin is outdated! Use extendMiddleware instead of setAppMiddlewares with same syntax!');
+        pluginToBeInstalled.extendMiddleware = pluginToBeInstalled.setAppMiddlewares;
+      }
+      if (typeof pluginToBeInstalled.extendMiddleware === 'function') {
+        this.extendMiddleware(pluginToBeInstalled.extendMiddleware);
+      }
+      if (pluginToBeInstalled.extendMiddleware instanceof Array) {
+        for (var i = 0; i < pluginToBeInstalled.extendMiddleware.length; i++) {
+          if (typeof pluginToBeInstalled.extendMiddleware[i] === 'function') {
+            this.extendMiddleware(pluginToBeInstalled.extendMiddleware[i]);
+          } else {
+            throw new Error('plugin.extendMiddleware[' + i + '] is not a function!');
+          }
         }
       }
-    }
+      if (pluginToBeInstalled.extendAppRoutes && typeof pluginToBeInstalled.extendRoutes === 'undefined') {
+        console.log('Plugin is outdated! Use extendMiddleware instead of setAppMiddlewares with same syntax!');
+        pluginToBeInstalled.extendRoutes = pluginToBeInstalled.extendAppRoutes;
+      }
 
-    return this;
+      if (typeof pluginToBeInstalled.extendRoutes === 'function') {
+        this.extendRoutes(pluginToBeInstalled.extendRoutes);
+      }
+
+      if (typeof pluginToBeInstalled.extendListeners === 'object') {
+        for (var x in pluginToBeInstalled.extendListeners) {
+          if (pluginToBeInstalled.extendListeners.hasOwnProperty(x)) {
+            this.extendListeners(x, pluginToBeInstalled.extendListeners[x]);
+          }
+        }
+      }
+
+      return this;
     }
   };
 
@@ -467,7 +505,7 @@ function MWC(config) {
     });
 
     //initialize expressJS application
-   thisMWC.app = appManager(thisMWC, _extendAppFunctions, _additionalStrategies, _extendMiddlewareFunctions, _extendRoutesFunctions);
+    thisMWC.app = appManager(thisMWC, _extendAppFunctions, _additionalStrategies, _extendMiddlewareFunctions, _extendRoutesFunctions);
 
     if (howExactly) {
       if (howExactly === 'app') {
@@ -483,7 +521,7 @@ function MWC(config) {
       if (howExactly instanceof http) {
         return howExactly.createServer(thisMWC.app, options);//do not forget to set this https for listening.
       }
-     throw new Error('Function MWC.listen(httpOrHttpsOrPort) accepts objects of null, "app", http, https or port\'s number as argument!');
+      throw new Error('Function MWC.listen(httpOrHttpsOrPort) accepts objects of null, "app", http, https or port\'s number as argument!');
     } else {
       this.app.listen(this.app.get('port'));//listening to default port
       return thisMWC;
@@ -493,7 +531,7 @@ function MWC(config) {
 
 util.inherits(MWC, EventEmitter);
 
-MWC.prototype.validateConfig = function(config) {
+MWC.prototype.validateConfig = function (config) {
   // General check
   if (typeof config !== 'object') {
     throw new Error('Config is not an object!');
@@ -501,7 +539,7 @@ MWC.prototype.validateConfig = function(config) {
   if (!(config.hostUrl && url.parse(config.hostUrl)['hostname'])) {
     throw new Error('Config.hostUrl have to be valid hostname - for example, http://example.org/ with http(s) on start and "/" at end!!!');
   }
-  if (!(config.secret && config.secret.length>9)) {
+  if (!(config.secret && config.secret.length > 9)) {
     throw new Error('Config.secret is not set or is to short!');
   }
 
@@ -527,44 +565,44 @@ MWC.prototype.validateConfig = function(config) {
  * @returns {mwc} mwc object
  */
 MWC.prototype.extendListeners = function (eventName, eventHandlerFunction) {
-    if (typeof eventName === "string" && typeof eventHandlerFunction === "function") {
-      this.on(eventName,eventHandlerFunction);
-      return this;
-    } else {
-      throw new Error('#MWC.extendListeners(eventName,eventHandlerFunction) have wrong arguments!');
-    }
+  if (typeof eventName === 'string' && typeof eventHandlerFunction === 'function') {
+    this.on(eventName, eventHandlerFunction);
+    return this;
+  } else {
+    throw new Error('#MWC.extendListeners(eventName,eventHandlerFunction) have wrong arguments!');
+  }
 };
 
 //legacy support, outdated
-MWC.prototype.ready = function (){
+MWC.prototype.ready = function () {
   console.log('MWC.ready is outdated, use MWC.start with the same syntax');
   return this.start('app');
 };
 
-MWC.prototype.listen = function (httpOrHttpsOrPort,options){
+MWC.prototype.listen = function (httpOrHttpsOrPort, options) {
   console.log('MWC.listen is outdated, use MWC.start with the same syntax');
-  return this.start(httpOrHttpsOrPort,options);
+  return this.start(httpOrHttpsOrPort, options);
 };
 
-MWC.prototype.setAppParameters = function(environment, settingsFunction){
+MWC.prototype.setAppParameters = function (environment, settingsFunction) {
   console.log('setAppParameters is outdated, use extendApp  with the same syntax');
   this.extendApp(environment, settingsFunction);
   return this;
 };
 
-MWC.prototype.extendMiddlewares = function(environment, path, settingsFunction){
+MWC.prototype.extendMiddlewares = function (environment, path, settingsFunction) {
   console.log('extendMiddlewares is outdated, use extendMiddleware with the same syntax');
   this.extendMiddleware(environment, path, settingsFunction);
   return this;
 };
 
-MWC.prototype.setAppMiddlewares = function(environment, path, settingsFunction){
+MWC.prototype.setAppMiddlewares = function (environment, path, settingsFunction) {
   console.log('setAppMiddlewares is outdated, use extendMiddleware with the same syntax');
   this.extendMiddleware(environment, path, settingsFunction);
   return this;
 };
 
-MWC.prototype.extendAppRoutes = function(settingsFunction){
+MWC.prototype.extendAppRoutes = function (settingsFunction) {
   console.log('extendAppRoutes is outdated, use extendRoutes with the same syntax');
   this.extendRoutes(settingsFunction);
   return this;
@@ -579,7 +617,7 @@ MWC.prototype.extendAppRoutes = function(settingsFunction){
  * is used for making this object to be able to emit events through mwc
  * @param {object} object - object to be extended
  */
-MWC.prototype.injectEmit = function(object) {
+MWC.prototype.injectEmit = function (object) {
   var thisMWC = this;
   object.emitMWC = function (eventName, eventContent) {
     thisMWC.emit(eventName, eventContent);
@@ -598,7 +636,7 @@ MWC.prototype.injectEmit = function(object) {
  * BTW, redis is NOT MySQL - we can't increase speed with connection pooling!
  * @returns {RedisClient} redis client
  */
-MWC.prototype.createRedisClient = function() {
+MWC.prototype.createRedisClient = function () {
   return redisManager.create(this.config.redis);
 };
 
@@ -609,7 +647,7 @@ MWC.prototype.createRedisClient = function() {
  * Create MWC object instance (factory)
  * @param {object} config - config object
  */
-MWC.create = function(config) {
+MWC.create = function (config) {
   return new MWC(config);
 };
 

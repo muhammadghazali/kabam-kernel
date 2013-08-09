@@ -330,7 +330,9 @@ describe('Kernel', function() {
       var response,body;
       before(function(done){
         request.get('http://localhost:3000/middleware3Path',function (err, res, b){
-          if(err) throw err;
+          if(err) {
+            throw err;
+          }
           response=res;
           body=b;
           done();
@@ -364,7 +366,9 @@ describe('Kernel', function() {
       var response,body;
       before(function(done){
         request.get('http://localhost:3000/someRoute',function (err, res, b){
-          if(err) throw err;
+          if(err) {
+            throw err;
+          }
           response=res;
           body=b;
           done();
@@ -432,7 +436,9 @@ describe('Kernel', function() {
         var response,body;
         before(function(done){
           request.get('http://localhost:3000/someRoute',function (err, res, b){
-            if(err) throw err;
+            if(err) {
+              throw err;
+            }
             response=res;
             body=b;
             done();
@@ -461,7 +467,9 @@ describe('Kernel', function() {
         var response,body;
         before(function(done){
           request.get('http://localhost:3000/newPlugin',function (err, res, b){
-            if(err) throw err;
+            if(err) {
+              throw err;
+            }
             response=res;
             body=b;
             done();
@@ -494,7 +502,9 @@ describe('Kernel', function() {
     var response,body;
     before(function(done){
       request.get('http://localhost:3000/someRoute',function (err, res, b){
-        if(err) throw err;
+        if(err) {
+          throw err;
+        }
         response=res;
         body=b;
         done();
@@ -603,7 +613,9 @@ describe('Kernel', function() {
                 cb(null,userCreated);
               }
             },function(err,res){
-              if(err) throw err;
+              if(err) {
+                throw err;
+              }
               usersFound=res;
               done();
             });
@@ -637,7 +649,9 @@ describe('Kernel', function() {
         var user;
         before(function(done){
           MWC.model.User.signUp('johndoe','johndoe@example.org','waterfall',function(err,userCreated){
-            if(err) throw err;
+            if(err) {
+              throw err;
+            }
             user=userCreated;
             done();
           });
@@ -677,7 +691,7 @@ describe('Kernel', function() {
         });
 
         after(function (done) {
-          user.remove(done)
+          user.remove(done);
         });
       });
 
@@ -685,7 +699,9 @@ describe('Kernel', function() {
         var user;
         before(function(done){
           MWC.model.User.signUpByEmailOnly('johndoe@example.org',function(err,userCreated){
-            if(err) throw err;
+            if(err) {
+              throw err;
+            }
             user=userCreated;
             done();
           });
@@ -718,7 +734,7 @@ describe('Kernel', function() {
         });
 
         after(function (done) {
-          user.remove(done)
+          user.remove(done);
         });
       });
 
@@ -732,7 +748,9 @@ describe('Kernel', function() {
             'emailVerified':false,
             'apiKeyCreatedAt':new Date()
           }, function (err, userCreated) {
-            if(err) throw err;
+            if(err) {
+              throw err;
+            }
             user=userCreated;
             MWC.model.User.findOneByApiKeyAndVerify('vseBydetHoroshooneByApiKey',function(err,userActivated){
               userBeingActivated=userActivated;
@@ -767,7 +785,9 @@ describe('Kernel', function() {
                 'emailVerified': true,
                 'apiKeyCreatedAt': new Date()
               }, function (err, userCreated) {
-                if(err) throw err;
+                if(err) {
+                  throw err;
+                }
                 user=userCreated;
                 userCreated.setPassword('lalala',function(err){
                   cb(err, userCreated);
@@ -811,10 +831,14 @@ describe('Kernel', function() {
         var user,userFound;
         before(function(done){
           MWC.model.User.signUp('johnDoe','johndoe@example.org','suzan123', function(err,userCreated){
-            if(err) throw err;
+            if(err) {
+              throw err;
+            }
             user=userCreated;
             MWC.model.User.processOAuthProfile('johndoe@example.org',function(error,userFromProfile){
-              if(error) throw error;
+              if(error) {
+                throw error;
+              }
               userFound=userFromProfile;
               done();
             });
@@ -835,7 +859,7 @@ describe('Kernel', function() {
         });
 
         after(function (done) {
-          user.remove(done)
+          user.remove(done);
         });
       });
 
@@ -843,7 +867,9 @@ describe('Kernel', function() {
         var user;
         before(function(done){
           MWC.model.User.processOAuthProfile('johndoe@mail.ru',function(error,userFromProfile){
-            if(error) throw error;
+            if(error) {
+              throw error;
+            }
             user=userFromProfile;
             done();
           });
@@ -856,7 +882,7 @@ describe('Kernel', function() {
         });
 
         after(function (done) {
-          user.remove(done)
+          user.remove(done);
         });
       });
 
@@ -889,7 +915,7 @@ describe('Kernel', function() {
           });
 
           after(function (done) {
-            user.remove(done)
+            user.remove(done);
           });
         });
 
@@ -928,7 +954,7 @@ describe('Kernel', function() {
 
 
             after(function (done) {
-              user.remove(done)
+              user.remove(done);
             });
           });
         });
@@ -969,7 +995,7 @@ describe('Kernel', function() {
 
 
             after(function (done) {
-              user.remove(done)
+              user.remove(done);
             });
           });
         });
@@ -1012,7 +1038,7 @@ describe('Kernel', function() {
         });
 
         after(function (done) {
-          user.remove(done)
+          user.remove(done);
         });
       });
 
@@ -1046,7 +1072,7 @@ describe('Kernel', function() {
         });
 
         after(function (done) {
-          user.remove(done)
+          user.remove(done);
         });
       });
 
@@ -1081,7 +1107,7 @@ describe('Kernel', function() {
         });
 
         after(function (done) {
-          user.remove(done)
+          user.remove(done);
         });
       });
 
@@ -1138,7 +1164,10 @@ describe('Kernel', function() {
               }
             ],function(err,userFound){
               userWithRole = userFound;
-              if(err) throw err;
+              if(err) {
+                throw err;
+              }
+
               done();
             });
         });
@@ -1178,7 +1207,9 @@ describe('Kernel', function() {
               }
             ],function(err,userFound){
               userWithOutRole = userFound;
-              if(err) throw err;
+              if(err) {
+                throw err;
+              }
               done();
             });
         });

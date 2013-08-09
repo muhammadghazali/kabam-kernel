@@ -42,7 +42,7 @@ MWC.extendMiddleware(['development', 'staging'], function (core) {
 MWC.extendRoutes(
   function (core) {
     core.app.get('/', function (req, res) {
-      var authByGoogleString = (req.user)?'<li><a href="/my">See your profile</a></li>':'<li><a href="/auth/google">Auth by google</a></li>';
+      var authByGoogleString = (req.user) ? '<li><a href="/my">See your profile</a></li>' : '<li><a href="/auth/google">Auth by google</a></li>';
 
       res.send('<html>' +
         '<head>MyWebClass Core Example</head>' +
@@ -84,28 +84,31 @@ MWC.extendRoutes(
       response.send('Administrator was notified about your actions!');
     });
 
-    core.app.get('/kittens',function(request,response){
-      request.model.Cats.find({},function(err,cats){
-        if(err) throw err;
+    core.app.get('/kittens', function (request, response) {
+      request.model.Cats.find({}, function (err, cats) {
+        if (err) {
+          throw err;
+        }
         response.json(cats);
       });
     });
 
-    core.app.get('/dogs',function(request,response){
-      request.model.Dogs.find({},function(err,dogs){
-        if(err) throw err;
+    core.app.get('/dogs', function (request, response) {
+      request.model.Dogs.find({}, function (err, dogs) {
+        if (err) {
+          throw err;
+        }
         response.json(dogs);
       });
     });
 
   }
 );
-//*/
 //injecting plugin as an object
 MWC.usePlugin({
-  'name':'exampleClassPlugin',
+  'name': 'exampleClassPlugin',
   'extendCore': null, //can be ommited
-  'extendModel':{'Dogs':function (mongoose, config) {
+  'extendModel': {'Dogs': function (mongoose, config) {
     var DogsSchema = new mongoose.Schema({
       'nickname': String
     });
@@ -115,7 +118,7 @@ MWC.usePlugin({
     return mongoose.model('dogs', DogsSchema);
   }},
   'extendApp': null, //can be ommited
-  "extendMiddleware": null, //can be ommited
+  'extendMiddleware': null, //can be ommited
   'extendRoutes': function (core) {
     core.app.get('/newPlugin', function (req, res) {
       res.send('New plugin is installed as object');
@@ -133,11 +136,11 @@ MWC.usePlugin({
 //}
 
 //listening of MWC events. 'Coocoo!' is emmited by mwc_plugin_example every 5 seconds
-MWC.extendListeners('Coocoo!',function (message) {
+MWC.extendListeners('Coocoo!', function (message) {
   console.log('Coocoo! Coocoo! ' + message);
 });
 
-MWC.extendListeners('honeypot accessed',function (message) {
+MWC.extendListeners('honeypot accessed', function (message) {
   console.log('Attention! Somebody tries to hack us! ' + message);
 });
 
@@ -153,23 +156,26 @@ setInterval(function () {
   MWC.emit('Coocoo!', 'Time now is ' + (new Date().toLocaleTimeString()));
 }, 5000);
 
-/*
-setTimeout(function(){
-  MWC.model.Cats.create({nickname:'Chubais'},function(err,cat){
-    if(err) throw err;
-    if(cat){
-      console.log('Skoro tolko koshki rodyatsya!');
-      console.log('Happy birthday, '+cat.nickname);
-    }
-  });
-},5000);
 
-setTimeout(function(){
-  MWC.model.Dogs.create({nickname:'Laika'},function(err,dog){
-    if(err) throw err;
-    if(dog){
-      console.log('Happy birthday, '+dog.nickname);
+setTimeout(function () {
+  MWC.model.Cats.create({nickname: 'Chubais'}, function (err, cat) {
+    if (err) {
+      throw err;
+    }
+    if (cat) {
+      console.log('Skoro tolko koshki rodyatsya!');
+      console.log('Happy birthday, ' + cat.nickname);
     }
   });
-},4000);
-*/
+}, 5000);
+
+setTimeout(function () {
+  MWC.model.Dogs.create({nickname: 'Laika'}, function (err, dog) {
+    if (err) {
+      throw err;
+    }
+    if (dog) {
+      console.log('Happy birthday, ' + dog.nickname);
+    }
+  });
+}, 4000);
