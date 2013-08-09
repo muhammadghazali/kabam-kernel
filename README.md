@@ -122,7 +122,7 @@ and for `https` server in this way
 3. `MWC.mongoose` - is a [mongoose](https://npmjs.org/package/mongoose) instance, used by this applications.
 
 4. `MWC.model` - is a object, that includes [mongoose models](http://mongoosejs.com/docs/guide.html), used by this application.
-For now, there is `MWC.model.Users` objects in it. But other models can be injected by `MWC.extendModel` function
+For now, there is `MWC.model.User` objects in it. But other models can be injected by `MWC.extendModel` function
 
 5. `MWC.redisClient` - is a ready to use [redis](https://npmjs.org/package/redis) client used by application
 
@@ -349,7 +349,7 @@ This is the way of things it is intended to work
 When you call the `extendCore(function(core){...})`, you can add global core functions and variables,
 but not anything other touching the application, middlewares or routes.
 In code it is called right after initializing [mongoose routes](https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L195)
-core have event emmiter capabilities `MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.model.Users`, `MWC.model.Documents` (exposed as mongoose schemas).
+core have event emmiter capabilities `MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.model.User`, `MWC.model.Documents` (exposed as mongoose schemas).
 Nothing more!
 
 When you call `extendModel(ModelName,function(mongoose, config){...})` you get all the enviroment created after calling
@@ -361,7 +361,7 @@ template [engines](http://expressjs.com/api.html#app.engine), [locals](http://ex
 and [other](http://expressjs.com/api.html#app-settings) settings.
 In code it is called [after settng logging middleware and port](https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L236).
 You can set any application parameter you want, you have full MWC core internalls at your disposal
-`MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.model.Users`, `MWC.model.Documents` and custom models from calling `extendModel`.
+`MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.model.User`, `MWC.model.Documents` and custom models from calling `extendModel`.
 
 When you call `extendMiddleware(function(core){...})`, you can set app middlewares.
 They are [called]((https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L283) after

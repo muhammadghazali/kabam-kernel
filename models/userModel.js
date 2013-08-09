@@ -39,7 +39,7 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.Users
+   * @name mwc.model.User
    * @methodOf mwc.model
    * @description
    * Mongoose object to manipulate users collection
@@ -99,7 +99,7 @@ module.exports = exports = function (mwc) {
    * @example
    * ```javascript
    *
-   *   MWC.model.Users.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *   MWC.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
    *     console.log(user.getGravatar(140));
    * // -> https://secure.gravatar.com/avatar/02ba513b62ef9f2f7798b9bac1ccf822?s=140
    *   });
@@ -124,7 +124,7 @@ module.exports = exports = function (mwc) {
    * @example
    * ```javascript
    *
-   *   MWC.model.Users.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *   MWC.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
    *     console.log(user.verifyPassword('someKey'));
    *   });
    *
@@ -144,7 +144,7 @@ module.exports = exports = function (mwc) {
    * @example
    * ```javascript
    *
-   *   MWC.model.Users.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *   MWC.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
    *     user.setPassword('someKey', function(err){if err throw err;});
    *   });
    *
@@ -167,7 +167,7 @@ module.exports = exports = function (mwc) {
    * @example
    * ```javascript
    *
-   *   MWC.model.Users.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *   MWC.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
    *     user.invalidateSession(function(err){if err throw err;});
    *   });
    *
@@ -189,7 +189,7 @@ module.exports = exports = function (mwc) {
    * @example
    * ```javascript
    *
-   *   MWC.model.Users.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *   MWC.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
    *     user.grantRole('rulerOfTheWorld', function(err){if err throw err;});
    *   });
    *
@@ -213,7 +213,7 @@ module.exports = exports = function (mwc) {
    * @example
    * ```javascript
    *
-   *   MWC.model.Users.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *   MWC.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
    *     if(user.hasRole('rulerOfTheWorld')){
    *       ...
    *     } else {
@@ -241,7 +241,7 @@ module.exports = exports = function (mwc) {
    * @example
    * ```javascript
    *
-   *   MWC.model.Users.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *   MWC.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
    *     user.revokeRole('rulerOfTheWorld', function(err){if err throw err;});
    *   });
    *
@@ -267,7 +267,7 @@ module.exports = exports = function (mwc) {
    * @example
    * ```javascript
    *
-   *     MWC.model.Users.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *     MWC.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
    *       user.notify('email','Happy birthday'); // sending email to this user
    *     });
    * ```
@@ -293,7 +293,7 @@ module.exports = exports = function (mwc) {
   //finders
   /**
    * @ngdoc function
-   * @name mwc.model.Users.findOneByLoginOrEmail
+   * @name mwc.model.User.findOneByLoginOrEmail
    * @description
    * Finds one user by login or email, returns as second argument in callback, first one is error
    * @param {string} loginOrEmai - login or email of user to be foundl
@@ -301,7 +301,7 @@ module.exports = exports = function (mwc) {
    * @example
    * ```javascript
    *
-   *     MWC.model.Users.findOneByLoginOrEmail('test@rambler.ru',function(err,userCreated){
+   *     MWC.model.User.findOneByLoginOrEmail('test@rambler.ru',function(err,userCreated){
    *       user.notify('email','Happy birthday'); // sending email to this user
    *     });
    * ```
@@ -316,7 +316,7 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.Users.findOneByApiKey
+   * @name mwc.model.User.findOneByApiKey
    * @description
    * Finds one user by apiKey, returns as second argument in callback, first one is error
    * @param {string} apiKey - apiKey of user to be foundl
@@ -325,7 +325,7 @@ module.exports = exports = function (mwc) {
    * @example
    * ```javascript
    *
-   *     MWC.model.Users.findOneByApiKey('apiKey',function(err,userCreated){
+   *     MWC.model.User.findOneByApiKey('apiKey',function(err,userCreated){
    *       user.notify('email','Happy birthday'); // sending email to this user
    *     });
    * ```
@@ -336,7 +336,7 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.Users.getByRole
+   * @name mwc.model.User.getByRole
    * @description
    * Finds users who have desired role
    * @param {string} role - role/permission to search owners of
@@ -344,7 +344,7 @@ module.exports = exports = function (mwc) {
    * @example
    * ```javascript
    *
-   *     MWC.model.Users.getByRole('admin',function(err,users){
+   *     MWC.model.User.getByRole('admin',function(err,users){
    *       users.map(function(user){
    *         user.notify('email','Happy birthday'); // sending email to this user
    *       })
@@ -357,7 +357,7 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.Users.processOAuthProfile
+   * @name mwc.model.User.processOAuthProfile
    * @param {string} email - email of user from oauth profile we want to process
    * @param {function} done - function is fired when users are found
    * @description
@@ -367,7 +367,7 @@ module.exports = exports = function (mwc) {
    * @example
    * ```javascript
    *
-   * mwc.model.Users.processOAuthProfile('someEmail@somedomain.com',function(err,user){
+   * mwc.model.User.processOAuthProfile('someEmail@somedomain.com',function(err,user){
    *   assert.equal(true,user.emailVerified);
    *   assert.equal(false,user.profileComplete);
    *   assert.equal('someEmail@somedomain.com',user.email);
@@ -403,7 +403,7 @@ module.exports = exports = function (mwc) {
   };
   /**
    * @ngdoc function
-   * @name mwc.model.Users.signUp
+   * @name mwc.model.User.signUp
    * @param {string} username - username for new user
    * @param {string} email - email for new user
    * @param {string} password - password for new user
@@ -439,7 +439,7 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.Users.signUpByEmailOnly
+   * @name mwc.model.User.signUpByEmailOnly
    * @param {string}  email  - email for new user
    * @param {function}  callback  - function is fired when user is saved
    * @description
@@ -473,7 +473,7 @@ module.exports = exports = function (mwc) {
    * @ngdoc function
    * @name User.completeProfile
    * @description
-   * Complete users profile for user created by mwc.model.users.signUpByEmailOnly
+   * Complete users profile for user created by mwc.model.user.signUpByEmailOnly
    * @param {string} username - username to set for user instance
    * @param {string} password - password to set for user instance
    * @param {function} callback  - function is fired when user is saved
@@ -515,11 +515,11 @@ module.exports = exports = function (mwc) {
    * @example
    * ```javascript
    * var userEgorLetov;
-   * mwc.model.Users.findOneByLoginOrEmail('EgorLetov',function(err,user){
+   * mwc.model.User.findOneByLoginOrEmail('EgorLetov',function(err,user){
    *   if(err) throw err;
    *   userEgorLetov=user;
    *   user.setKeyChain('paradise','with_Iuda',function(err){
-   *    mwc.model.Users.findOneByKeychain('paradise','with_Iuda',function(err,userFound){
+   *    mwc.model.User.findOneByKeychain('paradise','with_Iuda',function(err,userFound){
    *      assert.equal(userFound.username, userEgorLetov.username);
    *    });
    *   });
@@ -548,7 +548,7 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.Users.findOneByKeychain
+   * @name mwc.model.User.findOneByKeychain
    * @description
    * Finds user that have keychain for this provider and this id
    * @param {string} provider - provider name
@@ -556,7 +556,7 @@ module.exports = exports = function (mwc) {
    * @param {function} callback  - function is fired when user is saved
    * @example
    * ```javascript
-   *    mwc.model.Users.findOneByKeychain('paradise','with_Iuda',function(err,userFound){
+   *    mwc.model.User.findOneByKeychain('paradise','with_Iuda',function(err,userFound){
    *      ...
    *    });
    *
@@ -572,7 +572,7 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.Users.findOneByApiKeyAndVerify
+   * @name mwc.model.User.findOneByApiKeyAndVerify
    * @description
    * This function is used for verifying users profile from link in email message
    * @param {string} apiKey - apiKey to use
@@ -597,7 +597,7 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.Users.findOneByApiKeyAndVerify
+   * @name mwc.model.User.findOneByApiKeyAndVerify
    * @description
    * This function is used for reseting users password by link in email with submitting form later
    * @param {string} apiKey - apiKey to use
@@ -620,5 +620,5 @@ module.exports = exports = function (mwc) {
     });
   };
 
-  return mongoose.model('users', UserSchema);
+  return mongoose.model('User', UserSchema);
 };
