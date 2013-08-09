@@ -1200,7 +1200,7 @@ describe('Kernel', function() {
         before(function(done){
           MWC.model.Users.create({
             'username': 'test888',
-            'email': 'ostroumov@teksi.ru'
+            'email': 'ostroumov'+Math.floor(Math.random()*100)+'@teksi.ru'
           }, function (err, userCreated) {
             if (err) {
               throw err;
@@ -1211,7 +1211,7 @@ describe('Kernel', function() {
               user.notify('Hello!');
             },300);
 
-            MWC.on('notify',function(message){
+            MWC.on('notify:all',function(message){
               messageObj=message;
               done();
             });
@@ -1219,7 +1219,6 @@ describe('Kernel', function() {
         });
 
         it('makes mwc core emit events with message created properly',function(){
-          messageObj.type.should.be.equal('text');
           messageObj.user.should.eql(user);
           messageObj.message.should.be.equal('Hello!');
         });

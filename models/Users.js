@@ -45,14 +45,6 @@ module.exports = exports = function (mwc) {
 
     //keychain
     keychain: {}, // i'm loving mongoose - http://mongoosejs.com/docs/schematypes.html - see mixed
-/*
-    keychain: {//this is temporary approach, because mongoose validation fails. need further research
-      twitter: Number,
-      github : Number,
-      facebook: Number,
-      linkedin: Number
-    },
-*/
     profile: Object //this is user profile object. it can store anything! - age, postal address, occupation. everything! todo - embedded document?
   });
   //UserSchema.plugin(useTimestamps);//do not works! add createdAt, and updatedAt attributes
@@ -122,20 +114,22 @@ module.exports = exports = function (mwc) {
   };
 
   //notify
-  UserSchema.methods.notify=function(message){
-    if(typeof message === 'string'){
-      mwc.emit('notify',{
-        'user':this,
-        'type':'text',
-        'message':message
-      });
+  UserSchema.methods.notify=function(channel,message){
+    var channelToUse,messageToSend;
+    if(typeof message === 'undefined' && (typeof channel === 'object' || typeof channel === 'string')){
+      channelToUse='all';
+      messageToSend=channel;
     } else {
-      mwc.emit('notify',{
-        'user':this,
-        'type': (message.type)?(message.type):'text',
-        'message':message
-      });
+      if(typeof channel === 'string'  && (typeof message === 'object' || typeof message === 'string')){
+        channelToUse=channel;
+        messageToSend=message;
+      } else {
+        throw new Error('Function User.notify([channelNameString],messageObj) has wrond arguments!');
+      }
     }
+
+    mwc.emit('notify:'+channelToUse, {user:this,message:messageToSend});
+    return;
   };
 
   //finders
