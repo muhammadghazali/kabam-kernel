@@ -32,6 +32,7 @@ module.exports = exports = function (mwc) {
   /**
    * @ngdoc object
    * @name mwc.model.Users
+   * @methodOf mwc
    * @description
    * Mongoose object to manipulate users collection
    */
