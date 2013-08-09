@@ -451,7 +451,7 @@ function MWC(config) {
     thisMWC.redisClient = redisManager.create(thisMWC.config.redis);
 
     //injecting mongoose and additional models
-    thisMWC.model = mongooseManager.createModel(thisMWC, _additionalModels);
+    thisMWC.model = mongooseManager.injectModels(thisMWC, _additionalModels);
 
     _extendCoreFunctions.map(function (settingsFunction) {
 
