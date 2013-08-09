@@ -577,7 +577,15 @@ module.exports = exports = function (mwc) {
     this.findOne(needle,callback);
   };
 
-  //finders-setters
+  /**
+   * @ngdoc method
+   * @name findOneByApiKeyAndVerify
+   * @methodOf mwc.model.Users
+   * @description
+   * This function is used for verifying users profile from link in email message
+   * @param {string} apiKey - apiKey to use
+   * @param {function} callback  - function is fired when user is saved
+   */
   UserSchema.statics.findOneByApiKeyAndVerify = function(apiKey,callback){
     this.findOneByApiKey(apiKey,function(err,userFound){
       if(err){
@@ -595,6 +603,16 @@ module.exports = exports = function (mwc) {
     });
   };
 
+  /**
+   * @ngdoc method
+   * @name findOneByApiKeyAndVerify
+   * @methodOf mwc.model.Users
+   * @description
+   * This function is used for reseting users password by link in email with submitting form later
+   * @param {string} apiKey - apiKey to use
+   * @param {string} password- new password to set
+   * @param {function} callback  - function is fired when user is saved
+   */
   UserSchema.statics.findOneByApiKeyAndResetPassword = function(apiKey, password, callback){
     this.findOneByApiKey(apiKey,function(err,userFound){
       if(err) {
