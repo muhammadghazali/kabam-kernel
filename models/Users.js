@@ -10,10 +10,10 @@ function md5(str) {
 }
 
 
-var rackSeed=crypto.randomBytes(64);
-function rack(){
-  var result = sha512(rackSeed+crypto.randomBytes(64).toString());
-  rackSeed=result;
+var rackSeed = crypto.randomBytes(64);
+function rack() {
+  var result = sha512(rackSeed + crypto.randomBytes(64).toString());
+  rackSeed = result;
   return result;
 }
 
@@ -54,13 +54,15 @@ module.exports = exports = function (mwc) {
     password: String,//hashed password
 
     //api key interaction
-    apiKey: {type: String, required: true, unique: true, default:rack, match: /^[a-zA-Z0-9_]+$/ }, //for invalidating sessions by user request, for api interactions...
+    apiKey: {type: String, required: true, unique: true, default: rack, match: /^[a-zA-Z0-9_]+$/ }, //for invalidating sessions by user request, for api interactions...
     apiKeyCreatedAt: Date,
 
 
     //role management
     root: Boolean,
-    roles: [{type: String, match: /^[a-zA-Z0-9_]+$/ }],
+    roles: [
+      {type: String, match: /^[a-zA-Z0-9_]+$/ }
+    ],
 
     //profile status
     emailVerified: Boolean, //profile is activated
@@ -76,12 +78,13 @@ module.exports = exports = function (mwc) {
     email: 1,
     username: 1,
     apiKey: 1,
-    keychain:1,
+    keychain: 1,
     roles: 1
   });
 
   /**
    * @ngdoc function
+   * @methodOf User
    * @name User.getGravatar
    * @description
    * Returns the url to current user's gravatar
@@ -103,14 +106,15 @@ module.exports = exports = function (mwc) {
    * ```
    */
   UserSchema.methods.getGravatar = function (size, type, rating) {
-    size = size?size:300;
-    type = type?type:'wavatar';
-    rating = rating?rating:'g';
+    size = size ? size : 300;
+    type = type ? type : 'wavatar';
+    rating = rating ? rating : 'g';
     return 'https://secure.gravatar.com/avatar/' + md5(this.email.toLowerCase().trim()) + '.jpg?s=' + size + '&d=' + type + '&r=' + rating;
   };
 
   /**
    * @ngdoc function
+   * @methodOf User
    * @name User.verifyPassword
    * @description
    * Returns true, if password is correct for this user, or false, if it is not correct
@@ -132,6 +136,7 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
+   * @methodOf User
    * @name User.setPassword
    * @description
    * Sets new password for user, calls callback when user is saved
@@ -156,6 +161,7 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
+   * @methodOf User
    * @name User.invalidateSession
    * @description
    * Invalidates the apiKey, which results in immediate logoff for this user, and invalidating the access tokens.
@@ -177,6 +183,7 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
+   * @methodOf User
    * @name User.grantRole
    * @param {string} roleName - role/permission to grant. Every user can have manifold of roles.
    * @description
@@ -201,6 +208,7 @@ module.exports = exports = function (mwc) {
   };
   /**
    * @ngdoc function
+   * @methodOf User
    * @name User.hasRole
    * @param {string} roleName - role/permission to rcheck
    * @description
@@ -220,7 +228,7 @@ module.exports = exports = function (mwc) {
    * ```
    */
   UserSchema.methods.hasRole = function (roleName) {
-    if(this.root){
+    if (this.root) {
       return true;
     } else {
       return (this.roles.indexOf(roleName) !== -1);
@@ -229,6 +237,7 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
+   * @methodOf User
    * @name User.revokeRole
    * @param {string} roleName - role/permission to revoke.
    * @description
@@ -255,6 +264,7 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
+   * @methodOf User
    * @name User.notify
    * @description
    * Notifies the current user, using the mwc event emitting system
@@ -268,21 +278,21 @@ module.exports = exports = function (mwc) {
    *     });
    * ```
    */
-  UserSchema.methods.notify=function(channel,message){
-    var channelToUse,messageToSend;
-    if(typeof message === 'undefined' && (typeof channel === 'object' || typeof channel === 'string')){
-      channelToUse='all';
-      messageToSend=channel;
+  UserSchema.methods.notify = function (channel, message) {
+    var channelToUse, messageToSend;
+    if (typeof message === 'undefined' && (typeof channel === 'object' || typeof channel === 'string')) {
+      channelToUse = 'all';
+      messageToSend = channel;
     } else {
-      if(typeof channel === 'string'  && (typeof message === 'object' || typeof message === 'string')){
-        channelToUse=channel;
-        messageToSend=message;
+      if (typeof channel === 'string' && (typeof message === 'object' || typeof message === 'string')) {
+        channelToUse = channel;
+        messageToSend = message;
       } else {
         throw new Error('Function User.notify([channelNameString],messageObj) has wrond arguments!');
       }
     }
 
-    mwc.emit('notify:'+channelToUse, {user:this,message:messageToSend});
+    mwc.emit('notify:' + channelToUse, {user: this, message: messageToSend});
     return;
   };
 
@@ -370,8 +380,8 @@ module.exports = exports = function (mwc) {
    * });
    * ```
    */
-  UserSchema.statics.processOAuthProfile = function(email,done){
-    var Users=this;
+  UserSchema.statics.processOAuthProfile = function (email, done) {
+    var Users = this;
     if (email) {
       Users.findOne({'email': email}, function (err, userFound) {
         if (err) {
@@ -408,25 +418,25 @@ module.exports = exports = function (mwc) {
    * signups new user by username, email, password, fires callback with first argument of error and the second one
    * of user signed it
    */
-  UserSchema.statics.signUp = function(username,email,password,callback){
+  UserSchema.statics.signUp = function (username, email, password, callback) {
     this.create({
-      'username':username,
-      'email':email,
-      'apiKey':sha512(rack()),
-      'emailVerified':false,
-      'root':false,
-      'profileComplete':true,
-      'apiKeyCreatedAt':new Date()
-    },function(err,userCreated){
-      if(err) {
+      'username': username,
+      'email': email,
+      'apiKey': sha512(rack()),
+      'emailVerified': false,
+      'root': false,
+      'profileComplete': true,
+      'apiKeyCreatedAt': new Date()
+    }, function (err, userCreated) {
+      if (err) {
         callback(err);
       } else {
-        userCreated.setPassword(password,function(err1){
-          if(err1){
+        userCreated.setPassword(password, function (err1) {
+          if (err1) {
             callback(err1);
           } else {
-            userCreated.notify('email',{'subject':'Verify your email account!','template':'signin'});
-            callback(null,userCreated);
+            userCreated.notify('email', {'subject': 'Verify your email account!', 'template': 'signin'});
+            callback(null, userCreated);
           }
         });
       }
@@ -448,8 +458,8 @@ module.exports = exports = function (mwc) {
       'emailVerified': true, //email is verified!
       'profileComplete': false,
       'apiKey': sha512(rack()),
-      'root':false,
-      'apiKeyCreatedAt':new Date()
+      'root': false,
+      'apiKeyCreatedAt': new Date()
     }, function (err, userCreated) {
       if (err) {
         callback(err);
@@ -467,6 +477,7 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
+   * @methodOf User
    * @name User.completeProfile
    * @description
    * Complete users profile for user created by mwc.model.users.signUpByEmailOnly
@@ -474,11 +485,11 @@ module.exports = exports = function (mwc) {
    * @param {string} password - password to set for user instance
    * @param {function} callback  - function is fired when user is saved
    */
-  UserSchema.methods.completeProfile = function(username,password,callback){
-    if(typeof this.username === 'undefined' && this.profileComplete === false){
+  UserSchema.methods.completeProfile = function (username, password, callback) {
+    if (typeof this.username === 'undefined' && this.profileComplete === false) {
       this.username = username;
       this.profileComplete = true;
-      this.setPassword(password,callback);
+      this.setPassword(password, callback);
     } else {
       callback(new Error('Account is completed!'));
     }
@@ -486,6 +497,7 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
+   * @methodOf User
    * @name User.saveProfile
    * @description
    * Saves object as current users profile
@@ -493,8 +505,8 @@ module.exports = exports = function (mwc) {
    * @param {function} callback  - function is fired when user is saved
    */
 
-  UserSchema.methods.saveProfile = function(profile,callback){
-    this.profile=profile;
+  UserSchema.methods.saveProfile = function (profile, callback) {
+    this.profile = profile;
     this.markModified('profile'); //http://mongoosejs.com/docs/schematypes.html
     this.save(callback);
   };
@@ -502,6 +514,7 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
+   * @methodOf User
    * @name User.setKeyChain
    * @description
    * Grants the current user possibility to login through 3rd side oauth provider
@@ -523,7 +536,7 @@ module.exports = exports = function (mwc) {
    *
    * ```
    */
-  UserSchema.methods.setKeyChain = function(provider, id, callback){
+  UserSchema.methods.setKeyChain = function (provider, id, callback) {
     this.keychain[provider] = id;
     this.markModified('keychain'); //http://mongoosejs.com/docs/schematypes.html
     this.save(callback);
@@ -531,14 +544,15 @@ module.exports = exports = function (mwc) {
 
   /**
    * @ngdoc function
+   * @methodOf User
    * @name User.revokeKeyChain
    * @description
    * Revokes the current user possibility to login through 3rd side oauth provider
    * @param {string} provider - provider name
    * @param {function} callback  - function is fired when user is saved
    */
-  UserSchema.methods.revokeKeyChain = function(provider,callback){
-    this.keychain[provider]=null;
+  UserSchema.methods.revokeKeyChain = function (provider, callback) {
+    this.keychain[provider] = null;
     this.save(callback);
   };
 
@@ -558,12 +572,12 @@ module.exports = exports = function (mwc) {
    *
    * ```
    */
-  UserSchema.statics.findOneByKeychain = function(provider,id,callback){
-    var key = 'keychain.'+provider,
-      needle={};
+  UserSchema.statics.findOneByKeychain = function (provider, id, callback) {
+    var key = 'keychain.' + provider,
+      needle = {};
 
-    needle[key]=id;
-    this.findOne(needle,callback);
+    needle[key] = id;
+    this.findOne(needle, callback);
   };
 
   /**
@@ -574,15 +588,15 @@ module.exports = exports = function (mwc) {
    * @param {string} apiKey - apiKey to use
    * @param {function} callback  - function is fired when user is saved
    */
-  UserSchema.statics.findOneByApiKeyAndVerify = function(apiKey,callback){
-    this.findOneByApiKey(apiKey,function(err,userFound){
-      if(err){
+  UserSchema.statics.findOneByApiKeyAndVerify = function (apiKey, callback) {
+    this.findOneByApiKey(apiKey, function (err, userFound) {
+      if (err) {
         callback(err);
       } else {
-        if(userFound && userFound.emailVerified === false && (new Date().getTime() - userFound.apiKeyCreatedAt.getTime())<30*60*1000) {
+        if (userFound && userFound.emailVerified === false && (new Date().getTime() - userFound.apiKeyCreatedAt.getTime()) < 30 * 60 * 1000) {
           userFound.emailVerified = true;
-          userFound.save(function(err1){
-            callback(err1,userFound);
+          userFound.save(function (err1) {
+            callback(err1, userFound);
           });
         } else {
           callback(new Error('Activation key is wrong or outdated!'));
@@ -600,14 +614,14 @@ module.exports = exports = function (mwc) {
    * @param {string} password - new password to set
    * @param {function} callback  - function is fired when user is saved
    */
-  UserSchema.statics.findOneByApiKeyAndResetPassword = function(apiKey, password, callback){
-    this.findOneByApiKey(apiKey,function(err,userFound){
-      if(err) {
+  UserSchema.statics.findOneByApiKeyAndResetPassword = function (apiKey, password, callback) {
+    this.findOneByApiKey(apiKey, function (err, userFound) {
+      if (err) {
         callback(err);
       } else {
-        if(userFound && (new Date().getTime() - userFound.apiKeyCreatedAt.getTime())<30*60*1000){
-          userFound.setPassword(password,function(err1){
-            callback(err1,userFound);
+        if (userFound && (new Date().getTime() - userFound.apiKeyCreatedAt.getTime()) < 30 * 60 * 1000) {
+          userFound.setPassword(password, function (err1) {
+            callback(err1, userFound);
           });
         } else {
           callback(new Error('Activation key is wrong or outdated!'));
