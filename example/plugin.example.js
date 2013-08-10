@@ -15,7 +15,7 @@
 exports.name = 'pluginExample';
 /**
  * @ngdoc function
- * @name plugin.dependencies
+ * @name Plugin.dependencies
  * @description
  * Plugins, that are required to be loaded previously  - not implemented yet
  * @type {Array}
