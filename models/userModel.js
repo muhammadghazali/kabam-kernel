@@ -42,7 +42,7 @@ module.exports = exports = function (mwc) {
    * @name mwc.model.User
    * @methodOf mwc.model
    * @description
-   * Mongoose object to manipulate users collection
+   * Active record style Mongoose object to manipulate users collection
    */
 
 

@@ -5,9 +5,44 @@
  * Plugin object, that can be loaded by mwc.loadPlugin
  */
 
+/**
+ * @ngdoc method
+ * @name plugin.name
+ * @description
+ * Unique (in the scope of project) plugin name
+ * @type {string}
+ */
 exports.name = 'pluginExample';
+/**
+ * @ngdoc method
+ * @name plugin.dependencies
+ * @description
+ * Plugins, that are required to be loaded previously  - not implemented yet
+ * @type {Array}
+ */
 exports.dependencies = ['mwc_plugin_foo','mwc_plugin_bar']; //we throw error it this plugins are not loaded in application
 
+/**
+ * @ngdoc method
+ * @name plugin.core
+ * @type {object}
+ * @description
+ * Object, that will be supplied as argument to mwc.extencCore function
+ * @example
+ * ```javascript
+ * exports.core = {
+ *   'parameterOne': 1,
+ *   'parameterTwo': [1, 2, 3, 4, 5],
+ *   'parameterThree': {},
+ *   'getSum': function (config) {
+ *     return function (a, b) {
+ *       return (a + b) * (config.multipyKoefficient);
+ *     }
+ *   }
+ * };
+ *
+ * ```
+ */
 exports.core = {
   'parameterOne': 1,
   'parameterTwo': [1, 2, 3, 4, 5],
