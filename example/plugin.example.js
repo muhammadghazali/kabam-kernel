@@ -54,7 +54,31 @@ exports.core = {
   }
 };
 
-
+/**
+ * @ngdoc function
+ * @name Plugin.model
+ * @type {object}
+ * @description
+ * Object, that will be supplied as argument to mwc.extendModel function
+ * @example
+ *```javascript
+ * exports.model = {
+ *  'Cats': function (mongoose, config) {
+ *   var CatsSchema = new mongoose.Schema({
+ *     'nickname': String
+ *   });
+ *
+ *  return mongoose.model('cats', CatsSchema);
+ * },
+ * 'Dogs': function (mongoose, config) {
+ *   var DogsSchema = new mongoose.Schema({
+ *     'nickname': String
+ *   });
+ *  return mongoose.model('Dogs', DogsSchema);
+ * }
+ *};
+ *```
+ */
 exports.model = {
   'Cats': function (mongoose, config) {
     var CatsSchema = new mongoose.Schema({
@@ -80,8 +104,21 @@ exports.model = {
   }
 };
 
+/**
+ * @ngdoc function
+ * @name Plugin.app
+ * @type {function}
+ * @description
+ * Function, that will be supplied as argument to mwc.extendApp function
+ * @example
+ * ```javascript
+ * exports.app = function (mwc) {
+ *   mwc.app.set('someValue',42);
+ * };
+ * ```
+ */
 exports.app = function (mwc) {
-  core.app.set('someValue',42);
+  mwc.app.set('someValue',42);
 };
 
 var LinkedInStrategy = require('passport-linkedin').Strategy;
