@@ -1,3 +1,10 @@
+/**
+ * @ngdoc function
+ * @name Plugin
+ * @description
+ * Plugin object, that can be loaded by mwc.loadPlugin
+ */
+
 exports.name = 'pluginExample';
 exports.dependencies = ['mwc_plugin_foo','mwc_plugin_bar']; //we throw error it this plugins are not loaded in application
 
