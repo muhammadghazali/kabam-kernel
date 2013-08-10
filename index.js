@@ -594,41 +594,6 @@ MWC.prototype.extendListeners = function (eventName, eventHandlerFunction) {
   }
 };
 
-//legacy support, outdated
-MWC.prototype.ready = function () {
-  console.log('MWC.ready is outdated, use MWC.start with the same syntax');
-  return this.start('app');
-};
-
-MWC.prototype.listen = function (httpOrHttpsOrPort, options) {
-  console.log('MWC.listen is outdated, use MWC.start with the same syntax');
-  return this.start(httpOrHttpsOrPort, options);
-};
-
-MWC.prototype.setAppParameters = function (environment, settingsFunction) {
-  console.log('setAppParameters is outdated, use extendApp  with the same syntax');
-  this.extendApp(environment, settingsFunction);
-  return this;
-};
-
-MWC.prototype.extendMiddlewares = function (environment, path, settingsFunction) {
-  console.log('extendMiddlewares is outdated, use extendMiddleware with the same syntax');
-  this.extendMiddleware(environment, path, settingsFunction);
-  return this;
-};
-
-MWC.prototype.setAppMiddlewares = function (environment, path, settingsFunction) {
-  console.log('setAppMiddlewares is outdated, use extendMiddleware with the same syntax');
-  this.extendMiddleware(environment, path, settingsFunction);
-  return this;
-};
-
-MWC.prototype.extendAppRoutes = function (settingsFunction) {
-  console.log('extendAppRoutes is outdated, use extendRoutes with the same syntax');
-  this.extendRoutes(settingsFunction);
-  return this;
-};
-//legacy support, outdated ^^^
 
 /**
  * @ngdoc function
