@@ -48,7 +48,7 @@ module.exports = function(grunt) {
         startPage: '/api'
       },
       api: {
-        src: ['results/index.ngdoc', 'index.js', 'lib/**/*.js', 'models/**/*.js'],
+        src: ['results/index.ngdoc', 'index.js', 'lib/**/*.js', 'models/**/*.js','example/plugin.example.js'],
         title: 'MWC Kernel API'
       }
     },

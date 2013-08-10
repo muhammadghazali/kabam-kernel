@@ -6,7 +6,7 @@
  */
 
 /**
- * @ngdoc method
+ * @ngdoc function
  * @name plugin.name
  * @description
  * Unique (in the scope of project) plugin name
@@ -14,7 +14,7 @@
  */
 exports.name = 'pluginExample';
 /**
- * @ngdoc method
+ * @ngdoc function
  * @name plugin.dependencies
  * @description
  * Plugins, that are required to be loaded previously  - not implemented yet
@@ -23,7 +23,7 @@ exports.name = 'pluginExample';
 exports.dependencies = ['mwc_plugin_foo','mwc_plugin_bar']; //we throw error it this plugins are not loaded in application
 
 /**
- * @ngdoc method
+ * @ngdoc function
  * @name plugin.core
  * @type {object}
  * @description
