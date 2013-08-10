@@ -412,7 +412,7 @@ function MWC(config) {
         pluginToBeInstalled = pluginObjectOrName;
       }
 
-      if (typeof pluginToBeInstalled.name === 'string' && /^[a-z0-9_\-]+$/.test(pluginToBeInstalled.name) && pluginObjectOrName.name === 'shared') {
+      if (typeof pluginToBeInstalled.name !== 'string' && !/^[a-z0-9_\-]+$/.test(pluginToBeInstalled.name) && pluginObjectOrName.name === 'shared') {
         throw new Error('Wrong plugin syntax. Plugin name is missed or have wrong syntax!');
       }
 
