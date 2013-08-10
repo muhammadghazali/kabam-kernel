@@ -79,7 +79,9 @@ describe('Users model', function() {
               cb(null,userCreated);
             }
           },function(err,res){
-            if(err) throw err;
+            if(err) {
+              throw err;
+            }
             usersFound=res;
             done();
           });
@@ -113,7 +115,9 @@ describe('Users model', function() {
       var user;
       before(function(done){
         MWC.model.User.signUp('johndoe','johndoe@example.org','waterfall',function(err,userCreated){
-          if(err) throw err;
+          if(err) {
+            throw err;
+          }
           user=userCreated;
           done();
         });
@@ -153,7 +157,7 @@ describe('Users model', function() {
       });
 
       after(function (done) {
-        user.remove(done)
+        user.remove(done);
       });
     });
 
@@ -161,7 +165,9 @@ describe('Users model', function() {
       var user;
       before(function(done){
         MWC.model.User.signUpByEmailOnly('johndoe@example.org',function(err,userCreated){
-          if(err) throw err;
+          if(err) {
+            throw err;
+          }
           user=userCreated;
           done();
         });
@@ -194,7 +200,7 @@ describe('Users model', function() {
       });
 
       after(function (done) {
-        user.remove(done)
+        user.remove(done);
       });
     });
 
@@ -208,7 +214,9 @@ describe('Users model', function() {
           'emailVerified':false,
           'apiKeyCreatedAt':new Date()
         }, function (err, userCreated) {
-          if(err) throw err;
+          if(err) {
+            throw err;
+          }
           user=userCreated;
           MWC.model.User.findOneByApiKeyAndVerify('vseBydetHoroshooneByApiKey',function(err,userActivated){
             userBeingActivated=userActivated;
@@ -243,6 +251,9 @@ describe('Users model', function() {
               'emailVerified': true,
               'apiKeyCreatedAt': new Date()
             }, function (err, userCreated) {
+              if(err) {
+                throw err;
+              }
               user=userCreated;
               userCreated.setPassword('lalala',function(err){
                 cb(err, userCreated);
@@ -286,10 +297,14 @@ describe('Users model', function() {
       var user,userFound;
       before(function(done){
         MWC.model.User.signUp('johnDoe','johndoe@example.org','suzan123', function(err,userCreated){
-          if(err) throw err;
+          if(err) {
+            throw err;
+          }
           user=userCreated;
           MWC.model.User.processOAuthProfile('johndoe@example.org',function(error,userFromProfile){
-            if(error) throw error;
+            if(error) {
+              throw error;
+            }
             userFound=userFromProfile;
             done();
           });
@@ -310,7 +325,7 @@ describe('Users model', function() {
       });
 
       after(function (done) {
-        user.remove(done)
+        user.remove(done);
       });
     });
 
@@ -318,7 +333,9 @@ describe('Users model', function() {
       var user;
       before(function(done){
         MWC.model.User.processOAuthProfile('johndoe@mail.ru',function(error,userFromProfile){
-          if(error) throw error;
+          if(error) {
+            throw error;
+          }
           user=userFromProfile;
           done();
         });
@@ -331,7 +348,7 @@ describe('Users model', function() {
       });
 
       after(function (done) {
-        user.remove(done)
+        user.remove(done);
       });
     });
 
@@ -344,7 +361,6 @@ describe('Users model', function() {
           MWC.model.User.create({
             'username': 'test888',
             'email': 'ostroumov@teksi.ru',
-            'apiKey':'lalala1',
             'keychain':{
               'github':11111
             }
@@ -365,7 +381,7 @@ describe('Users model', function() {
         });
 
         after(function (done) {
-          user.remove(done)
+          user.remove(done);
         });
       });
 
@@ -376,7 +392,6 @@ describe('Users model', function() {
           MWC.model.User.create({
             'username': 'test888',
             'email': 'ostroumov@teksi.ru',
-            'apiKey':'lalala1',
             'keychain':{
               'github':11111
             }
@@ -405,7 +420,7 @@ describe('Users model', function() {
 
 
           after(function (done) {
-            user.remove(done)
+            user.remove(done);
           });
         });
       });
@@ -417,7 +432,6 @@ describe('Users model', function() {
           MWC.model.User.create({
             'username': 'test888',
             'email': 'ostroumov@teksi.ru',
-            'apiKey':'lalala1',
             'keychain':{
               'github':11111,
               'someProvider':1
@@ -447,7 +461,7 @@ describe('Users model', function() {
 
 
           after(function (done) {
-            user.remove(done)
+            user.remove(done);
           });
         });
       });
@@ -461,8 +475,7 @@ describe('Users model', function() {
       before(function (done) {
         MWC.model.User.create({
           'username': 'test888',
-          'email': 'ostroumov@teksi.ru',
-          'apiKey':'lalala1'
+          'email': 'ostroumov@teksi.ru'
         }, function (err, userCreated) {
           if (err) {
             throw err;
@@ -491,7 +504,7 @@ describe('Users model', function() {
       });
 
       after(function (done) {
-        user.remove(done)
+        user.remove(done);
       });
     });
 
@@ -500,8 +513,7 @@ describe('Users model', function() {
       before(function (done) {
         MWC.model.User.create({
           'username': 'testSubject47_1',
-          'email': 'ostroumov3@teksi.ru',
-          'apiKey':'lalala1_1'
+          'email': 'ostroumov3@teksi.ru'
         }, function (err, userCreated) {
           if (err) {
             throw err;
@@ -526,7 +538,7 @@ describe('Users model', function() {
       });
 
       after(function (done) {
-        user.remove(done)
+        user.remove(done);
       });
     });
 
@@ -535,8 +547,7 @@ describe('Users model', function() {
       before(function (done) {
         MWC.model.User.create({
           'username': 'testSubject47_2',
-          'email': 'ostroumov_3@teksi.ru',
-          'apiKey': 'lalalaDaiMne3Ryblya'
+          'email': 'ostroumov_3@teksi.ru'
         }, function (err, userCreated) {
           if (err) {
             throw err;
@@ -562,7 +573,7 @@ describe('Users model', function() {
       });
 
       after(function (done) {
-        user.remove(done)
+        user.remove(done);
       });
     });
 
@@ -572,7 +583,6 @@ describe('Users model', function() {
         MWC.model.User.create({
           'username': 'test888',
           'email': 'ostroumov@teksi.ru',
-          'apiKey':'lalala1',
           'roles':'role1'
         }, function (err, userCreated) {
           if (err) {
@@ -603,8 +613,7 @@ describe('Users model', function() {
             function(cb){
               MWC.model.User.create({
                 'username': 'test888',
-                'email': 'ostroumov@teksi.ru',
-                'apiKey':'lalala1'
+                'email': 'ostroumov@teksi.ru'
               },cb);
             },
             function(aaa,cb){
@@ -621,7 +630,10 @@ describe('Users model', function() {
             }
           ],function(err,userFound){
             userWithRole = userFound;
-            if(err) throw err;
+            if(err) {
+              throw err;
+            }
+
             done();
           });
       });
@@ -644,7 +656,6 @@ describe('Users model', function() {
               MWC.model.User.create({
                 'username': 'test888',
                 'email': 'ostroumov@teksi.ru',
-                'apiKey':'lalala1',
                 'roles':['role1','role2']
               },cb);
             },
@@ -662,7 +673,9 @@ describe('Users model', function() {
             }
           ],function(err,userFound){
             userWithOutRole = userFound;
-            if(err) throw err;
+            if(err) {
+              throw err;
+            }
             done();
           });
       });
@@ -684,8 +697,7 @@ describe('Users model', function() {
       before(function(done){
         MWC.model.User.create({
           'username': 'test888',
-          'email': 'ostroumov@teksi.ru',
-          'apiKey':'lalala1'
+          'email': 'ostroumov'+Math.floor(Math.random()*100)+'@teksi.ru'
         }, function (err, userCreated) {
           if (err) {
             throw err;
@@ -696,7 +708,7 @@ describe('Users model', function() {
             user.notify('Hello!');
           },300);
 
-          MWC.on('notify',function(message){
+          MWC.on('notify:all',function(message){
             messageObj=message;
             done();
           });
@@ -704,7 +716,6 @@ describe('Users model', function() {
       });
 
       it('makes mwc core emit events with message created properly',function(){
-        messageObj.type.should.be.equal('text');
         messageObj.user.should.eql(user);
         messageObj.message.should.be.equal('Hello!');
       });
@@ -719,7 +730,6 @@ describe('Users model', function() {
       before(function(done){
         MWC.model.User.create({
           'email': 'emptyness@teksi.ru',
-          'apiKey':'lalala1',
           'profileComplete':false,
           'emailVerified':true
         }, function (err, userCreated) {
