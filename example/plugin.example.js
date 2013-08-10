@@ -166,9 +166,26 @@ exports.routes = function(core){
   });
 };
 
-//custom listeners to core events
-exports.listeners('alert',function(alert){
-  console.log(alert);
-});
+/**
+ * @ngdoc function
+ * @name plugin.listeners
+ * @type {object}
+ * @description
+ * Object, that will be supplied as argument to mwc.extendListeners function
+ * Field names are the vent types, values are function called against this events
+ * @example
+ * ```javascript
+ *  exports.listeners = {
+ *  'panic': function (panic) {
+ *   console.log(alert);
+ *  }
+ * };
+ * ```
+ */
+exports.listeners = {
+  'alert': function (panic) {
+    console.log(panic);
+  }
+};
 
 
