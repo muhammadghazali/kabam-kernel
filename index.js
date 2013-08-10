@@ -443,16 +443,23 @@ function MWC(config) {
         this.extendApp(pluginToBeInstalled.app);
       }
 
-      if (pluginToBeInstalled.middleware instanceof Array) {
-        for (var i = 0; i < pluginToBeInstalled.middleware.length; i++) {
-          if (typeof pluginToBeInstalled.middleware[i] === 'function') {
-            this.extendMiddleware(pluginToBeInstalled.middleware[i]);
+      if(typeof pluginToBeInstalled.middleware !== 'undefined'){
+        if (pluginToBeInstalled.middleware instanceof Array) {
+          for (var i = 0; i < pluginToBeInstalled.middleware.length; i++) {
+            if (typeof pluginToBeInstalled.middleware[i] === 'function') {
+              this.extendMiddleware(pluginToBeInstalled.middleware[i]);
+            } else {
+              throw new Error('plugin.middleware[' + i + '] is not a function!');
+            }
+          }
+        } else {
+          if (typeof pluginToBeInstalled.middleware === 'function') {
+            this.extendMiddleware(pluginToBeInstalled.middleware);
           } else {
-            throw new Error('plugin.middleware[' + i + '] is not a function!');
+            throw new Error('plugin.middleware is not a function!');
           }
         }
       }
-
       if (typeof pluginToBeInstalled.routes === 'function') {
         this.extendRoutes(pluginToBeInstalled.routes);
       }
