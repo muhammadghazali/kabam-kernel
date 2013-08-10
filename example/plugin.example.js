@@ -153,7 +153,6 @@ exports.middleware = [
  * @type {function}
  * @description
  * Extend appliction routes, sends the value as argument to a function mwc.extendRoutes
- * @param {mwc} mwc
  * @example
  * ```javascript
  *  exports.routes = function(mwc){
