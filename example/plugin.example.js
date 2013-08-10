@@ -1,7 +1,7 @@
 exports.name = 'pluginExample';
 exports.dependencies = ['mwc_plugin_foo','mwc_plugin_bar']; //we throw error it this plugins are not loaded in application
 
-exports.extendCore = {
+exports.core = {
   'parameterOne': 1,
   'parameterTwo': [1, 2, 3, 4, 5],
   'parameterThree': {},
@@ -13,7 +13,7 @@ exports.extendCore = {
 };
 
 
-exports.extendModel = {
+exports.model = {
   'Cats': function (mongoose, config) {
     var CatsSchema = new mongoose.Schema({
       'nickname': String
@@ -38,14 +38,14 @@ exports.extendModel = {
   }
 };
 
-exports.extendApp = function (core) {
+exports.app = function (core) {
   core.app.set('someValue',42);
 };
 
 var LinkedInStrategy = require('passport-linkedin').Strategy;
 
 //sorry, only one(!) passportJS strategy per plugin!
-exports.extendStrategy = {
+exports.strategy = {
   'strategy': function (core) {
     return new LinkedInStrategy({
       consumerKey: core.config.passport.LINKEDIN_API_KEY,
@@ -77,7 +77,7 @@ exports.extendStrategy = {
 //because middleware conception is tricky and it do need the core object, for example,
 // in this way or maybe in some other way. But it do need the core!!!
 //for simplicity of code of plugin all middlewares are setted to all enviroments and are mounted to path /
-exports.extendMiddleware = [
+exports.middleware = [
   function (core) {
     return function (request, response, next) {
       request.model.Cats.count({name: 'Grumpy'}, function (err, numberOfCats) {
@@ -108,7 +108,7 @@ exports.extendMiddleware = [
 //maybe we have injected all we need in routes parameters in extendMiddleware
 //and we can bind routes to application instead of core...
 
-exports.extendRoutes = function(core){
+exports.routes = function(core){
   core.app.get('/kittens',function(request,response){
     request.model.Cats.find({},function(err,cats){
       if(err) throw err;
@@ -125,7 +125,7 @@ exports.extendRoutes = function(core){
 };
 
 //custom listeners to core events
-exports.extendListeners('alert',function(alert){
+exports.listeners('alert',function(alert){
   console.log(alert);
 });
 

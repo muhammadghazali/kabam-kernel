@@ -416,67 +416,51 @@ function MWC(config) {
         throw new Error('Wrong plugin syntax. Plugin name is missed or have wrong syntax!');
       }
 
-      if (typeof pluginToBeInstalled.extendCore === 'object') {
-        for (var field in pluginToBeInstalled.extendCore) {
-          if (pluginToBeInstalled.extendCore.hasOwnProperty(field)) {
-            this.extendCore(field, pluginToBeInstalled.extendCore[field], pluginToBeInstalled.name);
+      if (typeof pluginToBeInstalled.core === 'object') {
+        for (var field in pluginToBeInstalled.core) {
+          if (pluginToBeInstalled.core.hasOwnProperty(field)) {
+            this.extendCore(field, pluginToBeInstalled.core[field], pluginToBeInstalled.name);
           }
         }
       }
-      if (typeof pluginToBeInstalled.extendModel === 'object') {
-        for (var x in pluginToBeInstalled.extendModel) {
-          if (pluginToBeInstalled.extendModel.hasOwnProperty(x)) {
-            this.extendModel(x, pluginToBeInstalled.extendModel[x]);
+      if (typeof pluginToBeInstalled.model === 'object') {
+        for (var x in pluginToBeInstalled.model) {
+          if (pluginToBeInstalled.model.hasOwnProperty(x)) {
+            this.extendModel(x, pluginToBeInstalled.model[x]);
           }
         }
       }
 
-      if (typeof pluginToBeInstalled.extendStrategy === 'object') {
-        if (typeof pluginToBeInstalled.extendStrategy.strategy === 'function' && typeof pluginToBeInstalled.extendStrategy.routes === 'function') {
-          this.extendStrategy(pluginToBeInstalled.extendStrategy);
+      if (typeof pluginToBeInstalled.strategy === 'object') {
+        if (typeof pluginToBeInstalled.strategy.strategy === 'function' && typeof pluginToBeInstalled.strategy.routes === 'function') {
+          this.extendStrategy(pluginToBeInstalled.strategy);
         } else {
-          throw new Error('extendStrategy of plugin has wrong syntax! strategy and routes have to be functions!');
+          throw new Error('plugin.strategy has wrong syntax! strategy and routes have to be functions!');
         }
       }
 
-      if (pluginToBeInstalled.setAppParameters && typeof pluginToBeInstalled.extendApp === 'undefined') {
-        console.log('Plugin is outdated! Use extendApp instead of setAppParameters with same syntax!');
-        pluginToBeInstalled.extendApp = pluginToBeInstalled.setAppParameters;
+      if (typeof pluginToBeInstalled.app === 'function') {
+        this.extendApp(pluginToBeInstalled.app);
       }
 
-      if (typeof pluginToBeInstalled.extendApp === 'function') {
-        this.extendApp(pluginToBeInstalled.extendApp);
-      }
-
-      if (pluginToBeInstalled.setAppMiddlewares && typeof pluginToBeInstalled.extendMiddleware === 'undefined') {
-        console.log('Plugin is outdated! Use extendMiddleware instead of setAppMiddlewares with same syntax!');
-        pluginToBeInstalled.extendMiddleware = pluginToBeInstalled.setAppMiddlewares;
-      }
-      if (typeof pluginToBeInstalled.extendMiddleware === 'function') {
-        this.extendMiddleware(pluginToBeInstalled.extendMiddleware);
-      }
-      if (pluginToBeInstalled.extendMiddleware instanceof Array) {
-        for (var i = 0; i < pluginToBeInstalled.extendMiddleware.length; i++) {
-          if (typeof pluginToBeInstalled.extendMiddleware[i] === 'function') {
-            this.extendMiddleware(pluginToBeInstalled.extendMiddleware[i]);
+      if (pluginToBeInstalled.middleware instanceof Array) {
+        for (var i = 0; i < pluginToBeInstalled.middleware.length; i++) {
+          if (typeof pluginToBeInstalled.middleware[i] === 'function') {
+            this.extendMiddleware(pluginToBeInstalled.middleware[i]);
           } else {
-            throw new Error('plugin.extendMiddleware[' + i + '] is not a function!');
+            throw new Error('plugin.middleware[' + i + '] is not a function!');
           }
         }
       }
-      if (pluginToBeInstalled.extendAppRoutes && typeof pluginToBeInstalled.extendRoutes === 'undefined') {
-        console.log('Plugin is outdated! Use extendMiddleware instead of setAppMiddlewares with same syntax!');
-        pluginToBeInstalled.extendRoutes = pluginToBeInstalled.extendAppRoutes;
+
+      if (typeof pluginToBeInstalled.routes === 'function') {
+        this.extendRoutes(pluginToBeInstalled.routes);
       }
 
-      if (typeof pluginToBeInstalled.extendRoutes === 'function') {
-        this.extendRoutes(pluginToBeInstalled.extendRoutes);
-      }
-
-      if (typeof pluginToBeInstalled.extendListeners === 'object') {
-        for (var x in pluginToBeInstalled.extendListeners) {
-          if (pluginToBeInstalled.extendListeners.hasOwnProperty(x)) {
-            this.extendListeners(x, pluginToBeInstalled.extendListeners[x]);
+      if (typeof pluginToBeInstalled.listeners === 'object') {
+        for (var x in pluginToBeInstalled.listeners) {
+          if (pluginToBeInstalled.listeners.hasOwnProperty(x)) {
+            this.extendListeners(x, pluginToBeInstalled.listeners[x]);
           }
         }
       }

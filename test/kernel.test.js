@@ -146,11 +146,11 @@ describe('Kernel', function() {
 
      MWC.usePlugin({
      'name':'unitTestPlugin',
-     'extendCore': {'mul':function(config){return function(a,b){return a*b}}},
-     'extendModel':{'Dogs':extendModelFunctionPlugin},
-     'extendApp': extendAppParametersFunctionPlugin,
-     "extendMiddleware": extendAppMiddlewareFunctionPlugin,
-     'extendRoutes': extendRoutesFunctionPlugin
+     'core': {'mul':function(config){return function(a,b){return a*b}}},
+     'model':{'Dogs':extendModelFunctionPlugin},
+     'app': extendAppParametersFunctionPlugin,
+     "middleware": [extendAppMiddlewareFunctionPlugin],
+     'routes': extendRoutesFunctionPlugin
      });
      //*/
     //create and start this application

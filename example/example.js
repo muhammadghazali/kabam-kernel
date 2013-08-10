@@ -107,8 +107,8 @@ MWC.extendRoutes(
 //injecting plugin as an object
 MWC.usePlugin({
   'name': 'exampleClassPlugin',
-  'extendCore': null, //can be ommited
-  'extendModel': {'Dogs': function (mongoose, config) {
+  'core': null, //can be ommited
+  'model': {'Dogs': function (mongoose, config) {
     var DogsSchema = new mongoose.Schema({
       'nickname': String
     });
@@ -117,9 +117,9 @@ MWC.usePlugin({
     });
     return mongoose.model('dogs', DogsSchema);
   }},
-  'extendApp': null, //can be ommited
-  'extendMiddleware': null, //can be ommited
-  'extendRoutes': function (core) {
+  'app': null, //can be ommited
+  'middleware': null, //can be ommited
+  'routes': function (core) {
     core.app.get('/newPlugin', function (req, res) {
       res.send('New plugin is installed as object');
     });
