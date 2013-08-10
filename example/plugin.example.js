@@ -127,16 +127,16 @@ var LinkedInStrategy = require('passport-linkedin').Strategy;
 exports.strategy = {
   'strategy': function (mwc) {
     return new LinkedInStrategy({
-      consumerKey: core.config.passport.LINKEDIN_API_KEY,
-      consumerSecret: core.config.passport.LINKEDIN_SECRET_KEY,
-      callbackURL: core.config.hostUrl + 'auth/linkedin/callback'
+      consumerKey: mwc.config.passport.LINKEDIN_API_KEY,
+      consumerSecret: mwc.config.passport.LINKEDIN_SECRET_KEY,
+      callbackURL: mwc.config.hostUrl + 'auth/linkedin/callback'
     }, function (token, tokenSecret, profile, done) {
       console.log('==============');
       console.log(profile);
       console.log('==============');
       var email = profile.emails[0].value;
       if (email) {
-        core.model.Users.processOAuthProfile(email, done);
+        mwc.model.Users.processOAuthProfile(email, done);
       } else {
         return done(new Error('There is something strange instead of user profile'));
       }
