@@ -14,8 +14,8 @@ MWC.extendCore('TempVar', 42);
 
 
 //set global lever variables for expressJS application
-MWC.extendApp(['development', 'staging'], function (core) {
-  core.app.set('TempVar', core.shared.TempVar);
+MWC.extendApp(['development', 'staging'], function (mwc) {
+  mwc.app.set('TempVar', mwc.shared.TempVar);
 });
 
 
@@ -32,7 +32,7 @@ MWC.extendModel('Cats', function (mongoose, config) {
 });
 
 //set middleware for development and staging enviroments
-MWC.extendMiddleware(['development', 'staging'], function (core) {
+MWC.extendMiddleware(['development', 'staging'], function (mwc) {
   return function (req, res, next) {
     res.setHeader('X-Production', 'NO!');
     next();
@@ -40,14 +40,14 @@ MWC.extendMiddleware(['development', 'staging'], function (core) {
 });
 //we add some routes
 MWC.extendRoutes(
-  function (core) {
-    core.app.get('/', function (req, res) {
+  function (mwc) {
+    mwc.app.get('/', function (req, res) {
       var authByGoogleString = (req.user) ? '<li><a href="/my">See your profile</a></li>' : '<li><a href="/auth/google">Auth by google</a></li>';
 
       res.send('<html>' +
         '<head>MyWebClass Core Example</head>' +
         '<body>' +
-        '<p>TempVar is ' + core.app.get('TempVar') + '</p>' +
+        '<p>TempVar is ' + mwc.app.get('TempVar') + '</p>' +
         '<p>Hello, friend! You can do this things:</p><ul>' +
         '<li>See current <a href="/time">time</a>.</li>' +
         '<li>See <a href="/team">team</a> on this server.</li>' +
@@ -63,7 +63,7 @@ MWC.extendRoutes(
     });
 
     //we use Mongoose Model in this route
-    core.app.get('/team', function (request, response) {
+    mwc.app.get('/team', function (request, response) {
       request.model.Users.find({}, function (err, users) {
         if (err) {
           throw err;
@@ -72,19 +72,19 @@ MWC.extendRoutes(
       });
     });
     //we use exposed Redis client. In a rather stupid way.
-    core.app.get('/redis', function (request, response) {
+    mwc.app.get('/redis', function (request, response) {
       request.redisClient.keys('*', function (err, keys) {
         response.json(keys);
       });
     });
 
     //making mousetrap - when user visits this url, MWC emmits the event
-    core.app.get('/honeypot', function (request, response) {
+    mwc.app.get('/honeypot', function (request, response) {
       request.emitMWC('honeypot accessed', 'Somebody with IP of ' + request.ip + ' accessed the honeypot');
       response.send('Administrator was notified about your actions!');
     });
 
-    core.app.get('/kittens', function (request, response) {
+    mwc.app.get('/kittens', function (request, response) {
       request.model.Cats.find({}, function (err, cats) {
         if (err) {
           throw err;
@@ -93,7 +93,7 @@ MWC.extendRoutes(
       });
     });
 
-    core.app.get('/dogs', function (request, response) {
+    mwc.app.get('/dogs', function (request, response) {
       request.model.Dogs.find({}, function (err, dogs) {
         if (err) {
           throw err;
@@ -117,10 +117,10 @@ MWC.usePlugin({
     });
     return mongoose.model('dogs', DogsSchema);
   }},
-  'app': null, //can be ommited
-  'middleware': null, //can be ommited
-  'routes': function (core) {
-    core.app.get('/newPlugin', function (req, res) {
+//  'app': null, //can be ommited
+//  'middleware': null, //can be ommited
+  'routes': function (mwc) {
+    mwc.app.get('/newPlugin', function (req, res) {
       res.send('New plugin is installed as object');
     });
   }
