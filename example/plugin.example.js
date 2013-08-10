@@ -7,7 +7,7 @@
 
 /**
  * @ngdoc function
- * @name plugin.name
+ * @name Plugin.name
  * @description
  * Unique (in the scope of project) plugin name
  * @type {string}
@@ -24,7 +24,7 @@ exports.dependencies = ['mwc_plugin_foo','mwc_plugin_bar']; //we throw error it 
 
 /**
  * @ngdoc function
- * @name plugin.core
+ * @name Plugin.core
  * @type {object}
  * @description
  * Object, that will be supplied as argument to mwc.extencCore function
@@ -80,7 +80,7 @@ exports.model = {
   }
 };
 
-exports.app = function (core) {
+exports.app = function (mwc) {
   core.app.set('someValue',42);
 };
 
@@ -88,7 +88,7 @@ var LinkedInStrategy = require('passport-linkedin').Strategy;
 
 //sorry, only one(!) passportJS strategy per plugin!
 exports.strategy = {
-  'strategy': function (core) {
+  'strategy': function (mwc) {
     return new LinkedInStrategy({
       consumerKey: core.config.passport.LINKEDIN_API_KEY,
       consumerSecret: core.config.passport.LINKEDIN_SECRET_KEY,
@@ -120,7 +120,7 @@ exports.strategy = {
 // in this way or maybe in some other way. But it do need the core!!!
 //for simplicity of code of plugin all middlewares are setted to all enviroments and are mounted to path /
 exports.middleware = [
-  function (core) {
+  function (mwc) {
     return function (request, response, next) {
       request.model.Cats.count({name: 'Grumpy'}, function (err, numberOfCats) {
         if (numberOfCats > core.parameterOne) {
@@ -132,7 +132,7 @@ exports.middleware = [
       });
     };
   },
-  function (core) {
+  function (mwc) {
     return function (request, response, next) {
       request.model.Dogs.count({name: 'Strelka'}, function (err, numberOfDogs) {
         if (numberOfDogs > core.parameterOne) {
@@ -146,19 +146,42 @@ exports.middleware = [
   }
 ];
 
-//extending routes
-//maybe we have injected all we need in routes parameters in extendMiddleware
-//and we can bind routes to application instead of core...
 
-exports.routes = function(core){
-  core.app.get('/kittens',function(request,response){
+/**
+ * @ngdoc function
+ * @name Plugin.routes
+ * @type {function}
+ * @description
+ * Extend appliction routes, sends the value as argument to a function mwc.extendRoutes
+ * @param {mwc} mwc
+ * @example
+ * ```javascript
+ *  exports.routes = function(mwc){
+ *   mwc.app.get('/kittens',function(request,response){
+ *     request.model.Cats.find({},function(err,cats){
+ *       if(err) throw err;
+ *       response.json(cats);
+ *     });
+ *   });
+ *
+ *   mwc.app.get('/dogs',function(request,response){
+ *     request.model.Dogs.find({},function(err,dogs){
+ *       if(err) throw err;
+ *       response.json(dogs);
+ *     });
+ *   });
+ * };
+ * ```
+ */
+exports.routes = function(mwc){
+  mwc.app.get('/kittens',function(request,response){
     request.model.Cats.find({},function(err,cats){
       if(err) throw err;
       response.json(cats);
     });
   });
 
-  core.app.get('/dogs',function(request,response){
+  mwc.app.get('/dogs',function(request,response){
     request.model.Dogs.find({},function(err,dogs){
       if(err) throw err;
       response.json(dogs);
@@ -168,7 +191,7 @@ exports.routes = function(core){
 
 /**
  * @ngdoc function
- * @name plugin.listeners
+ * @name Plugin.listeners
  * @type {object}
  * @description
  * Object, that will be supplied as argument to mwc.extendListeners function
