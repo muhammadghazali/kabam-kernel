@@ -6,6 +6,7 @@ mwc_kernel
 ==========
 
 MyWebClass core node.js application to be extended by plugins.
+[![Build Status](https://travis-ci.org/mywebclass/mwc_kernel.png?branch=master)](https://travis-ci.org/mywebclass/mwc_kernel)
 
 Important
 =======
