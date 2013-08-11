@@ -490,8 +490,40 @@ function MWC(config) {
    * - https instance - bind expressJS application to this server, returns this server object with application bound
    * - string of 'app' - start appliation as standalone object, for background workers and console scripts, returns mwc
    *
-   * @param {object} options - config object for https server.
-   * @url http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener
+   * @param {object} options config object for https server [http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener](http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener)
+   *
+   * @example
+   * ```javascript
+   *
+   *   //different ways to bind application to 3000 port
+   *   mwc.start('app');
+   *   mwc.app.listen(3000);
+   *
+   *   mwc.start(); //binds to default port, 3000
+   *
+   *   mwc.start(3000); //binds to  port 3000
+   *
+   *   var http = require('http');
+   *   mwc.start(http).listen(mwc.app.get('port'));
+   *
+   *   //with socket.io
+   *   //this is done in this way, because we can attach socket.io easily
+   *   var http = require('http');
+   *   var server = mwc.start(http);
+   *   io = require('socket.io').listen(server);
+   *   server.listen(mwc.app.get('port'));
+   *
+   *   //setting up the https
+   *   var https = require('https');
+   *   mwc.start(https,{
+   *     key: fs.readFileSync('test/fixtures/keys/agent2-key.pem'),
+   *     cert: fs.readFileSync('test/fixtures/keys/agent2-cert.pem')
+   *   }).listen(mwc.app.get('port'));
+   *
+   * ```
+   *
+   *
+   *
    *
    */
   this.start = function (howExactly, options) {
@@ -527,11 +559,13 @@ function MWC(config) {
         thisMWC.app.listen(howExactly);
         return thisMWC;
       }
-      if (howExactly instanceof https) {
-        return howExactly.createServer(thisMWC.app);//do not forget to set this http for listening.
-      }
-      if (howExactly instanceof http) {
-        return howExactly.createServer(thisMWC.app, options);//do not forget to set this https for listening.
+      if (typeof howExactly  === 'object' && typeof howExactly.createServer === 'function') {
+        if(options){
+          return howExactly.createServer(options,thisMWC.app);//do not forget to set this https for listening.
+        } else {
+          return howExactly.createServer(thisMWC.app);//do not forget to set this https for listening.
+        }
+
       }
       throw new Error('Function MWC.listen(httpOrHttpsOrPort) accepts objects of null, "app", http, https or port\'s number as argument!');
     } else {
