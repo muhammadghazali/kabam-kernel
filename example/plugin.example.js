@@ -3,6 +3,62 @@
  * @name Plugin
  * @description
  * Plugin object, that can be loaded by mwc.loadPlugin
+ * @example
+ * ```javascript
+ * exports.name ='testPlugin333';
+ *
+ * exports.core = {
+ *   'parameterOne': 1,
+ *   'parameterTwo': [1, 2, 3, 4, 5],
+ *   'parameterThree': {},
+ *   'getSum': function (config) {
+ *     return function (a, b) {
+ *       return (a + b) * (config.multipyKoefficient);
+ *     }
+ *   }
+ * };
+ *
+ * exports.model = {
+ *   'Cats': function (mongoose, config) {
+ *    var CatsSchema = new mongoose.Schema({
+ *      'nickname': String
+ *    });
+ *
+ *   return mongoose.model('cats', CatsSchema);
+ *  },
+ *  'Dogs': function (mongoose, config) {
+ *    var DogsSchema = new mongoose.Schema({
+ *      'nickname': String
+ *    });
+ *   return mongoose.model('Dogs', DogsSchema);
+ *  }
+ * };
+ *
+ * exports.app = function (mwc) {
+ *   mwc.app.set('someValue',42);
+ * };
+ *
+ *  exports.routes = function(mwc){
+ *   mwc.app.get('/kittens',function(request,response){
+ *     request.model.Cats.find({},function(err,cats){
+ *       if(err) throw err;
+ *       response.json(cats);
+ *     });
+ *   });
+ *
+ *   mwc.app.get('/dogs',function(request,response){
+ *     request.model.Dogs.find({},function(err,dogs){
+ *       if(err) throw err;
+ *       response.json(dogs);
+ *     });
+ *   });
+ * };
+ *  exports.listeners = {
+ *  'panic': function (panic) {
+ *   console.log(alert);
+ *  }
+ * };
+ * ```
  */
 
 /**
@@ -40,7 +96,6 @@ exports.dependencies = ['mwc_plugin_foo','mwc_plugin_bar']; //we throw error it 
  *     }
  *   }
  * };
- *
  * ```
  */
 exports.core = {
