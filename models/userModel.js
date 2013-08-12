@@ -542,6 +542,7 @@ module.exports = exports = function (mwc) {
    */
   UserSchema.methods.revokeKeyChain = function (provider, callback) {
     this.keychain[provider] = null;
+    this.markModified('keychain'); //http://mongoosejs.com/docs/schematypes.html
     this.save(callback);
   };
 
