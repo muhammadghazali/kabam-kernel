@@ -46,11 +46,13 @@ function MWC(config) {
    * @name mwc.extendCore
    * @description
    * Perform dependency injection on the mwc.shared object.
-   * If mwc do not have fieldName property/method, this method is created as public property/method
+   * If mwc do not have fieldName property/method, this method is created as public property/method.
+   * You can call this function multiple times. Later this field/method can be called by `mwc.nameSpaceName.fieldName`. `nameSpaceName`
+   * can be ommited, default value is `shared`
    * @param {string} fieldName - field name
-   * @param {function/object/string/number/array} factoryFunctionOrObject - function(config),
+   * @param {function/object/string/number/array} factoryFunctionOrObject  function(config),
    * what is called to return value assigned to fieldName  config is the mwc.config object, or just a object, to be setted as mwc public field
-   * @param {string} namespace - namespace to bind this field. default is 'shared;
+   * @param {string} namespace  namespace to bind this field. default is 'shared;
    * @example
    * ```javascript
    *
@@ -271,10 +273,11 @@ function MWC(config) {
    * @name mwc.extendMiddleware
    * @description
    * Adds new middleware to expressJS application
+   * This function can be executed multiple times, the middlewares applied are used in application in *order* they were issued by this function.
+   * First argument (array of enviroments), and the second one (the path where to use middleware, the default is "/") are OPTIONAL
    * They are [applied]((https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L283) after
    * [setting default exposed internals middleware](https://github.com/mywebclass/mwc_kernel/blob/master/lib/appManager.js#L114) and before
    * [setting router middleware](https://github.com/mywebclass/mwc_kernel/blob/master/lib/appManager.js#L142).
-
    * So, you have the full power of core internals - (`emit`,`on`), `redisClient`, `model.User`
    * and exposed internals middleware - where expressJS object of request have functions of `request.mwcEmit`,
    * `request.model`,`request.model.User`, `request.emitMWC`, custom models,`request.redisClient`, and `request.user` provided

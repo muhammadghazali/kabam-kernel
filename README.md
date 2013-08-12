@@ -26,30 +26,35 @@ Introduction
 Technically this is a Factory class to vendor [express.js](http://expressjs.com/) applications,
 that can be easily extended by 6 mixin type functions.
 
-0. `mwcCore(configObj)` - create application object using [configuration object](https://github.com/mywebclass/mwc_kernel/blob/master/example/config.json) specified.
+0. `mwcCore(configObj)` - create application object using [configuration object](https://github.com/mywebclass/mwc_kernel/blob/master/example/config.json)
+specified.
 
-1. `extendCore('fieldName',function(config){...},'nameSpaceName')` or `extendCore('fieldName', 'someValue')` - extend object created, including expressJS application
-and some other modules. You can call this function multiple times. Later this field/method can be called by `mwc.nameSpaceName.fieldName`. `nameSpaceName`
+1. [extendCore('fieldName',function(config){...},'nameSpaceName')](http://ci.monimus.com/docs/#/api/mwc.extendCore) or
+[extendCore('fieldName', 'someValue')](http://ci.monimus.com/docs/#/api/mwc.extendCore) - extend kernel object.
+ You can call this function multiple times. Later this field/method can be called by `mwc.nameSpaceName.fieldName`. `nameSpaceName`
 can be ommited, default value is `shared`
 
+2. [extendModel(ModelName,function(mongoose, config){...})](http://ci.monimus.com/docs/#/api/mwc.extendModel) - extend build in mongoose models.
 
-2. `extendModel(ModelName,function(mongoose, config){...})` - extend build in mongoose models.
-
-3. `extendApp(['development','staging','production','otherEnviroment'],function(core){...})` - set global application parameters, for example
+3. [extendApp(['development','staging','production','otherEnviroment'],function(core){...})](http://ci.monimus.com/docs/#/api/mwc.extendApp) - set global application parameters, for example
 template [engines](http://expressjs.com/api.html#app.engine),
 [locals](http://expressjs.com/api.html#app.locals)
 and [other](http://expressjs.com/api.html#app-settings) settings.
 First argument (array of enviroments) is OPTIONAL
 
-4. `extendMiddleware(['development','staging','production','otherEnviroment'],'/middlewarePath',function(core){...})` - set application
-[middleware](http://expressjs.com/api.html#middleware).
+4. [extendMiddleware(['development','staging','production','otherEnviroment'],'/middlewarePath',function(core){...})](http://ci.monimus.com/docs/#/api/mwc.extendMiddleware) -
+ set application [middleware](http://expressjs.com/api.html#middleware).
 This function can be executed multiple times, the middlewares applied are used in application in *order* they were issued by this function.
 First argument (array of enviroments), and the second one (the path where to use middleware, the default is "/") are OPTIONAL
 
-5. `extendRoutes(function(core){...})` - add custom routes to application
+5. [extendRoutes(function(core){...})](http://ci.monimus.com/docs/#/api/mwc.extendRoutes) - add custom routes to application.
+ExpressJS object of every routes request have functions of `request.mwcEmit`, `request.model`,`request.model.User`, `request.emitMWC`, custom models,
+`request.redisClient`, and `request.user` provided by [passportjs](http://passportjs.org) middleware.
 
-6. `loadPlugin("mwc_plugin_foo")` or `loadPlugin(pluginObj)` - load plugin as object or as a installed [npm](https://npmjs.org/) plugin by name
-See [Plugin creating manual](https://github.com/mywebclass/mwc_kernel#plugin-creating-manual) for details
+
+6. [loadPlugin("mwc_plugin_foo")` or `loadPlugin(pluginObj)](http://ci.monimus.com/docs/#/api/mwc.loadPlugin) -
+load plugin as object or as a installed [npm](https://npmjs.org/) plugin by name.
+See [Plugin creating manual](https://github.com/mywebclass/mwc_kernel#plugin-creating-manual) for details.
 
 
 
@@ -207,7 +212,6 @@ Installation
 Edit the example/config.json file with your favourite text editor.
 
 ```shell
-    $ node example/populate_database.js
     $ npm start
 ```
 
@@ -220,7 +224,9 @@ Open [http://localhost:3000/my](http://localhost:3000/my) to see you profile
 Developer's Note
 ================
 
-CONTRIBUTE TO BRANCH `dev` ONLY PLEASE!!!
+`DO NOT CONTRIBUTE TO BRANCH MASTER PLEASE!!!`
+
+CREATE A FEATURE BRANCH INSTEAD!
 
 Run jshint with:
 
@@ -245,79 +251,11 @@ or
 Plugin creating manual
 =======
 
-This is typicale plugin code. It is placed there
+This is typical plugin code. It is placed there
 [https://github.com/mywebclass/mwc_plugin_example](https://github.com/mywebclass/mwc_plugin_example)
 
 *Important* - when you create plugin, the `extendApp`, `extendMiddleware` APPLIES to all enviroments!
 Furthermore, `extendMiddleware` binds to route '/'
-
-```javascript
-var os = require('os');
-
-exports.extendCore = function(core) {
-  //some other Cocoo clock
-  setInterval(function() {
-    core.emit('Coocoo!', 'Dzin!');
-  }, 5000);
-};
-
-exports.extendApp = function(core) {
-  core.app.set('var1', "42");
-};
-
-exports.extendMiddleware = function(core) {
-  return function(request, response, next) {
-    response.setHeader('X-MWC-PLUGIN_EXAMPLE!', 'THIS ROCKS!');
-    next();
-  }
-};
-
-exports.extendRoutes = function(core) {
-  core.app.get('/time', function(request, response) {
-    response.send('Current time is ' + (new Date().toLocaleString()));
-  });
-
-
-  core.app.get('/config', function(request, response) {
-    response.json({
-      'current_time': (new Date().toLocaleString()),
-      'NODE_ENV': process.env.NODE_ENV,
-      'OS': {
-        'hostname': os.hostname(),
-        'arch': os.arch(),
-        'type': os.type(),
-        'platform': os.platform(),
-        'release': os.release(),
-        'NodeJS version': process.version
-      }
-    });
-  });
-
-  //we use Mongoose Model in this route
-  core.app.get('/team', function(request, response) {
-    request.model.Users.find({
-      active: 1
-    }, function(err, users) {
-      if (err) throw err;
-      response.json({
-        'Team': users
-      });
-    });
-  });
-  //we use exposed Redis client. In a rather stupid way.
-  core.app.get('/redis', function(request, response) {
-    request.redisClient.keys('*', function(err, keys) {
-      response.json(keys);
-    });
-  });
-
-  //making mousetrap - when user visits this url, MWC emmits the event
-  core.app.get('/honeypot', function(request, response) {
-    request.emitMWC('honeypot accessed', 'Somebody with IP of ' + request.ip + ' accessed the honeypot');
-    response.send('Administrator was notified about your actions!');
-  });
-};
-```
 
 Lifecycle of mwc_kernel module and how can we extend it
 =======
@@ -347,7 +285,7 @@ And this code will be erroneous, because it violates the desired lifespan of app
 Because on stage of extending core, there is no core.app variable.
 
 This is the way of things it is intended to work
-When you call the `extendCore(function(core){...})`, you can add global core functions and variables,
+When you call the `extendCore('fieldName',function(config){...})`, you can add global core functions and variables,
 but not anything other touching the application, middlewares or routes.
 In code it is called right after initializing [mongoose routes](https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L195)
 core have event emmiter capabilities `MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.model.User`, `MWC.model.Documents` (exposed as mongoose schemas).
