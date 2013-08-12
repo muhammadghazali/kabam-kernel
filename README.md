@@ -61,7 +61,7 @@ ExpressJS object of every routes request have functions of `request.mwcEmit`, `r
 `request.redisClient`, and `request.user` provided by [passportjs](http://passportjs.org) middleware.
 
 
-7. [loadPlugin("mwc_plugin_foo")` or `loadPlugin(pluginObj)](http://ci.monimus.com/docs/#/api/mwc.loadPlugin) -
+7. [loadPlugin("mwc_plugin_foo") or loadPlugin(pluginObj)](http://ci.monimus.com/docs/#/api/mwc.loadPlugin) -
 load plugin as object or as a installed [npm](https://npmjs.org/) plugin by name.
 See [Plugin creating manual](https://github.com/mywebclass/mwc_kernel#plugin-creating-manual) for details.
 
@@ -277,7 +277,7 @@ Plugin creating manual
 This is typical plugin code. It is placed there
 [https://github.com/mywebclass/mwc_plugin_example](https://github.com/mywebclass/mwc_plugin_example)
 
-*Important* - when you create plugin, the `extendApp`, `extendMiddleware` APPLIES to all enviroments!
+*Important* - when you create plugin, the `extendApp`, `extendMiddleware` APPLIES to all environments!
 Furthermore, `extendMiddleware` binds to route '/'
 
 Lifecycle of mwc_kernel module and how can we extend it
