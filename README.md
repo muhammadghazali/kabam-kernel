@@ -32,37 +32,50 @@ specified.
 1. [extendCore('fieldName',function(config){...},'nameSpaceName')](http://ci.monimus.com/docs/#/api/mwc.extendCore) or
 [extendCore('fieldName', 'someValue')](http://ci.monimus.com/docs/#/api/mwc.extendCore) - extend kernel object.
  You can call this function multiple times. Later this field/method can be called by `mwc.nameSpaceName.fieldName`. `nameSpaceName`
-can be ommited, default value is `shared`
+can be ommited, default value is `shared`.
 
-2. [extendModel(ModelName,function(mongoose, config){...})](http://ci.monimus.com/docs/#/api/mwc.extendModel) - extend build in mongoose models.
+2. [extendStrategy](http://ci.monimus.com/docs/#/api/mwc.extendStrategy) - extend authorization means of application by custom passportKS strategies module.
 
-3. [extendApp(['development','staging','production','otherEnviroment'],function(core){...})](http://ci.monimus.com/docs/#/api/mwc.extendApp) - set global application parameters, for example
+3. [extendModel(ModelName,function(mongoose, config){...})](http://ci.monimus.com/docs/#/api/mwc.extendModel) - extend build in mongoose models.
+
+4. [extendApp(['development','staging','production','otherEnviroment'],function(core){...})](http://ci.monimus.com/docs/#/api/mwc.extendApp) - set global application parameters, for example
 template [engines](http://expressjs.com/api.html#app.engine),
 [locals](http://expressjs.com/api.html#app.locals)
 and [other](http://expressjs.com/api.html#app-settings) settings.
 First argument (array of enviroments) is OPTIONAL
 
-4. [extendMiddleware(['development','staging','production','otherEnviroment'],'/middlewarePath',function(core){...})](http://ci.monimus.com/docs/#/api/mwc.extendMiddleware) -
+5. [extendMiddleware(['development','staging','production','otherEnviroment'],'/middlewarePath',function(core){...})](http://ci.monimus.com/docs/#/api/mwc.extendMiddleware) -
  set application [middleware](http://expressjs.com/api.html#middleware).
 This function can be executed multiple times, the middlewares applied are used in application in *order* they were issued by this function.
 First argument (array of enviroments), and the second one (the path where to use middleware, the default is "/") are OPTIONAL
 
-5. [extendRoutes(function(core){...})](http://ci.monimus.com/docs/#/api/mwc.extendRoutes) - add custom routes to application.
+6. [extendRoutes(function(core){...})](http://ci.monimus.com/docs/#/api/mwc.extendRoutes) - add custom routes to application.
 ExpressJS object of every routes request have functions of `request.mwcEmit`, `request.model`,`request.model.User`, `request.emitMWC`, custom models,
 `request.redisClient`, and `request.user` provided by [passportjs](http://passportjs.org) middleware.
 
 
-6. [loadPlugin("mwc_plugin_foo")` or `loadPlugin(pluginObj)](http://ci.monimus.com/docs/#/api/mwc.loadPlugin) -
+7. [loadPlugin("mwc_plugin_foo")` or `loadPlugin(pluginObj)](http://ci.monimus.com/docs/#/api/mwc.loadPlugin) -
 load plugin as object or as a installed [npm](https://npmjs.org/) plugin by name.
 See [Plugin creating manual](https://github.com/mywebclass/mwc_kernel#plugin-creating-manual) for details.
+
+8. [start](http://ci.monimus.com/docs/#/api/mwc.start) - start the mwc application in way desired.
+
 
 
 
 Plugins
 =======
+Each of plugins have working example, to see it in action, install plugin like this
+```shell
+    $ git clone git@github.com:mywebclass/mwc_plugin_socket_io.git
+    $ cd mwc_plugin_socket_io
+    $ npm install
+    $ npm start
+```
+If you have redis and mongodb running without password, every plugin have will start demonstration from the box.
+If you have errors running plugin, upgrade your kernel or plugin modules.
 
  - [mwc_plugin_example](https://github.com/mywebclass/mwc_plugin_example) [![Build Status](https://travis-ci.org/mywebclass/mwc_plugin_example.png)](https://travis-ci.org/mywebclass/mwc_plugin_example) demonstration plugin
-
 
  - [mwc_heroku](https://github.com/mywebclass/mwc_heroku) - plugin to simplify deploy and configuring on [heroku cloud hosting](http://heroku.com).
 
@@ -101,14 +114,14 @@ MWC is a rather complicated object. In minimal installation it have this exposed
 in two ways
 
 ```javascript
-    MWC.listen(MWC.app.get('port'));
+    MWC.start(MWC.app.get('port'));
 ```
 
 or
 
 ```javascript
     var http = require('http');
-    MWC.listen(http);
+    MWC.start(http);
 ```
 
 and for `https` server in this way
@@ -120,7 +133,7 @@ and for `https` server in this way
         key: fs.readFileSync('test/fixtures/keys/agent2-key.pem'),
         cert: fs.readFileSync('test/fixtures/keys/agent2-cert.pem')
     };
-    MWC.listen(https.createServer(MWC.app,options));
+    MWC.start(https,options);
 ```
 
 
@@ -148,7 +161,7 @@ MWC.app.get('/someURI', function(request, response) {
 
 The model of User
 =======
-This system use mongoose model to represent users. It have this methods.
+This system use mongoose model to represent users. It have this global methods:
 
 1. `MWC.model.findOneByLoginOrEmail(string,function(err,userFound){...})` - finds one user, that have `username` or `email`  equal to `string`
 2. `MWC.model.findOneByApiKey(string,function(err,userFound){...})` - finds one user, that have `apiKey` equal to `string`
@@ -156,6 +169,9 @@ This system use mongoose model to represent users. It have this methods.
 4. `MWC.model.findOneByKeychain('github', 23122, function(err,userFound){...})` - finds user, that has github profile if of 23122
 5. `MWC.model.findOneByApiKeyAndVerify(apiKey,function(err,userFound){...})` - finds user with apiKey given and set his accout as verified
 6. `MWC.model.findOneByApiKeyAndResetPassword(apiKey, password, function(err){...})` - resets password for account with api key given
+
+Full description is published there:
+[http://ci.monimus.com/docs/#/api/mwc.model.User](http://ci.monimus.com/docs/#/api/mwc.model.User)
 
 Methods to one instance of class User
 
@@ -190,11 +206,11 @@ will attach the github profile with id=23122 to users profile
 
 11. `revokeKeyChain(provider,callback)` - opposite to 10.
 
-
+Further documentation is published here [http://ci.monimus.com/docs/#/api/User](http://ci.monimus.com/docs/#/api/User)
 
 
 There is plugin of [https://github.com/mywebclass/mwc_plugin_notify_by_email](https://github.com/mywebclass/mwc_plugin_notify_by_email)
-that sends SOME notifications as emails to user. There will be other plugins that can notify users by other means
+that sends notifications as emails to user. There will be other plugins that can notify users by other means
 
 
 
