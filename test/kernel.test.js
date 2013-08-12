@@ -846,7 +846,7 @@ describe('Kernel', function () {
         });
       });
 
-      describe('findOneByApiKeyAndResetPassword', function () {
+      describe('findOneByApiKeyAndResetPassword for good api key', function () {
         var user, userWithPasswordReseted;
         before(function (done) {
           async.waterfall([
@@ -894,6 +894,76 @@ describe('Kernel', function () {
         it('and the user have new password', function () {
           userWithPasswordReseted.verifyPassword('lalala1').should.be.false;
           userWithPasswordReseted.verifyPassword('lalala2').should.be.true;
+        });
+
+        after(function (done) {
+          user.remove(done);
+        });
+      });
+      describe('findOneByApiKeyAndResetPassword for bad api key', function () {
+        var user, userNotFound, errorThrown;
+        before(function (done) {
+          MWC.model.User.create({
+            'username': 'iForgotMyPassWordIamStupid',
+            'email': 'iForgotMyPassWordIamStupid@teksi.ru',
+            'apiKey': 'iForgotMyPassWordIamStupid1111',
+            'emailVerified': true,
+            'apiKeyCreatedAt': new Date()
+          }, function (err, userCreated) {
+            if (err) {
+              throw err;
+            }
+            user = userCreated;
+            MWC.model.User.findOneByApiKeyAndResetPassword('thisIsNotCorrectApiKey', 'lalala2', function (err1, userChanged) {
+              errorThrown = err1;
+              userNotFound = userChanged
+              done();
+            });
+          });
+        });
+
+        it('throws proper error', function () {
+          errorThrown.should.be.an.instanceOf(Error);
+          errorThrown.message.should.be.equal('Activation key is wrong or outdated!');
+        });
+
+        it('do not returns user in callback', function () {
+          should.not.exists(userNotFound);
+        });
+
+        after(function (done) {
+          user.remove(done);
+        });
+      });
+      describe('findOneByApiKeyAndResetPassword for outdated api key', function () {
+        var user, userNotFound, errorThrown;
+        before(function (done) {
+          MWC.model.User.create({
+            'username': 'iForgotMyPassWordIamStupid',
+            'email': 'iForgotMyPassWordIamStupid@teksi.ru',
+            'apiKey': 'iForgotMyPassWordIamStupid1111',
+            'emailVerified': true,
+            'apiKeyCreatedAt': new Date(1986, 1, 12, 11, 45, 36, 21)
+          }, function (err, userCreated) {
+            if (err) {
+              throw err;
+            }
+            user = userCreated;
+            MWC.model.User.findOneByApiKeyAndResetPassword('iForgotMyPassWordIamStupid1111', 'lalala2', function (err1, userChanged) {
+              errorThrown = err1;
+              userNotFound = userChanged
+              done();
+            });
+          });
+        });
+
+        it('throws proper error', function () {
+          errorThrown.should.be.an.instanceOf(Error);
+          errorThrown.message.should.be.equal('Activation key is wrong or outdated!');
+        });
+
+        it('do not returns user in callback', function () {
+          should.not.exists(userNotFound);
         });
 
         after(function (done) {
