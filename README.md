@@ -20,6 +20,12 @@ Without understanding how [express.js framework](http://expressjs.com/) operates
 
 this module is hard to understand. Please, read this information above before processing with this plugin.
 
+Disclaimer
+=======
+Project is under development, if you build something on it, do update this module daily.
+Review the documentation [http://ci.monimus.com/docs/#/api](http://ci.monimus.com/docs/#/api) - it have to be actual.
+It is updated more often than README.md
+
 Introduction
 =======
 
