@@ -33,7 +33,8 @@ Technically this is a Factory class to vendor [express.js](http://expressjs.com/
 that can be easily extended by 6 mixin type functions.
 
 0. `mwcCore(configObj)` - create application object using [configuration object](https://github.com/mywebclass/mwc_kernel/blob/master/example/config.json)
-specified.
+specified. The mandatory configObj fields are `"hostUrl":"http://vvv.msk0.ru/"`, `"secret":"hammer on the keyboard"`,
+and `"mongoUrl":"mongodb://localhost/mwc_dev"`.
 
 1. [extendCore('fieldName',function(config){...},'nameSpaceName')](http://ci.monimus.com/docs/#/api/mwc.extendCore) or
 [extendCore('fieldName', 'someValue')](http://ci.monimus.com/docs/#/api/mwc.extendCore) - extend kernel object.
