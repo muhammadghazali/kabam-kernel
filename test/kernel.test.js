@@ -1254,6 +1254,12 @@ describe('Kernel', function() {
           messageObj.message.should.be.equal('Hello!');
         });
 
+        it('throws errors for empty arguments',function(){
+          (function () {
+            user.notify();
+          }).should.throw('Function User.notify([channelNameString],messageObj) has wrond arguments!');
+
+        });
         after(function(done){
           user.remove(done);
         });
