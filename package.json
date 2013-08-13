@@ -1,6 +1,6 @@
 {
   "name": "mwc_kernel",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "MyWebClass kernel for building express.js applications with plugins",
   "main": "index.js",
   "engines": {

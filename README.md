@@ -25,6 +25,9 @@ Disclaimer
 Project is under development, if you build something on it, do update this module daily.
 Review the documentation [http://ci.monimus.com/docs/#/api](http://ci.monimus.com/docs/#/api) - it have to be actual.
 It is updated more often than README.md
+This project policy implies, that `master` branch works alwayes as documented
+and completes unit tests successefuly.
+But it can have some new features, not listed in README.md
 
 Introduction
 =======
