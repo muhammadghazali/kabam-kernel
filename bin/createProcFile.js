@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /*
-This script creates procfile to run this application
+This script creates Procfile to run this application via foreman or node-foreman
 It requires the application to be able to be started by npm start
 https://npmjs.org/doc/cli/npm-start.html
 */

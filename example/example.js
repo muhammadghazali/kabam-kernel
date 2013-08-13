@@ -145,8 +145,16 @@ MWC.extendListeners('honeypot accessed', function (message) {
 });
 
 
-//binding application to port
-MWC.start();
+//binding application to port - running as single instance
+//MWC.start();
+
+//starting application as cluster
+var isMaster=MWC.startCluster();
+if(isMaster){
+  console.log('This is master with PID #' + process.pid);
+} else {
+  console.log('This is worker with PID #' + process.pid);
+}
 
 //testing custom function defined on line 10
 console.log('Sum of 2 and 2 is ' + MWC.shared.getSum(2, 2));

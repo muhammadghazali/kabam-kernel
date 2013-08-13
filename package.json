@@ -12,8 +12,7 @@
     "test": "./node_modules/.bin/mocha --reporter spec"
   },
   "bin": {
-    "createProcFile": "bin/createProcFile.js",
-    "runProd": "bin/runProd.js"
+    "createProcFile": "bin/createProcFile.js"
   },
   "repository": {
     "type": "git",
@@ -35,7 +34,7 @@
     "passport-linkedin": "*",
     "mongoose": "*",
     "toobusy": "*",
-    "foreman": "*"
+    "colors":"*"
   },
   "devDependencies": {
     "grunt": "*",

@@ -5,7 +5,8 @@ var EventEmitter = require('events').EventEmitter,
   https = require('https'),
   appManager = require('./lib/appManager.js'),
   mongooseManager = require('./lib/mongooseManager.js'),
-  redisManager = require('./lib/redisManager.js');
+  redisManager = require('./lib/redisManager.js'),
+  colors = require('colors');
 
 /**
  * @ngdoc function
@@ -524,10 +525,6 @@ function MWC(config) {
    *   }).listen(mwc.app.get('port'));
    *
    * ```
-   *
-   *
-   *
-   *
    */
   this.start = function (howExactly, options) {
     prepared = true;
@@ -576,6 +573,56 @@ function MWC(config) {
       return thisMWC;
     }
   };
+  /**
+   * @ngdoc function
+   * @name mwc.startCluster
+   * @description
+   * Start mwc application as a cluster, with 1 process per CPU core.
+   * This command start the process master by mwc.start('app') - so it do not listens to http port,
+   * and the other ones as mwc.start(howExactly,options). When mwc is runned as cluster, it restarts killed processes
+   * @param {object} howExactly - object, same as for mwc.start
+   * Values:
+   *
+   * - null - bind expressJS application to default port (process.env.PORT) or 3000 port, returns mwc
+   * - number - bind expressJS application to this port, returns mwc
+   * - http instance - bind expressJS application to this server, returns this server object with application bound
+   * - https instance - bind expressJS application to this server, returns this server object with application bound
+   * - string of 'app' - start appliation as standalone object, for background workers and console scripts, returns mwc
+   *
+   * @param {object} options config object for https server [http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener](http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener), same as for mwc.start
+   * @returns {boolean} isMaster. Returns true, if this process is a master process of cluster, or false if this is slave process
+   */
+  this.startCluster = function(howExactly, options){
+    var thisMWC=this,
+      cluster = require('cluster'),
+      numCPUs = require('os').cpus().length;
+
+    if (cluster.isMaster) {
+      console.log(('Cluster : We have '+numCPUs+' CPU cores present.').bold.green);
+
+      // Fork workers.
+      for (var i = 0; i < numCPUs; i++) {
+        var worker = cluster.fork();
+        console.log(('Cluster : Spawning worker with id #'+worker.process.pid).green);
+      }
+
+      cluster.on('online', function(worker) {
+        console.log(('Cluster : Worker #'+worker.process.pid+ ' is online').green);
+      });
+
+      cluster.on('exit', function(worker, code, signal) {
+        var exitCode = worker.process.exitCode;
+        console.log(('Cluster : Worker #' + worker.process.pid + ' died ('+exitCode+'). Respawning...').yellow);
+        cluster.fork();
+      });
+
+      thisMWC.start('app'); // the master process is ran as background application and do not listens to port
+      return true;
+    } else {
+      thisMWC.start(howExactly,options);
+      return false;
+    }
+  }
 }
 
 util.inherits(MWC, EventEmitter);

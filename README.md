@@ -66,7 +66,7 @@ load plugin as object or as a installed [npm](https://npmjs.org/) plugin by name
 See [Plugin creating manual](https://github.com/mywebclass/mwc_kernel#plugin-creating-manual) for details.
 
 8. [start](http://ci.monimus.com/docs/#/api/mwc.start) - start the mwc application in way desired.
-
+9. [startCluster](http://ci.monimus.com/docs/#/api/mwc.startCluster) - start the mwc application in way desired as a Cluster.
 
 
 
