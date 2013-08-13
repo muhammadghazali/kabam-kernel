@@ -529,6 +529,9 @@ module.exports = exports = function (mwc) {
    * ```
    */
   UserSchema.methods.setKeyChain = function (provider, id, callback) {
+    if(!this.keychain){
+      this.keychain = {};
+    }
     this.keychain[provider] = id;
     this.markModified('keychain'); //http://mongoosejs.com/docs/schematypes.html
     this.save(callback);
@@ -569,7 +572,20 @@ module.exports = exports = function (mwc) {
       needle = {};
 
     needle[key] = id;
-    this.findOne(needle, callback);
+    this.findOne(needle, function(err,userFound){
+      if(err){
+        callback(err);
+      } else {
+        if(userFound){
+          userFound.invalidateSession(function(err2,newKey){
+            userFound.apiKey=newKey;
+            callback(err2, userFound);
+          });
+        } else {
+          callback(err,null);
+        }
+      }
+    });
   };
 
   /**
