@@ -30,7 +30,8 @@
     "passport-facebook": "*",
     "passport-linkedin": "*",
     "mongoose": "*",
-    "toobusy": "*"
+    "toobusy": "*",
+    "foreman": "*"
   },
   "devDependencies": {
     "grunt": "*",
