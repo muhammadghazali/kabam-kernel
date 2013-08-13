@@ -593,21 +593,23 @@ function MWC(config) {
    * @returns {boolean} isMaster. Returns true, if this process is a master process of cluster, or false if this is slave process
    */
   this.startCluster = function(howExactly, options){
+    prepared = true;
+
     var thisMWC=this,
       cluster = require('cluster'),
       numCPUs = require('os').cpus().length;
 
     if (cluster.isMaster) {
       console.log(('Cluster : We have '+numCPUs+' CPU cores present.').bold.green);
-
+      console.log(('Cluster : Master PID#'+process.pid+ ' is online').green);
       // Fork workers.
       for (var i = 0; i < numCPUs; i++) {
         var worker = cluster.fork();
-        console.log(('Cluster : Spawning worker with id #'+worker.process.pid).green);
+        console.log(('Cluster : Spawning worker with PID#'+worker.process.pid).green);
       }
 
       cluster.on('online', function(worker) {
-        console.log(('Cluster : Worker #'+worker.process.pid+ ' is online').green);
+        console.log(('Cluster : Worker PID#'+worker.process.pid+ ' is online').green);
       });
 
       cluster.on('exit', function(worker, code, signal) {
@@ -619,7 +621,7 @@ function MWC(config) {
       thisMWC.start('app'); // the master process is ran as background application and do not listens to port
       return true;
     } else {
-      thisMWC.start(howExactly,options);
+      thisMWC.start(howExactly, options);
       return false;
     }
   }
