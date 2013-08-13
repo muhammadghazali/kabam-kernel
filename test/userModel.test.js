@@ -617,19 +617,21 @@ describe('Users model', function () {
     });
 
     describe('function invalidateSession', function () {
-      var user;
+      var user,newApiKey;
       before(function (done) {
         MWC.model.User.create({
           'username': 'testSubject47_2',
-          'email': 'ostroumov_3@teksi.ru'
+          'email': 'ostroumov_3@teksi.ru',
+          'apiKey':'lalalaDaiMne3Ryblya'
         }, function (err, userCreated) {
           if (err) {
             throw err;
           }
-          userCreated.invalidateSession(function (err2) {
+          userCreated.invalidateSession(function (err2,apiKeySetted) {
             if (err2) {
               throw err2;
             }
+            newApiKey=apiKeySetted;
             MWC.model.User.findOne({'username': 'testSubject47_2'}, function (err3, userFound) {
               if (err3) {
                 throw err3;
@@ -644,6 +646,10 @@ describe('Users model', function () {
       it('changes the apiKey', function () {
         var test = (user.apiKey === 'lalalaDaiMne3Ryblya');
         test.should.equal(false);
+      });
+
+      it('fires callback with new api key', function () {
+        newApiKey.should.be.equal(user.apiKey);
       });
 
       after(function (done) {
