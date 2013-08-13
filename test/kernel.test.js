@@ -15,11 +15,6 @@ describe('Kernel', function () {
    * Extending core
    */
 
-
-  /*
-   * Extending model
-   */
-
   var extendModelFunction = function (mongoose, config) {
     var CatsSchema = new mongoose.Schema({
       'nickname': String
@@ -545,7 +540,7 @@ describe('Kernel', function () {
     });
 
   });
-
+//*/
   describe('Users model', function () {
 
     describe('Testing mwc_core mongoose model of users:', function () {
@@ -1496,5 +1491,9 @@ describe('Kernel', function () {
       });
     });
 
+  });
+//*/
+  after(function(done){
+    MWC.mongoose.disconnect(done);
   });
 });

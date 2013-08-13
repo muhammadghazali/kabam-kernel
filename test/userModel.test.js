@@ -3,12 +3,21 @@
 var should = require('should'),
   async = require('async'),
   mwcCore = require('./../index.js'),
-  config = require('./../example/config.json').development;
-
-var MWC = mwcCore(config);
-MWC.start('app');
+  MWC;
 
 describe('Users model', function () {
+  before(function(done){
+    var MWC = mwcCore({
+      'hostUrl':'http://localhost/',
+      'mongoUrl':'mongodb://localhost/mwcUserModelTest',
+      'secret':'IudaBydetVRau'
+    });
+    MWC.start('app');
+    setTimeout(done,1000);
+  });
+  after(function(done){
+    MWC.mongoose.disconnect(done);
+  });
 
   describe('Testing mwc_core mongoose model of users:', function () {
     it('exposes function find', function () {
