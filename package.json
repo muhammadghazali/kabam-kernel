@@ -11,6 +11,10 @@
     "start": "node example/example.js",
     "test": "./node_modules/.bin/mocha --reporter spec"
   },
+  "bin": {
+    "createProcFile": "bin/createProcFile.js",
+    "runProd": "bin/runProd.js"
+  },
   "repository": {
     "type": "git",
     "url": "git@github.com:mywebclass/mwc_kernel.git"
