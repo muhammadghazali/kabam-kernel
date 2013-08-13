@@ -167,15 +167,17 @@ module.exports = exports = function (mwc) {
    * ```javascript
    *
    *   MWC.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
-   *     user.invalidateSession(function(err){if err throw err;});
+   *     user.invalidateSession(function(err,newKey){if err throw err;});
    *   });
    *
    * ```
    */
   UserSchema.methods.invalidateSession = function (callback) {
-    this.apiKey = sha512(rack());
-    this.save(callback);
-    return;
+    var newApiKey = sha512(rack());
+    this.apiKey = newApiKey;
+    this.save(function(err){
+      callback(err,newApiKey);
+    });
   };
 
   /**
