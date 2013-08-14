@@ -211,6 +211,8 @@ function MWC(config) {
    * In code it is called [after setting logging middleware and port](https://github.com/mywebclass/mwc_kernel/blob/master/lib/appManager.js#84).
    * You can set any application parameter you want, you have full MWC core internals at your disposal
    * `mwc.emit`,`mwc.on`, `mwc.redisClient`, and `mwc.model.User` and custom models from calling `extendModel`.
+   * Some example of setting up the [template engine](https://github.com/mywebclass/mwc_plugin_hogan_express/blob/master/index.js)
+   * via plugin.
    *
    * @param {string/array/undefined} environment - application environment to use,
    * can be something like 'development', ['development','staging'] or null
