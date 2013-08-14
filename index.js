@@ -583,11 +583,11 @@ function MWC(config) {
    * @param {object} howExactly - object, same as for mwc.start
    * Values:
    *
-   * - null - bind expressJS application to default port (process.env.PORT) or 3000 port, returns mwc
-   * - number - bind expressJS application to this port, returns mwc
-   * - http instance - bind expressJS application to this server, returns this server object with application bound
-   * - https instance - bind expressJS application to this server, returns this server object with application bound
-   * - string of 'app' - start appliation as standalone object, for background workers and console scripts, returns mwc
+   * - null - bind expressJS application of worker process to default port (process.env.PORT) or 3000 port
+   * - number - bind expressJS application of worker process to this port
+   * - http instance - bind expressJS application  of worker process to this server
+   * - https instance - bind expressJS application of worker process to this server
+   * - string of 'app' - start expressJS appliation of worker process as standalone object, for background workers and console scripts
    *
    * @param {object} options config object for https server [http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener](http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener), same as for mwc.start
    * @returns {boolean} isMaster. Returns true, if this process is a master process of cluster, or false if this is slave process
