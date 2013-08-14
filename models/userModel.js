@@ -271,6 +271,10 @@ module.exports = exports = function (mwc) {
    *     MWC.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
    *       user.notify('email','Happy birthday'); // sending email to this user
    *     });
+   *
+   *     MWC.on('notify:email',function(emailObj){
+   *       console.log('Sendind email to '+emailObj.user.email+' with text "' + emailObj.message+'"');
+   *     });
    * ```
    */
   UserSchema.methods.notify = function (channel, message) {
