@@ -264,7 +264,11 @@ module.exports = exports = function (mwc) {
    * @ngdoc function
    * @name User.notify
    * @description
-   * Notifies the current user, using the mwc event emitting system
+   * Notifies the current user, using the mwc event emitting system. For the present moment there is 2 event dispatchers that
+   * can deliver notifications to users, first of them works by
+   * [email](https://github.com/mywebclass/mwc_plugin_notify_by_email) notifications, and the second one by
+   * [socket.io](https://github.com/mywebclass/mwc_plugin_socket_io) events.
+   *
    * @param {string} [channel] - optional, channel name, default is 'all'
    * @param {string/object} message - something that the notify handler understands
    * @example
@@ -274,6 +278,7 @@ module.exports = exports = function (mwc) {
    *       user.notify('email','Happy birthday'); // sending email to this user
    *     });
    *
+   *     // we catching the notify event later
    *     MWC.on('notify:email',function(emailObj){
    *       console.log('Sendind email to '+emailObj.user.email+' with text "' + emailObj.message+'"');
    *     });
@@ -417,7 +422,7 @@ module.exports = exports = function (mwc) {
    * @param {function}  callback  - function is fired when user is saved
    * @desription
    * signups new user by username, email, password, fires callback with first argument of error and the second one
-   * of user signed it
+   * of user created
    */
   UserSchema.statics.signUp = function (username, email, password, callback) {
     this.create({
