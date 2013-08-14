@@ -58,6 +58,8 @@ module.exports = exports = function (mwc) {
     apiKey: {type: String, required: true, unique: true, default: rack, match: /^[a-zA-Z0-9_]+$/ }, //for invalidating sessions by user request, for api interactions...
     apiKeyCreatedAt: Date,
 
+    //preferred language
+    lang: {type: String, default:'en', match:/^[a-z]{2}$/},
 
     //role management
     root: Boolean,
