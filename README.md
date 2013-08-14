@@ -7,6 +7,10 @@ mwc_kernel
 
 MyWebClass core node.js application to be extended by plugins.
 [![Build Status](https://travis-ci.org/mywebclass/mwc_kernel.png?branch=master)](https://travis-ci.org/mywebclass/mwc_kernel)
+This is some sort of Application Generator / Bootstrap script to vendor [expressJS](http://expressjs.com/) applications with
+high code reuse  from plugins. It is not a MWC framework or CMS. This is something more low level. This application include
+expandable kernel module to apply mongoose model, app settings, middlewares and routes for application being created.
+
 
 Important
 =======
@@ -25,8 +29,8 @@ Disclaimer
 Project is under development, if you build something on it, do update this module daily.
 Review the documentation [http://ci.monimus.com/docs/#/api](http://ci.monimus.com/docs/#/api) - it have to be actual.
 It is updated more often than README.md
-This project policy implies, that `master` branch works alwayes as documented
-and completes unit tests successefuly.
+This project policy implies, that `master` branch works always as documented
+and completes unit tests successfully.
 But it can have some new features, not listed in README.md
 
 Introduction
