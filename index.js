@@ -225,7 +225,14 @@ function MWC(config) {
    *     mwc.extendApp('development',function(core){
    *       core.app.locals.environment = 'development';
    *     });
-   *
+   *     //example of setting template engine
+   *     mwc.extendApp.app = function (core) {
+   *       core.app.set('views', '/views');
+   *       core.app.set('view engine', 'html');
+   *       core.app.set('layout', 'layout');
+   *       core.app.enable('view cache');
+   *       core.app.engine('html', require('hogan-express'));
+   *     };
    * ```
    *
    * @returns {mwc} mwc object
