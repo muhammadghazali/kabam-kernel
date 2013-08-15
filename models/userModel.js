@@ -45,42 +45,131 @@ module.exports = exports = function (mwc) {
    * Active record style Mongoose object to manipulate users collection
    */
 
-
   var UserSchema = new Schema({
+    /**
+     * @ngdoc value
+     * @methodOf User
+     * @name User.email
+     * @description
+     * Primary email of user, the one he/she used for registration. Unique.
+     */
     email: {type: String, required: true, unique: true, match: /^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/},
-
+    /**
+     * @ngdoc value
+     * @methodOf User
+     * @name User.username
+     * @description
+     * Primary username of user, the one he/she used for registration. Unique.
+     */
     username: {type: String, unique: true, match: /^[a-zA-Z0-9_]+$/, sparse: true},
     //sparse - it means it be unique, if not null  http://stackoverflow.com/questions/7955040/mongodb-mongoose-unique-if-not-null
     salt: String,//string to hash password
     password: String,//hashed password
 
-    //api key interaction
+    /**
+     * @ngdoc value
+     * @methodOf User
+     * @name User.apiKey
+     * @description
+     * Unique apiKey of user,
+     */
     apiKey: {type: String, required: true, unique: true, default: rack, match: /^[a-zA-Z0-9_]+$/ }, //for invalidating sessions by user request, for api interactions...
     apiKeyCreatedAt: Date,
 
-    //preferred language
+    /**
+     * @ngdoc value
+     * @methodOf User
+     * @name User.apiKey
+     * @description
+     * Preferred language of user
+     */
     lang: {type: String, default:'en', match:/^[a-z]{2}$/},
 
-    //role management
+    /**
+     * @ngdoc value
+     * @methodOf User
+     * @name User.root
+     * @description
+     * Is user root? - boolean
+     */
     root: Boolean,
+
+    /**
+     * @ngdoc value
+     * @methodOf User
+     * @name User.roles
+     * @description
+     * Array of user roles/permissions (strings)
+     */
     roles: [
       {type: String, match: /^[a-zA-Z0-9_]+$/ }
     ],
 
-    //shared profile data
+    /**
+     * @ngdoc value
+     * @methodOf User
+     * @name User.firstName
+     * @description
+     * Firts name of user
+     */
     firstName: String,
+    /**
+     * @ngdoc value
+     * @methodOf User
+     * @name User.lastName
+     * @description
+     * Last name of user
+     */
     lastName: String,
+    /**
+     * @ngdoc value
+     * @methodOf User
+     * @name User.skype
+     * @description
+     * Skype id of user
+     */
     skype: String,
 
-    //profile status
-    emailVerified: Boolean, //profile is activated
-    profileComplete: Boolean, //profile is complete - it means, it have email, username and password set!
+    /**
+     * @ngdoc value
+     * @methodOf User
+     * @name User.emailVerified
+     * @description
+     * Is email address verified? - boolean
+     */
+    emailVerified: Boolean,
+    /**
+     * @ngdoc value
+     * @methodOf User
+     * @name User.profileComplete
+     * @description
+     * Is profile complete - it means, it have email, username and password set. boolean
+     */
+    profileComplete: Boolean,
 
-    //keychain
+    /**
+     * @ngdoc value
+     * @methodOf User
+     * @name User.keychain
+     * @description
+     * Profile keychain. For example, the one like it
+     * ```javascript
+     * { "github":"111", "twitter":"111" }
+     * ```
+     * allows user to sign in using oAuth providers if he has github id = 111 pr twitter id = 111
+     * @see User.setKeychain
+     */
     keychain: {}, // i'm loving mongoose - http://mongoosejs.com/docs/schematypes.html - see mixed
-    profile: Object //this is user profile object. it can store anything! - age, postal address, occupation. everything! todo - embedded document?
+
+    /**
+     * @ngdoc value
+     * @methodOf User
+     * @name User.profile
+     * @description
+     * User profile object. it can store anything! - age, postal address, occupation. everything!
+     */
+    profile: Object
   });
-  //UserSchema.plugin(useTimestamps);//do not works! add createdAt, and updatedAt attributes
 
   UserSchema.index({
     email: 1,
