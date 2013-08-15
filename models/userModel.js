@@ -207,7 +207,13 @@ module.exports = exports = function (mwc) {
     rating = rating ? rating : 'g';
     return 'https://secure.gravatar.com/avatar/' + md5(this.email.toLowerCase().trim()) + '.jpg?s=' + size + '&d=' + type + '&r=' + rating;
   };
-
+  /**
+   * @ngdoc value
+   * @methodOf User
+   * @name User.gravatar
+   * @description
+   * Returns users gravatar
+   */
   UserSchema.virtual('gravatar').get(function () {
       return this.getGravatar();
     });
