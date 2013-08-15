@@ -67,6 +67,11 @@ module.exports = exports = function (mwc) {
       {type: String, match: /^[a-zA-Z0-9_]+$/ }
     ],
 
+    //shared profile data
+    firstName: String,
+    lastName: String,
+    skype: String,
+
     //profile status
     emailVerified: Boolean, //profile is activated
     profileComplete: Boolean, //profile is complete - it means, it have email, username and password set!
