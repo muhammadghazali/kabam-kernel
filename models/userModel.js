@@ -79,7 +79,7 @@ module.exports = exports = function (mwc) {
     /**
      * @ngdoc value
      * @methodOf User
-     * @name User.apiKey
+     * @name User.lang
      * @description
      * Preferred language of user
      */
