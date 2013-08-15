@@ -119,6 +119,9 @@ module.exports = exports = function (mwc) {
     return 'https://secure.gravatar.com/avatar/' + md5(this.email.toLowerCase().trim()) + '.jpg?s=' + size + '&d=' + type + '&r=' + rating;
   };
 
+  UserSchema.virtual('gravatar').get(function () {
+      return this.getGravatar();
+    });
   /**
    * @ngdoc function
    * @name User.verifyPassword
