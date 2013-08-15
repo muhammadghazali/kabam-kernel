@@ -32,6 +32,11 @@ It is updated more often than README.md
 This project policy implies, that `master` branch works always as documented
 and completes unit tests successfully.
 But it can have some new features, not listed in README.md
+Official repos
+
+ - [https://github.com/mywebclass/mwc_kernel](https://github.com/mywebclass/mwc_kernel) - main repo
+ - [https://bitbucket.org/vodolaz095/mwc_kernel](https://bitbucket.org/vodolaz095/mwc_kernel) - read only backup repo, can be outdated
+
 
 Introduction
 =======
