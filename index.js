@@ -723,11 +723,22 @@ MWC.prototype.createRedisClient = function () {
  * //minimal config object example
  *
  * var config = {
- *   "hostUrl":"http://example.org/", //hostname of server, mandatory field, used to create redirects and OAUTH domains
- *   "mongoUrl":"mongodb://username:password@mongoServer:27017/databaseName", // valid mongoUrl
- * //"redis": "redis://prefix:authPassword@redisServer:6379", //url to redis server, can be ommited
- * //"redis": {"host":"redisServer", "port":6379,"auth":"authPassword"}, //redis server parameters in different notation, can be ommited
+ *   "hostUrl":"http://example.org/",
+  *   //hostname of server, mandatory field, used to create redirects and OAUTH domains
+ *
+ *   "mongoUrl":"mongodb://username:password@mongoServer:27017/databaseName",
+ *   // valid mongoUrl
+ *
+ *   "secret":"LongAndHardSecretStringToPreventSessionHiJaskIsAMandatoryParameter",
+ *
+ * //"redis": "redis://prefix:authPassword@redisServer:6379",
+ * //url to redis server, can be ommited
+ *
+ * //"redis": {"host":"redisServer", "port":6379,"auth":"authPassword"},
+ * //redis server parameters in different notation, can be ommited
+ *
  *   "redis": {"host":"localhost", "port":6379,"auth":""}, //default redis server values
+ *   "disableCsrf" : false // disable csrf protection for application
  * };
  *
  * //minimal runnable example
