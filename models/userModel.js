@@ -752,5 +752,63 @@ module.exports = exports = function (mwc) {
     });
   };
 
+
+  //ACL for mwc_plugin_rest
+
+  /**
+   * @ngdoc function
+   * @name mwc.model.User.getForUser
+   * @param {User} user - user to test privileges, for example, the one from request object
+   * @param {object} parameters - users field to find against
+   * @param {function} callback - function(err,arrayOfUsersFound){...}
+   * @description
+   * This function return the array of users, that can be editable by current user.
+   * Usually, if user is root, he can edit other users
+   * @example
+   */
+  UserSchema.statics.getForUser = function(user,parameters,callback){
+    if(user && user.root){
+      this.find(parameters,callback);
+    } else {
+      callback(new Error('Access denied!'));
+    }
+  };
+  /**
+   * @ngdoc function
+   * @name mwc.model.User.canCreate
+   * @description
+   * Can this user create new users by rest api? Returns true if he/she can.
+   * If this user is root, he can do it.
+   * @param {User} user - user to test privileges, for example, the one from request object
+   * @returns {boolean} - true if he/she can.
+   */
+  UserSchema.statics.canCreate = function (user) {
+    return (user && user.root);
+  };
+  /**
+   * @ngdoc function
+   * @name mwc.model.User.canRead
+   * @description
+   * Can this user read other users profiles by rest api? Returns true if he/she can.
+   * If this user is root, he can do it.
+   * @param {User} user - user to test privileges, for example, the one from request object
+   * @returns {boolean} - true if he/she can.
+   */
+  UserSchema.methods.canRead = function (user) {
+    return (user && user.root);
+  };
+  /**
+   * @ngdoc function
+   * @name mwc.model.User.canWrite
+   * @description
+   * Can this user update/delete other users' profiles by rest api? Returns true
+   * If this user is root, he can do it.
+   * @param {User} user - user to test privileges, for example, the one from request object
+   * @returns {boolean} - true if he/she can.
+   */
+  UserSchema.methods.canWrite = function (user) {
+    return (user && user.root);
+  };
+
   return mongoose.model('User', UserSchema);
 };
