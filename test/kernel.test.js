@@ -1273,6 +1273,9 @@ describe('Kernel', function () {
           user.notify.should.be.a('function');
           user.getGravatar.should.be.a('function');
           user.completeProfile.should.be.a('function');
+
+          user.canRead.should.be.a('function');
+          user.canWrite.should.be.a('function');
         });
 
         it('user instance creates a proper gravatar url', function () {
