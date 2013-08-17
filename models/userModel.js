@@ -787,7 +787,7 @@ module.exports = exports = function (mwc) {
   };
   /**
    * @ngdoc function
-   * @name mwc.model.User.canRead
+   * @name User.canRead
    * @description
    * Can this user read other users profiles by rest api? Returns true if he/she can.
    * If this user is root, he can do it.
@@ -799,7 +799,7 @@ module.exports = exports = function (mwc) {
   };
   /**
    * @ngdoc function
-   * @name mwc.model.User.canWrite
+   * @name User.canWrite
    * @description
    * Can this user update/delete other users' profiles by rest api? Returns true
    * If this user is root, he can do it.
