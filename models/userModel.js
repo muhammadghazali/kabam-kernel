@@ -17,7 +17,7 @@ function rack() {
   return result;
 }
 
-module.exports = exports = function (mwc) {
+exports.init = function (mwc) {
   var mongoose = mwc.mongoose;
 
   var Schema = mongoose.Schema;
@@ -810,5 +810,5 @@ module.exports = exports = function (mwc) {
     return (user && user.root);
   };
 
-  return mongoose.model('User', UserSchema);
+  return mwc.mongoConnection.model('User', UserSchema);
 };

@@ -4,7 +4,8 @@ var EventEmitter = require('events').EventEmitter,
   http = require('http'),
   https = require('https'),
   appManager = require('./lib/appManager.js'),
-  mongooseManager = require('./lib/mongooseManager.js'),
+  MongooseManager = require('./lib/MongooseManager.js'),
+  mongooseManager = new MongooseManager(),
   redisManager = require('./lib/redisManager.js'),
   colors = require('colors');
 
@@ -537,7 +538,6 @@ function MWC(config) {
    */
   this.start = function (howExactly, options) {
     prepared = true;
-
     //injecting redis
     thisMWC.redisClient = redisManager.create(thisMWC.config.redis);
 
