@@ -1144,6 +1144,105 @@ describe('Kernel', function () {
         });
       });
 
+      describe('mwc_plugin_rest integration for users', function () {
+        var user;
+        before(function (done) {
+          MWC.model.User.create({
+            'username': 'test777',
+            'email': 'klapajoka@mail.ru'
+          }, function (err, userCreated) {
+            if (err) {
+              throw err;
+            }
+            user = userCreated;
+            done();
+          });
+        });
+
+        describe('MWC.model.User.canCreate', function () {
+          it('returns true for root user', function () {
+            MWC.model.User.canCreate({root: true}).should.be.true;
+          });
+          it('returns false for  not root user', function () {
+            MWC.model.Users.canCreate({root: false}).should.be.false;
+          });
+        });
+
+        describe('User.canRead', function () {
+          it('returns true for root user', function () {
+            user.canRead({root: true}).should.be.true;
+          });
+          it('returns false for  not root user', function () {
+            user.canRead({root: false}).should.be.false;
+          });
+        });
+
+        describe('User.canWrite', function () {
+          it('returns true for root user', function () {
+            user.canWrite({root: true}).should.be.true;
+          });
+          it('returns false for  not root user', function () {
+            user.canWrite({root: false}).should.be.false;
+          });
+        });
+
+        describe('MWC.model.User.getForUser works for root user', function () {
+          var usersFound, usersNotFound = '';
+          before(function (done) {
+            async.parallel([
+              function (cb) {
+                MWC.model.User.getForUser({root: true}, {username: 'test777'}, function (err, users) {
+                  usersFound = users;
+                  cb(err);
+                });
+              },
+              function (cb) {
+                MWC.model.User.getForUser({root: true}, {username: 'papytraxaetsobakatakemyinado'}, function (err, users) {
+                  usersNotFound = users;
+                  cb(err);
+                })
+              }
+            ], done);
+          });
+
+          it('finds the user by correct parameters',function(){
+            usersFound.should.be.instanceOf(Array);
+            usersFound.length.should.be.equal(1);
+            usersFound[0].username.should.be.equal('test777');
+            usersFound[0].email.should.be.equal('klapajoka@mail.ru');
+          });
+
+          it('do not finds the user by wrong parameters',function(){
+            usersNotFound.should.be.instanceOf(Array);
+            usersNotFound.length.should.be.equal(0);
+          });
+
+
+        });
+
+        describe('MWC.model.User.getForUser fails for non root user',function(){
+          var error;
+          before(function (done) {
+            MWC.model.User.getForUser({root: false}, {username: 'papytraxaetsobakatakemyinado'}, function (err, users) {
+              error=err;
+              done();
+            });
+          });
+
+          it('throws error',function(){
+            error.should.be.instanceOf(Error);
+          });
+          it('error have valid message',function(){
+            error.message.should.equal('Access denied!');
+          });
+        });
+
+
+        after(function (done) {
+          user.remove(done);
+        });
+
+      });
     });
     describe('Testing mwc_core mongoose model one instance of user:', function () {
       describe('general function are callable', function () {
