@@ -12,7 +12,8 @@
     "test": "./node_modules/.bin/mocha --reporter spec"
   },
   "bin": {
-    "createProcFile": "bin/createProcFile.js"
+    "kabamDeploy":"bin/kabamDelpoy.js",
+    "kabamUsers":"bin/kabamUsers.js"
   },
   "repository": {
     "type": "git",
@@ -34,7 +35,8 @@
     "passport-linkedin": "*",
     "mongoose": "*",
     "toobusy": "*",
-    "colors":"*"
+    "colors":"*",
+    "commander":"*"
   },
   "devDependencies": {
     "grunt": "*",
