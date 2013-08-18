@@ -1,7 +1,7 @@
 {
-  "name": "mwc_kernel",
+  "name": "kabam-kernel",
   "version": "0.2.3",
-  "description": "MyWebClass kernel for building express.js applications with plugins",
+  "description": "Kabam kernel for building express.js applications with plugins",
   "main": "index.js",
   "engines": {
     "node": "0.10.x",
@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:mywebclass/mwc_kernel.git"
+    "url": "git@github.com:mykabam/kabam-kernel.git"
   },
   "dependencies": {
     "async": "*",
@@ -81,6 +81,6 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/mywebclass/mwc_kernel/issues"
+    "url": "https://github.com/mykabam/kabam-kernel/issues"
   }
 }

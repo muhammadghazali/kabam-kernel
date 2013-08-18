@@ -6,7 +6,7 @@ mwc_kernel
 ==========
 
 MyWebClass core node.js application to be extended by plugins.
-[![Build Status](https://travis-ci.org/mywebclass/mwc_kernel.png?branch=master)](https://travis-ci.org/mywebclass/mwc_kernel)
+[![Build Status](https://travis-ci.org/mykabam/kabam-kernel.png?branch=master)](https://travis-ci.org/mykabam/kabam-kernel)
 This is some sort of Application Generator / Bootstrap script to vendor [expressJS](http://expressjs.com/) applications with
 high code reuse  from plugins. It is not a MWC framework or CMS. This is something more low level. This application include
 expandable kernel module to apply mongoose model, app settings, middlewares and routes for application being created.
@@ -35,7 +35,7 @@ But it can have some new features, not listed in README.md.
 
 **Official repos:**
 
- - [https://github.com/mywebclass/mwc_kernel](https://github.com/mywebclass/mwc_kernel) - main repo
+ - [https://github.com/mykabam/kabam-kernel](https://github.com/mykabam/kabam-kernel) - main repo
  - [https://bitbucket.org/vodolaz095/mwc_kernel](https://bitbucket.org/vodolaz095/mwc_kernel) - read only backup repo, can be outdated
 
 
@@ -45,7 +45,7 @@ Introduction
 Technically this is a Factory class to vendor [express.js](http://expressjs.com/) applications,
 that can be easily extended by 6 mixin type functions.
 
-0. `mwcCore(configObj)` - create application object using [configuration object](https://github.com/mywebclass/mwc_kernel/blob/master/example/config.json)
+0. `mwcCore(configObj)` - create application object using [configuration object](https://github.com/mykabam/kabam-kernel/blob/master/example/config.json)
 specified. The mandatory configObj fields are `"hostUrl":"http://vvv.msk0.ru/"`, `"secret":"hammer on the keyboard"`,
 and `"mongoUrl":"mongodb://localhost/mwc_dev"`.
 
@@ -76,7 +76,7 @@ ExpressJS object of every routes request have functions of `request.mwcEmit`, `r
 
 7. [loadPlugin("mwc_plugin_foo") or loadPlugin(pluginObj)](http://ci.monimus.com/docs/#/api/mwc.loadPlugin) -
 load plugin as object or as a installed [npm](https://npmjs.org/) plugin by name.
-See [Plugin creating manual](https://github.com/mywebclass/mwc_kernel#plugin-creating-manual) for details.
+See [Plugin creating manual](https://github.com/mykabam/kabam-kernel#plugin-creating-manual) for details.
 
 8. [start](http://ci.monimus.com/docs/#/api/mwc.start) - start the mwc application in way desired.
 9. [startCluster](http://ci.monimus.com/docs/#/api/mwc.startCluster) - start the mwc application in way desired as a Cluster.
@@ -110,12 +110,12 @@ If you have errors running plugin, upgrade your kernel or plugin modules.
 
  - [https://github.com/mywebclass/mwc_plugin_socket_io/](https://github.com/mywebclass/mwc_plugin_socket_io) - plugin to notify users by socket.io events
 
-[Plugin compatibility wiki](https://github.com/mywebclass/mwc_kernel/wiki/Plugin-compatibility-guide)
+[Plugin compatibility wiki](https://github.com/mykabam/kabam-kernel/wiki/Plugin-compatibility-guide)
 
 Example
 =======
 
-[https://github.com/mywebclass/mwc_kernel/blob/master/example/example.js](https://github.com/mywebclass/mwc_kernel/blob/master/example/example.js)
+[https://github.com/mykabam/kabam-kernel/blob/master/example/example.js](https://github.com/mykabam/kabam-kernel/blob/master/example/example.js)
 
 What exposable parts the MWC instance do have?
 =======
@@ -240,7 +240,7 @@ Installation
 =======
 
 ```shell
-    $ git clone git@github.com:mywebclass/mwc_kernel.git
+    $ git clone git@github.com:mykabam/kabam-kernel.git
     $ cd mwc_kernel
     $ npm install
 ```
@@ -282,7 +282,7 @@ or
     $ npm test
 ```
 
-[![Build Status](https://travis-ci.org/mywebclass/mwc_kernel.png?branch=master)](https://travis-ci.org/mywebclass/mwc_kernel)
+[![Build Status](https://travis-ci.org/mykabam/kabam-kernel.png?branch=master)](https://travis-ci.org/mykabam/kabam-kernel)
 
 Plugin creating manual
 =======
@@ -323,7 +323,7 @@ Because on stage of extending core, there is no core.app variable.
 This is the way of things it is intended to work
 When you call the `extendCore('fieldName',function(config){...})`, you can add global core functions and variables,
 but not anything other touching the application, middlewares or routes.
-In code it is called right after initializing [mongoose routes](https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L195)
+In code it is called right after initializing [mongoose routes](https://github.com/mykabam/kabam-kernel/blob/master/index.js#L195)
 core have event emmiter capabilities `MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.model.User`, `MWC.model.Documents` (exposed as mongoose schemas).
 Nothing more!
 
@@ -334,14 +334,14 @@ When you call `extendModel(ModelName,function(mongoose, config){...})` you get a
 When you call `extendApp(function(core){...})`, you can set global application parameters, for example
 template [engines](http://expressjs.com/api.html#app.engine), [locals](http://expressjs.com/api.html#app.locals)
 and [other](http://expressjs.com/api.html#app-settings) settings.
-In code it is called [after settng logging middleware and port](https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L236).
+In code it is called [after settng logging middleware and port](https://github.com/mykabam/kabam-kernel/blob/master/index.js#L236).
 You can set any application parameter you want, you have full MWC core internalls at your disposal
 `MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.model.User`, `MWC.model.Documents` and custom models from calling `extendModel`.
 
 When you call `extendMiddleware(function(core){...})`, you can set app middlewares.
-They are [called]((https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L283) after
-[setting default exposed internals middleware](https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L271) and before
-[setting error handlers middlewares](https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L283).
+They are [called]((https://github.com/mykabam/kabam-kernel/blob/master/index.js#L283) after
+[setting default exposed internals middleware](https://github.com/mykabam/kabam-kernel/blob/master/index.js#L271) and before
+[setting error handlers middlewares](https://github.com/mykabam/kabam-kernel/blob/master/index.js#L283).
 
 So, you have the full power of core internals - (`emit`,`on`), `redisClient`, and `model.Users`, `model.Documents`
 and exposed internals middleware - where expressJS object of request have functions of `request.mwcEmit`,
@@ -349,9 +349,9 @@ and exposed internals middleware - where expressJS object of request have functi
 by passportjs middleware.
 
 When you call `extendRoutes(function(core){})`, you can set the application routes and verbs for them.
-This is done after defining [router middleware]((https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L307) )
+This is done after defining [router middleware]((https://github.com/mykabam/kabam-kernel/blob/master/index.js#L307) )
 (the one that bind nodejs functions to URIs) and before the
-[setting up the default routes for Users and documents](https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L313)
+[setting up the default routes for Users and documents](https://github.com/mykabam/kabam-kernel/blob/master/index.js#L313)
 and routes for passport.js authentication.
 
 It is worth saying, that you also have expressJS object of every route defined to  have functions of `request.mwcEmit`,
