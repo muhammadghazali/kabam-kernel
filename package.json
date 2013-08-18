@@ -64,7 +64,12 @@
   },
   "contributors": [
     {
-      "name": "Anatolij Ostroumov (developer)",
+      "name": "Keith Williams (copyright owner)",
+      "url": "http://mywebclass.org",
+      "email": "keith@mywebclass.org"
+    },
+    {
+      "name": "Anatolij Ostroumov (responsible developer)",
       "url": "https://github.com/vodolaz095",
       "email": "ostroumov095@gmail.com"
     },
@@ -74,9 +79,13 @@
       "email": "tbudiman@gmail.com"
     },
     {
-      "name": "Keith Williams (copyright owner)",
-      "url": "http://mywebclass.org",
-      "email": "keith@mywebclass.org"
+      "name": "Alexander Petrovich (developer)",
+      "url": "https://github.com/chopachom"
+    },
+    {
+      "name": "Muhammad Ghazali (developer)",
+      "url": "https://github.com/muhammadghazali",
+      "email": "muhammadghazali2480@gmail.com"
     }
   ],
   "license": "MIT",
