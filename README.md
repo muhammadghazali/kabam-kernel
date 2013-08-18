@@ -357,3 +357,16 @@ and routes for passport.js authentication.
 It is worth saying, that you also have expressJS object of every route defined to  have functions of `request.mwcEmit`,
 `request.MODEL`,`request.MODEL.Users`,`request.MODEL.Documents`, custom models,`request.redisClient`, and `request.user` provided
 by [passportjs](http://passportjs.org) middleware.
+
+
+Responsibility guidelines
+================
+Every kabam plugin and package has the responsible developer. His duties are
+
+1) Maintain the package - fix and found bugs from upgrading modules included or nodejs version change
+2) React on bug reports
+3) Accept/deny pull request.
+
+The `Push` and `npm publish` privilege is the right of the `Responsible developer`, but the `fork` - is for everybody.
+
+Responsible developer for this package is  [Anatolij Ostroumov](https://github.com/vodolaz095)
