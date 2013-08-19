@@ -32,15 +32,15 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model
+   * @name kabamKernel.model
    * @description
    * Mongooses collections of objects to manipulate data in mongo database
    */
 
   /**
    * @ngdoc function
-   * @name mwc.model.User
-   * @methodOf mwc.model
+   * @name kabamKernel.model.User
+   * @methodOf kabamKernel.model
    * @description
    * Active record style Mongoose object to manipulate users collection
    */
@@ -403,7 +403,7 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.ban
+   * @name kabamKernel.model.User.ban
    * @description
    * Bans this user
    * @param {string} usernameOrEmail  - username or email address of user
@@ -421,7 +421,7 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.unban
+   * @name kabamKernel.model.User.unban
    * @description
    * Removes ban from this user
    * @param {string} usernameOrEmail  - username or email address of user
@@ -440,7 +440,7 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.findOneByUsernameOrEmail
+   * @name kabamKernel.model.User.findOneByUsernameOrEmail
    * @description
    * Alias for mwc.model.User.findOneByLoginOrEmail
    * @param {string} usernameOrEmail  - username or email address of user
@@ -493,7 +493,7 @@ exports.init = function (mwc) {
   //finders
   /**
    * @ngdoc function
-   * @name mwc.model.User.findOneByLoginOrEmail
+   * @name kabamKernel.model.User.findOneByLoginOrEmail
    * @description
    * Finds one user by login or email, returns as second argument in callback, first one is error
    * @param {string} loginOrEmai - login or email of user to be foundl
@@ -516,7 +516,7 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.findOneByApiKey
+   * @name kabamKernel.model.User.findOneByApiKey
    * @description
    * Finds one user by apiKey, returns as second argument in callback, first one is error
    * @param {string} apiKey - apiKey of user to be foundl
@@ -536,7 +536,7 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.getByRole
+   * @name kabamKernel.model.User.getByRole
    * @description
    * Finds users who have desired role
    * @param {string} role - role/permission to search owners of
@@ -557,7 +557,7 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.processOAuthProfile
+   * @name kabamKernel.model.User.processOAuthProfile
    * @param {string} email - email of user from oauth profile we want to process
    * @param {function} done - function is fired when users are found
    * @description
@@ -603,7 +603,7 @@ exports.init = function (mwc) {
   };
   /**
    * @ngdoc function
-   * @name mwc.model.User.signUp
+   * @name kabamKernel.model.User.signUp
    * @param {string} username - username for new user
    * @param {string} email - email for new user
    * @param {string} password - password for new user
@@ -640,7 +640,7 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.signUpByEmailOnly
+   * @name kabamKernel.model.User.signUpByEmailOnly
    * @param {string}  email  - email for new user
    * @param {function}  callback  - function is fired when user is saved
    * @description
@@ -758,7 +758,7 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.findOneByKeychain
+   * @name kabamKernel.model.User.findOneByKeychain
    * @description
    * Finds user that have keychain for this provider and this id
    * @param {string} provider - provider name
@@ -795,7 +795,7 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.findOneByApiKeyAndVerify
+   * @name kabamKernel.model.User.findOneByApiKeyAndVerify
    * @description
    * This function is used for verifying users profile from link in email message
    * @param {string} apiKey - apiKey to use
@@ -821,7 +821,7 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.findOneByApiKeyAndResetPassword
+   * @name kabamKernel.model.User.findOneByApiKeyAndResetPassword
    * @description
    * This function is used for reseting users password by link in email with submitting form later
    * @param {string} apiKey - apiKey to use
@@ -850,7 +850,7 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.getForUser
+   * @name kabamKernel.model.User.getForUser
    * @param {User} user - user to test privileges, for example, the one from request object
    * @param {object} parameters - users field to find against
    * @param {function} callback - function(err,arrayOfUsersFound){...}
@@ -868,7 +868,7 @@ exports.init = function (mwc) {
   };
   /**
    * @ngdoc function
-   * @name mwc.model.User.canCreate
+   * @name kabamKernel.model.User.canCreate
    * @description
    * Can this user create new users by rest api? Returns true if he/she can.
    * If this user is root, he can do it.
@@ -931,7 +931,7 @@ exports.init = function (mwc) {
 
 /**
  * @ngdoc function
- * @name mwc.model.User.eventsEmitter
+ * @name kabamKernel.model.User.eventsEmitter
  * @description
  * When some user parameters are changed the kernel object emit events
  * with payload of object of affected user at state of current event.

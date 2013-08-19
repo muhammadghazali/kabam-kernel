@@ -8,7 +8,7 @@ module.exports = function(grunt) {
         jshintrc: '.jshintrc'
       },
       all: {
-        src: ['Gruntfile.js', 'index.js', 'example/**/*.js', 'models/**/*.js', 'public/**/*.js', 'routes/**/*.js', 'test/**/*.js']
+        src: ['Gruntfile.js', 'index.js', 'example/**/*.js', 'models/**/*.js', 'public/**/*.js', 'routes/**/*.js', 'bin/**/*.js','test/**/*.js']
       },
       ci: {
         options: {
@@ -44,11 +44,11 @@ module.exports = function(grunt) {
     ngdocs: {
       options: {
         dest: 'results/docs',
-        title: 'mwc kernel',
+        title: 'KabamKernel',
         startPage: '/api'
       },
       api: {
-        src: ['results/index.ngdoc', 'index.js', 'lib/**/*.js', 'models/**/*.js','example/plugin.example.js'],
+        src: ['results/index.ngdoc', 'index.js', 'lib/**/*.js', 'models/**/*.js','example/plugin.example.js', ' bin/**/*.js'],
         title: 'MWC Kernel API'
       }
     },
