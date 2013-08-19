@@ -97,6 +97,15 @@ exports.init = function (mwc) {
     /**
      * @ngdoc value
      * @methodOf User
+     * @name User.isBanned
+     * @description
+     * Is user banned? - boolean
+     */
+    isBanned: {type: Boolean, default:false},
+
+    /**
+     * @ngdoc value
+     * @methodOf User
      * @name User.roles
      * @description
      * Array of user roles/permissions (strings)
@@ -365,6 +374,79 @@ exports.init = function (mwc) {
       this.save(callback);
     }
   };
+
+  /**
+   * @ngdoc function
+   * @name User.ban
+   * @description
+   * Ban this user
+   * @param {function} callback  - function is fired when user is saved
+   */
+  UserSchema.methods.ban = function(callback){
+    this.isBanned=true;
+    mwc.emit('users:ban',this);
+    this.save(cb);
+  };
+
+  /**
+   * @ngdoc function
+   * @name User.unban
+   * @description
+   * Removes ban from this user
+   * @param {function} callback  - function is fired when user is saved
+   */
+  UserSchema.methods.unban = function(callback){
+    this.isBanned=true;
+    mwc.emit('users:unban',this);
+    this.save(cb);
+  };
+
+  /**
+   * @ngdoc function
+   * @name mwc.model.User.ban
+   * @description
+   * Bans this user
+   * @param {string} usernameOrEmail  - username or email address of user
+   * @param {function} callback  - function is fired when user is saved
+   */
+  UserSchema.statics.ban = function(usernameOrEmail,callback){
+    this.findOneByLoginOrEmail(usernameOrEmail,function(err,userFound){
+      if(err){
+        callback(err);
+      } else {
+        userFound.ban(callback);
+      }
+    });
+  };
+
+  /**
+   * @ngdoc function
+   * @name mwc.model.User.unban
+   * @description
+   * Removes ban from this user
+   * @param {string} usernameOrEmail  - username or email address of user
+   * @param {function} callback  - function is fired when user is saved
+   */
+
+  UserSchema.statics.unban = function(usernameOrEmail,callback){
+    this.findOneByLoginOrEmail(usernameOrEmail,function(err,userFound){
+      if(err){
+        callback(err);
+      } else {
+        userFound.unban(callback);
+      }
+    });
+  };
+
+  /**
+   * @ngdoc function
+   * @name mwc.model.User.findOneByUsernameOrEmail
+   * @description
+   * Alias for mwc.model.User.findOneByLoginOrEmail
+   * @param {string} usernameOrEmail  - username or email address of user
+   * @param {function} callback  - function is fired when user is saved
+   */
+  UserSchema.statics.findOneByUsernameOrEmail = UserSchema.statics.findOneByLoginOrEmail;
 
   /**
    * @ngdoc function
