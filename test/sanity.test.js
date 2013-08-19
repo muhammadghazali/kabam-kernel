@@ -34,13 +34,8 @@ describe('sanity test', function () {
         var MWC = mwcCore({'hostUrl': 'http://example.org/','secret':'123'});
       }).should.throw('Config.secret is not set or is to short!');
     });
-    it('throws proper error for empty mongoUrl string', function () {
-      if(!process.env.mongoUrl){
-        (function () {
-          var MWC = mwcCore({'hostUrl': 'http://example.org/', secret: 'lalalalala1111'});
-        }).should.throw('Config variable of mongoURL is missed!');
-      }
-    });
+
+    it('throws proper error for empty mongoUrl string, pending, because we guess mongoUrl from environment');
 
     it('throws proper error for "I am banana!" mongoUrl string', function () {
       (function () {
