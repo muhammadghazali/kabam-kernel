@@ -928,3 +928,24 @@ exports.init = function (mwc) {
  * kabamKernel.on('users:unban', function(user){...});
  * ```
  */
+
+/**
+ * @ngdoc function
+ * @name mwc.model.User.eventsEmitter
+ * @description
+ * When some user parameters are changed the kernel object emit events
+ * with payload of object of affected user at state of current event.
+ * @example
+ * ```javascript
+ * kabamKernel.on('users:revokeRole', function(user){...});
+ * kabamKernel.on('users:signUp', function(user){...});
+ * kabamKernel.on('users:signUpByEmailOnly', function(user){...});
+ * kabamKernel.on('users:completeProfile', function(user){...});
+ * kabamKernel.on('users:saveProfile', function(user){...});
+ * kabamKernel.on('users:setKeyChain', function(user){...});
+ * kabamKernel.on('users:revokeKeyChain', function(user){...});
+ * kabamKernel.on('users:findOneByApiKeyAndVerify', function(user){...});
+ * kabamKernel.on('users:ban', function(user){...});
+ * kabamKernel.on('users:unban', function(user){...});
+ * ```
+ */
