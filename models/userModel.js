@@ -924,5 +924,7 @@ exports.init = function (mwc) {
  * kabamKernel.on('users:setKeyChain', function(user){...});
  * kabamKernel.on('users:revokeKeyChain', function(user){...});
  * kabamKernel.on('users:findOneByApiKeyAndVerify', function(user){...});
+ * kabamKernel.on('users:ban', function(user){...});
+ * kabamKernel.on('users:unban', function(user){...});
  * ```
  */
