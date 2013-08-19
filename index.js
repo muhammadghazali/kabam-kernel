@@ -753,3 +753,52 @@ MWC.create = function (config) {
 };
 
 module.exports = exports = MWC.create;
+
+/**
+ * @ngdoc function
+ * @name kabamKernel.on
+ * @usage
+ * kabamKernel.on('someEvent',function(payload){...});
+ * @description
+ * Adds a listener to the end of the listeners array for the specified event.
+ *
+ * There can be more event emmiters than in documentation. Probably from plugins and some 3rd party code.
+ * Event emitted from user model
+ * [http://ci.monimus.com/docs/#/api/User.eventsEmitter](http://ci.monimus.com/docs/#/api/User.eventsEmitter)
+ * [http://ci.monimus.com/docs/#/api/kabamKernel.model.User.eventsEmitter](http://ci.monimus.com/docs/#/api/kabamKernel.model.User.eventsEmitter)
+ *
+ * More info on event listeners - [http://nodejs.org/api/events.html#events_emitter_on_event_listener](http://nodejs.org/api/events.html#events_emitter_on_event_listener)
+ * @param {string} eventName - the name of event type
+ * @param {function} handlerFunction - function used to process the event
+ * @example
+ * ```javascript
+ *    kabamKernel.on('error', functon(error){ //this is standart event emitter
+ *      console.error(error);
+ *    });
+ *
+ *    //event emmiters from users model
+ *    kabamKernel.on('users:revokeRole', function(user){...});
+ *    kabamKernel.on('users:signUp', function(user){...});
+ *    kabamKernel.on('users:signUpByEmailOnly', function(user){...});
+ *    kabamKernel.on('users:completeProfile', function(user){...});
+ *    kabamKernel.on('users:saveProfile', function(user){...});
+ *    kabamKernel.on('users:setKeyChain', function(user){...});
+ *    kabamKernel.on('users:revokeKeyChain', function(user){...});
+ *    kabamKernel.on('users:findOneByApiKeyAndVerify', function(user){...});
+ *    kabamKernel.on('users:ban', function(user){...});
+ *    kabamKernel.on('users:unban', function(user){...});
+ * ```
+ */
+
+/**
+ * @ngdoc function
+ * @name kabamKernel.once
+ * @usage
+ * kabamKernel.on('someEvent',function(payload){...});
+ * @description
+ * Adds a one time listener for the event. This listener is invoked only the next time the event is fired, after which it is removed.
+ * It works only once.
+ * All things are identical to [http://ci.monimus.com/docs/#/api/kabamKernel.on](http://ci.monimus.com/docs/#/api/kabamKernel.on)
+ * @param {string} eventName - the name of event type
+ * @param {function} handlerFunction - function used to process the event
+ */
