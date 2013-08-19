@@ -910,7 +910,7 @@ exports.init = function (mwc) {
 
 /**
  * @ngdoc function
- * @name Users.eventsEmitter
+ * @name User.eventsEmitter
  * @description
  * When some user parameters are changed the kernel object emit events
  * with payload of object of affected user at state of current event.
