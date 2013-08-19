@@ -63,7 +63,7 @@ program.on('--help', function(){
 
 
 program.parse(process.argv);
-console.log(('KabamUser version '+pkg.version).bold.yellow.redBG);
+console.log(('KabamUsers version '+pkg.version).bold.yellow.redBG);
 if(process.argv.length===2){
   program.outputHelp();
 }

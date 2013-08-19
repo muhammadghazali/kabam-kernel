@@ -1,7 +1,7 @@
 {
   "name": "kabam-kernel",
   "version": "0.2.3",
-  "description": "Kabam kernel for building express.js applications with plugins",
+  "description": "KabamKernel for building express.js applications with plugins",
   "main": "index.js",
   "engines": {
     "node": "0.10.x",
@@ -12,7 +12,7 @@
     "test": "./node_modules/.bin/mocha --reporter spec"
   },
   "bin": {
-    "kabamUser":"bin/kabamUser.js"
+    "kabamUsers":"bin/kabamUsers.js"
   },
   "repository": {
     "type": "git",
