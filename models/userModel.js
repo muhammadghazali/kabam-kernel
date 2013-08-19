@@ -258,6 +258,7 @@ exports.init = function (mwc) {
     var salt = sha512(rack());
     this.salt = salt;
     this.password = sha512('' + salt + newPassword);
+    mwc.emit('users:setPassword',this);
     this.save(callback);
     return;
   };
@@ -304,6 +305,7 @@ exports.init = function (mwc) {
   UserSchema.methods.grantRole = function (roleName, callback) {
     if (this.roles.indexOf(roleName) === -1) {
       this.roles.push(roleName);
+      mwc.emit('users:grantRole',this);
       this.save(callback);
     } else {
       callback(null);
@@ -359,6 +361,7 @@ exports.init = function (mwc) {
       callback(null);
     } else {
       this.roles.splice(roleIndex, 1);
+      mwc.emit('users:revokeRole',this);
       this.save(callback);
     }
   };
@@ -545,6 +548,7 @@ exports.init = function (mwc) {
             callback(err1);
           } else {
             userCreated.notify('email', {'subject': 'Verify your email account!', 'template': 'signin'});
+            mwc.emit('users:signUp',userCreated);
             callback(null, userCreated);
           }
         });
@@ -577,6 +581,7 @@ exports.init = function (mwc) {
           if (err1) {
             callback(err1);
           } else {
+            mwc.emit('users:signUpByEmailOnly', userCreated);
             callback(null, userCreated);
           }
         });
@@ -597,6 +602,7 @@ exports.init = function (mwc) {
     if (typeof this.username === 'undefined' && this.profileComplete === false) {
       this.username = username;
       this.profileComplete = true;
+      mwc.emit('users:completeProfile', this);
       this.setPassword(password, callback);
     } else {
       callback(new Error('Account is completed!'));
@@ -615,6 +621,7 @@ exports.init = function (mwc) {
   UserSchema.methods.saveProfile = function (profile, callback) {
     this.profile = profile;
     this.markModified('profile'); //http://mongoosejs.com/docs/schematypes.html
+    mwc.emit('users:saveProfile', this);
     this.save(callback);
   };
 
@@ -648,6 +655,7 @@ exports.init = function (mwc) {
     }
     this.keychain[provider] = id;
     this.markModified('keychain'); //http://mongoosejs.com/docs/schematypes.html
+    mwc.emit('users:setKeyChain', this);
     this.save(callback);
   };
 
@@ -662,6 +670,7 @@ exports.init = function (mwc) {
   UserSchema.methods.revokeKeyChain = function (provider, callback) {
     this.keychain[provider] = null;
     this.markModified('keychain'); //http://mongoosejs.com/docs/schematypes.html
+    mwc.emit('users:revokeKeyChain', this);
     this.save(callback);
   };
 
@@ -718,6 +727,7 @@ exports.init = function (mwc) {
         if (userFound && userFound.emailVerified === false && (new Date().getTime() - userFound.apiKeyCreatedAt.getTime()) < 30 * 60 * 1000) {
           userFound.emailVerified = true;
           userFound.save(function (err1) {
+            mwc.emit('users:findOneByApiKeyAndVerify', userFound);
             callback(err1, userFound);
           });
         } else {
@@ -729,7 +739,7 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.findOneByApiKeyAndVerify
+   * @name mwc.model.User.findOneByApiKeyAndResetPassword
    * @description
    * This function is used for reseting users password by link in email with submitting form later
    * @param {string} apiKey - apiKey to use
@@ -743,6 +753,7 @@ exports.init = function (mwc) {
       } else {
         if (userFound && (new Date().getTime() - userFound.apiKeyCreatedAt.getTime()) < 30 * 60 * 1000) {
           userFound.setPassword(password, function (err1) {
+            mwc.emit('users:indOneByApiKeyAndResetPassword', userFound);
             callback(err1, userFound);
           });
         } else {
@@ -812,3 +823,24 @@ exports.init = function (mwc) {
 
   return mwc.mongoConnection.model('User', UserSchema);
 };
+
+
+
+/**
+ * @ngdoc function
+ * @name Users.eventsEmitter
+ * @description
+ * When some user parameters are changed the kernel object emit events
+ * with payload of object of affected user at state of current event.
+ * @example
+ * ```javascript
+ * kabamKernel.on('users:revokeRole', function(user){...});
+ * kabamKernel.on('users:signUp', function(user){...});
+ * kabamKernel.on('users:signUpByEmailOnly', function(user){...});
+ * kabamKernel.on('users:completeProfile', function(user){...});
+ * kabamKernel.on('users:saveProfile', function(user){...});
+ * kabamKernel.on('users:setKeyChain', function(user){...});
+ * kabamKernel.on('users:revokeKeyChain', function(user){...});
+ * kabamKernel.on('users:findOneByApiKeyAndVerify', function(user){...});
+ * ```
+ */
