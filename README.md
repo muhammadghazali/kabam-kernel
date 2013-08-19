@@ -1,8 +1,8 @@
 @ngdoc overview
-@name mwc_kernel-index
+@name KabamKernel-index
 @description
 
-mwc_kernel
+kabamKernel
 ==========
 
 MyWebClass core node.js application to be extended by plugins.
@@ -36,7 +36,7 @@ But it can have some new features, not listed in README.md.
 **Official repos:**
 
  - [https://github.com/mykabam/kabam-kernel](https://github.com/mykabam/kabam-kernel) - main repo
- - [https://bitbucket.org/vodolaz095/mwc_kernel](https://bitbucket.org/vodolaz095/mwc_kernel) - read only backup repo, can be outdated
+ - [https://bitbucket.org/vodolaz095/kabamKernel](https://bitbucket.org/vodolaz095/kabamKernel) - read only backup repo, can be outdated
 
 
 Introduction
@@ -45,7 +45,7 @@ Introduction
 Technically this is a Factory class to vendor [express.js](http://expressjs.com/) applications,
 that can be easily extended by 6 mixin type functions.
 
-0. `mwcCore(configObj)` - create application object using [configuration object](https://github.com/mykabam/kabam-kernel/blob/master/example/config.json)
+0. `kabamKernel(configObj)` - create application object using [configuration object](https://github.com/mykabam/kabam-kernel/blob/master/example/config.json)
 specified. The mandatory configObj fields are `"hostUrl":"http://vvv.msk0.ru/"`, `"secret":"hammer on the keyboard"`,
 and `"mongoUrl":"mongodb://localhost/mwc_dev"`.
 
@@ -241,7 +241,7 @@ Installation
 
 ```shell
     $ git clone git@github.com:mykabam/kabam-kernel.git
-    $ cd mwc_kernel
+    $ cd kabam-kernel
     $ npm install
 ```
 
@@ -293,9 +293,9 @@ This is typical plugin code. It is placed there
 *Important* - when you create plugin, the `extendApp`, `extendMiddleware` APPLIES to all environments!
 Furthermore, `extendMiddleware` binds to route '/'
 
-Lifecycle of mwc_kernel module and how can we extend it
+Lifecycle of kabamKernel module and how can we extend it
 =======
-*Firstly*, the *core* module in extending functions are THE SAME instance of mwcCore application.
+*Firstly*, the *core* module in extending functions are THE SAME instance of kabamKernel application.
 And every call of extending functions shedule some customization for this application.
 
 I think i will post a bad example, and explain, why this is bad

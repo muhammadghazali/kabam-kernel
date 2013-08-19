@@ -12,7 +12,7 @@ var EventEmitter = require('events').EventEmitter,
 
 /**
  * @ngdoc function
- * @name mwc
+ * @name kabamKernel
  * @constructor
  * @param {object} config - config object
  */
@@ -44,7 +44,7 @@ function MWC(config) {
   //privileged functions
   /**
    * @ngdoc function
-   * @name mwc.extendCore
+   * @name kabamKernel.extendCore
    * @description
    * Perform dependency injection on the mwc.shared object.
    * If mwc do not have fieldName property/method, this method is created as public property/method.
@@ -104,7 +104,7 @@ function MWC(config) {
 
   /**
    * @ngdoc function
-   * @name mwc.extendModel
+   * @name kabamKernel.extendModel
    * @description
    * Perform dependency injection of mongoose models to mwc.model and request.model.
    * When you call `extendModel(modelName,function(mongoose, config){...})` you get all the environment created after calling
@@ -145,7 +145,7 @@ function MWC(config) {
 
   /**
    * @ngdoc function
-   * @name mwc.extendStrategy
+   * @name kabamKernel.extendStrategy
    * @description
    * Loads new passportjs strategies from object
    * @param {object} strategyObject Passport's strategy object
@@ -202,7 +202,7 @@ function MWC(config) {
 
   /**
    * @ngdoc function
-   * @name mwc.extendApp
+   * @name kabamKernel.extendApp
    * @description
    * Set app parameters - view engine, variables, locals
    * When you call `extendApp(function(core){...})`, you can set global application parameters, for example
@@ -280,7 +280,7 @@ function MWC(config) {
 
   /**
    * @ngdoc function
-   * @name mwc.extendMiddleware
+   * @name kabamKernel.extendMiddleware
    * @description
    * Adds new middleware to expressJS application
    * This function can be executed multiple times, the middlewares applied are used in application in *order* they were issued by this function.
@@ -375,7 +375,7 @@ function MWC(config) {
 
   /**
    * @ngdoc function
-   * @name mwc.extendRoutes
+   * @name kabamKernel.extendRoutes
    * @description
    * Adds application routes and verbs for them.
    * ExpressJS object of every routes request have functions of `request.mwcEmit`,
@@ -408,7 +408,7 @@ function MWC(config) {
 
   /**
    * @ngdoc function
-   * @name mwc.usePlugin
+   * @name kabamKernel.usePlugin
    * @description
    * Loads plugin from object or npm module
    * @param {object/string} pluginObjectOrName - config object or plugin name to get by require
@@ -491,7 +491,7 @@ function MWC(config) {
 
   /**
    * @ngdoc function
-   * @name mwc.start
+   * @name kabamKernel.start
    * @description
    * Start mwc application
    * @param {object} howExactly - config object
@@ -583,7 +583,7 @@ function MWC(config) {
   };
   /**
    * @ngdoc function
-   * @name mwc.startCluster
+   * @name kabamKernel.startCluster
    * @description
    * Start mwc application as a cluster, with 1 process per CPU core.
    * This command start the process master by mwc.start('app') - so it do not listens to http port,
@@ -658,7 +658,7 @@ MWC.prototype.validateConfig = function (config) {
 
 /**
  * @ngdoc function
- * @name mwc.extendListeners
+ * @name kabamKernel.extendListeners
  * @param {string} eventName Name of the event
  * @param {function} eventHandlerFunction Function to handle the event
  * @description - add custom event handler for mwc
@@ -682,7 +682,7 @@ MWC.prototype.extendListeners = function (eventName, eventHandlerFunction) {
 
 /**
  * @ngdoc function
- * @name mwc.injectEmit
+ * @name kabamKernel.injectEmit
  * @description
  * Injects a function .emit(eventName,eventObj) for every object. This function
  * is used for making this object to be able to emit events through mwc
@@ -697,7 +697,7 @@ MWC.prototype.injectEmit = function (object) {
 
 /**
  * @ngdoc function
- * @name mwc.createRedisClient
+ * @name kabamKernel.createRedisClient
  * @description
  * Create new redis client
  *
@@ -713,7 +713,7 @@ MWC.prototype.createRedisClient = function () {
 
 /**
  * @ngdoc function
- * @name mwc.create
+ * @name kabamKernel.create
  * @description
  * Create MWC object instance (factory)
  * @param {object} config - config object

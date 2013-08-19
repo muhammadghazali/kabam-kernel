@@ -32,15 +32,15 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model
+   * @name kabamKernel.model
    * @description
    * Mongooses collections of objects to manipulate data in mongo database
    */
 
   /**
    * @ngdoc function
-   * @name mwc.model.User
-   * @methodOf mwc.model
+   * @name kabamKernel.model.User
+   * @methodOf kabamKernel.model
    * @description
    * Active record style Mongoose object to manipulate users collection
    */
@@ -93,6 +93,15 @@ exports.init = function (mwc) {
      * Is user root? - boolean
      */
     root: Boolean,
+
+    /**
+     * @ngdoc value
+     * @methodOf User
+     * @name User.isBanned
+     * @description
+     * Is user banned? - boolean
+     */
+    isBanned: {type: Boolean, default:false},
 
     /**
      * @ngdoc value
@@ -258,6 +267,7 @@ exports.init = function (mwc) {
     var salt = sha512(rack());
     this.salt = salt;
     this.password = sha512('' + salt + newPassword);
+    mwc.emit('users:setPassword',this);
     this.save(callback);
     return;
   };
@@ -304,6 +314,7 @@ exports.init = function (mwc) {
   UserSchema.methods.grantRole = function (roleName, callback) {
     if (this.roles.indexOf(roleName) === -1) {
       this.roles.push(roleName);
+      mwc.emit('users:grantRole',this);
       this.save(callback);
     } else {
       callback(null);
@@ -359,9 +370,83 @@ exports.init = function (mwc) {
       callback(null);
     } else {
       this.roles.splice(roleIndex, 1);
+      mwc.emit('users:revokeRole',this);
       this.save(callback);
     }
   };
+
+  /**
+   * @ngdoc function
+   * @name User.ban
+   * @description
+   * Ban this user
+   * @param {function} callback  - function is fired when user is saved
+   */
+  UserSchema.methods.ban = function(callback){
+    this.isBanned=true;
+    mwc.emit('users:ban',this);
+    this.save(cb);
+  };
+
+  /**
+   * @ngdoc function
+   * @name User.unban
+   * @description
+   * Removes ban from this user
+   * @param {function} callback  - function is fired when user is saved
+   */
+  UserSchema.methods.unban = function(callback){
+    this.isBanned=true;
+    mwc.emit('users:unban',this);
+    this.save(cb);
+  };
+
+  /**
+   * @ngdoc function
+   * @name kabamKernel.model.User.ban
+   * @description
+   * Bans this user
+   * @param {string} usernameOrEmail  - username or email address of user
+   * @param {function} callback  - function is fired when user is saved
+   */
+  UserSchema.statics.ban = function(usernameOrEmail,callback){
+    this.findOneByLoginOrEmail(usernameOrEmail,function(err,userFound){
+      if(err){
+        callback(err);
+      } else {
+        userFound.ban(callback);
+      }
+    });
+  };
+
+  /**
+   * @ngdoc function
+   * @name kabamKernel.model.User.unban
+   * @description
+   * Removes ban from this user
+   * @param {string} usernameOrEmail  - username or email address of user
+   * @param {function} callback  - function is fired when user is saved
+   */
+
+  UserSchema.statics.unban = function(usernameOrEmail,callback){
+    this.findOneByLoginOrEmail(usernameOrEmail,function(err,userFound){
+      if(err){
+        callback(err);
+      } else {
+        userFound.unban(callback);
+      }
+    });
+  };
+
+  /**
+   * @ngdoc function
+   * @name kabamKernel.model.User.findOneByUsernameOrEmail
+   * @description
+   * Alias for mwc.model.User.findOneByLoginOrEmail
+   * @param {string} usernameOrEmail  - username or email address of user
+   * @param {function} callback  - function is fired when user is saved
+   */
+  UserSchema.statics.findOneByUsernameOrEmail = UserSchema.statics.findOneByLoginOrEmail;
 
   /**
    * @ngdoc function
@@ -408,7 +493,7 @@ exports.init = function (mwc) {
   //finders
   /**
    * @ngdoc function
-   * @name mwc.model.User.findOneByLoginOrEmail
+   * @name kabamKernel.model.User.findOneByLoginOrEmail
    * @description
    * Finds one user by login or email, returns as second argument in callback, first one is error
    * @param {string} loginOrEmai - login or email of user to be foundl
@@ -431,7 +516,7 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.findOneByApiKey
+   * @name kabamKernel.model.User.findOneByApiKey
    * @description
    * Finds one user by apiKey, returns as second argument in callback, first one is error
    * @param {string} apiKey - apiKey of user to be foundl
@@ -451,7 +536,7 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.getByRole
+   * @name kabamKernel.model.User.getByRole
    * @description
    * Finds users who have desired role
    * @param {string} role - role/permission to search owners of
@@ -472,7 +557,7 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.processOAuthProfile
+   * @name kabamKernel.model.User.processOAuthProfile
    * @param {string} email - email of user from oauth profile we want to process
    * @param {function} done - function is fired when users are found
    * @description
@@ -518,7 +603,7 @@ exports.init = function (mwc) {
   };
   /**
    * @ngdoc function
-   * @name mwc.model.User.signUp
+   * @name kabamKernel.model.User.signUp
    * @param {string} username - username for new user
    * @param {string} email - email for new user
    * @param {string} password - password for new user
@@ -545,6 +630,7 @@ exports.init = function (mwc) {
             callback(err1);
           } else {
             userCreated.notify('email', {'subject': 'Verify your email account!', 'template': 'signin'});
+            mwc.emit('users:signUp',userCreated);
             callback(null, userCreated);
           }
         });
@@ -554,7 +640,7 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.signUpByEmailOnly
+   * @name kabamKernel.model.User.signUpByEmailOnly
    * @param {string}  email  - email for new user
    * @param {function}  callback  - function is fired when user is saved
    * @description
@@ -577,6 +663,7 @@ exports.init = function (mwc) {
           if (err1) {
             callback(err1);
           } else {
+            mwc.emit('users:signUpByEmailOnly', userCreated);
             callback(null, userCreated);
           }
         });
@@ -597,6 +684,7 @@ exports.init = function (mwc) {
     if (typeof this.username === 'undefined' && this.profileComplete === false) {
       this.username = username;
       this.profileComplete = true;
+      mwc.emit('users:completeProfile', this);
       this.setPassword(password, callback);
     } else {
       callback(new Error('Account is completed!'));
@@ -615,6 +703,7 @@ exports.init = function (mwc) {
   UserSchema.methods.saveProfile = function (profile, callback) {
     this.profile = profile;
     this.markModified('profile'); //http://mongoosejs.com/docs/schematypes.html
+    mwc.emit('users:saveProfile', this);
     this.save(callback);
   };
 
@@ -648,6 +737,7 @@ exports.init = function (mwc) {
     }
     this.keychain[provider] = id;
     this.markModified('keychain'); //http://mongoosejs.com/docs/schematypes.html
+    mwc.emit('users:setKeyChain', this);
     this.save(callback);
   };
 
@@ -662,12 +752,13 @@ exports.init = function (mwc) {
   UserSchema.methods.revokeKeyChain = function (provider, callback) {
     this.keychain[provider] = null;
     this.markModified('keychain'); //http://mongoosejs.com/docs/schematypes.html
+    mwc.emit('users:revokeKeyChain', this);
     this.save(callback);
   };
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.findOneByKeychain
+   * @name kabamKernel.model.User.findOneByKeychain
    * @description
    * Finds user that have keychain for this provider and this id
    * @param {string} provider - provider name
@@ -704,7 +795,7 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.findOneByApiKeyAndVerify
+   * @name kabamKernel.model.User.findOneByApiKeyAndVerify
    * @description
    * This function is used for verifying users profile from link in email message
    * @param {string} apiKey - apiKey to use
@@ -718,6 +809,7 @@ exports.init = function (mwc) {
         if (userFound && userFound.emailVerified === false && (new Date().getTime() - userFound.apiKeyCreatedAt.getTime()) < 30 * 60 * 1000) {
           userFound.emailVerified = true;
           userFound.save(function (err1) {
+            mwc.emit('users:findOneByApiKeyAndVerify', userFound);
             callback(err1, userFound);
           });
         } else {
@@ -729,7 +821,7 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.findOneByApiKeyAndVerify
+   * @name kabamKernel.model.User.findOneByApiKeyAndResetPassword
    * @description
    * This function is used for reseting users password by link in email with submitting form later
    * @param {string} apiKey - apiKey to use
@@ -743,6 +835,7 @@ exports.init = function (mwc) {
       } else {
         if (userFound && (new Date().getTime() - userFound.apiKeyCreatedAt.getTime()) < 30 * 60 * 1000) {
           userFound.setPassword(password, function (err1) {
+            mwc.emit('users:indOneByApiKeyAndResetPassword', userFound);
             callback(err1, userFound);
           });
         } else {
@@ -757,7 +850,7 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
-   * @name mwc.model.User.getForUser
+   * @name kabamKernel.model.User.getForUser
    * @param {User} user - user to test privileges, for example, the one from request object
    * @param {object} parameters - users field to find against
    * @param {function} callback - function(err,arrayOfUsersFound){...}
@@ -775,7 +868,7 @@ exports.init = function (mwc) {
   };
   /**
    * @ngdoc function
-   * @name mwc.model.User.canCreate
+   * @name kabamKernel.model.User.canCreate
    * @description
    * Can this user create new users by rest api? Returns true if he/she can.
    * If this user is root, he can do it.
@@ -812,3 +905,47 @@ exports.init = function (mwc) {
 
   return mwc.mongoConnection.model('User', UserSchema);
 };
+
+
+
+/**
+ * @ngdoc function
+ * @name User.eventsEmitter
+ * @description
+ * When some user parameters are changed the kernel object emit events
+ * with payload of object of affected user at state of current event.
+ * @example
+ * ```javascript
+ * kabamKernel.on('users:revokeRole', function(user){...});
+ * kabamKernel.on('users:signUp', function(user){...});
+ * kabamKernel.on('users:signUpByEmailOnly', function(user){...});
+ * kabamKernel.on('users:completeProfile', function(user){...});
+ * kabamKernel.on('users:saveProfile', function(user){...});
+ * kabamKernel.on('users:setKeyChain', function(user){...});
+ * kabamKernel.on('users:revokeKeyChain', function(user){...});
+ * kabamKernel.on('users:findOneByApiKeyAndVerify', function(user){...});
+ * kabamKernel.on('users:ban', function(user){...});
+ * kabamKernel.on('users:unban', function(user){...});
+ * ```
+ */
+
+/**
+ * @ngdoc function
+ * @name kabamKernel.model.User.eventsEmitter
+ * @description
+ * When some user parameters are changed the kernel object emit events
+ * with payload of object of affected user at state of current event.
+ * @example
+ * ```javascript
+ * kabamKernel.on('users:revokeRole', function(user){...});
+ * kabamKernel.on('users:signUp', function(user){...});
+ * kabamKernel.on('users:signUpByEmailOnly', function(user){...});
+ * kabamKernel.on('users:completeProfile', function(user){...});
+ * kabamKernel.on('users:saveProfile', function(user){...});
+ * kabamKernel.on('users:setKeyChain', function(user){...});
+ * kabamKernel.on('users:revokeKeyChain', function(user){...});
+ * kabamKernel.on('users:findOneByApiKeyAndVerify', function(user){...});
+ * kabamKernel.on('users:ban', function(user){...});
+ * kabamKernel.on('users:unban', function(user){...});
+ * ```
+ */
