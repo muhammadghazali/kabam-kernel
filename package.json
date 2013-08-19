@@ -12,7 +12,7 @@
     "test": "./node_modules/.bin/mocha --reporter spec"
   },
   "bin": {
-    "kabam":"bin/kabam.js"
+    "kabamUser":"bin/kabamUser.js"
   },
   "repository": {
     "type": "git",
