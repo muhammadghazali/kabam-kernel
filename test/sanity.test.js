@@ -12,11 +12,7 @@ describe('sanity test', function () {
 
   describe('MWC throws errors when we have strange config object', function () {
 
-    it('throws proper error for empty config object', function () {
-      (function () {
-        var MWC = mwcCore();
-      }).should.throw('Config is not an object!');
-    });
+    it('throws proper error for empty config object as we try to recreate it in this case');
 
     it('throws proper error for config object being not object', function () {
       (function () {
@@ -25,11 +21,7 @@ describe('sanity test', function () {
     });
 
 
-    it('throws proper error for config without hostUrl', function () {
-      (function () {
-        var MWC = mwcCore({'hostUrl': null});
-      }).should.throw('Config.hostUrl have to be valid hostname - for example, http://example.org/ with http(s) on start and "/" at end!!!');
-    });
+    it('throws proper error for config without hostUrl - we try to guess it from os.hostname()');
 
     it('throws proper error for config with bad hostUrl', function () {
       (function () {
@@ -37,18 +29,11 @@ describe('sanity test', function () {
       }).should.throw('Config.hostUrl have to be valid hostname - for example, http://example.org/ with http(s) on start and "/" at end!!!');
     });
 
-    it('throws proper error for undefined secret string', function () {
+    it('throws proper error for too short secret string', function () {
       (function () {
-        var MWC = mwcCore({'hostUrl': 'http://example.org/'});
+        var MWC = mwcCore({'hostUrl': 'http://example.org/','secret':'123'});
       }).should.throw('Config.secret is not set or is to short!');
     });
-
-    it('throws proper error for short secret string', function () {
-      (function () {
-        var MWC = mwcCore({'hostUrl': 'http://example.org/', secret: '123'});
-      }).should.throw('Config.secret is not set or is to short!');
-    });
-
     it('throws proper error for empty mongoUrl string', function () {
       if(!process.env.mongoUrl){
         (function () {

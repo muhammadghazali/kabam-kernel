@@ -5,6 +5,7 @@ var EventEmitter = require('events').EventEmitter,
   https = require('https'),
   appManager = require('./lib/appManager.js'),
   MongooseManager = require('./lib/MongooseManager.js'),
+  configManager = require('./lib/configManager.js'),
   mongooseManager = new MongooseManager(),
   redisManager = require('./lib/redisManager.js'),
   colors = require('colors');
@@ -18,16 +19,17 @@ var EventEmitter = require('events').EventEmitter,
 function MWC(config) {
 
   EventEmitter.call(this);
-
+  if (typeof config === 'undefined'){
+    config = {};
+  }
+  if(typeof config !== 'object'){
+    throw new Error('Config is not an object!');
+  }
   if (typeof config === 'object') {
-    if (process.env.redisUrl && !config.redis) {
-//Using redis configuration from enviromental value
-      config.redis = process.env.redisUrl;
-    }
-    if (process.env.mongoUrl && !config.mongoUrl) {
-//Using mongo configuration from enviromental value
-      config.mongoUrl = process.env.mongoUrl;
-    }
+    config.secret = configManager.getSecret(config.secret);
+    config.hostUrl = configManager.getHostUrl(config.hostUrl);
+    config.redis = configManager.getRedisUrl(config.redis);
+    config.mongoUrl = configManager.getMongoUrl(config.mongoUrl);
   }
   this.validateConfig(config);
   this.config = config;
@@ -646,7 +648,7 @@ MWC.prototype.validateConfig = function (config) {
   if (!(config.hostUrl && url.parse(config.hostUrl)['hostname'])) {
     throw new Error('Config.hostUrl have to be valid hostname - for example, http://example.org/ with http(s) on start and "/" at end!!!');
   }
-  if (!(config.secret && config.secret.length > 9)) {
+  if (config.secret.length < 9) {
     throw new Error('Config.secret is not set or is to short!');
   }
 
