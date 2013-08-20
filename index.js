@@ -500,11 +500,26 @@ function MWC(config) {
    * @param {object} howExactly - config object
    * Values:
    *
-   * - null - bind expressJS application to default port (process.env.PORT) or 3000 port, returns mwc
-   * - number - bind expressJS application to this port, returns mwc
-   * - http instance - bind expressJS application to this server, returns this server object with application bound
-   * - https instance - bind expressJS application to this server, returns this server object with application bound
-   * - string of 'app' - start appliation as standalone object, for background workers and console scripts, returns mwc
+   * *null* bind expressJS application to default port (process.env.PORT)
+   * or 3000 port, makes kabamKernel emit event of `started` with value {'type':'expressHttp', 'port':3000},
+   * returns kabamKernel
+   *
+   * *number* - bind expressJS application to this port,
+   * makes kabamKernel emit event of `started` with value {'type':'expressHttp', 'port':3001},
+   * where 3001 is port number desired, and returns kabamKernel
+   *
+   * *http instance* - bind expressJS application to this http server,
+   * makes kabamKernel emit event of `started` with value {'type':'bindedToHttp'},
+   * returns this server object with application bound
+   *
+   * *https instance* - bind expressJS application to this https server,
+   * makes kabamKernel emit event of `started` with value {'type':'bindedToHttp'},
+   * returns this server object with application bound
+   *
+   * *string of 'app'* - start appliation as standalone object,
+   * for background workers and console scripts,
+   * makes kabamKernel emit event of `started` with value {'type':'app'},
+   * returns kabamKernel
    *
    * @param {object} options config object for https server [http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener](http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener)
    *
@@ -564,13 +579,18 @@ function MWC(config) {
 
     if (howExactly) {
       if (howExactly === 'app') {
+        thisMWC.emit('started',{ 'type': 'app' });
         return thisMWC;
       }
       if (typeof howExactly === 'number' && howExactly > 0) {
-        thisMWC.app.listen(howExactly);
+        thisMWC.app.listen(howExactly, function(){
+          thisMWC.emit('started',{'port':howExactly, 'type': 'expressHttp'});
+          console.log(('KabamKernel started on '+howExactly+' port').blue);
+        });
         return thisMWC;
       }
       if (typeof howExactly  === 'object' && typeof howExactly.createServer === 'function') {
+        thisMWC.emit('started',{'type': 'bindedToHttp'});
         if(options){
           return howExactly.createServer(options,thisMWC.app);//do not forget to set this https for listening.
         } else {
@@ -580,7 +600,10 @@ function MWC(config) {
       }
       throw new Error('Function MWC.listen(httpOrHttpsOrPort) accepts objects of null, "app", http, https or port\'s number as argument!');
     } else {
-      this.app.listen(this.app.get('port'));//listening to default port
+      thisMWC.app.listen(thisMWC.app.get('port'), function(){
+        thisMWC.emit('started',{'port': thisMWC.app.get('port'), 'type': 'expressHttp'});
+        console.log(('KabamKernel started on '+thisMWC.app.get('port')+' port').blue);
+      });
       return thisMWC;
     }
   };
@@ -769,6 +792,8 @@ module.exports = exports = MWC.create;
  * [http://ci.monimus.com/docs/#/api/User.eventsEmitter](http://ci.monimus.com/docs/#/api/User.eventsEmitter)
  * [http://ci.monimus.com/docs/#/api/kabamKernel.model.User.eventsEmitter](http://ci.monimus.com/docs/#/api/kabamKernel.model.User.eventsEmitter)
  *
+ * Events emmited from starting application
+ * [http://ci.monimus.com/docs/#/api/kabamKernel.start](http://ci.monimus.com/docs/#/api/kabamKernel.start)
  * More info on event listeners - [http://nodejs.org/api/events.html#events_emitter_on_event_listener](http://nodejs.org/api/events.html#events_emitter_on_event_listener)
  * @param {string} eventName - the name of event type
  * @param {function} handlerFunction - function used to process the event
@@ -779,6 +804,7 @@ module.exports = exports = MWC.create;
  *    });
  *
  *    //event emmiters from users model
+ *    kabamKernel.on('started',function(parametes){...}); //see http://ci.monimus.com/docs/#/api/kabamKernel.start
  *    kabamKernel.on('users:revokeRole', function(user){...});
  *    kabamKernel.on('users:signUp', function(user){...});
  *    kabamKernel.on('users:signUpByEmailOnly', function(user){...});
