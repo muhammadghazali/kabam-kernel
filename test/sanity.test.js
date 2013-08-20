@@ -36,7 +36,7 @@ describe('sanity test', function () {
     });
 
     it('throws proper error for empty mongoUrl string, pending, because we guess mongoUrl from environment');
-
+/*/
     it('throws proper error for "I am banana!" mongoUrl string', function () {
       var mongoUrl = process.env.mongoUrl;
       process.env.mongoUrl = null;
@@ -45,7 +45,7 @@ describe('sanity test', function () {
       }).should.throw('Config.mongoUrl have to be valid mongoose URI - for example mongodb://user111:111password111@localhost:10053/app111');
       process.env.mongoUrl = mongoUrl;
     });
-/*/
+
     it('throws proper error for redis object without host, port', function () {
       var redis = process.env.redis;
       process.env.redis = null;
