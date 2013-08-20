@@ -795,6 +795,19 @@ module.exports = exports = MWC.create;
  *
  * Events emmited from starting application
  * [http://ci.monimus.com/docs/#/api/kabamKernel.start](http://ci.monimus.com/docs/#/api/kabamKernel.start)
+ *
+ * Event emmited from http server have type of `http` and are like this:
+ * ```javascript
+ * {
+ *   startTime: Wed Aug 21 2013 01:52:34 GMT+0400 (MSK),
+ *   duration: 49,
+ *   statusCode: 200,
+ *   method: 'GET',
+ *   ip: '127.0.0.1',
+ *   uri: '/'
+ * }
+ * ```
+ *
  * More info on event listeners - [http://nodejs.org/api/events.html#events_emitter_on_event_listener](http://nodejs.org/api/events.html#events_emitter_on_event_listener)
  * @param {string} eventName - the name of event type
  * @param {function} handlerFunction - function used to process the event

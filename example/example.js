@@ -156,6 +156,9 @@ if(isMaster){
   console.log('This is worker with PID #' + process.pid);
 }
 
+//logging requests
+MWC.on('http', console.log);
+
 //testing custom function defined on line 10
 console.log('Sum of 2 and 2 is ' + MWC.shared.getSum(2, 2));
 
