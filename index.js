@@ -823,7 +823,7 @@ module.exports = exports = MWC.create;
  * @ngdoc function
  * @name kabamKernel.once
  * @usage
- * kabamKernel.onces('someEvent',function(payload){...});
+ * kabamKernel.once('someEvent',function(payload){...});
  * @description
  * Adds a one time listener for the event. This listener is invoked only the next time the event is fired, after which it is removed.
  * kabamKernel inherits all methods, including this, from nodejs event emitter.
