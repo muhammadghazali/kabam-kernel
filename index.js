@@ -263,9 +263,9 @@ function MWC(config) {
       }
       if (typeof settingsFunction === 'function') {
         if (environmentToUse) {
-          for (var i = 0; i < environmentToUse.length; i++) {
+          for (var j = 0; j < environmentToUse.length; j++) {
             _extendAppFunctions.push({
-              'environment': environmentToUse[i],
+              'environment': environmentToUse[j],
               'settingsFunction': settingsFunction
             });
           }
@@ -331,8 +331,8 @@ function MWC(config) {
         }
         if (environment instanceof Array) {
           environmentToUse = environment;
-          for (var i = 0; i < environment.length; i++) {
-            if (typeof environment[i] !== 'string') {
+          for (var k = 0; k < environment.length; k++) {
+            if (typeof environment[k] !== 'string') {
               throw new Error('#MWC.extendMiddleware requires environment name to be a string!');
             }
           }
@@ -355,9 +355,9 @@ function MWC(config) {
 
       if (settingsFunctionToUse) {
         if (environmentToUse) {
-          for (var i = 0; i < environmentToUse.length; i++) {
+          for (var l = 0; l < environmentToUse.length; l++) {
             _extendMiddlewareFunctions.push({
-              'environment': environmentToUse[i],
+              'environment': environmentToUse[l],
               'path': pathToUse,
               'SettingsFunction': settingsFunctionToUse
             });
@@ -481,9 +481,9 @@ function MWC(config) {
       }
 
       if (typeof pluginToBeInstalled.listeners === 'object') {
-        for (var x in pluginToBeInstalled.listeners) {
-          if (pluginToBeInstalled.listeners.hasOwnProperty(x)) {
-            this.extendListeners(x, pluginToBeInstalled.listeners[x]);
+        for (var y in pluginToBeInstalled.listeners) {
+          if (pluginToBeInstalled.listeners.hasOwnProperty(y)) {
+            this.extendListeners(y, pluginToBeInstalled.listeners[y]);
           }
         }
       }
