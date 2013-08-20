@@ -804,7 +804,9 @@ module.exports = exports = MWC.create;
  *   statusCode: 200,
  *   method: 'GET',
  *   ip: '127.0.0.1',
- *   uri: '/'
+ *   uri: '/',
+ *   username:'johndoe',
+ *   email:'email'
  * }
  * ```
  *
