@@ -785,6 +785,7 @@ module.exports = exports = MWC.create;
  * @usage
  * kabamKernel.on('someEvent',function(payload){...});
  * @description
+ * kabamKernel inherits all methods, including this, from nodejs event emitter.
  * Adds a listener to the end of the listeners array for the specified event.
  *
  * There can be more event emmiters than in documentation. Probably from plugins and some 3rd party code.
@@ -822,11 +823,62 @@ module.exports = exports = MWC.create;
  * @ngdoc function
  * @name kabamKernel.once
  * @usage
- * kabamKernel.on('someEvent',function(payload){...});
+ * kabamKernel.onces('someEvent',function(payload){...});
  * @description
  * Adds a one time listener for the event. This listener is invoked only the next time the event is fired, after which it is removed.
+ * kabamKernel inherits all methods, including this, from nodejs event emitter.
  * It works only once.
  * All things are identical to [http://ci.monimus.com/docs/#/api/kabamKernel.on](http://ci.monimus.com/docs/#/api/kabamKernel.on)
  * @param {string} eventName - the name of event type
  * @param {function} handlerFunction - function used to process the event
  */
+
+/**
+ * @ngdoc function
+ * @name kabamKernel.addListener
+ * @description
+ * kabamKernel inherits all methods, including this, from nodejs event emitter.
+ * See (http://nodejs.org/api/events.html#events_emitter_addlistener_event_listener)
+ */
+
+/**
+ * @ngdoc function
+ * @name kabamKernel.removeListener
+ * @description
+ * kabamKernel inherits all methods, including this, from nodejs event emitter.
+ * See (http://nodejs.org/api/events.html#events_emitter_removelistener_event_listener)
+ */
+
+/**
+ * @ngdoc function
+ * @name kabamKernel.removeAllListeners
+ * @description
+ * kabamKernel inherits all methods, including this, from nodejs event emitter.
+ * See (http://nodejs.org/api/events.html#events_emitter_removealllisteners_event)
+ */
+
+/**
+ * @ngdoc function
+ * @name kabamKernel.setMaxListeners
+ * @description
+ * kabamKernel inherits all methods, including this, from nodejs event emitter.
+ * See (http://nodejs.org/api/events.html#events_emitter_setmaxlisteners_n)
+ */
+
+/**
+ * @ngdoc function
+ * @name kabamKernel.listeners
+ * @description
+ * kabamKernel inherits all methods, including this, from nodejs event emitter.
+ * See (http://nodejs.org/api/events.html#events_emitter_listeners_event)
+ */
+
+/**
+ * @ngdoc function
+ * @name kabamKernel.emit
+ * @description
+ * kabamKernel inherits all methods, including this, from nodejs event emitter.
+ * See (http://nodejs.org/api/events.html#events_emitter_emit_event_arg1_arg2)
+ */
+
+
