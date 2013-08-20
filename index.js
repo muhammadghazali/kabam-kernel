@@ -497,30 +497,30 @@ function MWC(config) {
    * @name kabamKernel.start
    * @description
    * Start mwc application
-   * @param {object} howExactly - config object
-   * Values:
+   * Parameters:
    *
    * *null* bind expressJS application to default port (process.env.PORT)
-   * or 3000 port, makes kabamKernel emit event of `started` with value {'type':'expressHttp', 'port':3000},
-   * returns kabamKernel
+   * or 3000 port, makes kabamKernel emit event of `started` with value
+   * `{'type':'expressHttp', 'port':3000}`, returns kabamKernel
    *
    * *number* - bind expressJS application to this port,
-   * makes kabamKernel emit event of `started` with value {'type':'expressHttp', 'port':3001},
+   * makes kabamKernel emit event of `started` with value `{'type':'expressHttp', 'port':3001}`,
    * where 3001 is port number desired, and returns kabamKernel
    *
    * *http instance* - bind expressJS application to this http server,
-   * makes kabamKernel emit event of `started` with value {'type':'bindedToHttp'},
+   * makes kabamKernel emit event of `started` with value `{'type':'bindedToHttp'}`,
    * returns this server object with application bound
    *
    * *https instance* - bind expressJS application to this https server,
-   * makes kabamKernel emit event of `started` with value {'type':'bindedToHttp'},
+   * makes kabamKernel emit event of `started` with value `{'type':'bindedToHttp'}`,
    * returns this server object with application bound
    *
    * *string of 'app'* - start appliation as standalone object,
    * for background workers and console scripts,
-   * makes kabamKernel emit event of `started` with value {'type':'app'},
+   * makes kabamKernel emit event of `started` with value `{'type':'app'}`,
    * returns kabamKernel
-   *
+
+   * @param {object} howExactly - config object, see parameters in description
    * @param {object} options config object for https server [http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener](http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener)
    *
    * @example
