@@ -79,21 +79,21 @@ describe('sanity test', function () {
 
   describe('MWC throws errors when we try to call extending functions with strange arguments', function () {
 
-    it('throws proper error for MWC.extendCore("i am pineapple!")', function () {
+    it('throws proper error for KabamKernel.extendCore("i am pineapple!")', function () {
       (function () {
         var MWC = mwcCore(config);
         MWC.extendCore('i am pineapple!');
-      }).should.throw('MWC.extendCore requires argument of fieldName(string), and value - function(config){} or object!');
+      }).should.throw('KabamKernel.extendCore requires argument of fieldName(string), and value - function(config){} or object!');
     });
 
-    it('throws proper error for MWC.extendModel("i am pineapple!")', function () {
+    it('throws proper error for KabamKernel.extendModel("i am pineapple!")', function () {
       (function () {
         var MWC = mwcCore(config);
         MWC.extendModel('i am pineapple!');
-      }).should.throw('MWC.extendModel requires arguments of string of "modelName" and function(core){...}');
+      }).should.throw('KabamKernel.extendModel requires arguments of string of "modelName" and function(core){...}');
     });
 
-    it('throws proper error for trying MWC.extendModel("Users",function()), because  "Users" is reserved name', function () {
+    it('throws proper error for trying KabamKernel.extendModel("Users",function()), because  "Users" is reserved name', function () {
       (function () {
         var MWC = mwcCore(config);
         MWC.extendModel('Users', function () {
@@ -101,14 +101,14 @@ describe('sanity test', function () {
       }).should.throw('Error extending model, "Users" is reserved name');
     });
 
-    it('throws proper error for MWC.extendApp("i am pineapple!");', function () {
+    it('throws proper error for KabamKernel.extendApp("i am pineapple!");', function () {
       (function () {
         var MWC = mwcCore(config);
         MWC.extendApp('i am pineapple!');
       }).should.throw('Wrong arguments for extendApp(arrayOrStringOfEnvironments,settingsFunction)');
     });
 
-    it('throws proper error for MWC.extendApp([{a:1},{b:1}],function(core){});', function () {
+    it('throws proper error for KabamKernel.extendApp([{a:1},{b:1}],function(core){});', function () {
       (function () {
         var MWC = mwcCore(config);
         MWC.extendApp([
@@ -116,10 +116,10 @@ describe('sanity test', function () {
           {b: 1}
         ], function (core) {
         });
-      }).should.throw('#MWC.extendApp requires environment name to be a string!');
+      }).should.throw('KabamKernel.extendApp requires environment name to be a string!');
     });
 
-    it('throws proper error for MWC.extendApp({b:1},function(core){});', function () {
+    it('throws proper error for KabamKernel.extendApp({b:1},function(core){});', function () {
       (function () {
         var MWC = mwcCore(config);
         MWC.extendApp([
@@ -127,17 +127,17 @@ describe('sanity test', function () {
           {b: 1}
         ], function (core) {
         });
-      }).should.throw('#MWC.extendApp requires environment name to be a string!');
+      }).should.throw('KabamKernel.extendApp requires environment name to be a string!');
     });
 
-    it('throws proper error for MWC.extendMiddleware("i am pineapple!");', function () {
+    it('throws proper error for KabamKernel.extendMiddleware("i am pineapple!");', function () {
       (function () {
         var MWC = mwcCore(config);
         MWC.extendMiddleware('i am pineapple!');
-      }).should.throw('Wrong arguments for function MWC.extendMiddleware(environmentArrayOrStrings, [path], settingsFunction(core){...})');
+      }).should.throw('Wrong arguments for function KabamKernel.extendMiddleware(environmentArrayOrStrings, [path], settingsFunction(core){...})');
     });
 
-    it('throws proper error for MWC.extendMiddleware([{a:1},{b:1}],function(core){})', function () {
+    it('throws proper error for KabamKernel.extendMiddleware([{a:1},{b:1}],function(core){})', function () {
       (function () {
         var MWC = mwcCore(config);
         MWC.extendMiddleware([
@@ -145,15 +145,15 @@ describe('sanity test', function () {
           {b: 1}
         ], function (core) {
         });
-      }).should.throw('#MWC.extendMiddleware requires environment name to be a string!');
+      }).should.throw('KabamKernel.extendMiddleware requires environment name to be a string!');
     });
 
-    it('throws proper error for MWC.extendMiddleware({a:1},function(core){})', function () {
+    it('throws proper error for KabamKernel.extendMiddleware({a:1},function(core){})', function () {
       (function () {
         var MWC = mwcCore(config);
         MWC.extendMiddleware({a: 1}, function (core) {
         });
-      }).should.throw('Wrong arguments for function MWC.extendMiddleware(environmentArrayOrStrings, [path], settingsFunction(core){...})');
+      }).should.throw('Wrong arguments for function KabamKernel.extendMiddleware(environmentArrayOrStrings, [path], settingsFunction(core){...})');
     });
 
     it('throws proper error for MWC.extendMiddleware("development","wrongPath",function(core){})', function () {
@@ -161,7 +161,7 @@ describe('sanity test', function () {
         var MWC = mwcCore(config);
         MWC.extendMiddleware('development', 'wrongPath', function (core) {
         });
-      }).should.throw('#MWC.extendMiddleware path to be a middleware valid path, that starts from "/"!');
+      }).should.throw('KabamKernel.extendMiddleware path to be a middleware valid path, that starts from "/"!');
     });
 
     it('throws proper error for MWC.extendMiddleware(["development","staging"],"wrongPath",function(core){})', function () {
@@ -169,14 +169,14 @@ describe('sanity test', function () {
         var MWC = mwcCore(config);
         MWC.extendMiddleware(['development', 'staging'], 'wrongPath', function (core) {
         });
-      }).should.throw('#MWC.extendMiddleware path to be a middleware valid path, that starts from "/"!');
+      }).should.throw('KabamKernel.extendMiddleware path to be a middleware valid path, that starts from "/"!');
     });
 
     it('throws proper error for MWC.extendRoutes("i am pineapple!");', function () {
       (function () {
         var MWC = mwcCore(config);
         MWC.extendRoutes('i am pineapple!');
-      }).should.throw('Wrong argument for MWC.extendAppRoutes(function(core){...});');
+      }).should.throw('Wrong argument for KabamKernel.extendAppRoutes(function(core){...});');
     });
 
   });
