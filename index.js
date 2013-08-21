@@ -822,8 +822,10 @@ module.exports = exports = MWC.create;
  *      console.error(error);
  *    });
  *
+ *    //event emmited from starting application
+ *    kabamKernel.on('started',function(parametes){...});
+ *
  *    //event emmiters from users model
- *    kabamKernel.on('started',function(parametes){...}); //see http://ci.monimus.com/docs/#/api/kabamKernel.start
  *    kabamKernel.on('users:revokeRole', function(user){...});
  *    kabamKernel.on('users:signUp', function(user){...});
  *    kabamKernel.on('users:signUpByEmailOnly', function(user){...});
