@@ -755,6 +755,8 @@ MWC.prototype.createRedisClient = function () {
  *   // valid mongoUrl
  *
  *   "secret":"LongAndHardSecretStringToPreventSessionHiJaskIsAMandatoryParameter",
+ *   "disableCsrf":false, //disable CSRF protection. This is not recommended
+ *   //CSRF have to be taken seriously - http://en.wikipedia.org/wiki/Csrf
  *
  * //"redis": "redis://prefix:authPassword@redisServer:6379",
  * //url to redis server, can be ommited
