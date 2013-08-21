@@ -55,7 +55,8 @@
  * };
  *  exports.listeners = {
  *  'panic': function (panic) {
- *   console.log(alert);
+ *   console.log('panic!');
+ *   console.log(panic!);
  *  }
  * };
  * ```
