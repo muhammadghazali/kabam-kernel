@@ -56,7 +56,7 @@
  *  exports.listeners = {
  *  'panic': function (panic) {
  *   console.log('panic!');
- *   console.log(panic!);
+ *   console.log(panic);
  *  }
  * };
  * ```
