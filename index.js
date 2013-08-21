@@ -787,16 +787,19 @@ module.exports = exports = MWC.create;
  * @description
  * kabamKernel inherits all methods, including this, from nodejs event emitter.
  * Adds a listener to the end of the listeners array for the specified event.
+ * See [official nodejs manual] (http://nodejs.org/api/events.html)
  *
  * There can be more event emmiters than in documentation. Probably from plugins and some 3rd party code.
- * Event emitted from user model
+ *
+ * *Event emitted from user model*
  * [http://ci.monimus.com/docs/#/api/User.eventsEmitter](http://ci.monimus.com/docs/#/api/User.eventsEmitter)
  * [http://ci.monimus.com/docs/#/api/kabamKernel.model.User.eventsEmitter](http://ci.monimus.com/docs/#/api/kabamKernel.model.User.eventsEmitter)
  *
- * Events emmited from starting application
+ * *Events emmited from starting application*
  * [http://ci.monimus.com/docs/#/api/kabamKernel.start](http://ci.monimus.com/docs/#/api/kabamKernel.start)
  *
- * Event emmited from http server have type of `http` and are like this:
+ * *Event emmited from http server*
+ * The have have type of `http` and are like this:
  * ```javascript
  * {
  *   startTime: Wed Aug 21 2013 01:52:34 GMT+0400 (MSK),
@@ -842,6 +845,7 @@ module.exports = exports = MWC.create;
  * @description
  * Adds a one time listener for the event. This listener is invoked only the next time the event is fired, after which it is removed.
  * kabamKernel inherits all methods, including this, from nodejs event emitter.
+ * See [official nodejs manual] (http://nodejs.org/api/events.html)
  * It works only once.
  * All things are identical to [http://ci.monimus.com/docs/#/api/kabamKernel.on](http://ci.monimus.com/docs/#/api/kabamKernel.on)
  * @param {string} eventName - the name of event type
@@ -853,7 +857,7 @@ module.exports = exports = MWC.create;
  * @name kabamKernel.addListener
  * @description
  * kabamKernel inherits all methods, including this, from nodejs event emitter.
- * See (http://nodejs.org/api/events.html#events_emitter_addlistener_event_listener)
+ * See [official nodejs manual] (http://nodejs.org/api/events.html#events_emitter_addlistener_event_listener)
  */
 
 /**
@@ -861,7 +865,7 @@ module.exports = exports = MWC.create;
  * @name kabamKernel.removeListener
  * @description
  * kabamKernel inherits all methods, including this, from nodejs event emitter.
- * See (http://nodejs.org/api/events.html#events_emitter_removelistener_event_listener)
+ * See [official nodejs manual](http://nodejs.org/api/events.html#events_emitter_removelistener_event_listener)
  */
 
 /**
@@ -869,7 +873,7 @@ module.exports = exports = MWC.create;
  * @name kabamKernel.removeAllListeners
  * @description
  * kabamKernel inherits all methods, including this, from nodejs event emitter.
- * See (http://nodejs.org/api/events.html#events_emitter_removealllisteners_event)
+ * See [official nodejs manual] (http://nodejs.org/api/events.html#events_emitter_removealllisteners_event)
  */
 
 /**
@@ -877,7 +881,7 @@ module.exports = exports = MWC.create;
  * @name kabamKernel.setMaxListeners
  * @description
  * kabamKernel inherits all methods, including this, from nodejs event emitter.
- * See (http://nodejs.org/api/events.html#events_emitter_setmaxlisteners_n)
+ * See [official nodejs manual] (http://nodejs.org/api/events.html#events_emitter_setmaxlisteners_n)
  */
 
 /**
@@ -885,7 +889,7 @@ module.exports = exports = MWC.create;
  * @name kabamKernel.listeners
  * @description
  * kabamKernel inherits all methods, including this, from nodejs event emitter.
- * See (http://nodejs.org/api/events.html#events_emitter_listeners_event)
+ * See [official nodejs manual] (http://nodejs.org/api/events.html#events_emitter_listeners_event)
  */
 
 /**
@@ -893,7 +897,7 @@ module.exports = exports = MWC.create;
  * @name kabamKernel.emit
  * @description
  * kabamKernel inherits all methods, including this, from nodejs event emitter.
- * See (http://nodejs.org/api/events.html#events_emitter_emit_event_arg1_arg2)
+ * See [official nodejs manual] (http://nodejs.org/api/events.html#events_emitter_emit_event_arg1_arg2)
  */
 
 
