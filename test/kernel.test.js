@@ -17,8 +17,8 @@ describe('Kernel', function () {
    * Extending core
    */
 
-  var extendModelFunction = function (mongoose, config) {
-    var CatsSchema = new mongoose.Schema({
+  var extendModelFunction = function (kabam) {
+    var CatsSchema = new kabam.mongoose.Schema({
       'nickname': String
     });
 
@@ -26,7 +26,7 @@ describe('Kernel', function () {
       nickname: 1
     });
 
-    return mongoose.model('cats', CatsSchema);
+    return kabam.mongoConnection.model('cats', CatsSchema);
   };
 
   /*
@@ -105,14 +105,14 @@ describe('Kernel', function () {
     });
   };
 
-  var extendModelFunctionPlugin = function (mongoose, config) {
-    var DogsSchema = new mongoose.Schema({
+  var extendModelFunctionPlugin = function (kabam) {
+    var DogsSchema = new  kabam.mongoose.Schema({
       'nickname': String
     });
     DogsSchema.index({
       nickname: 1
     });
-    return mongoose.model('dogs', DogsSchema);
+    return kabam.mongoConnection.model('dogs', DogsSchema);
   };
 
 

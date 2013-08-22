@@ -12,11 +12,11 @@ var EventEmitter = require('events').EventEmitter,
 
 /**
  * @ngdoc function
- * @name KabamKernel
+ * @name kabamKernel
  * @constructor
  * @param {object} config - config object
  */
-function KabamKernel(config) {
+function MWC(config) {
 
   EventEmitter.call(this);
   if (typeof config === 'undefined'){
@@ -47,7 +47,7 @@ function KabamKernel(config) {
   //privileged functions
   /**
    * @ngdoc function
-   * @name KabamKernel.extendCore
+   * @name kabamKernel.extendCore
    * @description
    * Perform dependency injection on the mwc.shared object.
    * If mwc do not have fieldName property/method, this method is created as public property/method.
@@ -80,7 +80,7 @@ function KabamKernel(config) {
    *     console.log(mwc.inThatNamespace.a); //333
    *
    *  ```
-   * @returns {KabamKernel} KabamKernel object
+   * @returns {kabamKernel} kabamKernel object
    */
   this.extendCore = function (fieldName, factoryFunctionOrObject, namespace) {
     if (prepared) {
@@ -107,7 +107,7 @@ function KabamKernel(config) {
 
   /**
    * @ngdoc function
-   * @name KabamKernel.extendModel
+   * @name kabamKernel.extendModel
    * @description
    * Perform dependency injection of mongoose models to mwc.model and request.model.
    * When you call `extendModel(modelName,function(mongoose, config){...})` you get all the environment created after calling
@@ -118,16 +118,16 @@ function KabamKernel(config) {
    * @example
    * ```javascript
    *
-   *     KabamKernel.extendModel('Cats', function (mongoose, config) {
-   *        var CatsSchema = new mongoose.Schema({
+   *     KabamKernel.extendModel('Cats', function (kabam) {
+   *        var CatsSchema = new kabam.mongoose.Schema({
    *         'nickname': String
    *        });
    *
-   *       return mongoose.model('cats', CatsSchema);
+   *       return kabam.mongoConnection.model('cats', CatsSchema);
    *     });
    *
    * ```
-   * @returns {KabamKernel} KabamKernel object
+   * @returns {kabamKernel} kabamKernel object
    */
   this.extendModel = function (modelName, modelFunction) {
     if (prepared) {
@@ -148,11 +148,11 @@ function KabamKernel(config) {
 
   /**
    * @ngdoc function
-   * @name KabamKernel.extendStrategy
+   * @name kabamKernel.extendStrategy
    * @description
    * Loads new passportjs strategies from object
    * @param {object} strategyObject Passport's strategy object
-   * @returns {KabamKernel} KabamKernel object
+   * @returns {kabamKernel} kabamKernel object
    * @url https://github.com/mywebclass/mwc_kernel/blob/master/lib/strategies/github.js
    * @example
    * ```javascript
@@ -205,14 +205,14 @@ function KabamKernel(config) {
 
   /**
    * @ngdoc function
-   * @name KabamKernel.extendApp
+   * @name kabamKernel.extendApp
    * @description
    * Set app parameters - view engine, variables, locals
    * When you call `extendApp(function(core){...})`, you can set global application parameters, for example
    * template [engines](http://expressjs.com/api.html#app.engine), [locals](http://expressjs.com/api.html#app.locals)
    * and [other](http://expressjs.com/api.html#app-settings) settings.
    * In code it is called [after setting logging middleware and port](https://github.com/mywebclass/mwc_kernel/blob/master/lib/appManager.js#84).
-   * You can set any application parameter you want, you have full KabamKernel core internals at your disposal
+   * You can set any application parameter you want, you have full MWC core internals at your disposal
    * `mwc.emit`,`mwc.on`, `mwc.redisClient`, and `mwc.model.User` and custom models from calling `extendModel`.
    * Some example of setting up the [template engine](https://github.com/mywebclass/mwc_plugin_hogan_express/blob/master/index.js)
    * via plugin.
@@ -238,7 +238,7 @@ function KabamKernel(config) {
    *     };
    * ```
    *
-   * @returns {KabamKernel} KabamKernel object
+   * @returns {kabamKernel} kabamKernel object
    */
   this.extendApp = function (environment, settingsFunction) {
     if (prepared) {
@@ -283,7 +283,7 @@ function KabamKernel(config) {
 
   /**
    * @ngdoc function
-   * @name KabamKernel.extendMiddleware
+   * @name kabamKernel.extendMiddleware
    * @description
    * Adds new middleware to expressJS application
    * This function can be executed multiple times, the middlewares applied are used in application in *order* they were issued by this function.
@@ -309,7 +309,7 @@ function KabamKernel(config) {
    *     }
    *
    * ```
-   * @returns {KabamKernel} KabamKernel object
+   * @returns {kabamKernel} kabamKernel object
    */
   this.extendMiddleware = function (environment, path, settingsFunction) {
     if (prepared) {
@@ -378,7 +378,7 @@ function KabamKernel(config) {
 
   /**
    * @ngdoc function
-   * @name KabamKernel.extendRoutes
+   * @name kabamKernel.extendRoutes
    * @description
    * Adds application routes and verbs for them.
    * ExpressJS object of every routes request have functions of `request.mwcEmit`,
@@ -394,7 +394,7 @@ function KabamKernel(config) {
    *       });
    *     }
    * ```
-   * @returns {KabamKernel} KabamKernel object
+   * @returns {kabamKernel} kabamKernel object
    */
   this.extendRoutes = function (settingsFunction) {
     if (prepared) {
@@ -411,7 +411,7 @@ function KabamKernel(config) {
 
   /**
    * @ngdoc function
-   * @name KabamKernel.usePlugin
+   * @name kabamKernel.usePlugin
    * @description
    * Loads plugin from object or npm module
    * @param {object/string} pluginObjectOrName - config object or plugin name to get by require
@@ -494,31 +494,31 @@ function KabamKernel(config) {
 
   /**
    * @ngdoc function
-   * @name KabamKernel.start
+   * @name kabamKernel.start
    * @description
    * Start mwc application
    * Parameters:
    *
    * *null* bind expressJS application to default port (process.env.PORT)
-   * or 3000 port, makes KabamKernel emit event of `started` with value
-   * `{'type':'expressHttp', 'port':3000}`, returns KabamKernel
+   * or 3000 port, makes kabamKernel emit event of `started` with value
+   * `{'type':'expressHttp', 'port':3000}`, returns kabamKernel
    *
    * *number* - bind expressJS application to this port,
-   * makes KabamKernel emit event of `started` with value `{'type':'expressHttp', 'port':3001}`,
-   * where 3001 is port number desired, and returns KabamKernel
+   * makes kabamKernel emit event of `started` with value `{'type':'expressHttp', 'port':3001}`,
+   * where 3001 is port number desired, and returns kabamKernel
    *
    * *http instance* - bind expressJS application to this http server,
-   * makes KabamKernel emit event of `started` with value `{'type':'bindedToHttp'}`,
+   * makes kabamKernel emit event of `started` with value `{'type':'bindedToHttp'}`,
    * returns this server object with application bound
    *
    * *https instance* - bind expressJS application to this https server,
-   * makes KabamKernel emit event of `started` with value `{'type':'bindedToHttp'}`,
+   * makes kabamKernel emit event of `started` with value `{'type':'bindedToHttp'}`,
    * returns this server object with application bound
    *
    * *string of 'app'* - start appliation as standalone object,
    * for background workers and console scripts,
-   * makes KabamKernel emit event of `started` with value `{'type':'app'}`,
-   * returns KabamKernel
+   * makes kabamKernel emit event of `started` with value `{'type':'app'}`,
+   * returns kabamKernel
 
    * @param {object} howExactly - config object, see parameters in description
    * @param {object} options config object for https server [http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener](http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener)
@@ -598,7 +598,7 @@ function KabamKernel(config) {
         }
 
       }
-      throw new Error('Function KabamKernel.listen(httpOrHttpsOrPort) accepts objects of null, "app", http, https or port\'s number as argument!');
+      throw new Error('Function MWC.listen(httpOrHttpsOrPort) accepts objects of null, "app", http, https or port\'s number as argument!');
     } else {
       thisMWC.app.listen(thisMWC.app.get('port'), function(){
         thisMWC.emit('started',{'port': thisMWC.app.get('port'), 'type': 'expressHttp'});
@@ -609,7 +609,7 @@ function KabamKernel(config) {
   };
   /**
    * @ngdoc function
-   * @name KabamKernel.startCluster
+   * @name kabamKernel.startCluster
    * @description
    * Start mwc application as a cluster, with 1 process per CPU core.
    * This command start the process master by mwc.start('app') - so it do not listens to http port,
@@ -661,9 +661,9 @@ function KabamKernel(config) {
   }
 }
 
-util.inherits(KabamKernel, EventEmitter);
+util.inherits(MWC, EventEmitter);
 
-KabamKernel.prototype.validateConfig = function (config) {
+MWC.prototype.validateConfig = function (config) {
   // General check
   if (typeof config !== 'object') {
     throw new Error('Config is not an object!');
@@ -684,7 +684,7 @@ KabamKernel.prototype.validateConfig = function (config) {
 
 /**
  * @ngdoc function
- * @name KabamKernel.extendListeners
+ * @name kabamKernel.extendListeners
  * @param {string} eventName Name of the event
  * @param {function} eventHandlerFunction Function to handle the event
  * @description - add custom event handler for mwc
@@ -694,9 +694,9 @@ KabamKernel.prototype.validateConfig = function (config) {
  *      mwc.extendListeners('someEvent', console.log);
  *
  * ```
- * @returns {KabamKernel} KabamKernel object
+ * @returns {kabamKernel} mwc object
  */
-KabamKernel.prototype.extendListeners = function (eventName, eventHandlerFunction) {
+MWC.prototype.extendListeners = function (eventName, eventHandlerFunction) {
   if (typeof eventName === 'string' && typeof eventHandlerFunction === 'function') {
     this.on(eventName, eventHandlerFunction);
     return this;
@@ -708,13 +708,13 @@ KabamKernel.prototype.extendListeners = function (eventName, eventHandlerFunctio
 
 /**
  * @ngdoc function
- * @name KabamKernel.injectEmit
+ * @name kabamKernel.injectEmit
  * @description
  * Injects a function .emit(eventName,eventObj) for every object. This function
  * is used for making this object to be able to emit events through mwc
  * @param {object} object - object to be extended
  */
-KabamKernel.prototype.injectEmit = function (object) {
+MWC.prototype.injectEmit = function (object) {
   var thisMWC = this;
   object.emitMWC = function (eventName, eventContent) {
     thisMWC.emit(eventName, eventContent);
@@ -723,25 +723,25 @@ KabamKernel.prototype.injectEmit = function (object) {
 
 /**
  * @ngdoc function
- * @name KabamKernel.createRedisClient
+ * @name kabamKernel.createRedisClient
  * @description
  * Create new redis client
  *
  * Use this function with great caution! Because usually redis-database-as-a-service providers have
  * strict connection limit!!! and every one redis client created like this consumes one connection!
- * Usually, KabamKernel needs only one redis client connection
+ * Usually, MWC needs only one redis client connection
  * BTW, redis is NOT MySQL - we can't increase speed with connection pooling!
  * @returns {RedisClient} redis client
  */
-KabamKernel.prototype.createRedisClient = function () {
+MWC.prototype.createRedisClient = function () {
   return redisManager.create(this.config.redis);
 };
 
 /**
  * @ngdoc function
- * @name KabamKernel.create
+ * @name kabamKernel.create
  * @description
- * Create KabamKernel object instance (factory)
+ * Create MWC object instance (factory)
  * @param {object} config - config object
  * @example
  * ```javascript
@@ -755,8 +755,6 @@ KabamKernel.prototype.createRedisClient = function () {
  *   // valid mongoUrl
  *
  *   "secret":"LongAndHardSecretStringToPreventSessionHiJaskIsAMandatoryParameter",
- *   "disableCsrf":false, //disable CSRF protection. This is not recommended
- *   //CSRF have to be taken seriously - http://en.wikipedia.org/wiki/Csrf
  *
  * //"redis": "redis://prefix:authPassword@redisServer:6379",
  * //url to redis server, can be ommited
@@ -769,25 +767,25 @@ KabamKernel.prototype.createRedisClient = function () {
  * };
  *
  * //minimal runnable example
- * var KabamKernel = require('kabam-kernel);
- * kabamKernel = KabamKernel(config);
- * kabamKernel.start();
+ * var mwc = require('mwc_kernel);
+ * MWC = mwc(config);
+ * MWC.start();
  *
  * ```
  */
-KabamKernel.create = function (config) {
-  return new KabamKernel(config);
+MWC.create = function (config) {
+  return new MWC(config);
 };
 
-module.exports = exports = KabamKernel.create;
+module.exports = exports = MWC.create;
 
 /**
  * @ngdoc function
- * @name KabamKernel.on
+ * @name kabamKernel.on
  * @usage
- * KabamKernel.on('someEvent',function(payload){...});
+ * kabamKernel.on('someEvent',function(payload){...});
  * @description
- * KabamKernel inherits all methods, including this, from nodejs event emitter.
+ * kabamKernel inherits all methods, including this, from nodejs event emitter.
  * Adds a listener to the end of the listeners array for the specified event.
  * See [official nodejs manual] (http://nodejs.org/api/events.html)
  *
@@ -795,10 +793,10 @@ module.exports = exports = KabamKernel.create;
  *
  * *Event emitted from user model*
  * [http://ci.monimus.com/docs/#/api/User.eventsEmitter](http://ci.monimus.com/docs/#/api/User.eventsEmitter)
- * [http://ci.monimus.com/docs/#/api/KabamKernel.model.User.eventsEmitter](http://ci.monimus.com/docs/#/api/KabamKernel.model.User.eventsEmitter)
+ * [http://ci.monimus.com/docs/#/api/kabamKernel.model.User.eventsEmitter](http://ci.monimus.com/docs/#/api/kabamKernel.model.User.eventsEmitter)
  *
  * *Events emmited from starting application*
- * [http://ci.monimus.com/docs/#/api/KabamKernel.start](http://ci.monimus.com/docs/#/api/KabamKernel.start)
+ * [http://ci.monimus.com/docs/#/api/kabamKernel.start](http://ci.monimus.com/docs/#/api/kabamKernel.start)
  *
  * *Event emmited from http server*
  * They have type of `http` and are like this:
@@ -820,87 +818,87 @@ module.exports = exports = KabamKernel.create;
  * @param {function} handlerFunction - function used to process the event
  * @example
  * ```javascript
- *    KabamKernel.on('error', functon(error){ //this is standart event emitter
+ *    kabamKernel.on('error', functon(error){ //this is standart event emitter
  *      console.error(error);
  *    });
  *
  *    //event emmited from starting application
- *    KabamKernel.on('started',function(parametes){...});
+ *    kabamKernel.on('started',function(parametes){...});
  *
  *    //event emmiters from users model
- *    KabamKernel.on('users:revokeRole', function(user){...});
- *    KabamKernel.on('users:signUp', function(user){...});
- *    KabamKernel.on('users:signUpByEmailOnly', function(user){...});
- *    KabamKernel.on('users:completeProfile', function(user){...});
- *    KabamKernel.on('users:saveProfile', function(user){...});
- *    KabamKernel.on('users:setKeyChain', function(user){...});
- *    KabamKernel.on('users:revokeKeyChain', function(user){...});
- *    KabamKernel.on('users:findOneByApiKeyAndVerify', function(user){...});
- *    KabamKernel.on('users:ban', function(user){...});
- *    KabamKernel.on('users:unban', function(user){...});
+ *    kabamKernel.on('users:revokeRole', function(user){...});
+ *    kabamKernel.on('users:signUp', function(user){...});
+ *    kabamKernel.on('users:signUpByEmailOnly', function(user){...});
+ *    kabamKernel.on('users:completeProfile', function(user){...});
+ *    kabamKernel.on('users:saveProfile', function(user){...});
+ *    kabamKernel.on('users:setKeyChain', function(user){...});
+ *    kabamKernel.on('users:revokeKeyChain', function(user){...});
+ *    kabamKernel.on('users:findOneByApiKeyAndVerify', function(user){...});
+ *    kabamKernel.on('users:ban', function(user){...});
+ *    kabamKernel.on('users:unban', function(user){...});
  * ```
  */
 
 /**
  * @ngdoc function
- * @name KabamKernel.once
+ * @name kabamKernel.once
  * @usage
- * KabamKernel.once('someEvent',function(payload){...});
+ * kabamKernel.once('someEvent',function(payload){...});
  * @description
  * Adds a one time listener for the event. This listener is invoked only the next time the event is fired, after which it is removed.
- * KabamKernel inherits all methods, including this, from nodejs event emitter.
+ * kabamKernel inherits all methods, including this, from nodejs event emitter.
  * See [official nodejs manual] (http://nodejs.org/api/events.html)
  * It works only once.
- * All things are identical to [http://ci.monimus.com/docs/#/api/KabamKernel.on](http://ci.monimus.com/docs/#/api/KabamKernel.on)
+ * All things are identical to [http://ci.monimus.com/docs/#/api/kabamKernel.on](http://ci.monimus.com/docs/#/api/kabamKernel.on)
  * @param {string} eventName - the name of event type
  * @param {function} handlerFunction - function used to process the event
  */
 
 /**
  * @ngdoc function
- * @name KabamKernel.addListener
+ * @name kabamKernel.addListener
  * @description
- * KabamKernel inherits all methods, including this, from nodejs event emitter.
+ * kabamKernel inherits all methods, including this, from nodejs event emitter.
  * See [official nodejs manual] (http://nodejs.org/api/events.html#events_emitter_addlistener_event_listener)
  */
 
 /**
  * @ngdoc function
- * @name KabamKernel.removeListener
+ * @name kabamKernel.removeListener
  * @description
- * KabamKernel inherits all methods, including this, from nodejs event emitter.
+ * kabamKernel inherits all methods, including this, from nodejs event emitter.
  * See [official nodejs manual](http://nodejs.org/api/events.html#events_emitter_removelistener_event_listener)
  */
 
 /**
  * @ngdoc function
- * @name KabamKernel.removeAllListeners
+ * @name kabamKernel.removeAllListeners
  * @description
- * KabamKernel inherits all methods, including this, from nodejs event emitter.
+ * kabamKernel inherits all methods, including this, from nodejs event emitter.
  * See [official nodejs manual] (http://nodejs.org/api/events.html#events_emitter_removealllisteners_event)
  */
 
 /**
  * @ngdoc function
- * @name KabamKernel.setMaxListeners
+ * @name kabamKernel.setMaxListeners
  * @description
- * KabamKernel inherits all methods, including this, from nodejs event emitter.
+ * kabamKernel inherits all methods, including this, from nodejs event emitter.
  * See [official nodejs manual] (http://nodejs.org/api/events.html#events_emitter_setmaxlisteners_n)
  */
 
 /**
  * @ngdoc function
- * @name KabamKernel.listeners
+ * @name kabamKernel.listeners
  * @description
- * KabamKernel inherits all methods, including this, from nodejs event emitter.
+ * kabamKernel inherits all methods, including this, from nodejs event emitter.
  * See [official nodejs manual] (http://nodejs.org/api/events.html#events_emitter_listeners_event)
  */
 
 /**
  * @ngdoc function
- * @name KabamKernel.emit
+ * @name kabamKernel.emit
  * @description
- * KabamKernel inherits all methods, including this, from nodejs event emitter.
+ * kabamKernel inherits all methods, including this, from nodejs event emitter.
  * See [official nodejs manual] (http://nodejs.org/api/events.html#events_emitter_emit_event_arg1_arg2)
  */
 
