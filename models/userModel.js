@@ -1,5 +1,6 @@
 var async = require('async'),
-  crypto = require('crypto');
+  crypto = require('crypto'),
+  sanitaze = require('validator').sanitize;
 
 function sha512(str) {
   return crypto.createHash('sha512').update(str).digest('hex').toString();
@@ -903,7 +904,126 @@ exports.init = function (mwc) {
     return (user && user.root);
   };
 
-  return mwc.mongoConnection.model('User', UserSchema);
+  //private messages
+  var messageSchema = new mongoose.Schema({
+      'to': mongoose.Schema.Types.ObjectId,
+      'from': mongoose.Schema.Types.ObjectId,
+      'created_at': { type: Date, default: Date.now },
+      'message': {type: String, trim: true } //trim whitespaces - http://mongoosejs.com/docs/api.html#schema_string_SchemaString-trim
+  });
+
+  messageSchema.index({
+    to: 1,
+    from: 1,
+    created_at: 1
+  });
+
+  var Message = mwc.mongoConnection.model('messages', messageSchema);
+
+/**
+ * @ngdoc function
+ * @name User.sendMessage
+ * @description
+ * Sends user a prifave message
+ * @param {User} from - author of message
+ * @param {string} message - text of message
+ * @param {function} callback -function to be called on message delivery
+ */
+  UserSchema.methods.sendMessage = function(from,message,callback){
+  var thisUser = this,
+    message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
+    async.waterfall([
+      function(cb){
+        if(typeof from === 'string'){
+          User.findOneByLoginOrEmail(from, cb);
+        } else {
+          if(from._id){
+            cb(null,from);
+          } else {
+            cb(new Error('from have to be user instance or string of username or email'));
+          }
+        }
+      },
+      function(userFound,cb){
+        Message.create({
+          'from': userFound._id,
+          'to': thisUser._id,
+          'message': message
+        },function(err,messageCreated){
+          if(err){
+            cb(err);
+          } else {
+            cb(null, userFound, messageCreated);
+          }
+        });
+      },
+      function(from,messageCreated,cb){
+        mwc.emit('notify:pm',{
+          'user':this,
+          'from':from,
+          'message':messageCreated.message
+        });
+        cb();
+      }
+    ],callback);
+  };
+/**
+ * @ngdoc function
+ * @name User.getRecentMessages
+ * @description
+ * Get recent messages in reverse chronological order
+ * @param {integer} mesgLimit - limit of messages
+ * @param {integer} mesgOffset - offset
+ * @param {function} callback -function(err,messages) to be called with message object
+ */
+  UserSchema.methods.getRecentMessages = function(mesgLimit,mesgOffset,callback){
+      Message
+        .find({'to': this._id})
+        .skip(mesgOffset)
+        .limit(mesgLimit)
+        .exec(callback);
+  };
+/**
+ * @ngdoc function
+ * @name User.getDialog
+ * @description
+ * Get recent messages for dialog with this and user with username in reverse chronological order
+ * @param {User} from - author of message
+ * @param {integer} mesgLimit - limit of messages
+ * @param {integer} mesgOffset - offset
+ * @param {function} callback -function(err,messages) to be called with message object
+ */
+  UserSchema.methods.getDialog = function(username, mesgLimit, mesgOffset, callback){
+    var thisUser = this;
+    async.waterfall([
+      function(cb){
+        if(typeof username === 'string'){
+          User.findOneByLoginOrEmail(username, cb);
+        } else {
+          if(username._id){
+            cb(null,username);
+          } else {
+            cb(new Error('from have to be user instance or string of username or email'));
+          }
+        }
+      },
+      function(userFound,cb){
+          Message
+            .find({
+              $or: [
+                {'to': thisUser._id, 'from': userFound._id},
+                {'from': thisUser._id, 'to': userFound._id}
+              ]
+            })
+            .skip(mesgOffset)
+            .limit(mesgLimit)
+            .exec(cb);
+      }
+      ],callback);
+  };
+
+  var User = mwc.mongoConnection.model('User', UserSchema);
+  return User;
 };
 
 

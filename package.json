@@ -34,8 +34,9 @@
     "passport-linkedin": "*",
     "mongoose": "*",
     "toobusy": "*",
-    "colors":"*",
-    "commander":"1.3.2"
+    "colors": "*",
+    "commander": "1.3.2",
+    "validator": "*"
   },
   "devDependencies": {
     "grunt": "*",
