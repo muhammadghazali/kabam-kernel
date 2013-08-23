@@ -1213,11 +1213,54 @@ describe('Users model', function () {
         should.not.exist(kabam.model.Messages.canCreate({'isBanned':true}));
       });
 
-      //describe('f');
-
-
       after(function (done) {
         user.remove(done);
+      });
+    });
+
+    describe('messages system actually works',function(){
+      var User1,User2;
+      before(function(done){
+        async.parallel({
+          'user1':function(cb){
+            kabam.model.User.create({
+              'username':'testSpamer1',
+              'email':'testSpamer1@example.org',
+              'emailVerified':true,
+              'profileComplete':true,
+              'isBanned':false
+            },cb);
+          },
+          'user2':function(cb){
+            kabam.model.User.create({
+              'username':'testSpamer2',
+              'email':'testSpamer2@example.org',
+              'emailVerified':true,
+              'profileComplete':true,
+              'isBanned':false
+            },cb);
+          },
+
+        },function(err,obj){
+          if(err) throw err;
+          User1 = obj.user1;
+          User2 = obj.user2;
+          done();
+        });
+      });
+
+      it('User1.sendMessage(User2, "test1", cb); works');
+      it('event is emmited once when user sends message');
+      it('User2.recieveMessage(User1, "test2", cb); works');
+      it('event is emmited once when user sends message');
+      it('User2 recieved both messages');
+
+
+      after(function(done){
+        async.parallel([
+          function(cb){User1.remove(cb)},
+          function(cb){User2.remove(cb)},
+        ],done);
       });
     });
   });
@@ -1225,7 +1268,7 @@ describe('Users model', function () {
   after(function (done) {
     kabam.mongoose.disconnect();
     kabam.mongoose.connection.close();
-    done()
+    done();
   });
 });
 
