@@ -19,8 +19,8 @@ MWC.extendApp(['development', 'staging'], function (mwc) {
 });
 
 
-MWC.extendModel('Cats', function (mongoose, config) {
-  var CatsSchema = new mongoose.Schema({
+MWC.extendModel('Cats', function (kabam) {
+  var CatsSchema = new kabam.mongoose.Schema({
     'nickname': String
   });
 
@@ -28,7 +28,7 @@ MWC.extendModel('Cats', function (mongoose, config) {
     nickname: 1
   });
 
-  return mongoose.model('cats', CatsSchema);
+  return kabam.mongoConnection.model('cats', CatsSchema);
 });
 
 //set middleware for development and staging enviroments
@@ -108,14 +108,14 @@ MWC.extendRoutes(
 MWC.usePlugin({
   'name': 'exampleClassPlugin',
   'core': null, //can be ommited
-  'model': {'Dogs': function (mongoose, config) {
-    var DogsSchema = new mongoose.Schema({
+  'model': {'Dogs': function (kabam) {
+    var DogsSchema = new kabam.mongoose.Schema({
       'nickname': String
     });
     DogsSchema.index({
       nickname: 1
     });
-    return mongoose.model('dogs', DogsSchema);
+    return kabam.mongoConnection.model('dogs', DogsSchema);
   }},
 //  'app': null, //can be ommited
 //  'middleware': null, //can be ommited

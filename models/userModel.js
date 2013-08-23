@@ -457,6 +457,7 @@ exports.init = function (mwc) {
    * can deliver notifications to users, first of them works by
    * [email](https://github.com/mywebclass/mwc_plugin_notify_by_email) notifications, and the second one by
    * [socket.io](https://github.com/mywebclass/mwc_plugin_socket_io) events.
+   * There is private messages module - [https://github.com/mykabam/kabam-plugin-private-message](https://github.com/mykabam/kabam-plugin-private-message)
    *
    * @param {string} [channel] - optional, channel name, default is 'all'
    * @param {string/object} message - something that the notify handler understands
