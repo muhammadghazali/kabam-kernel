@@ -1239,8 +1239,7 @@ describe('Users model', function () {
               'profileComplete':true,
               'isBanned':false
             },cb);
-          },
-
+          }
         },function(err,obj){
           if(err) throw err;
           User1 = obj.user1;
@@ -1250,37 +1249,61 @@ describe('Users model', function () {
       });
 
       describe('sendMessage',function(){
-        var event, message;
+        var event;
         before(function(done){
           kabam.once('notify:pm',function(m){
             event = m;
-            done();
+            setTimeout(done,1000);
           });
           User1.sendMessage(User2, "test1", function(err,messageCreated){
             if(err) throw err;
-            message = messageCreated;
           });
         });
-        it('User1.sendMessage(User2, "test1", cb); works',function(){
-          message.from._id.should.be.eql(User1._id);
-          message.user._id.should.be.eql(User2._id);
-          message.message.should.be.equal('test1');
+
+        it('event is emitted once when user sends message',function(){
+          should.exist(event);
         });
 
-        it('event is emmited once when user sends message',function(){
+        it('event have correct "from" field',function(){
           event.from._id.should.be.eql(User1._id);
-          event.user._id.should.be.eql(User2._id);
-          event.message.should.be.equal('test1');
         });
 
-        after(function(done){
-          message.remove(done);
+        it('event have correct "user" field',function(){
+          event.user._id.should.be.eql(User2._id);
         });
+
+        it('event have proper contents',function(){
+          event.message.should.be.equal('test1');
+        })
       });
 
       describe('recieveMessage',function(){
-        it('User2.recieveMessage(User1, "test2", cb); works');
-        it('event is emmited once when user sends message');
+        var event;
+        before(function(done){
+          kabam.once('notify:pm',function(m){
+            event = m;
+            setTimeout(done,1000);
+          });
+          User2.recieveMessage(User1, "test2", function(err,messageCreated){
+            if(err) throw err;
+          });
+        });
+
+        it('event is emitted once when user sends message',function(){
+          should.exist(event);
+        });
+
+        it('event have correct "from" field',function(){
+          event.from._id.should.be.eql(User1._id);
+        });
+
+        it('event have correct "user" field',function(){
+          event.user._id.should.be.eql(User2._id);
+        });
+
+        it('event have proper contents',function(){
+          event.message.should.be.equal('test2');
+        })
       });
 
       describe('getRecentMessages',function(){
@@ -1295,6 +1318,7 @@ describe('Users model', function () {
         async.parallel([
           function(cb){User1.remove(cb)},
           function(cb){User2.remove(cb)},
+          function(cb){kabam.model.Message.remove({'from':User1._id},cb)}
         ],done);
       });
     });

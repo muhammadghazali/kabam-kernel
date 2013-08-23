@@ -956,6 +956,11 @@ exports.init = function (mwc) {
  * @name User.sendMessage
  * @description
  * Sends private message from this user to other one
+ * @example
+ * ```javascript
+ * User1.sendMessage(User2,'hello!',function(err){if(err) throw err;});
+ * //User1 sends message to User2
+ * ```
  * @param {User/string} to - reciever of message
  * @param {string} message - text of message
  * @param {function} callback -function to be called on message delivery
@@ -988,10 +993,10 @@ exports.init = function (mwc) {
           }
         });
       },
-      function(from,messageCreated,cb){
+      function(to,messageCreated,cb){
         mwc.emit('notify:pm',{
-          'user':thisUser,
-          'from':from,
+          'user':to,
+          'from':thisUser,
           'message':messageCreated.message
         });
         cb();
@@ -1038,8 +1043,8 @@ exports.init = function (mwc) {
       },
       function(from,messageCreated,cb){
         mwc.emit('notify:pm',{
-          'user': from,
-          'from': thisUser,
+          'user': thisUser,
+          'from': from,
           'message':messageCreated.message
         });
         cb();
