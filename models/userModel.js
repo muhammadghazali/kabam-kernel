@@ -969,9 +969,9 @@ exports.init = function (mwc) {
           User.findOneByLoginOrEmail(to, cb);
         } else {
           if(to._id){
-            cb(null,from);
+            cb(null,to);
           } else {
-            cb(new Error('from have to be user instance or string of username or email'));
+            cb(new Error('to have to be user instance or string of username or email'));
           }
         }
       },
@@ -990,7 +990,7 @@ exports.init = function (mwc) {
       },
       function(from,messageCreated,cb){
         mwc.emit('notify:pm',{
-          'user':this,
+          'user':thisUser,
           'from':from,
           'message':messageCreated.message
         });
@@ -1038,8 +1038,8 @@ exports.init = function (mwc) {
       },
       function(from,messageCreated,cb){
         mwc.emit('notify:pm',{
-          'user':this,
-          'from':from,
+          'user': from,
+          'from': thisUser,
           'message':messageCreated.message
         });
         cb();

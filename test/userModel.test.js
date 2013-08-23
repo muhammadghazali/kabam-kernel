@@ -1249,11 +1249,46 @@ describe('Users model', function () {
         });
       });
 
-      it('User1.sendMessage(User2, "test1", cb); works');
-      it('event is emmited once when user sends message');
-      it('User2.recieveMessage(User1, "test2", cb); works');
-      it('event is emmited once when user sends message');
-      it('User2 recieved both messages');
+      describe('sendMessage',function(){
+        var event, message;
+        before(function(done){
+          kabam.once('notify:pm',function(m){
+            event = m;
+            done();
+          });
+          User1.sendMessage(User2, "test1", function(err,messageCreated){
+            if(err) throw err;
+            message = messageCreated;
+          });
+        });
+        it('User1.sendMessage(User2, "test1", cb); works',function(){
+          message.from._id.should.be.eql(User1._id);
+          message.user._id.should.be.eql(User2._id);
+          message.message.should.be.equal('test1');
+        });
+
+        it('event is emmited once when user sends message',function(){
+          event.from._id.should.be.eql(User1._id);
+          event.user._id.should.be.eql(User2._id);
+          event.message.should.be.equal('test1');
+        });
+
+        after(function(done){
+          message.remove(done);
+        });
+      });
+
+      describe('recieveMessage',function(){
+        it('User2.recieveMessage(User1, "test2", cb); works');
+        it('event is emmited once when user sends message');
+      });
+
+      describe('getRecentMessages',function(){
+        it('User2 getRecentMessages both messages');
+      });
+      describe('getDialog',function(){
+        it('User2 getDialog both messages');
+      });
 
 
       after(function(done){
