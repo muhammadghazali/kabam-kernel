@@ -1428,9 +1428,15 @@ describe('Users model', function () {
 
       after(function(done){
         async.parallel([
-          function(cb){User1.remove(cb)},
-          function(cb){User2.remove(cb)},
-          function(cb){kabam.model.Message.remove({'from':User1._id},cb)}
+          function(cb){
+            User1.remove(cb);
+          },
+          function(cb){
+            User2.remove(cb);
+          },
+          function(cb){
+            kabam.model.Message.remove({'from':User1._id},cb);
+          }
         ],done);
       });
     });
