@@ -184,6 +184,12 @@ describe('Kernel', function () {
 
     it('exposes mongoose model of users', function () {
       MWC.model.User.should.be.a('function');
+      MWC.model.Users.should.be.a('function');
+    });
+
+    it('exposes mongoose model of messages', function () {
+      MWC.model.Message.should.be.a('function');
+      MWC.model.Messages.should.be.a('function');
     });
 
     it('exposes an ExpressJS application', function () {

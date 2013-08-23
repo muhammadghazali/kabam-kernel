@@ -4,12 +4,12 @@ var should = require('should'),
   async = require('async'),
   mwcCore = require('./../index.js'),
   config = require('./../example/config.json').development,
-  MWC;
+  kabam;
 
 describe('Users model', function () {
   before(function (done) {
-    MWC = mwcCore(config);
-    MWC.start('app');
+    kabam = mwcCore(config);
+    kabam.start('app');
     setTimeout(done, 1000);
   });
 
@@ -17,52 +17,52 @@ describe('Users model', function () {
 
     describe('Testing mwc_core mongoose model of users:', function () {
       it('exposes function find', function () {
-        MWC.model.User.find.should.be.a('function');
+        kabam.model.User.find.should.be.a('function');
       });
       it('exposes function findOne', function () {
-        MWC.model.User.findOne.should.be.a('function');
+        kabam.model.User.findOne.should.be.a('function');
       });
       it('exposes function findOneByLoginOrEmail', function () {
-        MWC.model.User.findOneByLoginOrEmail.should.be.a('function');
+        kabam.model.User.findOneByLoginOrEmail.should.be.a('function');
       });
       it('exposes function findOneByApiKey', function () {
-        MWC.model.User.findOneByApiKey.should.be.a('function');
+        kabam.model.User.findOneByApiKey.should.be.a('function');
       });
       it('exposes function count', function () {
-        MWC.model.User.count.should.be.a('function');
+        kabam.model.User.count.should.be.a('function');
       });
       it('exposes function remove', function () {
-        MWC.model.User.remove.should.be.a('function');
+        kabam.model.User.remove.should.be.a('function');
       });
       it('exposes function create', function () {
-        MWC.model.User.create.should.be.a('function');
+        kabam.model.User.create.should.be.a('function');
       });
 
       it('exposes function getByRole', function () {
-        MWC.model.User.getByRole.should.be.a('function');
+        kabam.model.User.getByRole.should.be.a('function');
       });
 
       it('exposes function signUp', function () {
-        MWC.model.User.signUp.should.be.a('function');
+        kabam.model.User.signUp.should.be.a('function');
       });
 
       it('exposes function findOneByApiKeyAndVerify', function () {
-        MWC.model.User.findOneByApiKeyAndVerify.should.be.a('function');
+        kabam.model.User.findOneByApiKeyAndVerify.should.be.a('function');
       });
 
       it('exposes function findOneByApiKeyAndResetPassword', function () {
-        MWC.model.User.findOneByApiKeyAndResetPassword.should.be.a('function');
+        kabam.model.User.findOneByApiKeyAndResetPassword.should.be.a('function');
       });
 
       it('exposes function processOAuthProfile', function () {
-        MWC.model.User.processOAuthProfile.should.be.a('function');
+        kabam.model.User.processOAuthProfile.should.be.a('function');
       });
 
 
       describe('finders', function () {
         var usersFound;
         before(function (done) {
-          MWC.model.User.create({
+          kabam.model.User.create({
             'username': 'testSubject47111',
             'email': 'ostroumov4@teksi.ru',
             'apiKey': 'vseBydetHorosho'
@@ -72,13 +72,13 @@ describe('Users model', function () {
             }
             async.parallel({
               'byLogin': function (cb) {
-                MWC.model.User.findOneByLoginOrEmail('testSubject47111', cb);
+                kabam.model.User.findOneByLoginOrEmail('testSubject47111', cb);
               },
               'byEmail': function (cb) {
-                MWC.model.User.findOneByLoginOrEmail('ostroumov4@teksi.ru', cb);
+                kabam.model.User.findOneByLoginOrEmail('ostroumov4@teksi.ru', cb);
               },
               'byApiKey': function (cb) {
-                MWC.model.User.findOneByApiKey('vseBydetHorosho', cb);
+                kabam.model.User.findOneByApiKey('vseBydetHorosho', cb);
               },
               'created': function (cb) {
                 cb(null, userCreated);
@@ -119,7 +119,7 @@ describe('Users model', function () {
       describe('signUp', function () {
         var user;
         before(function (done) {
-          MWC.model.User.signUp('johndoe', 'johndoe@example.org', 'waterfall', function (err, userCreated) {
+          kabam.model.User.signUp('johndoe', 'johndoe@example.org', 'waterfall', function (err, userCreated) {
             if (err) {
               throw err;
             }
@@ -169,7 +169,7 @@ describe('Users model', function () {
       describe('signUpByEmailOnly', function () {
         var user;
         before(function (done) {
-          MWC.model.User.signUpByEmailOnly('johndoe@example.org', function (err, userCreated) {
+          kabam.model.User.signUpByEmailOnly('johndoe@example.org', function (err, userCreated) {
             if (err) {
               throw err;
             }
@@ -212,7 +212,7 @@ describe('Users model', function () {
       describe('findOneByApiKeyAndVerify for correct apiKey', function () {
         var user, userBeingActivated;
         before(function (done) {
-          MWC.model.User.create({
+          kabam.model.User.create({
             'username': 'oneByApiKey',
             'email': 'oneByApiKey@teksi.ru',
             'apiKey': 'vseBydetHoroshooneByApiKey',
@@ -223,7 +223,7 @@ describe('Users model', function () {
               throw err;
             }
             user = userCreated;
-            MWC.model.User.findOneByApiKeyAndVerify('vseBydetHoroshooneByApiKey', function (err, userActivated) {
+            kabam.model.User.findOneByApiKeyAndVerify('vseBydetHoroshooneByApiKey', function (err, userActivated) {
               userBeingActivated = userActivated;
               done();
             });
@@ -245,7 +245,7 @@ describe('Users model', function () {
       describe('findOneByApiKeyAndVerify for wrong apiKey', function () {
         var user, userBeingActivated, errorThrown;
         before(function (done) {
-          MWC.model.User.create({
+          kabam.model.User.create({
             'username': 'oneByApiKey',
             'email': 'oneByApiKey@teksi.ru',
             'apiKey': 'vseBydetHoroshooneByApiKey',
@@ -256,7 +256,7 @@ describe('Users model', function () {
               throw err;
             }
             user = userCreated;
-            MWC.model.User.findOneByApiKeyAndVerify('vseIdetPoPlanu', function (err, userActivated) {
+            kabam.model.User.findOneByApiKeyAndVerify('vseIdetPoPlanu', function (err, userActivated) {
               errorThrown = err;
               userBeingActivated = userActivated;
               done();
@@ -280,7 +280,7 @@ describe('Users model', function () {
       describe('findOneByApiKeyAndVerify for outdated apiKey', function () {
         var user, userBeingActivated, errorThrown;
         before(function (done) {
-          MWC.model.User.create({
+          kabam.model.User.create({
             'username': 'oneByApiKey',
             'email': 'oneByApiKey@teksi.ru',
             'apiKey': 'vseBydetHoroshooneByApiKey',
@@ -291,7 +291,7 @@ describe('Users model', function () {
               throw err;
             }
             user = userCreated;
-            MWC.model.User.findOneByApiKeyAndVerify('vseBydetHoroshooneByApiKey', function (err, userActivated) {
+            kabam.model.User.findOneByApiKeyAndVerify('vseBydetHoroshooneByApiKey', function (err, userActivated) {
               errorThrown = err;
               userBeingActivated = userActivated;
               done();
@@ -319,7 +319,7 @@ describe('Users model', function () {
           async.waterfall([
 
             function (cb) {
-              MWC.model.User.create({
+              kabam.model.User.create({
                 'username': 'iForgotMyPassWordIamStupid',
                 'email': 'iForgotMyPassWordIamStupid@teksi.ru',
                 'apiKey': 'iForgotMyPassWordIamStupid1111',
@@ -336,7 +336,7 @@ describe('Users model', function () {
               });
             },
             function (user1, cb) {
-              MWC.model.User.findOneByApiKeyAndResetPassword('iForgotMyPassWordIamStupid1111', 'lalala2', function (err1, userChanged) {
+              kabam.model.User.findOneByApiKeyAndResetPassword('iForgotMyPassWordIamStupid1111', 'lalala2', function (err1, userChanged) {
                 if (err1) {
                   cb(err1);
                 } else {
@@ -370,7 +370,7 @@ describe('Users model', function () {
       describe('findOneByApiKeyAndResetPassword for bad api key', function () {
         var user, userNotFound, errorThrown;
         before(function (done) {
-          MWC.model.User.create({
+          kabam.model.User.create({
             'username': 'iForgotMyPassWordIamStupid',
             'email': 'iForgotMyPassWordIamStupid@teksi.ru',
             'apiKey': 'iForgotMyPassWordIamStupid1111',
@@ -381,7 +381,7 @@ describe('Users model', function () {
               throw err;
             }
             user = userCreated;
-            MWC.model.User.findOneByApiKeyAndResetPassword('thisIsNotCorrectApiKey', 'lalala2', function (err1, userChanged) {
+            kabam.model.User.findOneByApiKeyAndResetPassword('thisIsNotCorrectApiKey', 'lalala2', function (err1, userChanged) {
               errorThrown = err1;
               userNotFound = userChanged
               done();
@@ -405,7 +405,7 @@ describe('Users model', function () {
       describe('findOneByApiKeyAndResetPassword for outdated api key', function () {
         var user, userNotFound, errorThrown;
         before(function (done) {
-          MWC.model.User.create({
+          kabam.model.User.create({
             'username': 'iForgotMyPassWordIamStupid',
             'email': 'iForgotMyPassWordIamStupid@teksi.ru',
             'apiKey': 'iForgotMyPassWordIamStupid1111',
@@ -416,7 +416,7 @@ describe('Users model', function () {
               throw err;
             }
             user = userCreated;
-            MWC.model.User.findOneByApiKeyAndResetPassword('iForgotMyPassWordIamStupid1111', 'lalala2', function (err1, userChanged) {
+            kabam.model.User.findOneByApiKeyAndResetPassword('iForgotMyPassWordIamStupid1111', 'lalala2', function (err1, userChanged) {
               errorThrown = err1;
               userNotFound = userChanged
               done();
@@ -441,12 +441,12 @@ describe('Users model', function () {
       describe('processOAuthProfile for user in database', function () {
         var user, userFound;
         before(function (done) {
-          MWC.model.User.signUp('johnDoe', 'johndoe@example.org', 'suzan123', function (err, userCreated) {
+          kabam.model.User.signUp('johnDoe', 'johndoe@example.org', 'suzan123', function (err, userCreated) {
             if (err) {
               throw err;
             }
             user = userCreated;
-            MWC.model.User.processOAuthProfile('johndoe@example.org', function (error, userFromProfile) {
+            kabam.model.User.processOAuthProfile('johndoe@example.org', function (error, userFromProfile) {
               if (error) {
                 throw error;
               }
@@ -477,7 +477,7 @@ describe('Users model', function () {
       describe('processOAuthProfile for user NOT in database', function () {
         var user;
         before(function (done) {
-          MWC.model.User.processOAuthProfile('johndoe@mail.ru', function (error, userFromProfile) {
+          kabam.model.User.processOAuthProfile('johndoe@mail.ru', function (error, userFromProfile) {
             if (error) {
               throw error;
             }
@@ -503,7 +503,7 @@ describe('Users model', function () {
           var user, userFound;
 
           before(function (done) {
-            MWC.model.User.create({
+            kabam.model.User.create({
               'username': 'test888',
               'email': 'ostroumov@teksi.ru',
               'keychain': {
@@ -514,7 +514,7 @@ describe('Users model', function () {
                 throw err;
               }
               user = userCreated;
-              MWC.model.User.findOneByKeychain('github', 11111, function (err, usr) {
+              kabam.model.User.findOneByKeychain('github', 11111, function (err, usr) {
                 userFound = usr;
                 done();
               });
@@ -534,7 +534,7 @@ describe('Users model', function () {
           var user, userUpdated;
 
           before(function (done) {
-            MWC.model.User.create({
+            kabam.model.User.create({
               'username': 'test888',
               'email': 'ostroumov@teksi.ru',
               'keychain': {
@@ -549,7 +549,7 @@ describe('Users model', function () {
                 if (err2) {
                   throw err2;
                 }
-                MWC.model.User.findOneByKeychain('someProvider', 1, function (err, usr) {
+                kabam.model.User.findOneByKeychain('someProvider', 1, function (err, usr) {
                   userUpdated = usr;
                   done();
                 });
@@ -576,7 +576,7 @@ describe('Users model', function () {
           var user, userUpdated;
 
           before(function (done) {
-            MWC.model.User.create({
+            kabam.model.User.create({
               'username': 'test888',
               'email': 'ostroumov@teksi.ru',
               'keychain': {
@@ -592,7 +592,7 @@ describe('Users model', function () {
                 if (err2) {
                   throw err2;
                 }
-                MWC.model.User.findOneByKeychain('github', 11111, function (err, usr) {
+                kabam.model.User.findOneByKeychain('github', 11111, function (err, usr) {
                   userUpdated = usr;
                   done();
                 });
@@ -619,7 +619,7 @@ describe('Users model', function () {
       describe('mwc_plugin_rest integration for users', function () {
         var user;
         before(function (done) {
-          MWC.model.User.create({
+          kabam.model.User.create({
             'username': 'test777',
             'email': 'klapajoka@mail.ru'
           }, function (err, userCreated) {
@@ -631,12 +631,12 @@ describe('Users model', function () {
           });
         });
 
-        describe('MWC.model.User.canCreate', function () {
+        describe('kabam.model.User.canCreate', function () {
           it('returns true for root user', function () {
-            MWC.model.User.canCreate({root: true}).should.be.true;
+            kabam.model.User.canCreate({root: true}).should.be.true;
           });
           it('returns false for  not root user', function () {
-            MWC.model.Users.canCreate({root: false}).should.be.false;
+            kabam.model.Users.canCreate({root: false}).should.be.false;
           });
         });
 
@@ -658,18 +658,18 @@ describe('Users model', function () {
           });
         });
 
-        describe('MWC.model.User.getForUser works for root user', function () {
+        describe('kabam.model.User.getForUser works for root user', function () {
           var usersFound, usersNotFound = '';
           before(function (done) {
             async.parallel([
               function (cb) {
-                MWC.model.User.getForUser({root: true}, {username: 'test777'}, function (err, users) {
+                kabam.model.User.getForUser({root: true}, {username: 'test777'}, function (err, users) {
                   usersFound = users;
                   cb(err);
                 });
               },
               function (cb) {
-                MWC.model.User.getForUser({root: true}, {username: 'papytraxaetsobakatakemyinado'}, function (err, users) {
+                kabam.model.User.getForUser({root: true}, {username: 'papytraxaetsobakatakemyinado'}, function (err, users) {
                   usersNotFound = users;
                   cb(err);
                 })
@@ -692,10 +692,10 @@ describe('Users model', function () {
 
         });
 
-        describe('MWC.model.User.getForUser fails for non root user', function () {
+        describe('kabam.model.User.getForUser fails for non root user', function () {
           var error;
           before(function (done) {
-            MWC.model.User.getForUser({root: false}, {username: 'papytraxaetsobakatakemyinado'}, function (err, users) {
+            kabam.model.User.getForUser({root: false}, {username: 'papytraxaetsobakatakemyinado'}, function (err, users) {
               error = err;
               done();
             });
@@ -721,7 +721,7 @@ describe('Users model', function () {
         var user;
 
         before(function (done) {
-          MWC.model.User.create({
+          kabam.model.User.create({
             'username': 'test888',
             'email': 'ostroumov@teksi.ru'
           }, function (err, userCreated) {
@@ -734,6 +734,9 @@ describe('Users model', function () {
         });
 
         it('user instance have functions needed', function () {
+          user.username.should.be.equal('test888');
+          user.email.should.be.equal('ostroumov@teksi.ru');
+          user._id.should.match(/[a-z0-9A-Z]+/);
           user.verifyPassword.should.be.a('function');
           user.setPassword.should.be.a('function');
           user.invalidateSession.should.be.a('function');
@@ -762,7 +765,7 @@ describe('Users model', function () {
       describe('functions setPassword, verifyPassword', function () {
         var user;
         before(function (done) {
-          MWC.model.User.create({
+          kabam.model.User.create({
             'username': 'testSubject47_1',
             'email': 'ostroumov3@teksi.ru'
           }, function (err, userCreated) {
@@ -796,7 +799,7 @@ describe('Users model', function () {
       describe('function invalidateSession', function () {
         var user, newApiKey;
         before(function (done) {
-          MWC.model.User.create({
+          kabam.model.User.create({
             'username': 'testSubject47_2',
             'email': 'ostroumov_3@teksi.ru',
             'apiKey': 'lalalaDaiMne3Ryblya'
@@ -809,7 +812,7 @@ describe('Users model', function () {
                 throw err2;
               }
               newApiKey = apiKeySetted;
-              MWC.model.User.findOne({'username': 'testSubject47_2'}, function (err3, userFound) {
+              kabam.model.User.findOne({'username': 'testSubject47_2'}, function (err3, userFound) {
                 if (err3) {
                   throw err3;
                 }
@@ -837,7 +840,7 @@ describe('Users model', function () {
       describe('function hasRole', function () {
         var user;
         before(function (done) {
-          MWC.model.User.create({
+          kabam.model.User.create({
             'username': 'test888',
             'email': 'ostroumov@teksi.ru',
             'roles': 'role1'
@@ -868,20 +871,20 @@ describe('Users model', function () {
           async.waterfall(
             [
               function (cb) {
-                MWC.model.User.create({
+                kabam.model.User.create({
                   'username': 'test888',
                   'email': 'ostroumov@teksi.ru'
                 }, cb);
               },
               function (aaa, cb) {
-                MWC.model.User.findOneByLoginOrEmail('test888', function (err, userFound) {
+                kabam.model.User.findOneByLoginOrEmail('test888', function (err, userFound) {
                   userFound.grantRole('role2', function (err) {
                     cb(err, true);
                   });
                 });
               },
               function (granted, cb) {
-                MWC.model.User.findOneByLoginOrEmail('test888', function (err, userFound) {
+                kabam.model.User.findOneByLoginOrEmail('test888', function (err, userFound) {
                   cb(err, userFound);
                 });
               }
@@ -910,21 +913,21 @@ describe('Users model', function () {
           async.waterfall(
             [
               function (cb) {
-                MWC.model.User.create({
+                kabam.model.User.create({
                   'username': 'test888',
                   'email': 'ostroumov@teksi.ru',
                   'roles': ['role1', 'role2']
                 }, cb);
               },
               function (aaa, cb) {
-                MWC.model.User.findOneByLoginOrEmail('test888', function (err, userFound) {
+                kabam.model.User.findOneByLoginOrEmail('test888', function (err, userFound) {
                   userFound.revokeRole('role2', function (err) {
                     cb(err, true);
                   });
                 });
               },
               function (granted, cb) {
-                MWC.model.User.findOneByLoginOrEmail('test888', function (err, userFound) {
+                kabam.model.User.findOneByLoginOrEmail('test888', function (err, userFound) {
                   cb(err, userFound);
                 });
               }
@@ -952,7 +955,7 @@ describe('Users model', function () {
         var user,
           messageObj;
         before(function (done) {
-          MWC.model.User.create({
+          kabam.model.User.create({
             'username': 'test888',
             'email': 'ostroumov' + Math.floor(Math.random() * 100) + '@teksi.ru'
           }, function (err, userCreated) {
@@ -965,7 +968,7 @@ describe('Users model', function () {
               user.notify('Hello!');
             }, 300);
 
-            MWC.on('notify:all', function (message) {
+            kabam.on('notify:all', function (message) {
               messageObj = message;
               done();
             });
@@ -991,7 +994,7 @@ describe('Users model', function () {
       describe('completeProfile for uncompleted profile', function () {
         var user, userCompleted;
         before(function (done) {
-          MWC.model.User.create({
+          kabam.model.User.create({
             'email': 'emptyness@teksi.ru',
             'profileComplete': false,
             'emailVerified': true
@@ -1004,7 +1007,7 @@ describe('Users model', function () {
               if (err1) {
                 throw err1;
               }
-              MWC.model.User.findOneByLoginOrEmail('Anatolij', function (err2, userFound) {
+              kabam.model.User.findOneByLoginOrEmail('Anatolij', function (err2, userFound) {
                 if (err2) {
                   throw err2;
                 }
@@ -1038,7 +1041,7 @@ describe('Users model', function () {
       describe('completeProfile for completed profile', function () {
         var user, errorThrown;
         before(function (done) {
-          MWC.model.User.create({
+          kabam.model.User.create({
             'email': 'emptyness@teksi.ru',
             'profileComplete': true,
             'emailVerified': true
@@ -1064,12 +1067,164 @@ describe('Users model', function () {
         });
       });
     });
+  });
+
+  describe('user model have to be compatible with kabam-plugin-test',function(){
+    it('it exposes getForUser and canCreate for Active Record',function(){
+      kabam.model.User.getForUser.should.be.a('function');
+      kabam.model.Users.getForUser.should.be.a('function');
+      kabam.model.User.canCreate.should.be.a('function');
+      kabam.model.Users.canCreate.should.be.a('function');
+    });
+
+    describe('getForUser and canCreate works for root',function(){
+      var user,users;
+      before(function (done) {
+        kabam.model.User.create({
+          'username':'test888',
+          'email': 'anybody@teksi.ru',
+          'root':true,
+          'profileComplete': true,
+          'emailVerified': true
+        }, function (err, userCreated) {
+          if (err) {
+            throw err;
+          }
+          user = userCreated;
+          kabam.model.User.getForUser(user,function(err, usersFound){
+            if(err) throw err;
+            users = usersFound;
+            done();
+          });
+        });
+      });
+
+      it('getForUser returns list of users',function(){
+        users.should.be.an.instanceOf(Array);
+        users.length.should.be.above(0);
+        users.map(function(userToTest){
+          userToTest.username.should.be.a('string');
+          userToTest.email.should.be.a('string');
+          userToTest._id.should.match(/[a-z0-9A-Z]+/);
+          userToTest.verifyPassword.should.be.a('function');
+          userToTest.setPassword.should.be.a('function');
+          userToTest.invalidateSession.should.be.a('function');
+
+          userToTest.grantRole.should.be.a('function');
+          userToTest.hasRole.should.be.a('function');
+          userToTest.revokeRole.should.be.a('function');
+
+          userToTest.notify.should.be.a('function');
+          userToTest.getGravatar.should.be.a('function');
+          userToTest.completeProfile.should.be.a('function');
+
+          userToTest.canRead.should.be.a('function');
+          userToTest.canWrite.should.be.a('function');
+
+          userToTest.canRead(user).should.be.true;
+          userToTest.canWrite(user).should.be.true;
+        });
+      });
+
+      it('canCreate returns true',function(){
+        kabam.model.User.canCreate(user).should.be.true;
+        kabam.model.User.canCreate({root:false}).should.be.false;
+      });
+
+      after(function (done) {
+        user.remove(done);
+      });
+    });
+
+    describe('getForUser and canCreate do not works for non root',function(){
+      var user,users,errorThrown;
+      before(function (done) {
+        kabam.model.User.create({
+          'username':'test888',
+          'email': 'anybody@teksi.ru',
+          'root':false,
+          'profileComplete': true,
+          'emailVerified': true
+        }, function (err, userCreated) {
+          if (err) {
+            throw err;
+          }
+          user = userCreated;
+          kabam.model.User.getForUser(user,function(err, usersFound){
+            errorThrown=err;
+            users = usersFound;
+            done();
+          });
+        });
+      });
+
+      it('getForUser throws error',function(){
+        errorThrown.should.be.instanceOf(Error);
+        errorThrown.message.should.be.equal('Access denied!');
+        should.not.exist(users);
+      });
+
+
+      it('fails when non root user access the usersApi',function(){
+        user.canRead(user).should.be.false;
+        user.canWrite(user).should.be.false;
+      });
+      it('canCreate returns true',function(){
+        kabam.model.User.canCreate(user).should.be.false;
+      });
+
+      after(function (done) {
+        user.remove(done);
+      });
+    });
 
   });
 
+  describe('private messages system',function(){
+    describe('messages schema have to be compatible with kabam-plugin-rest', function(){
+      var user;
+      before(function (done) {
+        kabam.model.User.create({
+          'email': 'anybody@teksi.ru',
+          'profileComplete': true,
+          'emailVerified': true
+        }, function (err, userCreated) {
+          if (err) {
+            throw err;
+          }
+          user = userCreated;
+          done();
+        });
+      });
+
+      it('it exposes getForUser and canCreate for Active Record',function(){
+        kabam.model.Message.getForUser.should.be.a('function');
+        kabam.model.Messages.getForUser.should.be.a('function');
+        kabam.model.Message.canCreate.should.be.a('function');
+        kabam.model.Messages.canCreate.should.be.a('function');
+      });
+
+      it('returns the proper values for canCreate',function(){
+        kabam.model.Messages.canCreate(user).should.be.true;
+        should.not.exist(kabam.model.Messages.canCreate({}));
+        should.not.exist(kabam.model.Messages.canCreate({'profileComplete':false}));
+        kabam.model.Messages.canCreate({'emailVerified':false}).should.be.false;;
+        kabam.model.Messages.canCreate({'emailVerified':false}).should.be.false;
+        should.not.exist(kabam.model.Messages.canCreate({'isBanned':true}));
+      });
+
+      //describe('f');
+
+
+      after(function (done) {
+        user.remove(done);
+      });
+    });
+  });
+
   after(function (done) {
-    MWC.mongoose.disconnect();
-    MWC.mongoose.connection.close();
+    kabam.mongoose.disconnect();
+    kabam.mongoose.connection.close();
     done()
   });
 });

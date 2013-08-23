@@ -1,6 +1,6 @@
 var async = require('async'),
   crypto = require('crypto'),
-  sanitaze = require('validator').sanitize;
+  sanitaze = require('validator').sanitize; //used for dealing with xss injections in private messages
 
 function sha512(str) {
   return crypto.createHash('sha512').update(str).digest('hex').toString();
@@ -862,10 +862,21 @@ exports.init = function (mwc) {
    * @example
    */
   UserSchema.statics.getForUser = function(user,parameters,callback){
-    if(user && user.root){
-      this.find(parameters,callback);
+    if(typeof parameters === "function" && typeof callback === "undefined"){
+      var callback2use = parameters,
+        parameters2use = {};
     } else {
-      callback(new Error('Access denied!'));
+      var callback2use = callback,
+        parameters2use = parameters;
+    }
+
+    if(user && user.root){
+      this.find(parameters2use)
+        .skip(((parameters2use.offset)?(parameters2use.offset):0))
+        .limit(((parameters2use.limit)?(parameters2use.limit):10))
+        .exec(callback2use);
+    } else {
+      callback2use(new Error('Access denied!'));
     }
   };
   /**
@@ -918,6 +929,25 @@ exports.init = function (mwc) {
     from: 1,
     created_at: 1
   });
+//methods for Message schema so it can work with kabam-plugin-rest VVV
+
+  messageSchema.statics.getForUser = function (user, parameters, callback) {
+    if (user && user._id) {
+      user.getRecentMessages(parameters.limit, parameters.offset, callback);
+    } else {
+      callback(null);
+    }
+  };
+  messageSchema.statics.canCreate = function (user) {
+    return (user && user.emailVerified && user.profileComplete && !user.isBanned);
+  };
+  messageSchema.methods.canRead = function (user) {
+    return (user && (user._id === this.to || user._id === this.from));
+  };
+  messageSchema.methods.canWrite = function (user) {
+    return false;
+  };
+//methods for Message schema so it can work with kabam-plugin-rest ^^^
 
   var Message = mwc.mongoConnection.model('messages', messageSchema);
 
@@ -973,8 +1003,8 @@ exports.init = function (mwc) {
  * @name User.getRecentMessages
  * @description
  * Get recent messages in reverse chronological order
- * @param {integer} mesgLimit - limit of messages
- * @param {integer} mesgOffset - offset
+ * @param {int} mesgLimit - limit of messages
+ * @param {int} mesgOffset - offset
  * @param {function} callback -function(err,messages) to be called with message object
  */
   UserSchema.methods.getRecentMessages = function(mesgLimit,mesgOffset,callback){
@@ -989,20 +1019,20 @@ exports.init = function (mwc) {
  * @name User.getDialog
  * @description
  * Get recent messages for dialog with this and user with username in reverse chronological order
- * @param {User} from - author of message
- * @param {integer} mesgLimit - limit of messages
- * @param {integer} mesgOffset - offset
+ * @param {User} usernameOrUser - author of message
+ * @param {int} mesgLimit - limit of messages
+ * @param {int} mesgOffset - offset
  * @param {function} callback -function(err,messages) to be called with message object
  */
-  UserSchema.methods.getDialog = function(username, mesgLimit, mesgOffset, callback){
+  UserSchema.methods.getDialog = function(usernameOrUser, mesgLimit, mesgOffset, callback){
     var thisUser = this;
     async.waterfall([
       function(cb){
-        if(typeof username === 'string'){
-          User.findOneByLoginOrEmail(username, cb);
+        if(typeof usernameOrUser === 'string'){
+          User.findOneByLoginOrEmail(usernameOrUser, cb);
         } else {
-          if(username._id){
-            cb(null,username);
+          if(usernameOrUser._id){
+            cb(null,usernameOrUser);
           } else {
             cb(new Error('from have to be user instance or string of username or email'));
           }
@@ -1024,7 +1054,12 @@ exports.init = function (mwc) {
   };
 
   var User = mwc.mongoConnection.model('User', UserSchema);
-  return User;
+  return {
+    'User':User,
+    'Users':User,
+    'Message':Message,
+    'Messages':Message
+  };
 };
 
 
