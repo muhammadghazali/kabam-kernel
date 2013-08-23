@@ -1009,6 +1009,11 @@ exports.init = function (mwc) {
    * @name User.recieveMessage
    * @description
    * Sends private message to this user from other one
+   * @example
+   * ```javascript
+   * User1.sendMessage(User2,'hello!',function(err){if(err) throw err;});
+   * //User1 sends message to User2
+   * ```
    * @param {User/string} from - reciever of message
    * @param {string} message - text of message
    * @param {function} callback -function to be called on message delivery
@@ -1056,7 +1061,7 @@ exports.init = function (mwc) {
  * @ngdoc function
  * @name User.getRecentMessages
  * @description
- * Get recent messages in reverse chronological order
+ * Get recent messages in reverse chronological order - the most recent on top
  * @param {int} mesgLimit - limit of messages
  * @param {int} mesgOffset - offset
  * @param {function} callback -function(err,messages) to be called with message object
@@ -1073,7 +1078,7 @@ exports.init = function (mwc) {
  * @ngdoc function
  * @name User.getDialog
  * @description
- * Get recent messages for dialog with this and user with username in reverse chronological order
+ * Get recent messages for dialog with this and user with username in reverse chronological order  - the most recent on top
  * @param {User} usernameOrUser - author of message
  * @param {int} mesgLimit - limit of messages
  * @param {int} mesgOffset - offset
