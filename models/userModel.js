@@ -1039,7 +1039,8 @@ exports.init = function (mwc) {
         }
       },
       function(userFound,cb){
-          Message
+        if(userFound){
+        Message
             .find({
               $or: [
                 {'to': thisUser._id, 'from': userFound._id},
@@ -1049,6 +1050,9 @@ exports.init = function (mwc) {
             .skip(mesgOffset)
             .limit(mesgLimit)
             .exec(cb);
+        } else {
+          cb(new Error('User do not exists!'));
+        }
       }
       ],callback);
   };
