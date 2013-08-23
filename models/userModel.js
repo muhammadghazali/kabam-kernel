@@ -966,8 +966,8 @@ exports.init = function (mwc) {
  * @param {function} callback -function to be called on message delivery
  */
   UserSchema.methods.sendMessage = function(to,message,callback){
-  var thisUser = this,
-    message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
+  var thisUser = this;
+  message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
     async.waterfall([
       function(cb){
         if(typeof to === 'string'){
@@ -1014,8 +1014,8 @@ exports.init = function (mwc) {
    * @param {function} callback -function to be called on message delivery
    */
   UserSchema.methods.recieveMessage = function(from,message,callback){
-    var thisUser = this,
-      message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
+    var thisUser = this;
+    message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
     async.waterfall([
       function(cb){
         if(typeof from === 'string'){
@@ -1066,6 +1066,7 @@ exports.init = function (mwc) {
         .find({'to': this._id})
         .skip(mesgOffset)
         .limit(mesgLimit)
+        .sort('-created_at')
         .exec(callback);
   };
 /**
@@ -1103,6 +1104,7 @@ exports.init = function (mwc) {
             })
             .skip(mesgOffset)
             .limit(mesgLimit)
+            .sort('-created_at')
             .exec(cb);
         } else {
           cb(new Error('User do not exists!'));

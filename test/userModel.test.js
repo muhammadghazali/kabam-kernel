@@ -1294,7 +1294,8 @@ describe('Users model', function () {
         });
 
         it('event have correct "from" field',function(){
-          event.from._id.should.be.eql(User1._id);
+          event.from._id.should.be.eql(User1
+            ._id);
         });
 
         it('event have correct "user" field',function(){
@@ -1307,10 +1308,123 @@ describe('Users model', function () {
       });
 
       describe('getRecentMessages',function(){
-        it('User2 getRecentMessages both messages');
+        var recentMessages,errF;
+        before(function(done){
+          User2.getRecentMessages(100,0,function(err,messages){
+            errF=err;
+            recentMessages=messages;
+            done();
+          });
+        });
+
+        it('fires callback without error',function(){
+          should.not.exist(errF);
+        });
+
+        it('fires callback with recent messages',function(){
+          recentMessages.should.be.instanceOf(Array);
+          recentMessages.length.should.be.equal(2);
+          //recentMessages.should.be.equal(1);
+
+          recentMessages[0].message.should.be.equal('test2');
+          recentMessages[0].to.should.be.eql(User2._id);
+          recentMessages[0].from.should.be.eql(User1._id);
+
+          recentMessages[1].message.should.be.equal('test1');
+          recentMessages[1].to.should.be.eql(User2._id);
+          recentMessages[1].from.should.be.eql(User1._id);
+
+        });
       });
-      describe('getDialog',function(){
-        it('User2 getDialog both messages');
+
+      describe('getDialog for string of login',function(){
+        var recentMessages,errF;
+        before(function(done){
+          User2.getDialog('testSpamer1',100,0,function(err,messages){
+            errF=err;
+            recentMessages=messages;
+            done();
+          });
+        });
+
+        it('fires callback without error',function(){
+          should.not.exist(errF);
+        });
+
+        it('fires callback with recent messages',function(){
+          recentMessages.should.be.instanceOf(Array);
+          recentMessages.length.should.be.equal(2);
+          //recentMessages.should.be.equal(1);
+
+          recentMessages[0].message.should.be.equal('test2');
+          recentMessages[0].to.should.be.eql(User2._id);
+          recentMessages[0].from.should.be.eql(User1._id);
+
+          recentMessages[1].message.should.be.equal('test1');
+          recentMessages[1].to.should.be.eql(User2._id);
+          recentMessages[1].from.should.be.eql(User1._id);
+
+        });
+      });
+
+      describe('getDialog for string of email',function(){
+        var recentMessages,errF;
+        before(function(done){
+          User2.getDialog('testSpamer1@example.org',100,0,function(err,messages){
+            errF=err;
+            recentMessages=messages;
+            done();
+          });
+        });
+
+        it('fires callback without error',function(){
+          should.not.exist(errF);
+        });
+
+        it('fires callback with recent messages',function(){
+          recentMessages.should.be.instanceOf(Array);
+          recentMessages.length.should.be.equal(2);
+          //recentMessages.should.be.equal(1);
+
+          recentMessages[0].message.should.be.equal('test2');
+          recentMessages[0].to.should.be.eql(User2._id);
+          recentMessages[0].from.should.be.eql(User1._id);
+
+          recentMessages[1].message.should.be.equal('test1');
+          recentMessages[1].to.should.be.eql(User2._id);
+          recentMessages[1].from.should.be.eql(User1._id);
+
+        });
+      });
+
+      describe('getDialog for user object',function(){
+        var recentMessages,errF;
+        before(function(done){
+          User2.getDialog(User1,100,0,function(err,messages){
+            errF=err;
+            recentMessages=messages;
+            done();
+          });
+        });
+
+        it('fires callback without error',function(){
+          should.not.exist(errF);
+        });
+
+        it('fires callback with recent messages',function(){
+          recentMessages.should.be.instanceOf(Array);
+          recentMessages.length.should.be.equal(2);
+          //recentMessages.should.be.equal(1);
+
+          recentMessages[0].message.should.be.equal('test2');
+          recentMessages[0].to.should.be.eql(User2._id);
+          recentMessages[0].from.should.be.eql(User1._id);
+
+          recentMessages[1].message.should.be.equal('test1');
+          recentMessages[1].to.should.be.eql(User2._id);
+          recentMessages[1].from.should.be.eql(User1._id);
+
+        });
       });
 
 
