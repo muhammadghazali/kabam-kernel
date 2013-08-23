@@ -955,14 +955,62 @@ exports.init = function (mwc) {
  * @ngdoc function
  * @name User.sendMessage
  * @description
- * Sends user a prifave message
- * @param {User} from - author of message
+ * Sends private message from this user to other one
+ * @param {User/string} to - reciever of message
  * @param {string} message - text of message
  * @param {function} callback -function to be called on message delivery
  */
-  UserSchema.methods.sendMessage = function(from,message,callback){
+  UserSchema.methods.sendMessage = function(to,message,callback){
   var thisUser = this,
     message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
+    async.waterfall([
+      function(cb){
+        if(typeof to === 'string'){
+          User.findOneByLoginOrEmail(to, cb);
+        } else {
+          if(to._id){
+            cb(null,from);
+          } else {
+            cb(new Error('from have to be user instance or string of username or email'));
+          }
+        }
+      },
+      function(userFound,cb){
+        Message.create({
+          'to': userFound._id,
+          'from': thisUser._id,
+          'message': message
+        },function(err,messageCreated){
+          if(err){
+            cb(err);
+          } else {
+            cb(null, userFound, messageCreated);
+          }
+        });
+      },
+      function(from,messageCreated,cb){
+        mwc.emit('notify:pm',{
+          'user':this,
+          'from':from,
+          'message':messageCreated.message
+        });
+        cb();
+      }
+    ],callback);
+  };
+
+  /**
+   * @ngdoc function
+   * @name User.recieveMessage
+   * @description
+   * Sends private message to this user from other one
+   * @param {User/string} from - reciever of message
+   * @param {string} message - text of message
+   * @param {function} callback -function to be called on message delivery
+   */
+  UserSchema.methods.recieveMessage = function(from,message,callback){
+    var thisUser = this,
+      message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
     async.waterfall([
       function(cb){
         if(typeof from === 'string'){
@@ -971,7 +1019,7 @@ exports.init = function (mwc) {
           if(from._id){
             cb(null,from);
           } else {
-            cb(new Error('from have to be user instance or string of username or email'));
+            cb(new Error('to have to be user instance or string of username or email'));
           }
         }
       },
@@ -998,6 +1046,7 @@ exports.init = function (mwc) {
       }
     ],callback);
   };
+
 /**
  * @ngdoc function
  * @name User.getRecentMessages
