@@ -733,10 +733,21 @@ describe('Users model', function () {
           });
         });
 
-        it('user instance have functions needed', function () {
+        it('user instance have correct values',function(){
           user.username.should.be.equal('test888');
           user.email.should.be.equal('ostroumov@teksi.ru');
           user._id.should.match(/[a-z0-9A-Z]+/);
+          user.gravatar.should.equal('https://secure.gravatar.com/avatar/0713799ed54a48d222f068d538d68a70.jpg?s=300&d=wavatar&r=g');
+
+          user.profileComplete.should.be.false;
+          user.emailVerified.should.be.false;
+
+          user.isBanned.should.be.false;
+          user.root.should.be.false;
+          user.lang.should.be.equal('en');
+        });
+
+        it('user instance have functions needed', function () {
           user.verifyPassword.should.be.a('function');
           user.setPassword.should.be.a('function');
           user.invalidateSession.should.be.a('function');

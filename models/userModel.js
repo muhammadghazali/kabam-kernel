@@ -93,7 +93,7 @@ exports.init = function (mwc) {
      * @description
      * Is user root? - boolean
      */
-    root: Boolean,
+    root:  {type: Boolean, default:false},
 
     /**
      * @ngdoc value
@@ -147,7 +147,7 @@ exports.init = function (mwc) {
      * @description
      * Is email address verified? - boolean
      */
-    emailVerified: Boolean,
+    emailVerified: {type: Boolean, default:false},
     /**
      * @ngdoc value
      * @methodOf User
@@ -155,7 +155,7 @@ exports.init = function (mwc) {
      * @description
      * Is profile complete - it means, it have email, username and password set. boolean
      */
-    profileComplete: Boolean,
+    profileComplete: {type: Boolean, default:false},
 
     /**
      * @ngdoc value
@@ -178,8 +178,22 @@ exports.init = function (mwc) {
      * @description
      * User profile object. it can store anything! - age, postal address, occupation. everything!
      */
-    profile: Object
-  });
+    profile: {},
+
+    /**
+     * @ngdoc value
+     * @methodOf User
+     * @name User.lastSeenOnline
+     * @description
+     * Timestamp of last http interaction with site - last seen online
+     */
+    lastSeenOnline : Date
+  },
+  {
+    toObject: { virtuals: true },
+    toJSON: { virtuals: true }
+  }
+  );
 
   UserSchema.index({
     email: 1,
@@ -227,6 +241,25 @@ exports.init = function (mwc) {
   UserSchema.virtual('gravatar').get(function () {
       return this.getGravatar();
     });
+
+  /**
+   * @methodOf User
+   * @name User.lastSeenOnlineAgo
+   * @description
+   * Returns how much milliseconds ago user was online
+   */
+  UserSchema.virtual('lastSeenOnlineAgo').get(function(){
+    return  ((new Date().getTime() - this.lastSeenOnline.getTime()));
+  });
+  /**
+   * @methodOf User
+   * @name User.isOnline
+   * @description
+   * Returns true, of user was online in less than 1 minute
+   */
+  UserSchema.virtual('isOnline').get(function(){
+    return  (this.lastSeenOnlineAgo < 60000);
+  });
   /**
    * @ngdoc function
    * @name User.verifyPassword
