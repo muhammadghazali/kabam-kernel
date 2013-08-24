@@ -519,7 +519,8 @@ function KabamKernel(config) {
    * for background workers and console scripts,
    * makes kabamKernel emit event of `started` with value `{'type':'app'}`,
    * returns kabamKernel
-
+   *
+   * It emits events of "started"
    * @param {object} howExactly - config object, see parameters in description
    * @param {object} options config object for https server [http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener](http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener)
    *
@@ -913,7 +914,7 @@ module.exports = exports = KabamKernel.create;
  * @name kabamKernel.emit
  * @description
  * kabamKernel inherits all methods, including this, from nodejs event emitter.
- * See [official nodejs manual] (http://nodejs.org/api/events.html#events_emitter_emit_event_arg1_arg2)
+ * See [official nodejs manual](http://nodejs.org/api/events.html#events_emitter_emit_event_arg1_arg2)
  */
 
 
