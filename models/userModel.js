@@ -252,7 +252,7 @@ exports.init = function (mwc) {
     if(this.lastSeenOnline){
       return  ((new Date().getTime() - this.lastSeenOnline.getTime()));
     } else {
-      return 30*24*60*60*1000; //month)))
+      return 10*365*24*60*60*1000; //month)))
     }
   });
   /**
