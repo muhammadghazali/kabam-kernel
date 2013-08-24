@@ -249,7 +249,11 @@ exports.init = function (mwc) {
    * Returns how much milliseconds ago user was online
    */
   UserSchema.virtual('lastSeenOnlineAgo').get(function(){
-    return  ((new Date().getTime() - this.lastSeenOnline.getTime()));
+    if(this.lastSeenOnline){
+      return  ((new Date().getTime() - this.lastSeenOnline.getTime()));
+    } else {
+      return 30*24*60*60*1000; //month)))
+    }
   });
   /**
    * @methodOf User
