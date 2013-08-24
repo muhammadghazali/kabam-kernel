@@ -1248,183 +1248,189 @@ describe('Users model', function () {
         });
       });
 
-      describe('sendMessage',function(){
-        var event;
-        before(function(done){
-          kabam.once('notify:pm',function(m){
-            event = m;
-            setTimeout(done,1000);
+      describe('creating messages:', function () {
+        describe('sendMessage', function () {
+          var event;
+          before(function (done) {
+            kabam.once('notify:pm', function (m) {
+              event = m;
+              setTimeout(done, 1000);
+            });
+            User1.sendMessage(User2, "test1", function (err, messageCreated) {
+              if (err) {
+                throw err;
+              }
+            });
           });
-          User1.sendMessage(User2, "test1", function(err,messageCreated){
-            if(err) throw err;
+
+          it('event is emitted once when user sends message', function () {
+            should.exist(event);
+          });
+
+          it('event have correct "from" field', function () {
+            event.from._id.should.be.eql(User1._id);
+          });
+
+          it('event have correct "user" field', function () {
+            event.user._id.should.be.eql(User2._id);
+          });
+
+          it('event have proper contents', function () {
+            event.message.should.be.equal('test1');
           });
         });
+        describe('recieveMessage', function () {
+          var event;
+          before(function (done) {
+            kabam.once('notify:pm', function (m) {
+              event = m;
+              setTimeout(done, 1000);
+            });
+            User2.recieveMessage(User1, "test2", function (err, messageCreated) {
+              if (err) {
+                throw err;
+              }
+            });
+          });
 
-        it('event is emitted once when user sends message',function(){
-          should.exist(event);
-        });
+          it('event is emitted once when user sends message', function () {
+            should.exist(event);
+          });
 
-        it('event have correct "from" field',function(){
-          event.from._id.should.be.eql(User1._id);
-        });
+          it('event have correct "from" field', function () {
+            event.from._id.should.be.eql(User1
+              ._id);
+          });
 
-        it('event have correct "user" field',function(){
-          event.user._id.should.be.eql(User2._id);
-        });
+          it('event have correct "user" field', function () {
+            event.user._id.should.be.eql(User2._id);
+          });
 
-        it('event have proper contents',function(){
-          event.message.should.be.equal('test1');
+          it('event have proper contents', function () {
+            event.message.should.be.equal('test2');
+          });
         });
       });
 
-      describe('recieveMessage',function(){
-        var event;
-        before(function(done){
-          kabam.once('notify:pm',function(m){
-            event = m;
-            setTimeout(done,1000);
+      describe('reading messages:', function () {
+        describe('getRecentMessages', function () {
+          var recentMessages, errF;
+          before(function (done) {
+            User2.getRecentMessages(100, 0, function (err, messages) {
+              errF = err;
+              recentMessages = messages;
+              done();
+            });
           });
-          User2.recieveMessage(User1, "test2", function(err,messageCreated){
-            if(err) throw err;
+
+          it('fires callback without error', function () {
+            should.not.exist(errF);
+          });
+
+          it('fires callback with recent messages', function () {
+            recentMessages.should.be.instanceOf(Array);
+            recentMessages.length.should.be.equal(2);
+
+            recentMessages[0].message.should.be.equal('test2');
+            recentMessages[0].to.should.be.eql(User2._id);
+            recentMessages[0].from.should.be.eql(User1._id);
+
+            recentMessages[1].message.should.be.equal('test1');
+            recentMessages[1].to.should.be.eql(User2._id);
+            recentMessages[1].from.should.be.eql(User1._id);
+
           });
         });
 
-        it('event is emitted once when user sends message',function(){
-          should.exist(event);
+        describe('getDialog for string of login', function () {
+          var recentMessages, errF;
+          before(function (done) {
+            User2.getDialog('testSpamer1', 100, 0, function (err, messages) {
+              errF = err;
+              recentMessages = messages;
+              done();
+            });
+          });
+
+          it('fires callback without error', function () {
+            should.not.exist(errF);
+          });
+
+          it('fires callback with recent messages', function () {
+            recentMessages.should.be.instanceOf(Array);
+            recentMessages.length.should.be.equal(2);
+            //recentMessages.should.be.equal(1);
+
+            recentMessages[0].message.should.be.equal('test2');
+            recentMessages[0].to.should.be.eql(User2._id);
+            recentMessages[0].from.should.be.eql(User1._id);
+
+            recentMessages[1].message.should.be.equal('test1');
+            recentMessages[1].to.should.be.eql(User2._id);
+            recentMessages[1].from.should.be.eql(User1._id);
+
+          });
         });
 
-        it('event have correct "from" field',function(){
-          event.from._id.should.be.eql(User1
-            ._id);
+        describe('getDialog for string of email', function () {
+          var recentMessages, errF;
+          before(function (done) {
+            User2.getDialog('testSpamer1@example.org', 100, 0, function (err, messages) {
+              errF = err;
+              recentMessages = messages;
+              done();
+            });
+          });
+
+          it('fires callback without error', function () {
+            should.not.exist(errF);
+          });
+
+          it('fires callback with recent messages', function () {
+            recentMessages.should.be.instanceOf(Array);
+            recentMessages.length.should.be.equal(2);
+
+            recentMessages[0].message.should.be.equal('test2');
+            recentMessages[0].to.should.be.eql(User2._id);
+            recentMessages[0].from.should.be.eql(User1._id);
+
+            recentMessages[1].message.should.be.equal('test1');
+            recentMessages[1].to.should.be.eql(User2._id);
+            recentMessages[1].from.should.be.eql(User1._id);
+
+          });
         });
 
-        it('event have correct "user" field',function(){
-          event.user._id.should.be.eql(User2._id);
-        });
+        describe('getDialog for user object', function () {
+          var recentMessages, errF;
+          before(function (done) {
+            User2.getDialog(User1, 100, 0, function (err, messages) {
+              errF = err;
+              recentMessages = messages;
+              done();
+            });
+          });
 
-        it('event have proper contents',function(){
-          event.message.should.be.equal('test2');
+          it('fires callback without error', function () {
+            should.not.exist(errF);
+          });
+
+          it('fires callback with recent messages', function () {
+            recentMessages.should.be.instanceOf(Array);
+            recentMessages.length.should.be.equal(2);
+            //recentMessages.should.be.equal(1);
+
+            recentMessages[0].message.should.be.equal('test2');
+            recentMessages[0].to.should.be.eql(User2._id);
+            recentMessages[0].from.should.be.eql(User1._id);
+
+            recentMessages[1].message.should.be.equal('test1');
+            recentMessages[1].to.should.be.eql(User2._id);
+            recentMessages[1].from.should.be.eql(User1._id);
+
+          });
         });
       });
-
-      describe('getRecentMessages',function(){
-        var recentMessages,errF;
-        before(function(done){
-          User2.getRecentMessages(100,0,function(err,messages){
-            errF=err;
-            recentMessages=messages;
-            done();
-          });
-        });
-
-        it('fires callback without error',function(){
-          should.not.exist(errF);
-        });
-
-        it('fires callback with recent messages',function(){
-          recentMessages.should.be.instanceOf(Array);
-          recentMessages.length.should.be.equal(2);
-
-          recentMessages[0].message.should.be.equal('test2');
-          recentMessages[0].to.should.be.eql(User2._id);
-          recentMessages[0].from.should.be.eql(User1._id);
-
-          recentMessages[1].message.should.be.equal('test1');
-          recentMessages[1].to.should.be.eql(User2._id);
-          recentMessages[1].from.should.be.eql(User1._id);
-
-        });
-      });
-
-      describe('getDialog for string of login',function(){
-        var recentMessages,errF;
-        before(function(done){
-          User2.getDialog('testSpamer1',100,0,function(err,messages){
-            errF=err;
-            recentMessages=messages;
-            done();
-          });
-        });
-
-        it('fires callback without error',function(){
-          should.not.exist(errF);
-        });
-
-        it('fires callback with recent messages',function(){
-          recentMessages.should.be.instanceOf(Array);
-          recentMessages.length.should.be.equal(2);
-          //recentMessages.should.be.equal(1);
-
-          recentMessages[0].message.should.be.equal('test2');
-          recentMessages[0].to.should.be.eql(User2._id);
-          recentMessages[0].from.should.be.eql(User1._id);
-
-          recentMessages[1].message.should.be.equal('test1');
-          recentMessages[1].to.should.be.eql(User2._id);
-          recentMessages[1].from.should.be.eql(User1._id);
-
-        });
-      });
-
-      describe('getDialog for string of email',function(){
-        var recentMessages,errF;
-        before(function(done){
-          User2.getDialog('testSpamer1@example.org',100,0,function(err,messages){
-            errF=err;
-            recentMessages=messages;
-            done();
-          });
-        });
-
-        it('fires callback without error',function(){
-          should.not.exist(errF);
-        });
-
-        it('fires callback with recent messages',function(){
-          recentMessages.should.be.instanceOf(Array);
-          recentMessages.length.should.be.equal(2);
-
-          recentMessages[0].message.should.be.equal('test2');
-          recentMessages[0].to.should.be.eql(User2._id);
-          recentMessages[0].from.should.be.eql(User1._id);
-
-          recentMessages[1].message.should.be.equal('test1');
-          recentMessages[1].to.should.be.eql(User2._id);
-          recentMessages[1].from.should.be.eql(User1._id);
-
-        });
-      });
-
-      describe('getDialog for user object',function(){
-        var recentMessages,errF;
-        before(function(done){
-          User2.getDialog(User1,100,0,function(err,messages){
-            errF=err;
-            recentMessages=messages;
-            done();
-          });
-        });
-
-        it('fires callback without error',function(){
-          should.not.exist(errF);
-        });
-
-        it('fires callback with recent messages',function(){
-          recentMessages.should.be.instanceOf(Array);
-          recentMessages.length.should.be.equal(2);
-          //recentMessages.should.be.equal(1);
-
-          recentMessages[0].message.should.be.equal('test2');
-          recentMessages[0].to.should.be.eql(User2._id);
-          recentMessages[0].from.should.be.eql(User1._id);
-
-          recentMessages[1].message.should.be.equal('test1');
-          recentMessages[1].to.should.be.eql(User2._id);
-          recentMessages[1].from.should.be.eql(User1._id);
-
-        });
-      });
-
 
       after(function(done){
         async.parallel([
