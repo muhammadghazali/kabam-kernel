@@ -777,9 +777,19 @@ KabamKernel.create = function (config) {
   return new KabamKernel(config);
 };
 
-
-
-//KabamKernel
+/**
+ * @ngdoc function
+ * @name kabamKernel.stop
+ * @description
+ * Stops kabamKernel instance - close redis and mongo connections.
+ */
+KabamKernel.prototype.stop = function(){
+  this.redisClient.end();
+  this.mongoose.connection.close();
+  this.mongoose.disconnect();
+  delete this;
+  return;
+};
 
 module.exports = exports = KabamKernel.create;
 

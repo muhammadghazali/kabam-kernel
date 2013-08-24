@@ -549,8 +549,7 @@ describe('Kernel', function () {
   });
 
   after(function(done){
-    MWC.mongoose.disconnect();
-    MWC.mongoose.connection.close();
-    done()
+    MWC.stop();
+    done();
   });
 });

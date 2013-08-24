@@ -1449,8 +1449,7 @@ describe('Users model', function () {
   });
 
   after(function (done) {
-    kabam.mongoose.disconnect();
-    kabam.mongoose.connection.close();
+    kabam.stop();
     done();
   });
 });
