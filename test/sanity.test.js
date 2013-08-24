@@ -98,7 +98,31 @@ describe('sanity test', function () {
         var MWC = mwcCore(config);
         MWC.extendModel('Users', function () {
         });
-      }).should.throw('Error extending model, "Users" is reserved name');
+      }).should.throw('Error extending model, "User(s)" and "Message(s)" are reserved name');
+    });
+
+    it('throws proper error for trying KabamKernel.extendModel("User",function()), because  "Users" is reserved name', function () {
+      (function () {
+        var MWC = mwcCore(config);
+        MWC.extendModel('User', function () {
+        });
+      }).should.throw('Error extending model, "User(s)" and "Message(s)" are reserved name');
+    });
+
+    it('throws proper error for trying KabamKernel.extendModel("Message",function()), because  "Users" is reserved name', function () {
+      (function () {
+        var MWC = mwcCore(config);
+        MWC.extendModel('User', function () {
+        });
+      }).should.throw('Error extending model, "User(s)" and "Message(s)" are reserved name');
+    });
+
+    it('throws proper error for trying KabamKernel.extendModel("Messages",function()), because  "Users" is reserved name', function () {
+      (function () {
+        var MWC = mwcCore(config);
+        MWC.extendModel('User', function () {
+        });
+      }).should.throw('Error extending model, "User(s)" and "Message(s)" are reserved name');
     });
 
     it('throws proper error for KabamKernel.extendApp("i am pineapple!");', function () {

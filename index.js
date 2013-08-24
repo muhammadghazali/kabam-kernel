@@ -110,10 +110,10 @@ function KabamKernel(config) {
    * @name kabamKernel.extendModel
    * @description
    * Perform dependency injection of mongoose models to mwc.model and request.model.
-   * When you call `extendModel(modelName,function(mongoose, config){...})` you get all the environment created after calling
+   * When you call `extendModel(modelName,function(kabamKernel){...})` you get all the environment created after calling
    * `extendCore(function(core){...})`.
    * @param {string} modelName - field name, "Users" is reserved field name!
-   * @param {function} modelFunction - function(mongoose, config) - the first argument is mongoose object, the second one is the
+   * @param {function} modelFunction - function(kabamKernel) - the first argument is mongoose object, the second one is the
    * mwc.config object
    * @example
    * ```javascript
@@ -133,8 +133,8 @@ function KabamKernel(config) {
     if (prepared) {
       throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
-      if (modelName === 'Users') {
-        throw new Error('Error extending model, "Users" is reserved name');
+      if (modelName === 'Users' || modelName === 'User' || modelName === 'Message' || modelName === 'Messages') {
+        throw new Error('Error extending model, "User(s)" and "Message(s)" are reserved name');
       } else {
         if (typeof modelName === 'string' && typeof modelFunction === 'function') {
           _additionalModels.push({'name': modelName, 'initFunction': modelFunction});
