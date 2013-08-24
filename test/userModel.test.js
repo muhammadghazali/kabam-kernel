@@ -1274,7 +1274,7 @@ describe('Users model', function () {
 
         it('event have proper contents',function(){
           event.message.should.be.equal('test1');
-        })
+        });
       });
 
       describe('recieveMessage',function(){
@@ -1304,7 +1304,7 @@ describe('Users model', function () {
 
         it('event have proper contents',function(){
           event.message.should.be.equal('test2');
-        })
+        });
       });
 
       describe('getRecentMessages',function(){
