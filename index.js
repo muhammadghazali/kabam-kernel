@@ -16,7 +16,7 @@ var EventEmitter = require('events').EventEmitter,
  * @constructor
  * @param {object} config - config object
  */
-function MWC(config) {
+function KabamKernel(config) {
 
   EventEmitter.call(this);
   if (typeof config === 'undefined'){
@@ -661,9 +661,9 @@ function MWC(config) {
   }
 }
 
-util.inherits(MWC, EventEmitter);
+util.inherits(KabamKernel, EventEmitter);
 
-MWC.prototype.validateConfig = function (config) {
+KabamKernel.prototype.validateConfig = function (config) {
   // General check
   if (typeof config !== 'object') {
     throw new Error('Config is not an object!');
@@ -696,7 +696,7 @@ MWC.prototype.validateConfig = function (config) {
  * ```
  * @returns {kabamKernel} mwc object
  */
-MWC.prototype.extendListeners = function (eventName, eventHandlerFunction) {
+KabamKernel.prototype.extendListeners = function (eventName, eventHandlerFunction) {
   if (typeof eventName === 'string' && typeof eventHandlerFunction === 'function') {
     this.on(eventName, eventHandlerFunction);
     return this;
@@ -714,7 +714,7 @@ MWC.prototype.extendListeners = function (eventName, eventHandlerFunction) {
  * is used for making this object to be able to emit events through mwc
  * @param {object} object - object to be extended
  */
-MWC.prototype.injectEmit = function (object) {
+KabamKernel.prototype.injectEmit = function (object) {
   var thisMWC = this;
   object.emitMWC = function (eventName, eventContent) {
     thisMWC.emit(eventName, eventContent);
@@ -733,7 +733,7 @@ MWC.prototype.injectEmit = function (object) {
  * BTW, redis is NOT MySQL - we can't increase speed with connection pooling!
  * @returns {RedisClient} redis client
  */
-MWC.prototype.createRedisClient = function () {
+KabamKernel.prototype.createRedisClient = function () {
   return redisManager.create(this.config.redis);
 };
 
@@ -769,15 +769,19 @@ MWC.prototype.createRedisClient = function () {
  * //minimal runnable example
  * var mwc = require('mwc_kernel);
  * MWC = mwc(config);
- * MWC.start();
+ * KabamKernelstart();
  *
  * ```
  */
-MWC.create = function (config) {
-  return new MWC(config);
+KabamKernel.create = function (config) {
+  return new KabamKernel(config);
 };
 
-module.exports = exports = MWC.create;
+
+
+//KabamKernel
+
+module.exports = exports = KabamKernel.create;
 
 /**
  * @ngdoc function
