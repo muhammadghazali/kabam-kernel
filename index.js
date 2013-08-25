@@ -1,8 +1,6 @@
 var EventEmitter = require('events').EventEmitter,
   url = require('url'),
   util = require('util'),
-  http = require('http'),
-  https = require('https'),
   appManager = require('./lib/appManager.js'),
   MongooseManager = require('./lib/MongooseManager.js'),
   configManager = require('./lib/configManager.js'),
