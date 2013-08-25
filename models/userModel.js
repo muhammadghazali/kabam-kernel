@@ -243,6 +243,7 @@ exports.init = function (mwc) {
     });
 
   /**
+   * @ngdoc function
    * @methodOf User
    * @name User.lastSeenOnlineAgo
    * @description
@@ -256,6 +257,7 @@ exports.init = function (mwc) {
     }
   });
   /**
+   * @ngdoc function
    * @methodOf User
    * @name User.isOnline
    * @description
