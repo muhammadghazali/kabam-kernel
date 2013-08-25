@@ -768,9 +768,9 @@ KabamKernel.prototype.createRedisClient = function () {
  * };
  *
  * //minimal runnable example
- * var mwc = require('mwc_kernel);
- * MWC = mwc(config);
- * KabamKernelstart();
+ * var KabamKernel = require('mwc_kernel);
+ * kabamKernel = mwc(config);
+ * kabamKernel.start();
  *
  * ```
  */
