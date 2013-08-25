@@ -239,7 +239,7 @@ exports.init = function (mwc) {
    * Returns users gravatar
    */
   UserSchema.virtual('gravatar').get(function () {
-      return this.getGravatar();
+      return this.getGravatar(80);
     });
 
   /**
