@@ -47,16 +47,19 @@ Why do we need this plugin? Let us consider this expressJS application
     var express = require('express');
 
 //initializing mongoose models (1)
+
     var model = require('./models.ks).init();
 
 //initializing passport.js strategies (2)
-    passport.use(.....);
-    passport.use(.....);
-    passport.use(.....);
-    passport.serializeUser(function(user, done) {...});
-    passport.deserializeUser(function(obj, done) {...});
+
+    passport.use(/*some stuff*/);
+    passport.use(/*some stuff*/);
+    passport.use(/*some stuff*/);
+    passport.serializeUser(function(user, done) {/*some stuff*/});
+    passport.deserializeUser(function(obj, done) {/*some stuff*/});
 
 //seting application parameters (3)
+
     var app = express();
     app.set('views', templateDirectory);
     app.set('view engine', 'html');
@@ -64,17 +67,20 @@ Why do we need this plugin? Let us consider this expressJS application
     app.engine('html', require('hogan-express'));
 
 //setting middlewares
+
     app.use(express.logger());
     app.use(express.cookieParser());
     app.use(express.bodyParser());
     app.use(express.methodOverride());
 
 //setting session middleware to use with passportJS (2)
+
     app.use(express.session({ secret: 'keyboard cat' }));
     app.use(passport.initialize());
     app.use(passport.session());
 
 //custom middleware (4)
+
     app.use(function(request,response,next){
       if(request.user){
         response.locals.myself = request.user;
@@ -83,15 +89,18 @@ Why do we need this plugin? Let us consider this expressJS application
 
 
 //inject mongoose models middleware (1)
+
     app.use(function(request, response, next){
       request.model = model;
       next();
     });
 
 //router middleware
+
     app.use(app.router);
 
 //setting error catcher middleware
+
     app.use(function (err, req, res, next) {
      res.status(503);
      res.header('Retry-After', 360);
@@ -99,11 +108,13 @@ Why do we need this plugin? Let us consider this expressJS application
     });
 
 //setting routes (5)
+
     app.get('/', function(req, res){
       res.send('hello world');
     });
 
 //starting application
+
     app.listen(3000);
 
 ```
