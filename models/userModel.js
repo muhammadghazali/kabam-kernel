@@ -443,6 +443,38 @@ exports.init = function (mwc) {
 
   /**
    * @ngdoc function
+   * @name User.export
+   * @description
+   * Returns the current user object without sensitive data
+   * - apiKey, salt, passwords, private email.
+   * For now it returns object with
+   *   `username`, `lang`, `root`, `isBanned`,
+   *   `roles`, `skype`, `lastName`, 'firstName'
+   *
+   * @return {object} - object of user profile with stripped sensitive
+   * data.
+   */
+  UserSchema.methods.export = function(){
+    var exportableProperties = [
+      'username',
+      'lang',
+      'root',
+      'isBanned',
+      'roles',
+      'skype',
+      'lastName',
+      'firstName'
+    ];
+    var ret = {};
+    for(var x in this){
+      if(exportableProperties.indexOf(x) !== -1){
+        ret[x] = this[x];
+      }
+    }
+    return ret;
+  };
+  /**
+   * @ngdoc function
    * @name kabamKernel.model.User.ban
    * @description
    * Bans this user
@@ -958,7 +990,27 @@ exports.init = function (mwc) {
   //private messages
   var messageSchema = new mongoose.Schema({
       'to': mongoose.Schema.Types.ObjectId,
+      'toProfile':{
+        'username':String,
+        'lang':String,
+        'root':Boolean,
+        'isBanned':Boolean,
+        'roles':[String],
+        'skype':String,
+        'lastName':String,
+        'firstName':String
+      },
       'from': mongoose.Schema.Types.ObjectId,
+      'fromProfile':{
+        'username':String,
+        'lang':String,
+        'root':Boolean,
+        'isBanned':Boolean,
+        'roles':[String],
+        'skype':String,
+        'lastName':String,
+        'firstName':String
+      },
       'created_at': { type: Date, default: Date.now },
       'message': {type: String, trim: true } //trim whitespaces - http://mongoosejs.com/docs/api.html#schema_string_SchemaString-trim
   });
@@ -1022,7 +1074,9 @@ exports.init = function (mwc) {
       function(userFound,cb){
         Message.create({
           'to': userFound._id,
+          'toProfile': userFound.export(),
           'from': thisUser._id,
+          'fromProfile': thisUser._id,
           'message': message
         },function(err,messageCreated){
           if(err){
@@ -1075,7 +1129,9 @@ exports.init = function (mwc) {
       function(userFound,cb){
         Message.create({
           'from': userFound._id,
+          'fromProfile': userFound.export(),
           'to': thisUser._id,
+          'toProfile': thisUser.export(),
           'message': message
         },function(err,messageCreated){
           if(err){
