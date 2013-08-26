@@ -44,66 +44,67 @@ Why do we need this plugin? Let us consider this expressJS application
 
 ```javascript
 
-var express = require('express');
+    var express = require('express');
 
 //initializing mongoose models (1)
-var model = require('./models.ks).init();
+    var model = require('./models.ks).init();
 
 //initializing passport.js strategies (2)
-passport.use(.....);
-passport.use(.....);
-passport.use(.....);
-passport.serializeUser(function(user, done) {...});
-passport.deserializeUser(function(obj, done) {...});
+    passport.use(.....);
+    passport.use(.....);
+    passport.use(.....);
+    passport.serializeUser(function(user, done) {...});
+    passport.deserializeUser(function(obj, done) {...});
 
 //seting application parameters (3)
-var app = express();
-app.set('views', templateDirectory);
-app.set('view engine', 'html');
-app.set('layout', 'layout');
-app.engine('html', require('hogan-express'));
+    var app = express();
+    app.set('views', templateDirectory);
+    app.set('view engine', 'html');
+    app.set('layout', 'layout');
+    app.engine('html', require('hogan-express'));
 
 //setting middlewares
-  app.use(express.logger());
-  app.use(express.cookieParser());
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
+    app.use(express.logger());
+    app.use(express.cookieParser());
+    app.use(express.bodyParser());
+    app.use(express.methodOverride());
 
 //setting session middleware to use with passportJS (2)
-  app.use(express.session({ secret: 'keyboard cat' }));
-  app.use(passport.initialize());
-  app.use(passport.session());
+    app.use(express.session({ secret: 'keyboard cat' }));
+    app.use(passport.initialize());
+    app.use(passport.session());
 
 //custom middleware (4)
-  app.use(function(request,response,next){
-    if(request.user){
-      response.locals.myself = request.user;
-    }
-  });
+    app.use(function(request,response,next){
+      if(request.user){
+        response.locals.myself = request.user;
+      }
+    });
 
 
 //inject mongoose models middleware (1)
-  app.use(function(request, response, next){
-    request.model = model;
-    next();
-  });
+    app.use(function(request, response, next){
+      request.model = model;
+      next();
+    });
 
 //router middleware
-  app.use(app.router);
+    app.use(app.router);
 
 //setting error catcher middleware
-  app.use(function (err, req, res, next) {
-   res.status(503);
-   res.header('Retry-After', 360);
-   res.send('Error 503. There are problems on our server. We will fix them soon!');
-  });
+    app.use(function (err, req, res, next) {
+     res.status(503);
+     res.header('Retry-After', 360);
+     res.send('Error 503. There are problems on our server. We will fix them soon!');
+    });
 
 //setting routes (5)
-app.get('/', function(req, res){
-  res.send('hello world');
-});
+    app.get('/', function(req, res){
+      res.send('hello world');
+    });
 
-app.listen(3000);
+//starting application
+    app.listen(3000);
 
 ```
 
