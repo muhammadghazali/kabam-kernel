@@ -44,13 +44,14 @@ Why do we need this plugin? Let us consider this expressJS application
 
 ```javascript
 
-    var express = require('express');
+    var express = require('express')
+      passport = require('passport');
 
   /*
    *initializing mongoose models (1)
    */
 
-    var model = require('./models.ks).init();
+    var model = require('./model/models.js').init();
 
   /*
    *initializing passport.js strategies (2)
