@@ -1079,7 +1079,7 @@ exports.init = function (mwc) {
           'to': userFound._id,
           'toProfile': userFound.export(),
           'from': thisUser._id,
-          'fromProfile': thisUser._id,
+          'fromProfile': thisUser.export(),
           'message': message
         },function(err,messageCreated){
           if(err){
