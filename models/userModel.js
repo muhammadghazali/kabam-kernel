@@ -457,6 +457,7 @@ exports.init = function (mwc) {
   UserSchema.methods.export = function(){
     var exportableProperties = [
       'username',
+      'gravatar',
       'lang',
       'root',
       'isBanned',
@@ -992,6 +993,7 @@ exports.init = function (mwc) {
       'to': mongoose.Schema.Types.ObjectId,
       'toProfile':{
         'username':String,
+        'gravatar':String,
         'lang':String,
         'root':Boolean,
         'isBanned':Boolean,
@@ -1003,6 +1005,7 @@ exports.init = function (mwc) {
       'from': mongoose.Schema.Types.ObjectId,
       'fromProfile':{
         'username':String,
+        'gravatar':String,
         'lang':String,
         'root':Boolean,
         'isBanned':Boolean,
