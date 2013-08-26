@@ -38,6 +38,95 @@ But it can have some new features, not listed in README.md.
  - [https://github.com/mykabam/kabam-kernel](https://github.com/mykabam/kabam-kernel) - main repo
  - [https://bitbucket.org/vodolaz095/kabamKernel](https://bitbucket.org/vodolaz095/kabamKernel) - read only backup repo, can be outdated
 
+Concept of expandable expressJS application
+================
+Why do we need this plugin? Let us consider this expressJS application
+
+```javascript
+
+var express = require('express');
+
+//initializing mongoose models (1)
+var model = require('./models.ks).init();
+
+//initializing passport.js strategies (2)
+passport.use(.....);
+passport.use(.....);
+passport.use(.....);
+passport.serializeUser(function(user, done) {...});
+passport.deserializeUser(function(obj, done) {...});
+
+//seting application parameters (3)
+var app = express();
+app.set('views', templateDirectory);
+app.set('view engine', 'html');
+app.set('layout', 'layout');
+app.engine('html', require('hogan-express'));
+
+//setting middlewares
+  app.use(express.logger());
+  app.use(express.cookieParser());
+  app.use(express.bodyParser());
+  app.use(express.methodOverride());
+
+//setting session middleware to use with passportJS (2)
+  app.use(express.session({ secret: 'keyboard cat' }));
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+//custom middleware (4)
+  app.use(function(request,response,next){
+    if(request.user){
+      response.locals.myself = request.user;
+    }
+  });
+
+
+//inject mongoose models middleware (1)
+  app.use(function(request, response, next){
+    request.model = model;
+    next();
+  });
+
+//router middleware
+  app.use(app.router);
+
+//setting error catcher middleware
+  app.use(function (err, req, res, next) {
+   res.status(503);
+   res.header('Retry-After', 360);
+   res.send('Error 503. There are problems on our server. We will fix them soon!');
+  });
+
+//setting routes (5)
+app.get('/', function(req, res){
+  res.send('hello world');
+});
+
+app.listen(3000);
+
+```
+
+This application can be anything - blog platform, todo list, chat...
+And if you closely examine all expressJS applications, you will find, that they usually have 5 hotspots, that
+change from one to other application. This spots give the individuality to application, make it different from others.
+This spots are
+
+ 1. Place to initialize mongoose models, and inject it to application routes controllers
+ 2. Place, where we tune the [passport.js](http://passportjs.org/) middleware - set up strategies and code to extract user profile from mongo database and add it to middleware chain
+ 3. Place to set application parameters - template engine, locals,
+ 4. Setting up custom middlewares in application chain
+ 5. Setting up application routes
+
+ So, all expressJS application do differ on 5 points. And this is all, other code is shared between applications.
+ In other works, we can create different applications by just tuning expressJS applications in this 5 points.
+ So, maybe we need to automatize this procedure, create a class, that will vendor expressJS application by applying
+ some settings functions on it in proper parts.
+
+ This node module do this - it allows us to make transformations to expressJS application automatically.
+
+
+
 
 Introduction
 =======
