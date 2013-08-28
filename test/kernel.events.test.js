@@ -1,19 +1,29 @@
 var should = require('should'),  
   mwcKernel = require('./../index.js'),
   events = require('events'),
-  config = require('./../example/config.json').development,  
+  config = require('./../example/config.json').development,
+  request = require('request'),  
   port = Math.floor(2000+1000*Math.random());
 
 describe('Kernel events emitter testing', function() {
 
     var MWC;
+    var isStarted = false;
     before(function(done) {
         MWC = mwcKernel(config);
-
+        
+         MWC.on('started', function(obj) {
+                isStarted = true;
+            });
+       
         MWC.start(port);
         setTimeout(done, 1000);        
     });
     
+    it('checking start event', function() {
+        isStarted.should.be.true;
+    });
+
     describe('Testing users:signUp', function() {
         var user;
         before(function(done) {
@@ -179,7 +189,7 @@ describe('Kernel events emitter testing', function() {
             });
         });
         it('saveProfile test event', function() {
-            user.roles.should.have.lengthOf(1);
+            user.roles[0].should.be.equal('role2');
         });
 
         after(function(done) {
@@ -255,7 +265,7 @@ describe('Kernel events emitter testing', function() {
             });
         });
         it('revokeKeyChain test event', function() {
-            user.keychain.should.not.have.property('github', 'with_Iuda');
+            should.not.exist(user.keychain.github);
         });
 
         after(function(done) {
@@ -301,51 +311,81 @@ describe('Kernel events emitter testing', function() {
         });
     });
 
-    /*describe('Testing http event', function() {
-               
+    describe('Testing http event', function() {
+         var data;      
         before(function(done) {
-           
+            request.get('http://localhost:'+port+'/', function(err,response,body){
+               if(err) {
+                        throw err;
+                    }
+            });
+
             MWC.on('http', function(params) {                
-                console.log(params);
+                data = params;
                 done();
             });
         });
-        it('check http parameters', function() {
-            //isStarted.should.be.true;
+        it('check http method parameter', function() {
+            should.exist(data.method);
         });
-    });*/
-
-    /*describe('Testing started event', function() {
-        
-        var isStarted = false;
-        before(function(done) {
-           
-            MWC.on('started', function(obj) {
-                isStarted = true;
-                console.log('++++++++++++++++++++++++');
-                done();
-            });
+        it('check http duration parameter', function() {
+            data.duration.should.be.below(100);
         });
-        it('start event', function() {
-            isStarted.should.be.true;
+        it('check http statuscode parameter', function() {
+            should.exist(data.statusCode);
         });
-    });*/
-
-    /*describe('Testing users:ban event', function() {
+        it('check http ip parameter', function() {
+            should.exist(data.ip);
+        });
+        it('check http uri parameter', function() {
+            should.exist(data.uri);
+        });
+    });
+    
+    describe('Testing users:unban (without email)event', function() {
         var user;
         before(function(done) {
             MWC.model.User.create({
-                'email': 'hzy21@dddf.sg'                
+                'email': 'hzy23@dddf.sg',
+                'isBanned':true               
                 }
               , function(err, userCreated) {
                     if(err) {
                         throw err;
                     }
                     
-                    userCreated.ban(function (err) {
-                      if(err) {
-                            throw err;
-                        }
+                    userCreated.unban(function () {
+                    });
+            });
+
+
+
+            MWC.on('users:unban', function(u) {
+                user = u;
+                done();
+            });
+        });
+        it('unban test event', function() {            
+            user.isBanned.should.be.false;
+        });
+
+        after(function(done) {
+            user.remove(done);
+        });
+    });
+
+    describe('Testing users:ban (with email)event', function() {
+        var user;
+        before(function(done) {
+            MWC.model.User.create({
+                'email': 'hzy27@dddf.sg'                
+                }
+              , function(err, userCreated) {
+                    if(err) {
+                        throw err;
+                    }
+                    
+                    MWC.model.User.ban('hzy27@dddf.sg',function(){
                     });
             });
 
@@ -353,7 +393,6 @@ describe('Kernel events emitter testing', function() {
 
             MWC.on('users:ban', function(u) {
                 user = u;
-                console.log(u);
                 done();
             });
         });
@@ -364,7 +403,7 @@ describe('Kernel events emitter testing', function() {
         after(function(done) {
             user.remove(done);
         });
-    });*/
+    });
 
 });
 
