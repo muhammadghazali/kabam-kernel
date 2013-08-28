@@ -10,3 +10,4 @@ services:
 
 notifications:
   email: false
+  hipchat: b83791c5d4b712de736d8c1e9f7fb8@271266
