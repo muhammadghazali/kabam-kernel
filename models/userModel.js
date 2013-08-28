@@ -425,7 +425,7 @@ exports.init = function (mwc) {
   UserSchema.methods.ban = function(callback){
     this.isBanned = true;
     mwc.emit('users:ban',this);
-    this.save(cb);
+    this.save(callback);
   };
 
   /**
@@ -438,7 +438,7 @@ exports.init = function (mwc) {
   UserSchema.methods.unban = function(callback){
     this.isBanned = false;
     mwc.emit('users:unban',this);
-    this.save(cb);
+    this.save(callback);
   };
 
   /**
