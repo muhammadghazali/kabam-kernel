@@ -24,6 +24,8 @@
     "redis": "*",
     "connect-redis": "*",
     "connect-flash": "*",
+    "socket.io":"*",
+    "passport.socketio":"*",
     "passport": "*",
     "passport-local": "*",
     "passport-hash": "*",
