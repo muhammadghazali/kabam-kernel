@@ -405,5 +405,9 @@ describe('Kernel events emitter testing', function() {
         });
     });
 
+  after(function(done){
+    MWC.stop();
+    done();
+  });
 });
 
