@@ -575,35 +575,38 @@ function KabamKernel(config) {
 
     //initialize expressJS application
     thisMWC.app = appManager(thisMWC, _extendAppFunctions, _additionalStrategies, _extendMiddlewareFunctions, _extendRoutesFunctions);
+    if (thisMWC.config.io && howExactly !== 'app') {
+      return thisMWC;
+    } else {
+      if (howExactly) {
+        if (howExactly === 'app') {
+          thisMWC.emit('started', { 'type': 'app' });
+          return thisMWC;
+        }
+        if (typeof howExactly === 'number' && howExactly > 0) {
+          thisMWC.app.listen(howExactly, function () {
+            thisMWC.emit('started', {'port': howExactly, 'type': 'expressHttp'});
+            console.log(('KabamKernel started on ' + howExactly + ' port').blue);
+          });
+          return thisMWC;
+        }
+        if (typeof howExactly === 'object' && typeof howExactly.createServer === 'function') {
+          thisMWC.emit('started', {'type': 'bindedToHttp'});
+          if (options) {
+            return howExactly.createServer(options, thisMWC.app);//do not forget to set this https for listening.
+          } else {
+            return howExactly.createServer(thisMWC.app);//do not forget to set this https for listening.
+          }
 
-    if (howExactly) {
-      if (howExactly === 'app') {
-        thisMWC.emit('started',{ 'type': 'app' });
-        return thisMWC;
-      }
-      if (typeof howExactly === 'number' && howExactly > 0) {
-        thisMWC.app.listen(howExactly, function(){
-          thisMWC.emit('started',{'port':howExactly, 'type': 'expressHttp'});
-          console.log(('KabamKernel started on '+howExactly+' port').blue);
+        }
+        throw new Error('Function MWC.listen(httpOrHttpsOrPort) accepts objects of null, "app", http, https or port\'s number as argument!');
+      } else {
+        thisMWC.app.listen(thisMWC.app.get('port'), function () {
+          thisMWC.emit('started', {'port': thisMWC.app.get('port'), 'type': 'expressHttp'});
+          console.log(('KabamKernel started on ' + thisMWC.app.get('port') + ' port').blue);
         });
         return thisMWC;
       }
-      if (typeof howExactly  === 'object' && typeof howExactly.createServer === 'function') {
-        thisMWC.emit('started',{'type': 'bindedToHttp'});
-        if(options){
-          return howExactly.createServer(options,thisMWC.app);//do not forget to set this https for listening.
-        } else {
-          return howExactly.createServer(thisMWC.app);//do not forget to set this https for listening.
-        }
-
-      }
-      throw new Error('Function MWC.listen(httpOrHttpsOrPort) accepts objects of null, "app", http, https or port\'s number as argument!');
-    } else {
-      thisMWC.app.listen(thisMWC.app.get('port'), function(){
-        thisMWC.emit('started',{'port': thisMWC.app.get('port'), 'type': 'expressHttp'});
-        console.log(('KabamKernel started on '+thisMWC.app.get('port')+' port').blue);
-      });
-      return thisMWC;
     }
   };
   /**
