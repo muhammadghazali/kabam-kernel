@@ -505,14 +505,6 @@ function KabamKernel(config) {
    * makes kabamKernel emit event of `started` with value `{'type':'expressHttp', 'port':3001}`,
    * where 3001 is port number desired, and returns kabamKernel
    *
-   * *http instance* - bind expressJS application to this http server,
-   * makes kabamKernel emit event of `started` with value `{'type':'bindedToHttp'}`,
-   * returns this server object with application bound
-   *
-   * *https instance* - bind expressJS application to this https server,
-   * makes kabamKernel emit event of `started` with value `{'type':'bindedToHttp'}`,
-   * returns this server object with application bound
-   *
    * *string of 'app'* - start appliation as standalone object,
    * for background workers and console scripts,
    * makes kabamKernel emit event of `started` with value `{'type':'app'}`,
@@ -575,39 +567,26 @@ function KabamKernel(config) {
 
     //initialize expressJS application
     thisMWC.app = appManager(thisMWC, _extendAppFunctions, _additionalStrategies, _extendMiddlewareFunctions, _extendRoutesFunctions);
-    if (thisMWC.config.io && howExactly !== 'app') {
-      return thisMWC;
-    } else {
       if (howExactly) {
         if (howExactly === 'app') {
           thisMWC.emit('started', { 'type': 'app' });
           return thisMWC;
         }
         if (typeof howExactly === 'number' && howExactly > 0) {
-          thisMWC.app.listen(howExactly, function () {
+          thisMWC.httpServer.listen(howExactly, function () {
             thisMWC.emit('started', {'port': howExactly, 'type': 'expressHttp'});
             console.log(('KabamKernel started on ' + howExactly + ' port').blue);
           });
           return thisMWC;
         }
-        if (typeof howExactly === 'object' && typeof howExactly.createServer === 'function') {
-          thisMWC.emit('started', {'type': 'bindedToHttp'});
-          if (options) {
-            return howExactly.createServer(options, thisMWC.app);//do not forget to set this https for listening.
-          } else {
-            return howExactly.createServer(thisMWC.app);//do not forget to set this https for listening.
-          }
-
-        }
-        throw new Error('Function MWC.listen(httpOrHttpsOrPort) accepts objects of null, "app", http, https or port\'s number as argument!');
+        throw new Error('Function MWC.listen(httpOrHttpsOrPort) accepts objects of null, "app" or port\'s number as argument!');
       } else {
-        thisMWC.app.listen(thisMWC.app.get('port'), function () {
+        thisMWC.httpServer.listen(thisMWC.app.get('port'), function () {
           thisMWC.emit('started', {'port': thisMWC.app.get('port'), 'type': 'expressHttp'});
           console.log(('KabamKernel started on ' + thisMWC.app.get('port') + ' port').blue);
         });
         return thisMWC;
       }
-    }
   };
   /**
    * @ngdoc function
