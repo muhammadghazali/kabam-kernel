@@ -54,7 +54,7 @@ exports.init = function (mwc) {
      * @description
      * Primary email of user, the one he/she used for registration. Unique.
      */
-    email: {type: String, required: true, unique: true, match: /^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/},
+    email: {type: String,trim: true, index: true, required: true, unique: true, match: /^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/},
     /**
      * @ngdoc value
      * @methodOf User
@@ -62,7 +62,7 @@ exports.init = function (mwc) {
      * @description
      * Primary username of user, the one he/she used for registration. Unique.
      */
-    username: {type: String, unique: true, match: /^[a-zA-Z0-9_]+$/, sparse: true},
+    username: {type: String,trim: true, index: true, unique: true, match: /^[a-zA-Z0-9_]+$/, sparse: true},
     //sparse - it means it be unique, if not null  http://stackoverflow.com/questions/7955040/mongodb-mongoose-unique-if-not-null
     salt: String,//string to hash password
     password: String,//hashed password
@@ -74,7 +74,7 @@ exports.init = function (mwc) {
      * @description
      * Unique apiKey of user,
      */
-    apiKey: {type: String, required: true, unique: true, default: rack, match: /^[a-zA-Z0-9_]+$/ }, //for invalidating sessions by user request, for api interactions...
+    apiKey: {type: String, required: true, index: true, unique: true, default: rack, match: /^[a-zA-Z0-9_]+$/ }, //for invalidating sessions by user request, for api interactions...
     apiKeyCreatedAt: Date,
 
     /**
@@ -122,7 +122,7 @@ exports.init = function (mwc) {
      * @description
      * Firts name of user
      */
-    firstName: String,
+    firstName: {type : String, trim: true},
     /**
      * @ngdoc value
      * @methodOf User
@@ -130,7 +130,7 @@ exports.init = function (mwc) {
      * @description
      * Last name of user
      */
-    lastName: String,
+    lastName: {type : String ,trim: true},
     /**
      * @ngdoc value
      * @methodOf User
@@ -138,7 +138,7 @@ exports.init = function (mwc) {
      * @description
      * Skype id of user
      */
-    skype: String,
+    skype: {type : String, trim: true},
 
     /**
      * @ngdoc value
@@ -169,7 +169,7 @@ exports.init = function (mwc) {
      * allows user to sign in using oAuth providers if he has github id = 111 pr twitter id = 111
      * @see User.setKeychain
      */
-    keychain: {}, // i'm loving mongoose - http://mongoosejs.com/docs/schematypes.html - see mixed
+    keychain: {type: Object, index: true, unique: true, sparse: true}, // i'm loving mongoose - http://mongoosejs.com/docs/schematypes.html - see mixed
 
     /**
      * @ngdoc value
@@ -196,9 +196,6 @@ exports.init = function (mwc) {
   );
 
   UserSchema.index({
-    email: 1,
-    username: 1,
-    apiKey: 1,
     keychain: 1,
     roles: 1
   });
@@ -758,8 +755,14 @@ exports.init = function (mwc) {
     if (typeof this.username === 'undefined' && this.profileComplete === false) {
       this.username = username;
       this.profileComplete = true;
-      mwc.emit('users:completeProfile', this);
-      this.setPassword(password, callback);
+      this.setPassword(password, function(err){
+        if(err){
+          callback('Unable to complete profile, username '+username+' is occupied!');
+        } else {
+          mwc.emit('users:completeProfile', this);
+          callback(null);
+        }
+      });
     } else {
       callback(new Error('Account is completed!'));
     }
