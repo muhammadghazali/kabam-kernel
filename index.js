@@ -512,7 +512,6 @@ function KabamKernel(config) {
    *
    * It emits events of "started"
    * @param {object} howExactly - config object, see parameters in description
-   * @param {object} options config object for https server [http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener](http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener)
    *
    * @example
    * ```javascript
@@ -544,7 +543,7 @@ function KabamKernel(config) {
    *
    * ```
    */
-  this.start = function (howExactly, options) {
+  this.start = function (howExactly) {
     prepared = true;
     //injecting redis
     thisMWC.redisClient = redisManager.create(thisMWC.config.redis);
@@ -600,25 +599,30 @@ function KabamKernel(config) {
    *
    * - null - bind expressJS application of worker process to default port (process.env.PORT) or 3000 port
    * - number - bind expressJS application of worker process to this port
-   * - http instance - bind expressJS application  of worker process to this server
-   * - https instance - bind expressJS application of worker process to this server
    * - string of 'app' - start expressJS appliation of worker process as standalone object, for background workers and console scripts
    *
-   * @param {object} options config object for https server [http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener](http://nodejs.org/api/https.html#https_https_createserver_options_requestlistener), same as for mwc.start
    * @returns {boolean} isMaster. Returns true, if this process is a master process of cluster, or false if this is slave process
    */
-  this.startCluster = function(howExactly, options){
+  this.startCluster = function(howExactly){
     prepared = true;
 
     var thisMWC=this,
       cluster = require('cluster'),
-      numCPUs = require('os').cpus().length;
+      numCPUs = require('os').cpus().length,
+      maxWorkers;
+
+    if(this.config.limitWorkers && this.config.limitWorkers>0){
+      maxWorkers  = Math.min(numCPUs, this.config.limitWorkers);
+    } else {
+      maxWorkers = numCPUs;
+    }
+
 
     if (cluster.isMaster) {
-      console.log(('Cluster : We have '+numCPUs+' CPU cores present.').bold.green);
+      console.log(('Cluster : We have '+numCPUs+' CPU cores present. We can use '+maxWorkers+' of them.').bold.green);
       console.log(('Cluster : Master PID#'+process.pid+ ' is online').green);
       // Fork workers.
-      for (var i = 0; i < numCPUs; i++) {
+      for (var i = 0; i < maxWorkers; i++) {
         var worker = cluster.fork();
         console.log(('Cluster : Spawning worker with PID#'+worker.process.pid).green);
       }
@@ -636,7 +640,7 @@ function KabamKernel(config) {
       thisMWC.start('app'); // the master process is ran as background application and do not listens to port
       return true;
     } else {
-      thisMWC.start(howExactly, options);
+      thisMWC.start(howExactly);
       return false;
     }
   }
@@ -729,22 +733,18 @@ KabamKernel.prototype.createRedisClient = function () {
  * //minimal config object example
  *
  * var config = {
- *   "hostUrl":"http://example.org/",
-  *   //hostname of server, mandatory field, used to create redirects and OAUTH domains
- *
- *   "mongoUrl":"mongodb://username:password@mongoServer:27017/databaseName",
- *   // valid mongoUrl
- *
- *   "secret":"LongAndHardSecretStringToPreventSessionHiJaskIsAMandatoryParameter",
- *
- * //"redis": "redis://prefix:authPassword@redisServer:6379",
- * //url to redis server, can be ommited
+ *   "hostUrl":"http://example.org/", //host url, can be quessed from enviroment
+ *   "mongoUrl":"mongodb://username:password@mongoServer:27017/databaseName", *   // valid mongoUrl, can be quessed
+ *   "secret":"LongAndHardSecretStringToPreventSessionHiJask", // can be quessed, but we recommend to set it
+ * //"redis": "redis://prefix:authPassword@redisServer:6379",  //url to redis server, can be ommited
  *
  * //"redis": {"host":"redisServer", "port":6379,"auth":"authPassword"},
  * //redis server parameters in different notation, can be ommited
  *
  *   "redis": {"host":"localhost", "port":6379,"auth":""}, //default redis server values
  *   "disableCsrf" : false // disable csrf protection for application
+ *   //"io":{'loglevel':1 }, //uncomment t his field to enable socket.io
+ *   //'limitWorkers': 2, //uncomment this string to set the max worker processes number the cluster spawn
  * };
  *
  * //minimal runnable example
