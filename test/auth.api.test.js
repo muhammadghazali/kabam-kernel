@@ -115,6 +115,53 @@ describe('auth api testing', function() {
             user.remove(done);
         });
     });
+    describe('Testing /auth/confirm/:apiKey route', function() {
+        var response,
+        body,
+        user
+        before(function(done) {
+            request({
+                'url': 'http://localhost:3011/auth/signup',
+                'method': 'POST',
+                'json': {
+                    "username": "usernameToUseForNewUser",
+                    "email": "emailForNewUser@example.org",
+                    "password": "myLongAndHardPassword"
+                }
+            },
+          function(err, r, b) {
+              if(err) {
+                  throw err;
+              }
+              kabam.model.User.findOneByLoginOrEmail('emailForNewUser@example.org', function(err, userFound) {
+                  if(err) {
+                      throw err;
+                  }
+                  user = userFound;
+                  request({
+                      'url': 'http://localhost:3011/auth/confirm/' + user.apiKey,
+                      'method': 'GET'
+                  },
+                  function(err, r1, b1) {
+                      if(err) {
+                          throw err;
+                      }
+                      response = r1;
+                      body = b1; console.log(b1);
+                      done();
+                  });
+              });
+
+          });
+        });
+
+        it('check proper response for it', function() {
+            response.statusCode.should.be.equal(201);
+        });
+        after(function(done) {
+            user.remove(done);
+        });
+    });
     after(function(done) {
         kabam.stop();
         done();
