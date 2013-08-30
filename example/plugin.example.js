@@ -208,10 +208,49 @@ exports.strategy = {
   }
 };
 
-//the most hard to understand function
-//because middleware conception is tricky and it do need the core object, for example,
-// in this way or maybe in some other way. But it do need the core!!!
-//for simplicity of code of plugin all middlewares are setted to all enviroments and are mounted to path /
+
+
+/**
+ * @ngdoc function
+ * @name Plugin.middleware
+ * @type {function}
+ * @description
+ * Function, that will be supplied as argument to mwc.extendMiddlware function
+ * the most hard to understand function
+ * because middleware conception is tricky and it do need the core object, for example,
+ * in this way or maybe in some other way. But it do need the core!!!
+ * for simplicity of code of plugin all middlewares are setted to all enviroments and are mounted to path /
+ * @example
+ * ```javascript
+ * exports.middleware = [
+ *   function (mwc) {
+ *     return function (request, response, next) {
+ *       request.model.Cats.count({name: 'Grumpy'}, function (err, numberOfCats) {
+ *         if (numberOfCats > core.parameterOne) {
+ *           request.getSum = core.getSum; //DI of core methods or values
+ *           next();
+ *        } else {
+ *           response.send(500, 'There is not enough cats called "Grumpy" to run this application!');
+ *         }
+ *       });
+ *     };
+ *   },
+ *   function (mwc) {
+ *     return function (request, response, next) {
+ *       request.model.Dogs.count({name: 'Strelka'}, function (err, numberOfDogs) {
+ *         if (numberOfDogs > core.parameterOne) {
+ *           request.getSum = core.getSum; //DI of core methods or values
+ *           next();
+ *         } else {
+ *           response.send(500, 'There is not enough Dogs called "Strelka" to run this application!');
+ *         }
+ *       });
+ *     };
+ *   }
+ * ];
+ * ```
+ */
+
 exports.middleware = [
   function (mwc) {
     return function (request, response, next) {
