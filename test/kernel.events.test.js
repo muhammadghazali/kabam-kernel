@@ -4,7 +4,7 @@ var should = require('should'),
   config = require('./../example/config.json').development,
   request = require('request'),
   port = Math.floor(2000 + 1000 * Math.random());
-
+//*
 describe('Kernel events emitter testing', function () {
 
   var MWC;
@@ -100,11 +100,11 @@ describe('Kernel events emitter testing', function () {
           if (err1) {
             throw err1;
           }
+          user = userCreated;
         });
       });
 
       MWC.on('users:completeProfile', function (u) {
-        user = u;
         done();
       });
     });
@@ -402,4 +402,4 @@ describe('Kernel events emitter testing', function () {
     done();
   });
 });
-
+//*/
