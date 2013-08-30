@@ -52,14 +52,69 @@ describe('auth api testing', function() {
         it('check response email', function() {
             body.email.should.be.equal('emailForNewUser@example.org');
         });
-        it('check proper response for it', function () {
+        it('check proper response for it', function() {
             response.statusCode.should.be.equal(201);
-          });
+        });
         after(function(done) {
             user.remove(done);
         });
     });
+    describe('Testing /auth/login route', function() {
+        var response,
+        body,
+        user
+        before(function(done) {
+            request({
+                'url': 'http://localhost:3011/auth/signup',
+                'method': 'POST',
+                'json': {
+                    "username": "usernameToUseForNewUser",
+                    "email": "emailForNewUser@example.org",
+                    "password": "myLongAndHardPassword"
+                }
+            },
+          function(err, r, b) {
+              if(err) {
+                  throw err;
+              }
+              kabam.model.User.findOneByLoginOrEmail('emailForNewUser@example.org', function(err, userFound) {
+                  if(err) {
+                      throw err;
+                  }
+                  user = userFound;
+                  request({
+                      'url': 'http://localhost:3011/auth/login',
+                      'method': 'POST',
+                      'json': {
+                            "username": "usernameToUseForNewUser",
+                            "password": "myLongAndHardPassword"
+                        }
+                  },
+                  function(err, r1, b1) {
+                      if(err) {
+                          throw err;
+                      }
+                      response = r1;
+                      body = b1;
+                      done();
+                  });
+              });
 
+          });
+        });
+        it('check response username', function() {
+            body.username.should.be.equal('usernameToUseForNewUser');
+        });
+        it('check response email', function() {
+            body.email.should.be.equal('emailForNewUser@example.org');
+        });
+        it('check proper response for it', function() {
+            response.statusCode.should.be.equal(200);
+        });
+        after(function(done) {
+            user.remove(done);
+        });
+    });
     after(function(done) {
         kabam.stop();
         done();
