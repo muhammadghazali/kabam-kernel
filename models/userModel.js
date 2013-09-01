@@ -443,7 +443,7 @@ exports.init = function (mwc) {
    * @name User.export
    * @description
    * Returns the current user object without sensitive data
-   * - apiKey, salt, passwords, private email.
+   * - apiKey, salt, passwords.
    * For now it returns object with
    *   `username`, `lang`, `root`, `isBanned`,
    *   `roles`, `skype`, `lastName`, 'firstName'
@@ -454,6 +454,7 @@ exports.init = function (mwc) {
   UserSchema.methods.export = function(){
     var exportableProperties = [
       'username',
+      'email',
       'gravatar',
       'lang',
       'root',
@@ -461,7 +462,8 @@ exports.init = function (mwc) {
       'roles',
       'skype',
       'lastName',
-      'firstName'
+      'firstName',
+      'profileComplete'
     ];
     var ret = {};
     for(var x in this){
