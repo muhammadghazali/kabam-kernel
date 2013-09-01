@@ -196,6 +196,9 @@ exports.init = function (mwc) {
   );
 
   UserSchema.index({
+    username: 1,
+    email: 1,
+    apiKey: 1,
     keychain: 1,
     roles: 1
   });
