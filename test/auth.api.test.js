@@ -9,16 +9,24 @@ describe('auth api testing', function() {
 
     var kabam;
     before(function(done) {
-        kabam = KabamKernel(config);
+        
+         kabam = KabamKernel({
+          'hostUrl': 'http://localhost:3011',
+          'mongoUrl': 'mongodb://localhost/mwc_dev',
+          'disableCsrf': true // NEVER DO IT!
+        });
 
+        kabam.on('started', function (evnt) {
+          done();
+        });
+       // kabam.usePlugin(require('./../index.js'));
         kabam.start(3011);
-        setTimeout(done, 1000);
     });
 
     describe('Testing /auth/signup route', function() {
         var response,
         body,
-        user
+        user;
         before(function(done) {
             request({
                 'url': 'http://localhost:3011/auth/signup',
@@ -62,7 +70,7 @@ describe('auth api testing', function() {
     describe('Testing /auth/login route', function() {
         var response,
         body,
-        user
+        user;
         before(function(done) {
             request({
                 'url': 'http://localhost:3011/auth/signup',
@@ -115,10 +123,53 @@ describe('auth api testing', function() {
             user.remove(done);
         });
     });
+    describe('Testing /auth/completeProfile', function () {
+    var user;
+    before(function (done) {
+      kabam.model.User.create({
+        'email': 'emailForNewUser@example.org',
+        'profileComplete': false
+      }, function (err, userCreated) {
+        if (err) {
+          throw err;
+        }
+        user= userCreated;
+        request({
+                      'url': 'http://localhost:3011/auth/completeProfile?mwckey=' + userCreated.apiKey,
+                      'method': 'POST',
+                      'json': {
+                            "username": "usernameToUseForNewUser",
+                            "password": "myLongAndHardPassword"
+                        }
+                  },
+                  function(err, r1, b1) {
+                      if(err) {
+                          throw err;
+                      }
+                      kabam.model.User.findOneByLoginOrEmail('emailForNewUser@example.org', function(err, userFound) {
+                          if(err) {
+                              throw err;
+                          }
+                          user = userFound;
+                          done();
+                      });
+                  });
+      });
+    });
+    it('check username', function () {
+      user.username.should.be.equal('usernameToUseForNewUser');
+    });
+    it('check profilecomplete', function () {
+      user.profileComplete.should.be.true;
+    });
+    after(function (done) {
+      user.remove(done);
+    });
+  });
     describe('Testing /auth/confirm/:apiKey route', function() {
         var response,
-        body,
-        user
+        body,data,
+        user;
         before(function(done) {
             request({
                 'url': 'http://localhost:3011/auth/signup',
@@ -147,16 +198,17 @@ describe('auth api testing', function() {
                           throw err;
                       }
                       response = r1;
-                      body = b1; console.log(b1);
+                      body = b1;
                       done();
                   });
+                  
               });
 
           });
         });
 
-        it('check proper response for it', function() {
-            response.statusCode.should.be.equal(201);
+        it('check redirect path', function () {
+          response.socket._httpMessage.path.should.equal('/')
         });
         after(function(done) {
             user.remove(done);
