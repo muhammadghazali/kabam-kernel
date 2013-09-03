@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "async": "*",
-    "express": "*",
+    "express": ">=3.3.8",
     "redis": "*",
     "connect-redis": "*",
     "connect-flash": "*",
