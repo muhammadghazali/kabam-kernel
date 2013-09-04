@@ -466,7 +466,8 @@ exports.init = function (mwc) {
       'skype',
       'lastName',
       'firstName',
-      'profileComplete'
+      'profileComplete',
+      'isOnline'
     ];
     var ret = {};
     for(var x in this){
