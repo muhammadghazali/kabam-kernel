@@ -449,7 +449,7 @@ exports.init = function (mwc) {
    * - apiKey, salt, passwords.
    * For now it returns object with
    *   `username`, `lang`, `root`, `isBanned`,
-   *   `roles`, `skype`, `lastName`, 'firstName'
+   *   `roles`, `skype`, `lastName`, 'firstName', `profileComplete`, `isOnline`
    *
    * @return {object} - object of user profile with stripped sensitive
    * data.
