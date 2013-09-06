@@ -38,7 +38,8 @@ function KabamKernel(config) {
     _additionalStrategies = [],
     prepared = false,
     _extendMiddlewareFunctions = [],
-    _extendRoutesFunctions = [];
+    _extendRoutesFunctions = [],
+    _catchAllFunction;
 
   var thisMWC = this;//http://www.crockford.com/javascript/private.html
 
@@ -409,6 +410,31 @@ function KabamKernel(config) {
 
   /**
    * @ngdoc function
+   * @name kabamKernel.catchAll
+   * @description
+   * Provides ability to add a "catch all" callback function that will be called only if no
+   * middleware returned a response nor any route have been matched.
+   * @param {function} catchAllFunction
+   * @example
+   * ```javascript
+   *
+   *     kernel.catchAll(function(kernel){
+   *       return function(req, res){
+   *         res.send(404);
+   *       }
+   *     });
+   * ```
+   */
+  this.catchAll = function(catchAllFunction){
+    if(prepared)
+      throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+    if(typeof catchAllFunction !== 'function')
+      throw new Error('Wrong argument for KabamKernel.catchAll(function(kernel){...});');
+    _catchAllFunction = catchAllFunction;
+  };
+
+  /**
+   * @ngdoc function
    * @name kabamKernel.usePlugin
    * @description
    * Loads plugin from object or npm module
@@ -565,7 +591,7 @@ function KabamKernel(config) {
     });
 
     //initialize expressJS application
-    thisMWC.app = appManager(thisMWC, _extendAppFunctions, _additionalStrategies, _extendMiddlewareFunctions, _extendRoutesFunctions);
+    thisMWC.app = appManager(thisMWC, _extendAppFunctions, _additionalStrategies, _extendMiddlewareFunctions, _extendRoutesFunctions, _catchAllFunction);
       if (howExactly) {
         if (howExactly === 'app') {
           thisMWC.emit('started', { 'type': 'app' });
