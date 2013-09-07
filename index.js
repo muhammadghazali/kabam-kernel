@@ -414,7 +414,7 @@ function KabamKernel(config) {
    * @description
    * Provides ability to add a "catch all" callback function that will be called only if no
    * middleware returned a response nor any route have been matched.
-   * @param {function} catchAllFunction
+   * @param {function} catchAllFunction callback function
    * @example
    * ```javascript
    *
@@ -922,5 +922,3 @@ module.exports = exports = KabamKernel.create;
  * kabamKernel inherits all methods, including this, from nodejs event emitter.
  * See [official nodejs manual](http://nodejs.org/api/events.html#events_emitter_emit_event_arg1_arg2)
  */
-
-
