@@ -1066,9 +1066,9 @@ exports.init = function (mwc) {
       function(userFound,cb){
         Message.create({
           'to': userFound._id,
-//          'toProfile': userFound.export(),
+          'toProfile': userFound._id,
           'from': thisUser._id,
-//          'fromProfile': thisUser.export(),
+          'fromProfile': thisUser._id,
           'message': message
         },function(err,messageCreated){
           if(err){
@@ -1121,9 +1121,9 @@ exports.init = function (mwc) {
       function(userFound,cb){
         Message.create({
           'from': userFound._id,
-//          'fromProfile': userFound.export(),
+          'fromProfile': userFound._id,
           'to': thisUser._id,
-//          'toProfile': thisUser.export(),
+          'toProfile': thisUser._id,
           'message': message
         },function(err,messageCreated){
           if(err){
