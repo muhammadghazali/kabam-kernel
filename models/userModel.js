@@ -190,8 +190,8 @@ exports.init = function (mwc) {
     lastSeenOnline : Date
   },
   {
-    toObject: { virtuals: true },
-    toJSON: { virtuals: true }
+    toObject: { getters: true }, //http://mongoosejs.com/docs/api.html#document_Document-toObject
+    toJSON: { getters: true }
   }
   );
 
