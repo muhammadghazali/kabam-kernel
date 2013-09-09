@@ -1209,12 +1209,226 @@ exports.init = function (mwc) {
       ],callback);
   };
 
+
+
+  /*
+      GROUPS
+   */
+
+  var GroupsSchema = new mongoose.Schema({
+    'name': {
+      type: String,
+      trim: true,
+      index: true
+    },
+    'uri': {
+      type: String,
+      trim: true,
+      index: true
+    },
+    //0 - world, 1 - school, 2 - course/association, 3 - group
+    'tier': {type: Number, min: 0, max: 3},
+
+    'school_id': mongoose.Schema.Types.ObjectId,
+    'course_id': mongoose.Schema.Types.ObjectId,
+
+    'descriptionPublic': String,
+    'descriptionForMembers': String,
+
+    'members': [
+      {
+        'user': { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        'role': String
+      }
+    ],
+    'isOpenToAll': {type: Boolean, default: false},
+    'isHidden': {type: Boolean, default: false}
+  });
+
+  GroupsSchema.index({ name: 1, uri: 1, school_id: 1, course_id: 1 });
+
+  GroupsSchema.statics.findGroup = function (schoolUri, courseUri, groupUri, callback) {
+    var groups = this;
+
+    if (schoolUri && !courseUri && !groupUri && typeof callback === 'function') {
+      //we try to find school by school uri
+      groups
+        .findOne({'uri': schoolUri, 'tier': 1})
+        .populate('members.user')
+        .exec(function (err, schoolFound) {
+          if (err) {
+            callback(err);
+          } else {
+            if (schoolFound) {
+              schoolFound.parentUri = null;
+              schoolFound.childrenUri = '/h/' + schoolFound.uri;
+              callback(null, schoolFound);
+            } else {
+              callback(null, null);
+            }
+          }
+        });
+    }
+
+    if (schoolUri && courseUri && !groupUri && typeof callback === 'function') {
+      async.waterfall(
+        [
+          function (cb) {
+            groups.findOne({'uri': schoolUri, 'tier': 1})
+              .populate('members.user')
+              .exec(function (err, schoolFound) {
+                cb(err, schoolFound);
+              });
+          },
+          function (school, cb) {
+            if (school && school._id) {//school found
+              groups.findOne({'uri': courseUri, 'tier': 2, 'school_id': school._id})
+                .populate('members.user')
+                .exec(function (err, courseFound) {
+                  cb(err, school, courseFound);
+                });
+            } else {
+              cb(null, null, null)
+            }
+
+          },
+          function (school, course, cb) {
+            if (course) {
+              course.school = school;
+              course.parentUri = '/h/' + school.uri;
+              course.childrenUri = '/h/' + school.uri + '/' + course.uri;
+              cb(null, course);
+            } else {
+              cb(null, null);
+            }
+          }
+        ], callback);
+    }
+
+    if (schoolUri && courseUri && groupUri && typeof callback === 'function') {
+      async.waterfall(
+        [
+          function (cb) {
+            groups.findOne({'uri': schoolUri, 'tier': 1})
+              .populate('members.user')
+              .exec(function (err, schoolFound) {
+                cb(err, schoolFound);
+              });
+          },
+          function (school, cb) {
+            if (school && school._id) {//school found
+              groups.findOne({'uri': courseUri, 'tier': 2, 'school_id': school._id})
+                .populate('members.user')
+                .exec(function (err, courseFound) {
+                  cb(err, school, courseFound);
+                });
+            } else {
+              cb(null, null, null)
+            }
+          },
+          function (school, course, cb) {
+            if (school && course && school._id && course._id) {
+              groups.findOne({'uri': groupUri, 'tier': 3, 'school_id': school._id, 'course_id': course._id})
+                .populate('members.user')
+                .exec(function (err, groupFound) {
+                  cb(err, school, course, groupFound);
+                });
+            } else {
+              cb(null, null, null, null);
+            }
+          },
+          function (school, course, group, cb) {
+            if (group) {
+              group.school = school;
+              group.course = course;
+              group.parentUri = '/h/' + school.uri + '/' + course.uri;
+              group.childrenUri = null;
+              cb(null, group);
+            } else {
+              cb(null, null);
+            }
+          }
+        ], callback);
+    }
+  };
+
+  GroupsSchema.methods.invite = function (user, role, callback) {
+    var userIsNotMember = true;
+    this.members.map(function (member) {
+      if (member.username == user.username) {
+        userIsNotMember = false;
+      }
+    });
+    if (userIsNotMember) {
+      this.members.push({
+        'user': user._id,
+        'role': role
+      });
+      this.save(callback);
+    } else {
+      callback(new Error('User is already in this group!'));
+    }
+  };
+
+  GroupsSchema.methods.ban = function (user, callback) {
+    for (var i = 0; i < this.members.length; i++) {
+      if (this.members[i].username === user.username) {
+        this.members.splice(i, 1);
+        break;
+      }
+    }
+    this.save(callback);
+  };
+
+  GroupsSchema.methods.inviteAdmin = function (usernameOrEmailOrUserObject, callback) {
+    this.invite(usernameOrEmailOrUserObject, 'admin', callback);
+  };
+
+  GroupsSchema.methods.inviteMember = function (usernameOrEmailOrUserObject, callback) {
+    this.invite(usernameOrEmailOrUserObject, 'member', callback);
+  };
+
+  GroupsSchema.methods.getParent = function (callback) {
+    switch (this.tier) {
+      case 2:
+        Groups.findOne({'_id': this.school_id, tier: 1}, callback);
+        break;
+      case 3:
+        Groups.findOne({'_id': this.course_id, tier: 2}, callback);
+        break;
+      default:
+        callback(null, null);
+    }
+  };
+
+  GroupsSchema.methods.getChildren = function (callback) {
+    switch (this.tier) {
+      case 1:
+        Groups.find({'school_id': this._id, tier: 2}, callback);
+        break;
+      case 2:
+        Groups.find({'course_id': this._id, tier: 3}, callback);
+        break;
+      default:
+        callback(null, null);
+    }
+  };
+
+  UserSchema.methods.getGroups=function(callback){};
+  UserSchema.methods.inviteToGroup = function(groupName,role,callback){};
+  UserSchema.methods.banFromGroup = function(groupName,callback){};
+  UserSchema.methods.getRole = function(groupName,callback){};
+  var Groups = mwc.mongoConnection.model('groups', GroupsSchema);
+
   var User = mwc.mongoConnection.model('User', UserSchema);
+
   return {
     'User':User,
     'Users':User,
     'Message':Message,
-    'Messages':Message
+    'Messages':Message,
+    'Group':Groups,
+    'Groups':Groups
   };
 };
 
