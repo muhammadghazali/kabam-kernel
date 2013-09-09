@@ -190,8 +190,8 @@ exports.init = function (mwc) {
     lastSeenOnline : Date
   },
   {
-    toObject: { virtuals: true },
-    toJSON: { virtuals: true }
+    toObject: { getters: true }, //http://mongoosejs.com/docs/api.html#document_Document-toObject
+    toJSON: { getters: true }
   }
   );
 
@@ -1000,29 +1000,9 @@ exports.init = function (mwc) {
   //private messages
   var messageSchema = new mongoose.Schema({
       'to': mongoose.Schema.Types.ObjectId,
-      'toProfile':{
-        'username':String,
-        'gravatar':String,
-        'lang':String,
-        'root':Boolean,
-        'isBanned':Boolean,
-        'roles':[String],
-        'skype':String,
-        'lastName':String,
-        'firstName':String
-      },
+      'toProfile': { type: mongoose.Schema.Types.ObjectId, ref:'User' },
       'from': mongoose.Schema.Types.ObjectId,
-      'fromProfile':{
-        'username':String,
-        'gravatar':String,
-        'lang':String,
-        'root':Boolean,
-        'isBanned':Boolean,
-        'roles':[String],
-        'skype':String,
-        'lastName':String,
-        'firstName':String
-      },
+      'fromProfile': { type: mongoose.Schema.Types.ObjectId, ref:'User' },
       'created_at': { type: Date, default: Date.now },
       'message': {type: String, trim: true } //trim whitespaces - http://mongoosejs.com/docs/api.html#schema_string_SchemaString-trim
   });
@@ -1086,9 +1066,9 @@ exports.init = function (mwc) {
       function(userFound,cb){
         Message.create({
           'to': userFound._id,
-          'toProfile': userFound.export(),
+          'toProfile': userFound._id,
           'from': thisUser._id,
-          'fromProfile': thisUser.export(),
+          'fromProfile': thisUser._id,
           'message': message
         },function(err,messageCreated){
           if(err){
@@ -1141,9 +1121,9 @@ exports.init = function (mwc) {
       function(userFound,cb){
         Message.create({
           'from': userFound._id,
-          'fromProfile': userFound.export(),
+          'fromProfile': userFound._id,
           'to': thisUser._id,
-          'toProfile': thisUser.export(),
+          'toProfile': thisUser._id,
           'message': message
         },function(err,messageCreated){
           if(err){
@@ -1176,6 +1156,8 @@ exports.init = function (mwc) {
   UserSchema.methods.getRecentMessages = function(mesgLimit,mesgOffset,callback){
       Message
         .find({'to': this._id})
+        .populate('fromProfile')
+        .populate('toProfile')
         .skip(mesgOffset)
         .limit(mesgLimit)
         .sort('-created_at')
@@ -1214,6 +1196,8 @@ exports.init = function (mwc) {
                 {'from': thisUser._id, 'to': userFound._id}
               ]
             })
+            .populate('fromProfile')
+            .populate('toProfile')
             .skip(mesgOffset)
             .limit(mesgLimit)
             .sort('-created_at')
