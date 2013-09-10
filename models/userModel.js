@@ -1203,7 +1203,7 @@ exports.init = function (mwc) {
             .populate('toProfile')
             .skip(mesgOffset)
             .limit(mesgLimit)
-            .sort('-created_at')
+            .sort('-createdAt')
             .exec(cb);
         } else {
           cb(new Error('User do not exists!'));
