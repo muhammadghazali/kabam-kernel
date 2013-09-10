@@ -997,43 +997,6 @@ exports.init = function (mwc) {
     return (user && user.root);
   };
 
-  //private messages
-  var messageSchema = new mongoose.Schema({
-      'to': mongoose.Schema.Types.ObjectId,
-      'toProfile': { type: mongoose.Schema.Types.ObjectId, ref:'User' },
-      'from': mongoose.Schema.Types.ObjectId,
-      'fromProfile': { type: mongoose.Schema.Types.ObjectId, ref:'User' },
-      'created_at': { type: Date, default: Date.now },
-      'message': {type: String, trim: true } //trim whitespaces - http://mongoosejs.com/docs/api.html#schema_string_SchemaString-trim
-  });
-
-  messageSchema.index({
-    to: 1,
-    from: 1,
-    created_at: 1
-  });
-//methods for Message schema so it can work with kabam-plugin-rest VVV
-
-  messageSchema.statics.getForUser = function (user, parameters, callback) {
-    if (user && user._id) {
-      user.getRecentMessages(parameters.limit, parameters.offset, callback);
-    } else {
-      callback(null);
-    }
-  };
-  messageSchema.statics.canCreate = function (user) {
-    return (user && user.emailVerified && user.profileComplete && !user.isBanned);
-  };
-  messageSchema.methods.canRead = function (user) {
-    return (user && (user._id === this.to || user._id === this.from));
-  };
-  messageSchema.methods.canWrite = function (user) {
-    return false;
-  };
-//methods for Message schema so it can work with kabam-plugin-rest ^^^
-
-  var Message = mwc.mongoConnection.model('messages', messageSchema);
-
 /**
  * @ngdoc function
  * @name User.sendMessage
@@ -1064,7 +1027,7 @@ exports.init = function (mwc) {
         }
       },
       function(userFound,cb){
-        Message.create({
+        mwc.model.Message.create({
           'to': userFound._id,
           'toProfile': userFound._id,
           'from': thisUser._id,
@@ -1119,7 +1082,7 @@ exports.init = function (mwc) {
         }
       },
       function(userFound,cb){
-        Message.create({
+        mwc.model.Message.create({
           'from': userFound._id,
           'fromProfile': userFound._id,
           'to': thisUser._id,
@@ -1154,7 +1117,7 @@ exports.init = function (mwc) {
  * @param {function} callback -function(err,messages) to be called with message object
  */
   UserSchema.methods.getRecentMessages = function(mesgLimit,mesgOffset,callback){
-      Message
+      mwc.model.Message
         .find({'to': this._id})
         .populate('fromProfile')
         .populate('toProfile')
@@ -1189,7 +1152,7 @@ exports.init = function (mwc) {
       },
       function(userFound,cb){
         if(userFound){
-        Message
+        mwc.model.Message
             .find({
               $or: [
                 {'to': thisUser._id, 'from': userFound._id},
@@ -1425,10 +1388,6 @@ exports.init = function (mwc) {
   return {
     'User':User,
     'Users':User,
-    'Message':Message,
-    'Messages':Message,
-    'Group':Groups,
-    'Groups':Groups
   };
 };
 

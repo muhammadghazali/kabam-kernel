@@ -1,1 +1,3 @@
-//placeholder for group model
+exports.initFunction = function(mwc){
+  return;
+}
