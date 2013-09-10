@@ -1,3 +1,4 @@
+'use strict';
 var async = require('async'),
   crypto = require('crypto'),
   sanitaze = require('validator').sanitize; //used for dealing with xss injections in private messages
@@ -19,10 +20,6 @@ function rack() {
 }
 
 exports.init = function (mwc) {
-  var mongoose = mwc.mongoose;
-
-  var Schema = mongoose.Schema;
-
   /**
    * @ngdoc function
    * @name User
@@ -45,8 +42,9 @@ exports.init = function (mwc) {
    * @description
    * Active record style Mongoose object to manipulate users collection
    */
-
-  var UserSchema = new Schema({
+  var mongoose = mwc.mongoose,
+    Schema = mongoose.Schema,
+    UserSchema = new Schema({
     /**
      * @ngdoc value
      * @methodOf User
@@ -54,7 +52,7 @@ exports.init = function (mwc) {
      * @description
      * Primary email of user, the one he/she used for registration. Unique.
      */
-    email: {type: String,trim: true, index: true, required: true, unique: true, match: /^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/},
+      email: {type: String, trim: true, index: true, required: true, unique: true, match: /^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/},
     /**
      * @ngdoc value
      * @methodOf User
@@ -62,10 +60,10 @@ exports.init = function (mwc) {
      * @description
      * Primary username of user, the one he/she used for registration. Unique.
      */
-    username: {type: String,trim: true, index: true, unique: true, match: /^[a-zA-Z0-9_]+$/, sparse: true},
+      username: {type: String, trim: true, index: true, unique: true, match: /^[a-zA-Z0-9_]+$/, sparse: true},
     //sparse - it means it be unique, if not null  http://stackoverflow.com/questions/7955040/mongodb-mongoose-unique-if-not-null
-    salt: String,//string to hash password
-    password: String,//hashed password
+      salt: String,//string to hash password
+      password: String,//hashed password
 
     /**
      * @ngdoc value
@@ -74,8 +72,8 @@ exports.init = function (mwc) {
      * @description
      * Unique apiKey of user,
      */
-    apiKey: {type: String, required: true, index: true, unique: true, default: rack, match: /^[a-zA-Z0-9_]+$/ }, //for invalidating sessions by user request, for api interactions...
-    apiKeyCreatedAt: Date,
+      apiKey: {type: String, required: true, index: true, unique: true, default: rack, match: /^[a-zA-Z0-9_]+$/ }, //for invalidating sessions by user request, for api interactions...
+      apiKeyCreatedAt: Date,
 
     /**
      * @ngdoc value
@@ -84,7 +82,7 @@ exports.init = function (mwc) {
      * @description
      * Preferred language of user
      */
-    lang: {type: String, default:'en', match:/^[a-z]{2}$/},
+      lang: {type: String, default: 'en', match: /^[a-z]{2}$/},
 
     /**
      * @ngdoc value
@@ -93,7 +91,7 @@ exports.init = function (mwc) {
      * @description
      * Is user root? - boolean
      */
-    root:  {type: Boolean, default:false},
+      root:  {type: Boolean, default : false},
 
     /**
      * @ngdoc value
@@ -102,7 +100,7 @@ exports.init = function (mwc) {
      * @description
      * Is user banned? - boolean
      */
-    isBanned: {type: Boolean, default:false},
+      isBanned: {type: Boolean, default:false},
 
     /**
      * @ngdoc value
@@ -111,9 +109,9 @@ exports.init = function (mwc) {
      * @description
      * Array of user roles/permissions (strings)
      */
-    roles: [
-      {type: String, match: /^[a-zA-Z0-9_]+$/ }
-    ],
+      roles: [
+        {type: String, match: /^[a-zA-Z0-9_]+$/ }
+      ],
 
     /**
      * @ngdoc value
@@ -122,7 +120,7 @@ exports.init = function (mwc) {
      * @description
      * Firts name of user
      */
-    firstName: {type : String, trim: true},
+      firstName: {type : String, trim: true},
     /**
      * @ngdoc value
      * @methodOf User
@@ -130,7 +128,7 @@ exports.init = function (mwc) {
      * @description
      * Last name of user
      */
-    lastName: {type : String ,trim: true},
+      lastName: {type : String ,trim: true},
     /**
      * @ngdoc value
      * @methodOf User
@@ -138,7 +136,7 @@ exports.init = function (mwc) {
      * @description
      * Skype id of user
      */
-    skype: {type : String, trim: true},
+      skype: {type : String, trim: true},
 
     /**
      * @ngdoc value
@@ -147,7 +145,7 @@ exports.init = function (mwc) {
      * @description
      * Is email address verified? - boolean
      */
-    emailVerified: {type: Boolean, default:false},
+      emailVerified: {type: Boolean, default:false},
     /**
      * @ngdoc value
      * @methodOf User
@@ -155,7 +153,7 @@ exports.init = function (mwc) {
      * @description
      * Is profile complete - it means, it have email, username and password set. boolean
      */
-    profileComplete: {type: Boolean, default:false},
+      profileComplete: {type: Boolean, default:false},
 
     /**
      * @ngdoc value
@@ -169,7 +167,7 @@ exports.init = function (mwc) {
      * allows user to sign in using oAuth providers if he has github id = 111 pr twitter id = 111
      * @see User.setKeychain
      */
-    keychain: {type: Object, index: true, unique: true, sparse: true}, // i'm loving mongoose - http://mongoosejs.com/docs/schematypes.html - see mixed
+      keychain: {type: Object, index: true, unique: true, sparse: true}, // i'm loving mongoose - http://mongoosejs.com/docs/schematypes.html - see mixed
 
     /**
      * @ngdoc value
@@ -178,7 +176,7 @@ exports.init = function (mwc) {
      * @description
      * User profile object. it can store anything! - age, postal address, occupation. everything!
      */
-    profile: {},
+      profile: {},
 
     /**
      * @ngdoc value
@@ -187,13 +185,13 @@ exports.init = function (mwc) {
      * @description
      * Timestamp of last http interaction with site - last seen online
      */
-    lastSeenOnline : Date
-  },
-  {
-    toObject: { getters: true, virtuals: true }, //http://mongoosejs.com/docs/api.html#document_Document-toObject
-    toJSON: { getters: true, virtuals: true }
-  }
-  );
+      lastSeenOnline : Date
+    },
+      {
+        toObject: { getters: true, virtuals: true }, //http://mongoosejs.com/docs/api.html#document_Document-toObject
+        toJSON: { getters: true, virtuals: true }
+      }
+      );
 
   UserSchema.index({
     username: 1,
@@ -226,9 +224,9 @@ exports.init = function (mwc) {
    * ```
    */
   UserSchema.methods.getGravatar = function (size, type, rating) {
-    size = size ? size : 300;
-    type = type ? type : 'wavatar';
-    rating = rating ? rating : 'g';
+    size = size || 300;
+    type = type || 'wavatar';
+    rating = rating || 'g';
     return 'https://secure.gravatar.com/avatar/' + md5(this.email.toLowerCase().trim()) + '.jpg?s=' + size + '&d=' + type + '&r=' + rating;
   };
   /**
@@ -249,11 +247,11 @@ exports.init = function (mwc) {
    * @description
    * Returns how much milliseconds ago user was online
    */
-  UserSchema.virtual('lastSeenOnlineAgo').get(function(){
-    if(this.lastSeenOnline){
-      return  ((new Date().getTime() - this.lastSeenOnline.getTime()));
+  UserSchema.virtual('lastSeenOnlineAgo').get(function () {
+    if (this.lastSeenOnline){
+      return ((new Date().getTime() - this.lastSeenOnline.getTime()));
     } else {
-      return 10*365*24*60*60*1000; //month)))
+      return 10 * 365 * 24 * 60 * 60 * 1000; //month)))
     }
   });
   /**
@@ -263,8 +261,8 @@ exports.init = function (mwc) {
    * @description
    * Returns true, of user was online in less than 1 minute
    */
-  UserSchema.virtual('isOnline').get(function(){
-    return  (this.lastSeenOnlineAgo < 60000);
+  UserSchema.virtual('isOnline').get(function () {
+    return (this.lastSeenOnlineAgo < 60000);
   });
   /**
    * @ngdoc function
@@ -306,8 +304,8 @@ exports.init = function (mwc) {
   UserSchema.methods.setPassword = function (newPassword, callback) {
     var salt = sha512(rack());
     this.salt = salt;
-    this.password = sha512('' + salt + newPassword);
-    mwc.emit('users:setPassword',this);
+    this.password = sha512(salt + newPassword);
+    mwc.emit('users:setPassword', this);
     this.save(callback);
     return;
   };
@@ -330,8 +328,8 @@ exports.init = function (mwc) {
   UserSchema.methods.invalidateSession = function (callback) {
     var newApiKey = sha512(rack());
     this.apiKey = newApiKey;
-    this.save(function(err){
-      callback(err,newApiKey);
+    this.save(function (err) {
+      callback(err, newApiKey);
     });
   };
 
@@ -354,7 +352,7 @@ exports.init = function (mwc) {
   UserSchema.methods.grantRole = function (roleName, callback) {
     if (this.roles.indexOf(roleName) === -1) {
       this.roles.push(roleName);
-      mwc.emit('users:grantRole',this);
+      mwc.emit('users:grantRole', this);
       this.save(callback);
     } else {
       callback(null);
@@ -422,9 +420,9 @@ exports.init = function (mwc) {
    * Ban this user
    * @param {function} callback  - function is fired when user is saved
    */
-  UserSchema.methods.ban = function(callback){
+  UserSchema.methods.ban = function (callback) {
     this.isBanned = true;
-    mwc.emit('users:ban',this);
+    mwc.emit('users:ban', this);
     this.save(callback);
   };
 
@@ -435,9 +433,9 @@ exports.init = function (mwc) {
    * Removes ban from this user
    * @param {function} callback  - function is fired when user is saved
    */
-  UserSchema.methods.unban = function(callback){
+  UserSchema.methods.unban = function (callback) {
     this.isBanned = false;
-    mwc.emit('users:unban',this);
+    mwc.emit('users:unban', this);
     this.save(callback);
   };
 
@@ -454,7 +452,7 @@ exports.init = function (mwc) {
    * @return {object} - object of user profile with stripped sensitive
    * data.
    */
-  UserSchema.methods.export = function(){
+  UserSchema.methods.export = function () {
     var exportableProperties = [
       'username',
       'email',
@@ -468,10 +466,12 @@ exports.init = function (mwc) {
       'firstName',
       'profileComplete',
       'isOnline'
-    ];
-    var ret = {};
-    for(var x in this){
-      if(exportableProperties.indexOf(x) !== -1){
+    ],
+      ret = {},
+      x;
+
+    for (x in this){
+      if(exportableProperties.indexOf(x) !== -1) {
         ret[x] = this[x];
       }
     }
@@ -487,7 +487,7 @@ exports.init = function (mwc) {
    */
   UserSchema.statics.ban = function(usernameOrEmail,callback){
     this.findOneByLoginOrEmail(usernameOrEmail,function(err,userFound){
-      if(err){
+      if (err) {
         callback(err);
       } else {
         userFound.ban(callback);
@@ -506,7 +506,7 @@ exports.init = function (mwc) {
 
   UserSchema.statics.unban = function(usernameOrEmail,callback){
     this.findOneByLoginOrEmail(usernameOrEmail,function(err,userFound){
-      if(err){
+      if (err) {
         callback(err);
       } else {
         userFound.unban(callback);
@@ -707,7 +707,7 @@ exports.init = function (mwc) {
             callback(err1);
           } else {
             userCreated.notify('email', {'subject': 'Verify your email account!', 'template': 'signin'});
-            mwc.emit('users:signUp',userCreated);
+            mwc.emit('users:signUp', userCreated);
             callback(null, userCreated);
           }
         });
@@ -758,11 +758,11 @@ exports.init = function (mwc) {
    * @param {function} callback  - function is fired when user is saved
    */
   UserSchema.methods.completeProfile = function (username, password, callback) {
-    if (typeof this.username === 'undefined' && this.profileComplete === false) {
+    if (this.username === undefined && this.profileComplete === false) {
       this.username = username;
       this.profileComplete = true;
-      this.setPassword(password, function(err){
-        if(err){
+      this.setPassword(password, function (err) {
+        if (err) {
           callback('Unable to complete profile, username '+username+' is occupied!');
         } else {
           mwc.emit('users:completeProfile', this);
@@ -815,7 +815,7 @@ exports.init = function (mwc) {
    * ```
    */
   UserSchema.methods.setKeyChain = function (provider, id, callback) {
-    if(!this.keychain){
+    if (!this.keychain) {
       this.keychain = {};
     }
     this.keychain[provider] = id;
@@ -860,8 +860,8 @@ exports.init = function (mwc) {
       needle = {};
 
     needle[key] = id;
-    this.findOne(needle, function(err,userFound){
-      if(err){
+    this.findOne(needle, function (err, userFound) {
+      if (err){
         callback(err);
       } else {
         if(userFound){
@@ -943,12 +943,15 @@ exports.init = function (mwc) {
    * @example
    */
   UserSchema.statics.getForUser = function(user,parameters,callback){
-    if(typeof parameters === "function" && typeof callback === "undefined"){
-      var callback2use = parameters,
-        parameters2use = {};
+    var callback2use,
+      parameters2use;
+
+    if(typeof parameters === 'function' && callback === undefined){
+      callback2use = parameters;
+      parameters2use = {};
     } else {
-      var callback2use = callback,
-        parameters2use = parameters;
+      callback2use = callback;
+      parameters2use = parameters;
     }
 
     if(user && user.root){
@@ -1003,15 +1006,15 @@ exports.init = function (mwc) {
       'toProfile': { type: mongoose.Schema.Types.ObjectId, ref:'User' },
       'from': mongoose.Schema.Types.ObjectId,
       'fromProfile': { type: mongoose.Schema.Types.ObjectId, ref:'User' },
-      'created_at': { type: Date, default: Date.now },
+      'createdAt': { type: Date, default: Date.now },
       'message': {type: String, trim: true } //trim whitespaces - http://mongoosejs.com/docs/api.html#schema_string_SchemaString-trim
-  });
+    });
 
   messageSchema.index({
     to: 1,
     from: 1,
-    created_at: 1
-  });
+    createdAt: 1
+    });
 //methods for Message schema so it can work with kabam-plugin-rest VVV
 
   messageSchema.statics.getForUser = function (user, parameters, callback) {
@@ -1049,8 +1052,8 @@ exports.init = function (mwc) {
  * @param {function} callback -function to be called on message delivery
  */
   UserSchema.methods.sendMessage = function(to,message,callback){
-  var thisUser = this;
-  message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
+    var thisUser = this;
+    message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
     async.waterfall([
       function(cb){
         if(typeof to === 'string'){
@@ -1160,9 +1163,9 @@ exports.init = function (mwc) {
         .populate('toProfile')
         .skip(mesgOffset)
         .limit(mesgLimit)
-        .sort('-created_at')
+        .sort('-createdAt')
         .exec(callback);
-  };
+    };
 /**
  * @ngdoc function
  * @name User.getDialog
@@ -1189,7 +1192,7 @@ exports.init = function (mwc) {
       },
       function(userFound,cb){
         if(userFound){
-        Message
+          Message
             .find({
               $or: [
                 {'to': thisUser._id, 'from': userFound._id},

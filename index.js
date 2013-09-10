@@ -1,3 +1,4 @@
+'use strict';
 var EventEmitter = require('events').EventEmitter,
   url = require('url'),
   util = require('util'),
@@ -15,12 +16,11 @@ var EventEmitter = require('events').EventEmitter,
  * @param {object} config - config object
  */
 function KabamKernel(config) {
-
   EventEmitter.call(this);
-  if (typeof config === 'undefined'){
+  if (config === undefined) {
     config = {};
   }
-  if(typeof config !== 'object'){
+  if (typeof config !== 'object') {
     throw new Error('Config is not an object!');
   }
   if (typeof config === 'object') {
@@ -32,16 +32,15 @@ function KabamKernel(config) {
   this.validateConfig(config);
   this.config = config;
 
-  var _extendCoreFunctions = [],//privileged field
-    _extendAppFunctions = [],
-    _additionalModels = [],
-    _additionalStrategies = [],
+  var extendCoreFunctions = [],//privileged field
+    extendAppFunctions = [],
+    additionalModels = [],
+    additionalStrategies = [],
     prepared = false,
-    _extendMiddlewareFunctions = [],
-    _extendRoutesFunctions = [],
-    _catchAllFunction;
-
-  var thisMWC = this;//http://www.crockford.com/javascript/private.html
+    extendMiddlewareFunctions = [],
+    extendRoutesFunctions = [],
+    catchAllFunction,
+    thisMWC = this;//http://www.crockford.com/javascript/private.html
 
   //privileged functions
   /**
@@ -89,18 +88,18 @@ function KabamKernel(config) {
         namespace = 'shared';
       }
 
-      if (typeof fieldName === 'string' && typeof factoryFunctionOrObject !== 'undefined') {
+      if (typeof fieldName === 'string' && factoryFunctionOrObject !== undefined) {
         if (typeof factoryFunctionOrObject === 'function') {
-          _extendCoreFunctions.push({'field': fieldName, 'factoryFunction': factoryFunctionOrObject, 'namespace': namespace});
+          extendCoreFunctions.push({'field': fieldName, 'factoryFunction': factoryFunctionOrObject, 'namespace': namespace});
         } else {
-          _extendCoreFunctions.push({'field': fieldName, 'factoryFunction': function () {
+          extendCoreFunctions.push({'field': fieldName, 'factoryFunction': function () {
             return factoryFunctionOrObject;
           }, 'namespace': namespace});
         }
-        return this;
       } else {
         throw new Error('KabamKernel.extendCore requires argument of fieldName(string), and value - function(config){} or object!');
       }
+      return this;
     }
   };
 
@@ -136,12 +135,12 @@ function KabamKernel(config) {
         throw new Error('Error extending model, "User(s)" and "Message(s)" are reserved name');
       } else {
         if (typeof modelName === 'string' && typeof modelFunction === 'function') {
-          _additionalModels.push({'name': modelName, 'initFunction': modelFunction});
-          return this;
+          additionalModels.push({'name': modelName, 'initFunction': modelFunction});
         } else {
           throw new Error('KabamKernel.extendModel requires arguments of string of "modelName" and function(core){...}');
         }
       }
+      return this;
     }
   };
 
@@ -197,7 +196,7 @@ function KabamKernel(config) {
       if (typeof strategyObject.routes !== 'function') {
         throw new Error('mwc.extendStrategies requires strategyObject.routes to be a proper function!');
       }
-      _additionalStrategies.push(strategyObject);
+      additionalStrategies.push(strategyObject);
       return this;
     }
   };
@@ -243,8 +242,10 @@ function KabamKernel(config) {
     if (prepared) {
       throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
-      var environmentToUse = null;
-      if (typeof settingsFunction === 'undefined') {
+      var environmentToUse = null,
+        i,
+        j;
+      if (settingsFunction === undefined) {
         settingsFunction = environment;
         environment = null;
       }
@@ -254,7 +255,7 @@ function KabamKernel(config) {
       }
       if (environment instanceof Array) {
         environmentToUse = environment;
-        for (var i = 0; i < environment.length; i++) {
+        for (i = 0; i < environment.length; i = i + 1) {
           if (typeof environment[i] !== 'string') {
             throw new Error('KabamKernel.extendApp requires environment name to be a string!');
           }
@@ -262,14 +263,14 @@ function KabamKernel(config) {
       }
       if (typeof settingsFunction === 'function') {
         if (environmentToUse) {
-          for (var j = 0; j < environmentToUse.length; j++) {
-            _extendAppFunctions.push({
+          for (j = 0; j < environmentToUse.length; j = j + 1) {
+            extendAppFunctions.push({
               'environment': environmentToUse[j],
               'settingsFunction': settingsFunction
             });
           }
         } else {
-          _extendAppFunctions.push({
+          extendAppFunctions.push({
             'settingsFunction': settingsFunction
           });
         }
@@ -316,9 +317,11 @@ function KabamKernel(config) {
     } else {
       var environmentToUse = null,
         pathToUse = '/',
-        settingsFunctionToUse = null;
+        settingsFunctionToUse = null,
+        k,
+        l;
 
-      if (typeof environment === 'function' && typeof path === 'undefined' && typeof settingsFunction === 'undefined') {
+      if (typeof environment === 'function' && path === undefined && settingsFunction === undefined) {
         settingsFunctionToUse = environment;
       }
 
@@ -330,7 +333,7 @@ function KabamKernel(config) {
         }
         if (environment instanceof Array) {
           environmentToUse = environment;
-          for (var k = 0; k < environment.length; k++) {
+          for (k = 0; k < environment.length; k = k + 1) {
             if (typeof environment[k] !== 'string') {
               throw new Error('KabamKernel.extendMiddleware requires environment name to be a string!');
             }
@@ -354,8 +357,8 @@ function KabamKernel(config) {
 
       if (settingsFunctionToUse) {
         if (environmentToUse) {
-          for (var l = 0; l < environmentToUse.length; l++) {
-            _extendMiddlewareFunctions.push({
+          for (l = 0; l < environmentToUse.length; l = l + 1) {
+            extendMiddlewareFunctions.push({
               'environment': environmentToUse[l],
               'path': pathToUse,
               'SettingsFunction': settingsFunctionToUse
@@ -363,7 +366,7 @@ function KabamKernel(config) {
           }
         } else {
           //we set middleware for all environments
-          _extendMiddlewareFunctions.push({
+          extendMiddlewareFunctions.push({
             'path': pathToUse,
             'SettingsFunction': settingsFunctionToUse
           });
@@ -400,11 +403,11 @@ function KabamKernel(config) {
       throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
       if (typeof settingsFunction === 'function') {
-        _extendRoutesFunctions.push(settingsFunction);
-        return this;
+        extendRoutesFunctions.push(settingsFunction);
       } else {
         throw new Error('Wrong argument for KabamKernel.extendAppRoutes(function(core){...});');
       }
+      return this;
     }
   };
 
@@ -425,14 +428,14 @@ function KabamKernel(config) {
    *     });
    * ```
    */
-  this.catchAll = function(catchAllFunction){
-    if(prepared) {
+  this.catchAll = function (func) {
+    if (prepared) {
       throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     }
-    if(typeof catchAllFunction !== 'function') {
+    if (typeof func !== 'function') {
       throw new Error('Wrong argument for KabamKernel.catchAll(function(kernel){...});');
     }
-    _catchAllFunction = catchAllFunction;
+    catchAllFunction = func;
   };
 
   /**
@@ -447,9 +450,13 @@ function KabamKernel(config) {
     if (prepared) {
       throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
-      var pluginToBeInstalled = {};
+      var pluginToBeInstalled = {},
+        field,
+        i,
+        y,
+        x;
       if (typeof pluginObjectOrName === 'string') {
-        pluginToBeInstalled = require('' + pluginObjectOrName);
+        pluginToBeInstalled = require(pluginObjectOrName);
       } else {
         pluginToBeInstalled = pluginObjectOrName;
       }
@@ -459,14 +466,14 @@ function KabamKernel(config) {
       }
 
       if (typeof pluginToBeInstalled.core === 'object') {
-        for (var field in pluginToBeInstalled.core) {
+        for (field in pluginToBeInstalled.core) {
           if (pluginToBeInstalled.core.hasOwnProperty(field)) {
             this.extendCore(field, pluginToBeInstalled.core[field], pluginToBeInstalled.name);
           }
         }
       }
       if (typeof pluginToBeInstalled.model === 'object') {
-        for (var x in pluginToBeInstalled.model) {
+        for (x in pluginToBeInstalled.model) {
           if (pluginToBeInstalled.model.hasOwnProperty(x)) {
             this.extendModel(x, pluginToBeInstalled.model[x]);
           }
@@ -485,9 +492,9 @@ function KabamKernel(config) {
         this.extendApp(pluginToBeInstalled.app);
       }
 
-      if(typeof pluginToBeInstalled.middleware !== 'undefined'){
+      if (pluginToBeInstalled.middleware !== undefined) {
         if (pluginToBeInstalled.middleware instanceof Array) {
-          for (var i = 0; i < pluginToBeInstalled.middleware.length; i++) {
+          for (i = 0; i < pluginToBeInstalled.middleware.length; i = i + 1) {
             if (typeof pluginToBeInstalled.middleware[i] === 'function') {
               this.extendMiddleware(pluginToBeInstalled.middleware[i]);
             } else {
@@ -507,7 +514,7 @@ function KabamKernel(config) {
       }
 
       if (typeof pluginToBeInstalled.listeners === 'object') {
-        for (var y in pluginToBeInstalled.listeners) {
+        for (y in pluginToBeInstalled.listeners) {
           if (pluginToBeInstalled.listeners.hasOwnProperty(y)) {
             this.extendListeners(y, pluginToBeInstalled.listeners[y]);
           }
@@ -577,14 +584,14 @@ function KabamKernel(config) {
     thisMWC.redisClient = redisManager.create(thisMWC.config.redis);
 
     //injecting mongoose and additional models
-    thisMWC.model = mongooseManager.injectModels(thisMWC, _additionalModels);
+    thisMWC.model = mongooseManager.injectModels(thisMWC, additionalModels);
 
-    _extendCoreFunctions.map(function (settingsFunction) {
+    extendCoreFunctions.map(function (settingsFunction) {
 
-      if (typeof thisMWC[settingsFunction.namespace] === 'undefined') {
+      if (thisMWC[settingsFunction.namespace] === undefined) {
         thisMWC[settingsFunction.namespace] = {};
       }
-      if (typeof thisMWC[settingsFunction.namespace][settingsFunction.field] === 'undefined') {
+      if (thisMWC[settingsFunction.namespace][settingsFunction.field] === undefined) {
         thisMWC[settingsFunction.namespace][settingsFunction.field] = settingsFunction.factoryFunction(thisMWC.config);
       } else {
         throw new Error('Kernel namespace collision - namespace "' + settingsFunction.namespace + '" already have field of ' + settingsFunction.field);
@@ -593,27 +600,27 @@ function KabamKernel(config) {
     });
 
     //initialize expressJS application
-    thisMWC.app = appManager(thisMWC, _extendAppFunctions, _additionalStrategies, _extendMiddlewareFunctions, _extendRoutesFunctions, _catchAllFunction);
-      if (howExactly) {
-        if (howExactly === 'app') {
-          thisMWC.emit('started', { 'type': 'app' });
-          return thisMWC;
-        }
-        if (typeof howExactly === 'number' && howExactly > 0) {
-          thisMWC.httpServer.listen(howExactly, function () {
-            thisMWC.emit('started', {'port': howExactly, 'type': 'expressHttp'});
-            console.log(('KabamKernel started on ' + howExactly + ' port').blue);
-          });
-          return thisMWC;
-        }
-        throw new Error('Function MWC.listen(httpOrHttpsOrPort) accepts objects of null, "app" or port\'s number as argument!');
-      } else {
-        thisMWC.httpServer.listen(thisMWC.app.get('port'), function () {
-          thisMWC.emit('started', {'port': thisMWC.app.get('port'), 'type': 'expressHttp'});
-          console.log(('KabamKernel started on ' + thisMWC.app.get('port') + ' port').blue);
+    thisMWC.app = appManager(thisMWC, extendAppFunctions, additionalStrategies, extendMiddlewareFunctions, extendRoutesFunctions, catchAllFunction);
+    if (howExactly) {
+      if (howExactly === 'app') {
+        thisMWC.emit('started', { 'type': 'app' });
+        return thisMWC;
+      }
+      if (typeof howExactly === 'number' && howExactly > 0) {
+        thisMWC.httpServer.listen(howExactly, function () {
+          thisMWC.emit('started', {'port': howExactly, 'type': 'expressHttp'});
+          console.log(('KabamKernel started on ' + howExactly + ' port').blue);
         });
         return thisMWC;
       }
+      throw new Error('Function MWC.listen(httpOrHttpsOrPort) accepts objects of null, "app" or port\'s number as argument!');
+    } else {
+      thisMWC.httpServer.listen(thisMWC.app.get('port'), function () {
+        thisMWC.emit('started', {'port': thisMWC.app.get('port'), 'type': 'expressHttp'});
+        console.log(('KabamKernel started on ' + thisMWC.app.get('port') + ' port').blue);
+      });
+      return thisMWC;
+    }
   };
   /**
    * @ngdoc function
@@ -631,15 +638,16 @@ function KabamKernel(config) {
    *
    * @returns {boolean} isMaster. Returns true, if this process is a master process of cluster, or false if this is slave process
    */
-  this.startCluster = function(howExactly){
+  this.startCluster = function (howExactly) {
     prepared = true;
 
-    var thisMWC=this,
+    var thisMWC = this,
       cluster = require('cluster'),
       numCPUs = require('os').cpus().length,
-      maxWorkers;
+      maxWorkers,
+      i;
 
-    if(this.config.limitWorkers && this.config.limitWorkers>0){
+    if (this.config.limitWorkers && this.config.limitWorkers > 0) {
       maxWorkers  = Math.min(numCPUs, this.config.limitWorkers);
     } else {
       maxWorkers = numCPUs;
@@ -647,21 +655,21 @@ function KabamKernel(config) {
 
 
     if (cluster.isMaster) {
-      console.log(('Cluster : We have '+numCPUs+' CPU cores present. We can use '+maxWorkers+' of them.').bold.green);
-      console.log(('Cluster : Master PID#'+process.pid+ ' is online').green);
+      console.log(('Cluster : We have ' + numCPUs + ' CPU cores present. We can use ' + maxWorkers + ' of them.').bold.green);
+      console.log(('Cluster : Master PID#' + process.pid + ' is online').green);
       // Fork workers.
-      for (var i = 0; i < maxWorkers; i++) {
+      for (i = 0; i < maxWorkers; i = i + 1) {
         var worker = cluster.fork();
-        console.log(('Cluster : Spawning worker with PID#'+worker.process.pid).green);
+        console.log(('Cluster : Spawning worker with PID#' + worker.process.pid).green);
       }
 
-      cluster.on('online', function(worker) {
-        console.log(('Cluster : Worker PID#'+worker.process.pid+ ' is online').green);
+      cluster.on('online', function (worker) {
+        console.log(('Cluster : Worker PID#' + worker.process.pid + ' is online').green);
       });
 
-      cluster.on('exit', function(worker, code, signal) {
+      cluster.on('exit', function (worker, code, signal) {
         var exitCode = worker.process.exitCode;
-        console.log(('Cluster : Worker #' + worker.process.pid + ' died ('+exitCode+'). Respawning...').yellow);
+        console.log(('Cluster : Worker #' + worker.process.pid + ' died (' + exitCode + '). Respawning...').yellow);
         cluster.fork();
       });
 
@@ -671,17 +679,17 @@ function KabamKernel(config) {
       thisMWC.start(howExactly);
       return false;
     }
-  }
+  };
 }
 
 util.inherits(KabamKernel, EventEmitter);
 
 KabamKernel.prototype.validateConfig = function (config) {
   // General check
-  if (typeof config !== 'object') {
+  if(typeof config !== 'object') {
     throw new Error('Config is not an object!');
   }
-  if (!(config.hostUrl && url.parse(config.hostUrl)['hostname'])) {
+  if (!(config.hostUrl && url.parse(config.hostUrl).hostname)) {
     throw new Error('Config.hostUrl have to be valid hostname - for example, http://example.org/ with http(s) on start and "/" at end!!!');
   }
   if (config.secret.length < 9) {
@@ -712,10 +720,10 @@ KabamKernel.prototype.validateConfig = function (config) {
 KabamKernel.prototype.extendListeners = function (eventName, eventHandlerFunction) {
   if (typeof eventName === 'string' && typeof eventHandlerFunction === 'function') {
     this.on(eventName, eventHandlerFunction);
-    return this;
   } else {
     throw new Error('KabamKernel.extendListeners(eventName,eventHandlerFunction) have wrong arguments!');
   }
+  return this;
 };
 
 
@@ -792,11 +800,10 @@ KabamKernel.create = function (config) {
  * @description
  * Stops kabamKernel instance - close redis and mongo connections.
  */
-KabamKernel.prototype.stop = function(){
+KabamKernel.prototype.stop = function () {
   this.redisClient.end();
   this.mongoose.connection.close();
   this.mongoose.disconnect();
-  delete this;
   return;
 };
 
