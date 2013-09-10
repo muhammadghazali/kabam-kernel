@@ -1,21 +1,19 @@
-//placeholder for message model
-exports.name = 'Cat';
-
-exports.initFunction = function(kabam) {
+'use strict';
+exports.initFunction = function (kabam) {
 
   var messageSchema = new kabam.mongoose.Schema({
       'to': kabam.mongoose.Schema.Types.ObjectId,
       'toProfile': { type: kabam.mongoose.Schema.Types.ObjectId, ref:'User' },
       'from': kabam.mongoose.Schema.Types.ObjectId,
       'fromProfile': { type: kabam.mongoose.Schema.Types.ObjectId, ref:'User' },
-      'created_at': { type: Date, default: Date.now },
+      'createdAt': { type: Date, default: Date.now },
       'message': {type: String, trim: true } //trim whitespaces - http://mongoosejs.com/docs/api.html#schema_string_SchemaString-trim
-  });
+    });
 
   messageSchema.index({
     to: 1,
     from: 1,
-    created_at: 1
+    createdAt: 1
   });
 
   messageSchema.statics.getForUser = function (user, parameters, callback) {
@@ -39,4 +37,4 @@ exports.initFunction = function(kabam) {
   };
 
   return kabam.mongoConnection.model('messages', messageSchema);
-}
+};

@@ -100,7 +100,7 @@ exports.init = function (mwc) {
      * @description
      * Is user banned? - boolean
      */
-      isBanned: {type: Boolean, default:false},
+      isBanned: {type: Boolean, default: false},
 
     /**
      * @ngdoc value
@@ -128,7 +128,7 @@ exports.init = function (mwc) {
      * @description
      * Last name of user
      */
-      lastName: {type : String ,trim: true},
+      lastName: {type : String, trim: true},
     /**
      * @ngdoc value
      * @methodOf User
@@ -145,7 +145,7 @@ exports.init = function (mwc) {
      * @description
      * Is email address verified? - boolean
      */
-      emailVerified: {type: Boolean, default:false},
+      emailVerified: {type: Boolean, default: false},
     /**
      * @ngdoc value
      * @methodOf User
@@ -153,7 +153,7 @@ exports.init = function (mwc) {
      * @description
      * Is profile complete - it means, it have email, username and password set. boolean
      */
-      profileComplete: {type: Boolean, default:false},
+      profileComplete: {type: Boolean, default: false},
 
     /**
      * @ngdoc value
@@ -237,8 +237,8 @@ exports.init = function (mwc) {
    * Returns users gravatar
    */
   UserSchema.virtual('gravatar').get(function () {
-      return this.getGravatar(80);
-    });
+    return this.getGravatar(80);
+  });
 
   /**
    * @ngdoc function
@@ -282,7 +282,7 @@ exports.init = function (mwc) {
    * ```
    */
   UserSchema.methods.verifyPassword = function (password) {
-    return (sha512('' + this.salt + password) === this.password);
+    return (sha512(this.salt + password) === this.password);
   };
 
   /**
@@ -470,8 +470,8 @@ exports.init = function (mwc) {
       ret = {},
       x;
 
-    for (x in this){
-      if(exportableProperties.indexOf(x) !== -1) {
+    for (x in this) {
+      if (exportableProperties.indexOf(x) !== -1) {
         ret[x] = this[x];
       }
     }
@@ -485,8 +485,8 @@ exports.init = function (mwc) {
    * @param {string} usernameOrEmail  - username or email address of user
    * @param {function} callback  - function is fired when user is saved
    */
-  UserSchema.statics.ban = function(usernameOrEmail,callback){
-    this.findOneByLoginOrEmail(usernameOrEmail,function(err,userFound){
+  UserSchema.statics.ban = function (usernameOrEmail, callback) {
+    this.findOneByLoginOrEmail(usernameOrEmail, function (err, userFound) {
       if (err) {
         callback(err);
       } else {
@@ -504,8 +504,8 @@ exports.init = function (mwc) {
    * @param {function} callback  - function is fired when user is saved
    */
 
-  UserSchema.statics.unban = function(usernameOrEmail,callback){
-    this.findOneByLoginOrEmail(usernameOrEmail,function(err,userFound){
+  UserSchema.statics.unban = function (usernameOrEmail, callback) {
+    this.findOneByLoginOrEmail(usernameOrEmail, function (err, userFound) {
       if (err) {
         callback(err);
       } else {
@@ -551,7 +551,7 @@ exports.init = function (mwc) {
    */
   UserSchema.methods.notify = function (channel, message) {
     var channelToUse, messageToSend;
-    if (typeof message === 'undefined' && (typeof channel === 'object' || typeof channel === 'string')) {
+    if (message === undefined && (typeof channel === 'object' || typeof channel === 'string')) {
       channelToUse = 'all';
       messageToSend = channel;
     } else {
@@ -763,7 +763,7 @@ exports.init = function (mwc) {
       this.profileComplete = true;
       this.setPassword(password, function (err) {
         if (err) {
-          callback('Unable to complete profile, username '+username+' is occupied!');
+          callback('Unable to complete profile, username ' + username + ' is occupied!');
         } else {
           mwc.emit('users:completeProfile', this);
           callback(null);
@@ -861,10 +861,10 @@ exports.init = function (mwc) {
 
     needle[key] = id;
     this.findOne(needle, function (err, userFound) {
-      if (err){
+      if (err) {
         callback(err);
       } else {
-        if(userFound){
+        if (userFound) {
           userFound.invalidateSession(function(err2,newKey){
             userFound.apiKey=newKey;
             callback(err2, userFound);
@@ -1172,20 +1172,20 @@ exports.init = function (mwc) {
           cb(new Error('User do not exists!'));
         }
       }
-      ],callback);
+    ], callback);
   };
 
 
   UserSchema.methods.getGroups = function(callback){};
-  UserSchema.methods.inviteToGroup = function(groupName,role,callback){};
-  UserSchema.methods.banFromGroup = function(groupName,callback){};
-  UserSchema.methods.getRole = function(groupName,callback){};
+  UserSchema.methods.inviteToGroup = function(groupName, role, callback){};
+  UserSchema.methods.banFromGroup = function(groupName, callback){};
+  UserSchema.methods.getRole = function(groupName, callback){};
 
   var User = mwc.mongoConnection.model('User', UserSchema);
 
   return {
     'User':User,
-    'Users':User,
+    'Users':User
   };
 };
 
