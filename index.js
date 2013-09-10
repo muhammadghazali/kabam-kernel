@@ -426,10 +426,12 @@ function KabamKernel(config) {
    * ```
    */
   this.catchAll = function(catchAllFunction){
-    if(prepared)
+    if(prepared) {
       throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
-    if(typeof catchAllFunction !== 'function')
+    }
+    if(typeof catchAllFunction !== 'function') {
       throw new Error('Wrong argument for KabamKernel.catchAll(function(kernel){...});');
+    }
     _catchAllFunction = catchAllFunction;
   };
 
