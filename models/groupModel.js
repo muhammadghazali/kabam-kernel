@@ -297,7 +297,7 @@ exports.initFunction = function (kabam) {
                     cb(err, school, courseFound);
                   });
               } else {
-                cb(null, null, null)
+                cb(null, null, null);
               }
             },
             function (school, course, cb) {
