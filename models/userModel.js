@@ -169,23 +169,32 @@ exports.init = function (mwc) {
      */
       keychain: {type: Object, index: true, unique: true, sparse: true}, // i'm loving mongoose - http://mongoosejs.com/docs/schematypes.html - see mixed
 
-    /**
-     * @ngdoc value
-     * @methodOf User
-     * @name User.profile
-     * @description
-     * User profile object. it can store anything! - age, postal address, occupation. everything!
-     */
+        /**
+         * @ngdoc value
+         * @methodOf User
+         * @name User.profile
+         * @description
+         * User profile object. it can store anything! - age, postal address, occupation. everything!
+         */
       profile: {},
 
-    /**
-     * @ngdoc value
-     * @methodOf User
-     * @name User.lastSeenOnline
-     * @description
-     * Timestamp of last http interaction with site - last seen online
-     */
-      lastSeenOnline : Date
+        /**
+         * @ngdoc value
+         * @methodOf User
+         * @name User.lastSeenOnline
+         * @description
+         * Timestamp of last http interaction with site - last seen online
+         */
+      lastSeenOnline : Date,
+
+        /**
+         * @ngdoc value
+         * @methodOf User
+         * @name User.groups
+         * @description
+         * Array of group ID, user are a member of...
+         */
+      groups : [{ type: mwc.mongoose.Schema.Types.ObjectId, ref: 'Group' }]
     },
       {
         toObject: { getters: true, virtuals: true }, //http://mongoosejs.com/docs/api.html#document_Document-toObject
@@ -1176,10 +1185,29 @@ exports.init = function (mwc) {
   };
 
 
-  UserSchema.methods.getGroups = function(callback){};
-  UserSchema.methods.inviteToGroup = function(groupName, role, callback){};
-  UserSchema.methods.banFromGroup = function(groupName, callback){};
-  UserSchema.methods.getRole = function(groupName, callback){};
+  UserSchema.methods.getGroups = function(callback){
+    var groups = [];
+    async.each(this.groups, function (groupId, cb) {
+      mwc.model.Group.findOne({'id': groupId}, function (err, groupFound) {
+        if(err){
+          cb(err);
+        } else {
+          groups.push(groupFound);
+          cb(null);
+        }
+      });
+    }, function(err){
+      callback(err,groups);
+    });
+  };
+
+
+  UserSchema.methods.inviteToGroup = function (groupName, role, callback) {
+  };
+  UserSchema.methods.banFromGroup = function (groupName, callback) {
+  };
+  UserSchema.methods.getRole = function (groupName, callback) {
+  };
 
   var User = mwc.mongoConnection.model('User', UserSchema);
 
