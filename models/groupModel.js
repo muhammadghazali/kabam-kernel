@@ -399,11 +399,24 @@ exports.initFunction = function (kabam) {
 
   //compatibility with rest plugin
 
+  //function to work with kabam-plugin-rest - only root can work with REST api to see all groups todo - maybe we can change it in future
   GroupsSchema.statics.getForUser = function (user, parameters, callback) {
-    callback(null); //todo implement acl
+    if (user && user.root) {
+      if (typeof parameters === 'object') {
+        this.find(parameters)
+          .limit(parameters.limit || 10)
+          .skip(parameters.offset || 0)
+          .populate('members.user')
+          .exec(callback);
+      } else {
+        callback(new Error('Wrong parameters'));
+      }
+    } else {
+      callback(new Error('Access denied!'));
+    }
   };
 
-  //only root can create groups by REST api
+  //function to work with kabam-plugin-rest - only root can create groups by REST api
   GroupsSchema.statics.canCreate = function (user, callback) {
     callback(null, (user && user.root));
   };
