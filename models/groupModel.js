@@ -32,11 +32,11 @@ exports.initFunction = function (kabam) {
       'isOpenToParent': {type: Boolean, default: false}, //maybe we do not need it?
       'isHidden': {type: Boolean, default: false}
     },
-      {
-        toObject: { getters: true, virtuals: true }, //http://mongoosejs.com/docs/api.html#document_Document-toObject
-        toJSON: { getters: true, virtuals: true }
-      }
-      );
+    {
+      toObject: { getters: true, virtuals: true }, //http://mongoosejs.com/docs/api.html#document_Document-toObject
+      toJSON: { getters: true, virtuals: true }
+    }
+  );
 
   GroupsSchema.index({ name: 1, uri: 1, schoolId: 1, courseId: 1 });
 
@@ -395,6 +395,24 @@ exports.initFunction = function (kabam) {
         ], callback);
       return;
     }
+  };
+
+  //compatibility with rest plugin
+
+  GroupsSchema.statics.getForUser = function (user, parameters, callback) {
+    callback(null); //todo implement acl
+  };
+
+  GroupsSchema.statics.canCreate = function (user) {
+    return false; //todo implement acl
+  };
+
+  GroupsSchema.methods.canRead = function (user) {
+    return false; //todo implement acl
+  };
+
+  GroupsSchema.methods.canWrite = function (user) {
+    return false; //todo implement acl
   };
 
   var Groups = kabam.mongoConnection.model('groups', GroupsSchema);
