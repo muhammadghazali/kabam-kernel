@@ -407,12 +407,28 @@ exports.initFunction = function (kabam) {
     return false; //todo implement acl
   };
 
-  GroupsSchema.methods.canRead = function (user) {
-    return false; //todo implement acl
+  //function to work with kabam-plugin-rest - admins and members can read this group parameters by REST api
+  GroupsSchema.methods.canRead = function (user, callback) {
+    var thisGroup = this;
+    thisGroup.checkRights(user, function (err, roleFound) {
+      if (err) {
+        callback(err);
+      } else {
+        callback(null, roleFound === 'admin' || roleFound === 'member');
+      }
+    });
   };
 
+  //function to work with kabam-plugin-rest - admins can change this group parameters by REST api
   GroupsSchema.methods.canWrite = function (user) {
-    return false; //todo implement acl
+    var thisGroup = this;
+    thisGroup.checkRights(user, function (err, roleFound) {
+      if (err) {
+        callback(err);
+      } else {
+        callback(null, roleFound === 'admin');
+      }
+    });
   };
 
   var Groups = kabam.mongoConnection.model('groups', GroupsSchema);
