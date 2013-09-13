@@ -21,7 +21,25 @@ describe('groups testing', function () {
     kabam.start(port);
   });
 
-  it('test have to be created soon');
+  describe('general test',function(){
+    describe('creating group hierarchy for users',function(){
+    /* we create 3 users, and 3 groups.
+     * first user is root in all groups
+     * second one is member of 3 groups
+     * third one visitor
+     * testing inheritance for adminship and membership.
+     */
+      it('have to be created');
+    });
+  });
+
+  describe('invite test', function(){
+    it('have to be created');
+  });
+
+  describe('ban test', function(){
+    it('have to be created');
+  });
 
   after(function (done) {
     kabam.stop();
