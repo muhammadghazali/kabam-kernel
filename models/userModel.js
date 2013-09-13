@@ -45,129 +45,129 @@ exports.init = function (mwc) {
   var mongoose = mwc.mongoose,
     Schema = mongoose.Schema,
     UserSchema = new Schema({
-    /**
-     * @ngdoc value
-     * @methodOf User
-     * @name User.email
-     * @description
-     * Primary email of user, the one he/she used for registration. Unique.
-     */
-      email: {type: String, trim: true, index: true, required: true, unique: true, match: /^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/},
-    /**
-     * @ngdoc value
-     * @methodOf User
-     * @name User.username
-     * @description
-     * Primary username of user, the one he/she used for registration. Unique.
-     */
-      username: {type: String, trim: true, index: true, unique: true, match: /^[a-zA-Z0-9_]+$/, sparse: true},
-    //sparse - it means it be unique, if not null  http://stackoverflow.com/questions/7955040/mongodb-mongoose-unique-if-not-null
-      salt: String,//string to hash password
-      password: String,//hashed password
+        /**
+         * @ngdoc value
+         * @methodOf User
+         * @name User.email
+         * @description
+         * Primary email of user, the one he/she used for registration. Unique.
+         */
+        email: {type: String, trim: true, index: true, required: true, unique: true, match: /^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/},
+        /**
+         * @ngdoc value
+         * @methodOf User
+         * @name User.username
+         * @description
+         * Primary username of user, the one he/she used for registration. Unique.
+         */
+        username: {type: String, trim: true, index: true, unique: true, match: /^[a-zA-Z0-9_]+$/, sparse: true},
+        //sparse - it means it be unique, if not null  http://stackoverflow.com/questions/7955040/mongodb-mongoose-unique-if-not-null
+        salt: String,//string to hash password
+        password: String,//hashed password
 
-    /**
-     * @ngdoc value
-     * @methodOf User
-     * @name User.apiKey
-     * @description
-     * Unique apiKey of user,
-     */
-      apiKey: {type: String, required: true, index: true, unique: true, default: rack, match: /^[a-zA-Z0-9_]+$/ }, //for invalidating sessions by user request, for api interactions...
-      apiKeyCreatedAt: Date,
+        /**
+         * @ngdoc value
+         * @methodOf User
+         * @name User.apiKey
+         * @description
+         * Unique apiKey of user,
+         */
+        apiKey: {type: String, required: true, index: true, unique: true, default: rack, match: /^[a-zA-Z0-9_]+$/ }, //for invalidating sessions by user request, for api interactions...
+        apiKeyCreatedAt: Date,
 
-    /**
-     * @ngdoc value
-     * @methodOf User
-     * @name User.lang
-     * @description
-     * Preferred language of user
-     */
-      lang: {type: String, default: 'en', match: /^[a-z]{2}$/},
+        /**
+         * @ngdoc value
+         * @methodOf User
+         * @name User.lang
+         * @description
+         * Preferred language of user
+         */
+        lang: {type: String, default: 'en', match: /^[a-z]{2}$/},
 
-    /**
-     * @ngdoc value
-     * @methodOf User
-     * @name User.root
-     * @description
-     * Is user root? - boolean
-     */
-      root:  {type: Boolean, default : false},
+        /**
+         * @ngdoc value
+         * @methodOf User
+         * @name User.root
+         * @description
+         * Is user root? - boolean
+         */
+        root: {type: Boolean, default: false},
 
-    /**
-     * @ngdoc value
-     * @methodOf User
-     * @name User.isBanned
-     * @description
-     * Is user banned? - boolean
-     */
-      isBanned: {type: Boolean, default: false},
+        /**
+         * @ngdoc value
+         * @methodOf User
+         * @name User.isBanned
+         * @description
+         * Is user banned? - boolean
+         */
+        isBanned: {type: Boolean, default: false},
 
-    /**
-     * @ngdoc value
-     * @methodOf User
-     * @name User.roles
-     * @description
-     * Array of user roles/permissions (strings)
-     */
-      roles: [
-        {type: String, match: /^[a-zA-Z0-9_]+$/ }
-      ],
+        /**
+         * @ngdoc value
+         * @methodOf User
+         * @name User.roles
+         * @description
+         * Array of user roles/permissions (strings)
+         */
+        roles: [
+          {type: String, match: /^[a-zA-Z0-9_]+$/ }
+        ],
 
-    /**
-     * @ngdoc value
-     * @methodOf User
-     * @name User.firstName
-     * @description
-     * Firts name of user
-     */
-      firstName: {type : String, trim: true},
-    /**
-     * @ngdoc value
-     * @methodOf User
-     * @name User.lastName
-     * @description
-     * Last name of user
-     */
-      lastName: {type : String, trim: true},
-    /**
-     * @ngdoc value
-     * @methodOf User
-     * @name User.skype
-     * @description
-     * Skype id of user
-     */
-      skype: {type : String, trim: true},
+        /**
+         * @ngdoc value
+         * @methodOf User
+         * @name User.firstName
+         * @description
+         * Firts name of user
+         */
+        firstName: {type: String, trim: true},
+        /**
+         * @ngdoc value
+         * @methodOf User
+         * @name User.lastName
+         * @description
+         * Last name of user
+         */
+        lastName: {type: String, trim: true},
+        /**
+         * @ngdoc value
+         * @methodOf User
+         * @name User.skype
+         * @description
+         * Skype id of user
+         */
+        skype: {type: String, trim: true},
 
-    /**
-     * @ngdoc value
-     * @methodOf User
-     * @name User.emailVerified
-     * @description
-     * Is email address verified? - boolean
-     */
-      emailVerified: {type: Boolean, default: false},
-    /**
-     * @ngdoc value
-     * @methodOf User
-     * @name User.profileComplete
-     * @description
-     * Is profile complete - it means, it have email, username and password set. boolean
-     */
-      profileComplete: {type: Boolean, default: false},
+        /**
+         * @ngdoc value
+         * @methodOf User
+         * @name User.emailVerified
+         * @description
+         * Is email address verified? - boolean
+         */
+        emailVerified: {type: Boolean, default: false},
+        /**
+         * @ngdoc value
+         * @methodOf User
+         * @name User.profileComplete
+         * @description
+         * Is profile complete - it means, it have email, username and password set. boolean
+         */
+        profileComplete: {type: Boolean, default: false},
 
-    /**
-     * @ngdoc value
-     * @methodOf User
-     * @name User.keychain
-     * @description
-     * Profile keychain. For example, the one like it
-     * ```javascript
-     * { "github":"111", "twitter":"111" }
-     * ```
-     * allows user to sign in using oAuth providers if he has github id = 111 pr twitter id = 111
-     * @see User.setKeychain
-     */
-      keychain: {type: Object, index: true, unique: true, sparse: true}, // i'm loving mongoose - http://mongoosejs.com/docs/schematypes.html - see mixed
+        /**
+         * @ngdoc value
+         * @methodOf User
+         * @name User.keychain
+         * @description
+         * Profile keychain. For example, the one like it
+         * ```javascript
+         * { "github":"111", "twitter":"111" }
+         * ```
+         * allows user to sign in using oAuth providers if he has github id = 111 pr twitter id = 111
+         * @see User.setKeychain
+         */
+        keychain: {type: Object, index: true, unique: true, sparse: true}, // i'm loving mongoose - http://mongoosejs.com/docs/schematypes.html - see mixed
 
         /**
          * @ngdoc value
@@ -176,7 +176,7 @@ exports.init = function (mwc) {
          * @description
          * User profile object. it can store anything! - age, postal address, occupation. everything!
          */
-      profile: {},
+        profile: {},
 
         /**
          * @ngdoc value
@@ -185,7 +185,7 @@ exports.init = function (mwc) {
          * @description
          * Timestamp of last http interaction with site - last seen online
          */
-      lastSeenOnline : Date,
+        lastSeenOnline: Date,
 
         /**
          * @ngdoc value
@@ -195,13 +195,15 @@ exports.init = function (mwc) {
          * Array of groups' ID, user are a member of...
          * Role is defined IN group, not here
          */
-      groups : [{ type: mwc.mongoose.Schema.Types.ObjectId, ref: 'Group' }]
-    },
+        groups: [
+          { type: mwc.mongoose.Schema.Types.ObjectId, ref: 'Group' }
+        ]
+      },
       {
         toObject: { getters: true, virtuals: true }, //http://mongoosejs.com/docs/api.html#document_Document-toObject
         toJSON: { getters: true, virtuals: true }
       }
-      );
+    );
 
   UserSchema.index({
     username: 1,
@@ -258,7 +260,7 @@ exports.init = function (mwc) {
    * Returns how much milliseconds ago user was online
    */
   UserSchema.virtual('lastSeenOnlineAgo').get(function () {
-    if (this.lastSeenOnline){
+    if (this.lastSeenOnline) {
       return ((new Date().getTime() - this.lastSeenOnline.getTime()));
     } else {
       return 10 * 365 * 24 * 60 * 60 * 1000; //month)))
@@ -418,7 +420,7 @@ exports.init = function (mwc) {
       callback(null);
     } else {
       this.roles.splice(roleIndex, 1);
-      mwc.emit('users:revokeRole',this);
+      mwc.emit('users:revokeRole', this);
       this.save(callback);
     }
   };
@@ -464,19 +466,19 @@ exports.init = function (mwc) {
    */
   UserSchema.methods.export = function () {
     var exportableProperties = [
-      'username',
-      'email',
-      'gravatar',
-      'lang',
-      'root',
-      'isBanned',
-      'roles',
-      'skype',
-      'lastName',
-      'firstName',
-      'profileComplete',
-      'isOnline'
-    ],
+        'username',
+        'email',
+        'gravatar',
+        'lang',
+        'root',
+        'isBanned',
+        'roles',
+        'skype',
+        'lastName',
+        'firstName',
+        'profileComplete',
+        'isOnline'
+      ],
       ret = {},
       x;
 
@@ -875,12 +877,12 @@ exports.init = function (mwc) {
         callback(err);
       } else {
         if (userFound) {
-          userFound.invalidateSession(function(err2,newKey){
-            userFound.apiKey=newKey;
+          userFound.invalidateSession(function (err2, newKey) {
+            userFound.apiKey = newKey;
             callback(err2, userFound);
           });
         } else {
-          callback(err,null);
+          callback(err, null);
         }
       }
     });
@@ -952,11 +954,11 @@ exports.init = function (mwc) {
    * Usually, if user is root, he can edit other users
    * @example
    */
-  UserSchema.statics.getForUser = function(user,parameters,callback){
+  UserSchema.statics.getForUser = function (user, parameters, callback) {
     var callback2use,
       parameters2use;
 
-    if(typeof parameters === 'function' && callback === undefined){
+    if (typeof parameters === 'function' && callback === undefined) {
       callback2use = parameters;
       parameters2use = {};
     } else {
@@ -964,10 +966,10 @@ exports.init = function (mwc) {
       parameters2use = parameters;
     }
 
-    if(user && user.root){
+    if (user && user.root) {
       this.find(parameters2use)
-        .skip(((parameters2use.offset)?(parameters2use.offset):0))
-        .limit(((parameters2use.limit)?(parameters2use.limit):10))
+        .skip(((parameters2use.offset) ? (parameters2use.offset) : 0))
+        .limit(((parameters2use.limit) ? (parameters2use.limit) : 10))
         .exec(callback2use);
     } else {
       callback2use(new Error('Access denied!'));
@@ -1010,59 +1012,59 @@ exports.init = function (mwc) {
     return (user && user.root);
   };
 
-/**
- * @ngdoc function
- * @name User.sendMessage
- * @description
- * Sends private message from this user to other one
- * @example
- * ```javascript
- * User1.sendMessage(User2,'hello!',function(err){if(err) throw err;});
- * //User1 sends message to User2
- * ```
- * @param {User/string} to - reciever of message
- * @param {string} message - text of message
- * @param {function} callback -function to be called on message delivery
- */
-  UserSchema.methods.sendMessage = function(to,message,callback){
+  /**
+   * @ngdoc function
+   * @name User.sendMessage
+   * @description
+   * Sends private message from this user to other one
+   * @example
+   * ```javascript
+   * User1.sendMessage(User2,'hello!',function(err){if(err) throw err;});
+   * //User1 sends message to User2
+   * ```
+   * @param {User/string} to - reciever of message
+   * @param {string} message - text of message
+   * @param {function} callback -function to be called on message delivery
+   */
+  UserSchema.methods.sendMessage = function (to, message, callback) {
     var thisUser = this;
     message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
     async.waterfall([
-      function(cb){
-        if(typeof to === 'string'){
+      function (cb) {
+        if (typeof to === 'string') {
           User.findOneByLoginOrEmail(to, cb);
         } else {
-          if(to._id){
-            cb(null,to);
+          if (to._id) {
+            cb(null, to);
           } else {
             cb(new Error('to have to be user instance or string of username or email'));
           }
         }
       },
-      function(userFound,cb){
+      function (userFound, cb) {
         mwc.model.Message.create({
           'to': userFound._id,
           'toProfile': userFound._id,
           'from': thisUser._id,
           'fromProfile': thisUser._id,
           'message': message
-        },function(err,messageCreated){
-          if(err){
+        }, function (err, messageCreated) {
+          if (err) {
             cb(err);
           } else {
             cb(null, userFound, messageCreated);
           }
         });
       },
-      function(to,messageCreated,cb){
-        mwc.emit('notify:pm',{
-          'user':to,
-          'from':thisUser,
-          'message':messageCreated.message
+      function (to, messageCreated, cb) {
+        mwc.emit('notify:pm', {
+          'user': to,
+          'from': thisUser,
+          'message': messageCreated.message
         });
         cb();
       }
-    ],callback);
+    ], callback);
   };
 
   /**
@@ -1079,93 +1081,93 @@ exports.init = function (mwc) {
    * @param {string} message - text of message
    * @param {function} callback -function to be called on message delivery
    */
-  UserSchema.methods.recieveMessage = function(from,message,callback){
+  UserSchema.methods.recieveMessage = function (from, message, callback) {
     var thisUser = this;
     message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
     async.waterfall([
-      function(cb){
-        if(typeof from === 'string'){
+      function (cb) {
+        if (typeof from === 'string') {
           User.findOneByLoginOrEmail(from, cb);
         } else {
-          if(from._id){
-            cb(null,from);
+          if (from._id) {
+            cb(null, from);
           } else {
             cb(new Error('to have to be user instance or string of username or email'));
           }
         }
       },
-      function(userFound,cb){
+      function (userFound, cb) {
         mwc.model.Message.create({
           'from': userFound._id,
           'fromProfile': userFound._id,
           'to': thisUser._id,
           'toProfile': thisUser._id,
           'message': message
-        },function(err,messageCreated){
-          if(err){
+        }, function (err, messageCreated) {
+          if (err) {
             cb(err);
           } else {
             cb(null, userFound, messageCreated);
           }
         });
       },
-      function(from,messageCreated,cb){
-        mwc.emit('notify:pm',{
+      function (from, messageCreated, cb) {
+        mwc.emit('notify:pm', {
           'user': thisUser,
           'from': from,
-          'message':messageCreated.message
+          'message': messageCreated.message
         });
         cb();
       }
-    ],callback);
+    ], callback);
   };
 
-/**
- * @ngdoc function
- * @name User.getRecentMessages
- * @description
- * Get recent messages in reverse chronological order - the most recent on top
- * @param {int} mesgLimit - limit of messages
- * @param {int} mesgOffset - offset
- * @param {function} callback -function(err,messages) to be called with message object
- */
-  UserSchema.methods.getRecentMessages = function(mesgLimit,mesgOffset,callback){
-      mwc.model.Message
-        .find({'to': this._id})
-        .populate('fromProfile')
-        .populate('toProfile')
-        .skip(mesgOffset)
-        .limit(mesgLimit)
-        .sort('-createdAt')
-        .exec(callback);
-    };
-/**
- * @ngdoc function
- * @name User.getDialog
- * @description
- * Get recent messages for dialog with this and user with username in reverse chronological order  - the most recent on top
- * @param {User} usernameOrUser - author of message
- * @param {int} mesgLimit - limit of messages
- * @param {int} mesgOffset - offset
- * @param {function} callback -function(err,messages) to be called with message object
- */
-  UserSchema.methods.getDialog = function(usernameOrUser, mesgLimit, mesgOffset, callback){
+  /**
+   * @ngdoc function
+   * @name User.getRecentMessages
+   * @description
+   * Get recent messages in reverse chronological order - the most recent on top
+   * @param {int} mesgLimit - limit of messages
+   * @param {int} mesgOffset - offset
+   * @param {function} callback -function(err,messages) to be called with message object
+   */
+  UserSchema.methods.getRecentMessages = function (mesgLimit, mesgOffset, callback) {
+    mwc.model.Message
+      .find({'to': this._id})
+      .populate('fromProfile')
+      .populate('toProfile')
+      .skip(mesgOffset)
+      .limit(mesgLimit)
+      .sort('-createdAt')
+      .exec(callback);
+  };
+  /**
+   * @ngdoc function
+   * @name User.getDialog
+   * @description
+   * Get recent messages for dialog with this and user with username in reverse chronological order  - the most recent on top
+   * @param {User} usernameOrUser - author of message - string of username/email or user object
+   * @param {int} mesgLimit - limit of messages
+   * @param {int} mesgOffset - offset
+   * @param {function} callback -function(err,messages) to be called with message object
+   */
+  UserSchema.methods.getDialog = function (usernameOrUser, mesgLimit, mesgOffset, callback) {
     var thisUser = this;
     async.waterfall([
-      function(cb){
-        if(typeof usernameOrUser === 'string'){
+      function (cb) {
+        if (typeof usernameOrUser === 'string') {
           User.findOneByLoginOrEmail(usernameOrUser, cb);
         } else {
-          if(usernameOrUser._id){
-            cb(null,usernameOrUser);
+          if (usernameOrUser._id) {
+            cb(null, usernameOrUser);
           } else {
-            cb(new Error('from have to be user instance or string of username or email'));
+            cb(new Error('usernameOrUser have to be user instance or string of username or email'));
           }
         }
       },
-      function(userFound,cb){
-        if(userFound){
-        mwc.model.Message
+      function (userFound, cb) {
+        if (userFound) {
+          mwc.model.Message
             .find({
               $or: [
                 {'to': thisUser._id, 'from': userFound._id},
@@ -1185,39 +1187,106 @@ exports.init = function (mwc) {
     ], callback);
   };
 
-
-  UserSchema.methods.getGroups = function(callback){
+  /**
+   * @ngdoc function
+   * @name User.getGroups
+   * @description
+   * Return the array of groups, where current user is a member/admin/something else
+   * @param {function} callback -function(err,arrayOfGroups) to be called with groups objects' array
+   */
+  UserSchema.methods.getGroups = function (callback) {
     var groups = [];
     async.each(this.groups, function (groupId, cb) {
       mwc.model.Group.findOne({'id': groupId}, function (err, groupFound) {
-        if(err){
+        if (err) {
           cb(err);
         } else {
           groups.push(groupFound);
           cb(null);
         }
       });
-    }, function(err){
-      callback(err,groups);
+    }, function (err) {
+      callback(err, groups);
     });
   };
 
+  /**
+   * @ngdoc function
+   * @name User.inviteToGroup
+   * @param {String} groupId
+   * @param {String} role
+   * @description
+   * Gives the current user role in group
+   * @param {function} callback
+   */
+  UserSchema.methods.inviteToGroup = function (groupId, role, callback) {
+    var thisUser = this;
+    mwc.model.Group.findOne({'_id': groupId}, function (err, groupFound) {
+      if (err) {
+        callback(err);
+      } else {
+        if (groupFound) {
+          groupFound.invite(thisUser, role, callback);
+        } else {
+          callback(new Error('Unable to find this group!'));
+        }
+      }
+    });
+  };
 
-  UserSchema.methods.inviteToGroup = function (groupName, role, callback) {
+  /**
+   * @ngdoc function
+   * @name User.banFromGroup
+   * @param {String} groupId
+   * @description
+   * Removes current user from this group
+   * @param {function} callback
+   */
+  UserSchema.methods.banFromGroup = function (groupId, callback) {
+    var thisUser = this;
+    mwc.model.Group.findOne({'_id': groupId}, function (err, groupFound) {
+      if (err) {
+        callback(err);
+      } else {
+        if (groupFound) {
+          groupFound.ban(thisUser, callback);
+        } else {
+          callback(new Error('Unable to find this group!'));
+        }
+      }
+    });
   };
-  UserSchema.methods.banFromGroup = function (groupName, callback) {
-  };
-  UserSchema.methods.getRole = function (groupName, callback) {
+
+  /**
+   * @ngdoc function
+   * @name User.getRole
+   * @param {String} groupId
+   * @description
+   * Removes current user from this group
+   * @param {function} callback - function(err,stringOfRoleName);
+   */
+  UserSchema.methods.getRole = function (groupId, callback) {
+    var thisUser = this;
+    mwc.model.Group.findOne({'_id': groupId}, function (err, groupFound) {
+      if (err) {
+        callback(err);
+      } else {
+        if (groupFound) {
+          groupFound.checkRights(thisUser, callback);
+        } else {
+          callback(new Error('Unable to find this group!'));
+        }
+      }
+    });
   };
 
   var User = mwc.mongoConnection.model('User', UserSchema);
 
   return {
-    'User':User,
-    'Users':User
+    'User': User,
+    'Users': User
   };
 };
-
 
 
 /**
