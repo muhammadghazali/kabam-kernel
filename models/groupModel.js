@@ -403,8 +403,9 @@ exports.initFunction = function (kabam) {
     callback(null); //todo implement acl
   };
 
-  GroupsSchema.statics.canCreate = function (user) {
-    return false; //todo implement acl
+  //only root can create groups by REST api
+  GroupsSchema.statics.canCreate = function (user, callback) {
+    callback(null, (user && user.root));
   };
 
   //function to work with kabam-plugin-rest - admins and members can read this group parameters by REST api
