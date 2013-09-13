@@ -968,8 +968,8 @@ exports.init = function (mwc) {
 
     if (user && user.root) {
       this.find(parameters2use)
-        .skip(((parameters2use.offset) ? (parameters2use.offset) : 0))
-        .limit(((parameters2use.limit) ? (parameters2use.limit) : 10))
+        .skip(parameters2use.offset || 0)
+        .limit(parameters2use.limit || 10)
         .exec(callback2use);
     } else {
       callback2use(new Error('Access denied!'));
