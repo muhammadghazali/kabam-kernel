@@ -192,7 +192,8 @@ exports.init = function (mwc) {
          * @methodOf User
          * @name User.groups
          * @description
-         * Array of group ID, user are a member of...
+         * Array of groups' ID, user are a member of...
+         * Role is defined IN group, not here
          */
       groups : [{ type: mwc.mongoose.Schema.Types.ObjectId, ref: 'Group' }]
     },

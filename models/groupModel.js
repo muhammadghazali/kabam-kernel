@@ -87,8 +87,8 @@ exports.initFunction = function (kabam) {
 
     async.parallel({
       'inSchool': function (cb) {
-        if (this.school_id) {
-          Groups.findOne({'_id': this.school_id}, function (err, schoolFound) {
+        if (this.schoolId) {
+          Groups.findOne({'_id': this.schoolId}, function (err, schoolFound) {
             cb(err, schoolFound.findRoleInThisGroup(user));
           });
         } else {
@@ -96,8 +96,8 @@ exports.initFunction = function (kabam) {
         }
       },
       'inCourse': function (cb) {
-        if (this.course_id) {
-          Groups.findOne({'_id': this.course_id}, function (err, courseFound) {
+        if (this.courseId) {
+          Groups.findOne({'_id': this.courseId}, function (err, courseFound) {
             cb(err, courseFound.findRoleInThisGroup(user));
           });
         } else {
@@ -135,181 +135,268 @@ exports.initFunction = function (kabam) {
     });
   };
 
-
-  //invitations
+  /**
+   * @ngdoc function
+   * @name Group.invite
+   * @param {User} user  object of user
+   * @param {string} role - name of role to be assigned in this group
+   * @param {function} callback is called on operation completed
+   * @description
+   * Invite user into group with desired role
+   */
   GroupsSchema.methods.invite = function (user, role, callback) {
-    var userIsNotMember = true;
+    var userIsNotMember = true,
+      thisGroup = this;
     this.members.map(function (member) {
       if (member.user.toString() === user._id.toString()) { //we do not populate users here, so it works like it...
         userIsNotMember = false;
       }
     });
     if (userIsNotMember) {
-      this.members.push({
-        'user': user._id,
-        'role': role
-      });
-      this.save(callback);
+      async.parallel({
+        'addIdToGroup': function (cb) {
+          thisGroup.members.push({
+            'user': user._id,
+            'role': role
+          });
+          thisGroup.save(cb);
+        },
+        'addIdToUser': function (cb) {
+          var userHaveThisGroupId = false;
+          user.groups.map(function (group) {
+            if (group.toString() === thisGroup._id.toString()) { //we do not populate groups here, so it works like it...
+              userHaveThisGroupId = true;
+            }
+          });
+
+          if (userHaveThisGroupId) {
+            cb(null);
+          } else {
+            user.groups.push(thisGroup._id);
+            user.save(cb);
+          }
+        }
+      }, callback);
     } else {
       callback(new Error('User is already in this group!'));
     }
   };
-  GroupsSchema.methods.inviteAdmin = function (usernameOrEmailOrUserObject, callback) {
-    this.invite(usernameOrEmailOrUserObject, 'admin', callback);
+
+  /**
+   * @ngdoc function
+   * @name Group.inviteAdmin
+   * @param {User} user  object of user
+   * @param {function} callback is called on operation completed
+   * @description
+   * Invite user into group with role of Admin
+   */
+  GroupsSchema.methods.inviteAdmin = function (user, callback) {
+    this.invite(user, 'admin', callback);
   };
 
-  GroupsSchema.methods.inviteMember = function (usernameOrEmailOrUserObject, callback) {
-    this.invite(usernameOrEmailOrUserObject, 'member', callback);
+  /**
+   * @ngdoc function
+   * @name Group.inviteMember
+   * @param {User} user  object of user
+   * @param {function} callback is called on operation completed
+   * @description
+   * Invite user into group with role of Member
+   */
+  GroupsSchema.methods.inviteMember = function (user, callback) {
+    this.invite(user, 'member', callback);
   };
-  //invitations
 
+  /**
+   * @ngdoc function
+   * @name Group.ban
+   * @param {User} user  object of user
+   * @param {function} callback is called on operation completed
+   * @description
+   * Remove this user from members of this group
+   */
   GroupsSchema.methods.ban = function (user, callback) {
-    var i;
-    for (i = 0; i < this.members.length; i = i + 1) {
-      if (this.members[i].user.toString() === user._id.toString()) {//we do not populate users here, so it works like it...
-        this.members.splice(i, 1);
-        break;
+    var i,
+      thisGroup = this;
+    async.parallel({
+      'idInGroup': function (cb) {
+        for (i = 0; i < thisGroup.members.length; i = i + 1) {
+          if (thisGroup.members[i].user.toString() === user._id.toString()) {//we do not populate users here, so it works like it...
+            thisGroup.members.splice(i, 1);
+            break;
+          }
+        }
+        thisGroup.save(cb);
+      },
+      'idInUser': function (cb) {
+        for (i = 0; i < user.groups.length; i = i + 1) {
+          if (user.groups[i].toString() === thisGroup._id.toString()) {//we do not populate groups here, so it works like it...
+            user.groups.splice(i, 1);
+            break;
+          }
+        }
+        user.save(cb);
       }
-    }
-    this.save(callback);
+    }, callback);
   };
 
-
-
+  /**
+   * @ngdoc function
+   * @name Group.getParent
+   * @param {function} callback  - function(err,groupFound) is called on operation completed
+   * @description
+   * Get group parent with respect to group tier
+   */
   GroupsSchema.methods.getParent = function (callback) {
     switch (this.tier) {
     case 2:
-      Groups.findOne({'_id': this.school_id, tier: 1}, callback);
+      Groups.findOne({'_id': this.schoolId, tier: 1}, callback);
       break;
     case 3:
-      Groups.findOne({'_id': this.course_id, tier: 2}, callback);
-      break;
-    default:
-        callback(null, null);
-    }
-  };
-
-  GroupsSchema.methods.getChildren = function (callback) {
-    switch (this.tier) {
-    case 1:
-      Groups.find({'school_id': this._id, tier: 2}, callback);
-      break;
-    case 2:
-      Groups.find({'course_id': this._id, tier: 3}, callback);
+      Groups.findOne({'_id': this.courseId, tier: 2}, callback);
       break;
     default:
       callback(null, null);
     }
   };
 
-    GroupsSchema.statics.findGroup = function (schoolUri, courseUri, groupUri, callback) {
-      var groups = this;
-
-      if (schoolUri && !courseUri && !groupUri && typeof callback === 'function') {
-        //we try to find school by school uri
-        groups
-          .findOne({'uri': schoolUri, 'tier': 1})
-          .populate('members.user')
-          .exec(function (err, schoolFound) {
-            if (err) {
-              callback(err);
-            } else {
-              if (schoolFound) {
-                schoolFound.parentUri = null;
-                schoolFound.childrenUri = '/h/' + schoolFound.uri;
-                callback(null, schoolFound);
-              } else {
-                callback(null, null);
-              }
-            }
-          });
-        return;
-      }
-
-      if (schoolUri && courseUri && !groupUri && typeof callback === 'function') {
-        async.waterfall(
-          [
-            function (cb) {
-              groups.findOne({'uri': schoolUri, 'tier': 1})
-                .populate('members.user')
-                .exec(function (err, schoolFound) {
-                  cb(err, schoolFound);
-                });
-            },
-            function (school, cb) {
-              if (school && school._id) {//school found
-                groups.findOne({'uri': courseUri, 'tier': 2, 'school_id': school._id})
-                  .populate('members.user')
-                  .exec(function (err, courseFound) {
-                    cb(err, school, courseFound);
-                  });
-              } else {
-                cb(null, null, null)
-              }
-
-            },
-            function (school, course, cb) {
-              if (course) {
-                course.school = school;
-                course.parentUri = '/h/' + school.uri;
-                course.childrenUri = '/h/' + school.uri + '/' + course.uri;
-                cb(null, course);
-              } else {
-                cb(null, null);
-              }
-            }
-          ], callback);
-        return;
-      }
-
-      if (schoolUri && courseUri && groupUri && typeof callback === 'function') {
-        async.waterfall(
-          [
-            function (cb) {
-              groups.findOne({'uri': schoolUri, 'tier': 1})
-                .populate('members.user')
-                .exec(function (err, schoolFound) {
-                  cb(err, schoolFound);
-                });
-            },
-            function (school, cb) {
-              if (school && school._id) {//school found
-                groups.findOne({'uri': courseUri, 'tier': 2, 'school_id': school._id})
-                  .populate('members.user')
-                  .exec(function (err, courseFound) {
-                    cb(err, school, courseFound);
-                  });
-              } else {
-                cb(null, null, null);
-              }
-            },
-            function (school, course, cb) {
-              if (school && course && school._id && course._id) {
-                groups.findOne({'uri': groupUri, 'tier': 3, 'school_id': school._id, 'course_id': course._id})
-                  .populate('members.user')
-                  .exec(function (err, groupFound) {
-                    cb(err, school, course, groupFound);
-                  });
-              } else {
-                cb(null, null, null, null);
-              }
-            },
-            function (school, course, group, cb) {
-              if (group) {
-                group.school = school;
-                group.course = course;
-                group.parentUri = '/h/' + school.uri + '/' + course.uri;
-                group.childrenUri = null;
-                cb(null, group);
-              } else {
-                cb(null, null);
-              }
-            }
-          ], callback);
-        return;
-      }
-    };
-
-    var Groups = kabam.mongoConnection.model('groups', GroupsSchema);
-    return Groups;
+  /**
+   * @ngdoc function
+   * @name Group.getChildren
+   * @param {function} callback  - function(err,arrayOfGroupsFound) is called on operation completed.
+   * @description
+   * Get group children with respect to group tier
+   */
+  GroupsSchema.methods.getChildren = function (callback) {
+    switch (this.tier) {
+    case 1:
+      Groups.find({'schoolId': this._id, tier: 2}, callback);
+      break;
+    case 2:
+      Groups.find({'courseId': this._id, tier: 3}, callback);
+      break;
+    default:
+      callback(null, null);
+    }
   };
+
+  /**
+   * @ngdoc function
+   * @name Group.findGroup
+   * @param {String} schoolUri
+   * @param {String}  courseUri
+   * @param {String}  groupUri
+   * @param {function} callback  - function(err,groupFound) is called on operation completed
+   * @description
+   * Find the group from hierarchy level
+   */
+  GroupsSchema.statics.findGroup = function (schoolUri, courseUri, groupUri, callback) {
+    var groups = this;
+
+    if (schoolUri && !courseUri && !groupUri && typeof callback === 'function') {
+      //we try to find school by school uri
+      groups
+        .findOne({'uri': schoolUri, 'tier': 1})
+        .populate('members.user')
+        .exec(function (err, schoolFound) {
+          if (err) {
+            callback(err);
+          } else {
+            if (schoolFound) {
+              schoolFound.parentUri = null;
+              schoolFound.childrenUri = '/h/' + schoolFound.uri;
+              callback(null, schoolFound);
+            } else {
+              callback(null, null);
+            }
+          }
+        });
+      return;
+    }
+
+    if (schoolUri && courseUri && !groupUri && typeof callback === 'function') {
+      async.waterfall(
+        [
+          function (cb) {
+            groups.findOne({'uri': schoolUri, 'tier': 1})
+              .populate('members.user')
+              .exec(function (err, schoolFound) {
+                cb(err, schoolFound);
+              });
+          },
+          function (school, cb) {
+            if (school && school._id) {//school found
+              groups.findOne({'uri': courseUri, 'tier': 2, 'schoolId': school._id})
+                .populate('members.user')
+                .exec(function (err, courseFound) {
+                  cb(err, school, courseFound);
+                });
+            } else {
+              cb(null, null, null);
+            }
+
+          },
+          function (school, course, cb) {
+            if (course) {
+              course.school = school;
+              course.parentUri = '/h/' + school.uri;
+              course.childrenUri = '/h/' + school.uri + '/' + course.uri;
+              cb(null, course);
+            } else {
+              cb(null, null);
+            }
+          }
+        ], callback);
+      return;
+    }
+
+    if (schoolUri && courseUri && groupUri && typeof callback === 'function') {
+      async.waterfall(
+        [
+          function (cb) {
+            groups.findOne({'uri': schoolUri, 'tier': 1})
+              .populate('members.user')
+              .exec(function (err, schoolFound) {
+                cb(err, schoolFound);
+              });
+          },
+          function (school, cb) {
+            if (school && school._id) {//school found
+              groups.findOne({'uri': courseUri, 'tier': 2, 'schoolId': school._id})
+                .populate('members.user')
+                .exec(function (err, courseFound) {
+                  cb(err, school, courseFound);
+                });
+            } else {
+              cb(null, null, null);
+            }
+          },
+          function (school, course, cb) {
+            if (school && course && school._id && course._id) {
+              groups.findOne({'uri': groupUri, 'tier': 3, 'schoolId': school._id, 'courseId': course._id})
+                .populate('members.user')
+                .exec(function (err, groupFound) {
+                  cb(err, school, course, groupFound);
+                });
+            } else {
+              cb(null, null, null, null);
+            }
+          },
+          function (school, course, group, cb) {
+            if (group) {
+              group.school = school;
+              group.course = course;
+              group.parentUri = '/h/' + school.uri + '/' + course.uri;
+              group.childrenUri = null;
+              cb(null, group);
+            } else {
+              cb(null, null);
+            }
+          }
+        ], callback);
+      return;
+    }
+  };
+
+  var Groups = kabam.mongoConnection.model('groups', GroupsSchema);
+  return Groups;
+};
