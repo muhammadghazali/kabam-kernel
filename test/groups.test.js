@@ -27,10 +27,37 @@ describe('groups testing', function () {
       var shared;
       before(function(done){
         async.parallel({
-          'userRoot':function(cb){},
-          'userAdmin':function(cb){},
-          'useMember':function(cb){},
-          'userVisitor':function(cb){},
+          'userRoot':function(cb){
+            kabam.model.User.create({
+              'username': 'groups_test_root',
+              'email': 'groups_test_root@mywebclass.org',
+              'root': true
+            },cb);
+          },
+          'userAdmin':function(cb){
+            kabam.model.User.create({
+              '_id': '522d996a8680bf210f000001',
+              'username': 'groups_test_root',
+              'email': 'groups_test_root@mywebclass.org',
+              'root': false
+            },cb);
+          },
+          'useMember':function(cb){
+            kabam.model.User.create({
+              '_id': '522d996a8680bf210f000002',
+              'username': 'groups_test_member',
+              'email': 'groups_test_member@mywebclass.org',
+              'root': false
+            },cb);
+          },
+          'userVisitor':function(cb){
+            kabam.model.User.create({
+              '_id': '522d996a8680bf210f000003',
+              'username': 'groups_test_visitor',
+              'email': 'groups_test_visitor@mywebclass.org',
+              'root': false
+            },cb);
+          },
           'testSchool':function(cb){},
           'testCourse':function(cb){},
           'testGroup':function(cb){}
