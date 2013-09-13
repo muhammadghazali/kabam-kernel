@@ -23,6 +23,7 @@
     "before",
     "beforeEach",
     "after",
-    "afterEach"
+    "afterEach",
+    "exports"
   ]
 }
