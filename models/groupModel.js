@@ -421,7 +421,7 @@ exports.initFunction = function (kabam) {
   };
 
   //function to work with kabam-plugin-rest - admins can change this group parameters by REST api
-  GroupsSchema.methods.canWrite = function (user) {
+  GroupsSchema.methods.canWrite = function (user, callback) {
     var thisGroup = this;
     thisGroup.checkRights(user, function (err, roleFound) {
       if (err) {
