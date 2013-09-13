@@ -1,3 +1,5 @@
+/*jshint immed: false */
+'use strict';
 var should = require('should'),
   KabamKernel = require('./../index.js'),
   events = require('events'),

@@ -1,9 +1,10 @@
+/*jshint immed: false */
+'use strict';
 var should = require('should'),
   KabamKernel = require('./../index.js'),
   port = Math.floor(2000 + 1000 * Math.random());
 
 describe('groups testing', function () {
-
   var kabam;
   before(function (done) {
 

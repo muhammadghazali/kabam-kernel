@@ -1,11 +1,12 @@
 /*jshint immed: false */
+'use strict';
 var should = require('should'),
   async = require('async'),
   mwcKernel = require('./../index.js'),
   events = require('events'),
   config = require('./../example/config.json').development,
   request = require('request'),
-  port = Math.floor(2000+1000*Math.random());
+  port = Math.floor(2000 + 1000 * Math.random());
 
 
 describe('Kernel', function () {
@@ -106,7 +107,7 @@ describe('Kernel', function () {
   };
 
   var extendModelFunctionPlugin = function (kabam) {
-    var DogsSchema = new  kabam.mongoose.Schema({
+    var DogsSchema = new kabam.mongoose.Schema({
       'nickname': String
     });
     DogsSchema.index({
@@ -335,7 +336,7 @@ describe('Kernel', function () {
     describe('it actually works', function () {
       var response, body;
       before(function (done) {
-        request.get('http://localhost:'+port+'/middleware3Path', function (err, res, b) {
+        request.get('http://localhost:' + port + '/middleware3Path', function (err, res, b) {
           if (err) {
             throw err;
           }
@@ -345,7 +346,7 @@ describe('Kernel', function () {
         });
       });
 
-      it('it starts HTTP server on port localhost:'+port+'', function () {
+      it('it starts HTTP server on port localhost:' + port + '', function () {
         response.statusCode.should.equal(404);//this is ok
       });
 
@@ -371,7 +372,7 @@ describe('Kernel', function () {
     describe('it actually works', function () {
       var response, body;
       before(function (done) {
-        request.get('http://localhost:'+port+'/someRoute', function (err, res, b) {
+        request.get('http://localhost:' + port + '/someRoute', function (err, res, b) {
           if (err) {
             throw err;
           }
@@ -381,7 +382,7 @@ describe('Kernel', function () {
         });
       });
 
-      it('it starts HTTP server on port localhost:'+port+'', function () {
+      it('it starts HTTP server on port localhost:' + port + '', function () {
         response.statusCode.should.equal(200);
         body.should.equal('HI');
       });
@@ -441,7 +442,7 @@ describe('Kernel', function () {
       describe('it actually works', function () {
         var response, body;
         before(function (done) {
-          request.get('http://localhost:'+port+'/someRoute', function (err, res, b) {
+          request.get('http://localhost:' + port + '/someRoute', function (err, res, b) {
             if (err) {
               throw err;
             }
@@ -451,7 +452,7 @@ describe('Kernel', function () {
           });
         });
 
-        it('it starts HTTP server on port localhost:'+port+'', function () {
+        it('it starts HTTP server on port localhost:' + port + '', function () {
           response.statusCode.should.equal(200);
           body.should.equal('HI');
         });
@@ -472,7 +473,7 @@ describe('Kernel', function () {
       describe('it actually works', function () {
         var response, body;
         before(function (done) {
-          request.get('http://localhost:'+port+'/newPlugin', function (err, res, b) {
+          request.get('http://localhost:' + port + '/newPlugin', function (err, res, b) {
             if (err) {
               throw err;
             }
@@ -482,7 +483,7 @@ describe('Kernel', function () {
           });
         });
 
-        it('it starts HTTP server on port localhost:'+port+'', function () {
+        it('it starts HTTP server on port localhost:' + port + '', function () {
           response.statusCode.should.equal(200);
         });
 
@@ -507,7 +508,7 @@ describe('Kernel', function () {
   describe('#MWC.listen(portNumber)', function () {
     var response, body;
     before(function (done) {
-      request.get('http://localhost:'+port+'/someRoute', function (err, res, b) {
+      request.get('http://localhost:' + port + '/someRoute', function (err, res, b) {
         if (err) {
           throw err;
         }
@@ -517,7 +518,7 @@ describe('Kernel', function () {
       });
     });
 
-    it('it starts HTTP server on port localhost:'+port+'', function () {
+    it('it starts HTTP server on port localhost:' + port + '', function () {
       response.statusCode.should.equal(200);
       body.should.equal('HI');
     });
@@ -548,7 +549,7 @@ describe('Kernel', function () {
 
   });
 
-  after(function(done){
+  after(function (done) {
     MWC.stop();
     done();
   });

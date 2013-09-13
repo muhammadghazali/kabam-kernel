@@ -1,3 +1,5 @@
+/*jshint immed: false */
+'use strict';
 var should = require('should'),
   mwcKernel = require('./../index.js'),
   events = require('events'),
@@ -275,21 +277,21 @@ describe('Kernel events emitter testing', function () {
     var user;
     before(function (done) {
       MWC.model.User.create({
-          'email': 'hzy15@dddf.sg',
-          'apiKey': 'vseBydetHoroshooneByApiKey4',
-          'emailVerified': false,
-          'apiKeyCreatedAt': new Date()
-        }, function (err, userCreated) {
+        'email': 'hzy15@dddf.sg',
+        'apiKey': 'vseBydetHoroshooneByApiKey4',
+        'emailVerified': false,
+        'apiKeyCreatedAt': new Date()
+      }, function (err, userCreated) {
+        if (err) {
+          throw err;
+        }
+
+        MWC.model.User.findOneByApiKeyAndVerify('vseBydetHoroshooneByApiKey4', function (err, userActivated) {
           if (err) {
             throw err;
           }
-
-          MWC.model.User.findOneByApiKeyAndVerify('vseBydetHoroshooneByApiKey4', function (err, userActivated) {
-            if (err) {
-              throw err;
-            }
-          });
         });
+      });
 
 
       MWC.on('users:findOneByApiKeyAndVerify', function (u) {
@@ -342,16 +344,16 @@ describe('Kernel events emitter testing', function () {
     var user;
     before(function (done) {
       MWC.model.User.create({
-          'email': 'hzy23@dddf.sg',
-          'isBanned': true
-        }, function (err, userCreated) {
-          if (err) {
-            throw err;
-          }
+        'email': 'hzy23@dddf.sg',
+        'isBanned': true
+      }, function (err, userCreated) {
+        if (err) {
+          throw err;
+        }
 
-          userCreated.unban(function () {
-          });
+        userCreated.unban(function () {
         });
+      });
 
 
       MWC.on('users:unban', function (u) {
@@ -372,15 +374,15 @@ describe('Kernel events emitter testing', function () {
     var user;
     before(function (done) {
       MWC.model.User.create({
-          'email': 'hzy27@dddf.sg'
-        }, function (err, userCreated) {
-          if (err) {
-            throw err;
-          }
+        'email': 'hzy27@dddf.sg'
+      }, function (err, userCreated) {
+        if (err) {
+          throw err;
+        }
 
-          MWC.model.User.ban('hzy27@dddf.sg', function () {
-          });
+        MWC.model.User.ban('hzy27@dddf.sg', function () {
         });
+      });
 
 
       MWC.on('users:ban', function (u) {

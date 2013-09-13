@@ -1,5 +1,5 @@
 /*jshint immed: false */
-//*/
+'use strict';
 var should = require('should'),
   async = require('async'),
   mwcCore = require('./../index.js'),
@@ -733,7 +733,7 @@ describe('Users model', function () {
           });
         });
 
-        it('user instance have correct values',function(){
+        it('user instance have correct values', function () {
           user.username.should.be.equal('test888');
           user.email.should.be.equal('ostroumov@teksi.ru');
           user._id.should.match(/[a-z0-9A-Z]+/);
@@ -1080,21 +1080,21 @@ describe('Users model', function () {
     });
   });
 
-  describe('user model have to be compatible with kabam-plugin-test',function(){
-    it('it exposes getForUser and canCreate for Active Record',function(){
+  describe('user model have to be compatible with kabam-plugin-test', function () {
+    it('it exposes getForUser and canCreate for Active Record', function () {
       kabam.model.User.getForUser.should.be.a('function');
       kabam.model.Users.getForUser.should.be.a('function');
       kabam.model.User.canCreate.should.be.a('function');
       kabam.model.Users.canCreate.should.be.a('function');
     });
 
-    describe('getForUser and canCreate works for root',function(){
-      var user,users;
+    describe('getForUser and canCreate works for root', function () {
+      var user, users;
       before(function (done) {
         kabam.model.User.create({
-          'username':'test888',
+          'username': 'test888',
           'email': 'anybody@teksi.ru',
-          'root':true,
+          'root': true,
           'profileComplete': true,
           'emailVerified': true
         }, function (err, userCreated) {
@@ -1102,18 +1102,18 @@ describe('Users model', function () {
             throw err;
           }
           user = userCreated;
-          kabam.model.User.getForUser(user,function(err, usersFound){
-            if(err) throw err;
+          kabam.model.User.getForUser(user, function (err, usersFound) {
+            if (err) throw err;
             users = usersFound;
             done();
           });
         });
       });
 
-      it('getForUser returns list of users',function(){
+      it('getForUser returns list of users', function () {
         users.should.be.an.instanceOf(Array);
         users.length.should.be.above(0);
-        users.map(function(userToTest){
+        users.map(function (userToTest) {
           userToTest.username.should.be.a('string');
           userToTest.email.should.be.a('string');
           userToTest._id.should.match(/[a-z0-9A-Z]+/);
@@ -1137,9 +1137,9 @@ describe('Users model', function () {
         });
       });
 
-      it('canCreate returns true',function(){
+      it('canCreate returns true', function () {
         kabam.model.User.canCreate(user).should.be.true;
-        kabam.model.User.canCreate({root:false}).should.be.false;
+        kabam.model.User.canCreate({root: false}).should.be.false;
       });
 
       after(function (done) {
@@ -1147,13 +1147,13 @@ describe('Users model', function () {
       });
     });
 
-    describe('getForUser and canCreate do not works for non root',function(){
-      var user,users,errorThrown;
+    describe('getForUser and canCreate do not works for non root', function () {
+      var user, users, errorThrown;
       before(function (done) {
         kabam.model.User.create({
-          'username':'test888',
+          'username': 'test888',
           'email': 'anybody@teksi.ru',
-          'root':false,
+          'root': false,
           'profileComplete': true,
           'emailVerified': true
         }, function (err, userCreated) {
@@ -1161,26 +1161,26 @@ describe('Users model', function () {
             throw err;
           }
           user = userCreated;
-          kabam.model.User.getForUser(user,function(err, usersFound){
-            errorThrown=err;
+          kabam.model.User.getForUser(user, function (err, usersFound) {
+            errorThrown = err;
             users = usersFound;
             done();
           });
         });
       });
 
-      it('getForUser throws error',function(){
+      it('getForUser throws error', function () {
         errorThrown.should.be.instanceOf(Error);
         errorThrown.message.should.be.equal('Access denied!');
         should.not.exist(users);
       });
 
 
-      it('fails when non root user access the usersApi',function(){
+      it('fails when non root user access the usersApi', function () {
         user.canRead(user).should.be.false;
         user.canWrite(user).should.be.false;
       });
-      it('canCreate returns true',function(){
+      it('canCreate returns true', function () {
         kabam.model.User.canCreate(user).should.be.false;
       });
 
@@ -1191,8 +1191,8 @@ describe('Users model', function () {
 
   });
 
-  describe('private messages system',function(){
-    describe('messages schema have to be compatible with kabam-plugin-rest', function(){
+  describe('private messages system', function () {
+    describe('messages schema have to be compatible with kabam-plugin-rest', function () {
       var user;
       before(function (done) {
         kabam.model.User.create({
@@ -1208,20 +1208,21 @@ describe('Users model', function () {
         });
       });
 
-      it('it exposes getForUser and canCreate for Active Record',function(){
+      it('it exposes getForUser and canCreate for Active Record', function () {
         kabam.model.Message.getForUser.should.be.a('function');
         kabam.model.Messages.getForUser.should.be.a('function');
         kabam.model.Message.canCreate.should.be.a('function');
         kabam.model.Messages.canCreate.should.be.a('function');
       });
 
-      it('returns the proper values for canCreate',function(){
+      it('returns the proper values for canCreate', function () {
         kabam.model.Messages.canCreate(user).should.be.true;
         should.not.exist(kabam.model.Messages.canCreate({}));
-        should.not.exist(kabam.model.Messages.canCreate({'profileComplete':false}));
-        kabam.model.Messages.canCreate({'emailVerified':false}).should.be.false;;
-        kabam.model.Messages.canCreate({'emailVerified':false}).should.be.false;
-        should.not.exist(kabam.model.Messages.canCreate({'isBanned':true}));
+        should.not.exist(kabam.model.Messages.canCreate({'profileComplete': false}));
+        kabam.model.Messages.canCreate({'emailVerified': false}).should.be.false;
+        ;
+        kabam.model.Messages.canCreate({'emailVerified': false}).should.be.false;
+        should.not.exist(kabam.model.Messages.canCreate({'isBanned': true}));
       });
 
       after(function (done) {
@@ -1229,30 +1230,30 @@ describe('Users model', function () {
       });
     });
 
-    describe('messages system actually works',function(){
-      var User1,User2;
-      before(function(done){
+    describe('messages system actually works', function () {
+      var User1, User2;
+      before(function (done) {
         async.parallel({
-          'user1':function(cb){
+          'user1': function (cb) {
             kabam.model.User.create({
-              'username':'testSpamer1',
-              'email':'testSpamer1@example.org',
-              'emailVerified':true,
-              'profileComplete':true,
-              'isBanned':false
-            },cb);
+              'username': 'testSpamer1',
+              'email': 'testSpamer1@example.org',
+              'emailVerified': true,
+              'profileComplete': true,
+              'isBanned': false
+            }, cb);
           },
-          'user2':function(cb){
+          'user2': function (cb) {
             kabam.model.User.create({
-              'username':'testSpamer2',
-              'email':'testSpamer2@example.org',
-              'emailVerified':true,
-              'profileComplete':true,
-              'isBanned':false
-            },cb);
+              'username': 'testSpamer2',
+              'email': 'testSpamer2@example.org',
+              'emailVerified': true,
+              'profileComplete': true,
+              'isBanned': false
+            }, cb);
           }
-        },function(err,obj){
-          if(err) throw err;
+        }, function (err, obj) {
+          if (err) throw err;
           User1 = obj.user1;
           User2 = obj.user2;
           done();
@@ -1443,18 +1444,18 @@ describe('Users model', function () {
         });
       });
 
-      after(function(done){
+      after(function (done) {
         async.parallel([
-          function(cb){
+          function (cb) {
             User1.remove(cb);
           },
-          function(cb){
+          function (cb) {
             User2.remove(cb);
           },
-          function(cb){
-            kabam.model.Message.remove({'from':User1._id},cb);
+          function (cb) {
+            kabam.model.Message.remove({'from': User1._id}, cb);
           }
-        ],done);
+        ], done);
       });
     });
   });
