@@ -76,7 +76,7 @@ exports.initFunction = function (kabam) {
     }
 
     if (user.hasRole('hadmin')) {
-      callback(null, 'admin'); //roots are admins are admins of every group
+      callback(null, 'admin'); //roots are admins of every group
       return;
     }
 
@@ -202,23 +202,6 @@ exports.initFunction = function (kabam) {
     }
   };
 
-    //get recent messages in this group
-    GroupsSchema.methods.getMessages = function (limit, offset, callback) {
-      if (!parseInt(offset) > 0) {
-        offset = 0;
-      }
-      if (!parseInt(limit) > 0) {
-        limit = 20;
-      }
-
-      kabam.model.groupMessages.find({'groupId': this._id})
-        .populate('user')
-        .limit(limit)
-        .skip(offset)
-        .sort('createdAt')
-        .exec(callback);
-    };
-
     GroupsSchema.statics.findGroup = function (schoolUri, courseUri, groupUri, callback) {
       var groups = this;
 
@@ -330,4 +313,3 @@ exports.initFunction = function (kabam) {
     var Groups = kabam.mongoConnection.model('groups', GroupsSchema);
     return Groups;
   };
-
