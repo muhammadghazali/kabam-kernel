@@ -63,7 +63,7 @@ exports.initFunction = function (kabam) {
    * @description
    * Check role in this group, with respect to parent groups.
    * @param {User}  user to check rights against
-   * @param {function} callback(err,stringWithRoleName) to be called on completion
+   * @param {function} callback - function(err, stringWithRoleName) to be called on completion
    */
 
   GroupsSchema.methods.checkRights = function (user, callback) {
@@ -419,7 +419,7 @@ exports.initFunction = function (kabam) {
         'courseId': ((thisGroup.tier === 1) ? null : thisGroup._id)
       }, callback);
     } else {
-      callback(new Error('This is group is 3 tier - it cannot have child groups'));
+      callback(new Error('This is group of 3 tier - it cannot have child groups'));//todo maybe more descriptive err message
     }
   };
   //compatibility with rest plugin
