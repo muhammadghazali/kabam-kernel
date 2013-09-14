@@ -1224,14 +1224,65 @@ describe('Users model', function () {
         kabam.model.Messages.canCreate.should.be.a('function');
       });
 
-      it('returns the proper values for canCreate', function () {
-        kabam.model.Messages.canCreate(user).should.be.true;
-        should.not.exist(kabam.model.Messages.canCreate({}));
-        should.not.exist(kabam.model.Messages.canCreate({'profileComplete': false}));
-        kabam.model.Messages.canCreate({'emailVerified': false}).should.be.false;
-        ;
-        kabam.model.Messages.canCreate({'emailVerified': false}).should.be.false;
-        should.not.exist(kabam.model.Messages.canCreate({'isBanned': true}));
+      describe('canCreate for proper user', function(){
+        var val;
+        before(function(done){
+          kabam.model.Messages.canCreate(user, function(err,v){
+            if(err) throw err;
+            val = v;
+            done();
+          });
+        });
+
+        it('fires callback with (null, true)',function(){
+          val.should.be.true;
+        });
+      });
+
+      describe('canCreate for user with uncomplete profile', function(){
+        var val;
+        before(function(done){
+          kabam.model.Messages.canCreate({'profileComplete': false}, function(err,v){
+            if(err) throw err;
+            val = v;
+            done();
+          });
+        });
+
+        it('fires callback with (null,null)',function(){
+          should.not.exists(val);
+        });
+      });
+
+      describe('canCreate for user with unverified profile', function(){
+        var val;
+        before(function(done){
+          kabam.model.Messages.canCreate({'emailVerified': false}, function(err,v){
+            if(err) throw err;
+            val = v;
+            done();
+          });
+        });
+
+        it('fires callback with (null,null)',function(){
+          //should.not.exists(val);
+          val.should.be.false;
+        });
+      });
+
+      describe('canCreate for user with banned profile', function(){
+        var val;
+        before(function(done){
+          kabam.model.Messages.canCreate({'isBanned': true}, function(err, v){
+            if(err) throw err;
+            val = v;
+            done();
+          });
+        });
+
+        it('fires callback with (null,null)',function(){
+          should.not.exists(val);
+        });
       });
 
       after(function (done) {
@@ -1474,5 +1525,3 @@ describe('Users model', function () {
     done();
   });
 });
-
-//*/

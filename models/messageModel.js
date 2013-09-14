@@ -24,16 +24,16 @@ exports.initFunction = function (kabam) {
     }
   };
 
-  messageSchema.statics.canCreate = function (user) {
-    return (user && user.emailVerified && user.profileComplete && !user.isBanned);
+  messageSchema.statics.canCreate = function (user, callback) {
+    callback(null, user && user.emailVerified && user.profileComplete && !user.isBanned);
   };
 
-  messageSchema.methods.canRead = function (user) {
-    return (user && (user._id.toString() === this.to.toString() || user._id.toString() === this.from.toString()));
+  messageSchema.methods.canRead = function (user, callback) {
+    callback(null, user && (user._id.toString() === this.to.toString() || user._id.toString() === this.from.toString()));
   };
 
-  messageSchema.methods.canWrite = function (user) {
-    return false;
+  messageSchema.methods.canWrite = function (user, callback) {
+    callback(null, false);
   };
 
   return kabam.mongoConnection.model('messages', messageSchema);
