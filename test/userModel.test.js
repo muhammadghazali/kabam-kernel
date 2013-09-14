@@ -1265,7 +1265,6 @@ describe('Users model', function () {
         });
 
         it('fires callback with (null,null)',function(){
-          //should.not.exists(val);
           val.should.be.false;
         });
       });
@@ -1490,7 +1489,6 @@ describe('Users model', function () {
           it('fires callback with recent messages', function () {
             recentMessages.should.be.instanceOf(Array);
             recentMessages.length.should.be.equal(2);
-            //recentMessages.should.be.equal(1);
 
             recentMessages[0].message.should.be.equal('test2');
             recentMessages[0].to.should.be.eql(User2._id);
