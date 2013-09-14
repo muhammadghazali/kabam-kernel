@@ -631,30 +631,88 @@ describe('Users model', function () {
           });
         });
 
-        describe('kabam.model.User.canCreate', function () {
-          it('returns true for root user', function () {
-            kabam.model.User.canCreate({root: true}).should.be.true;
+        describe('kabam.model.User.canCreate for root', function () {
+          var val;
+          before(function(done){
+            kabam.model.User.canCreate({root: true},function(err,v){
+              if(err) throw err;
+              val = v;
+              done();
+            });
           });
-          it('returns false for  not root user', function () {
-            kabam.model.Users.canCreate({root: false}).should.be.false;
-          });
-        });
-
-        describe('User.canRead', function () {
-          it('returns true for root user', function () {
-            user.canRead({root: true}).should.be.true;
-          });
-          it('returns false for  not root user', function () {
-            user.canRead({root: false}).should.be.false;
+          it('fires callback(null, true)', function () {
+            val.should.be.true;
           });
         });
 
-        describe('User.canWrite', function () {
-          it('returns true for root user', function () {
-            user.canWrite({root: true}).should.be.true;
+        describe('kabam.model.User.canCreate for non root', function () {
+          var val;
+          before(function(done){
+            kabam.model.User.canCreate({root: false},function(err,v){
+              if(err) throw err;
+              val = v;
+              done();
+            });
           });
-          it('returns false for  not root user', function () {
-            user.canWrite({root: false}).should.be.false;
+          it('fires callback(null, false)', function () {
+            val.should.be.false;
+          });
+        });
+
+
+        describe('kabam.model.User.canRead for root', function () {
+          var val;
+          before(function(done){
+            user.canRead({root: true},function(err,v){
+              if(err) throw err;
+              val = v;
+              done();
+            });
+          });
+          it('fires callback(null, true)', function () {
+            val.should.be.true;
+          });
+        });
+
+        describe('kabam.model.User.canRead for non root', function () {
+          var val;
+          before(function(done){
+            user.canRead({root: false},function(err,v){
+              if(err) throw err;
+              val = v;
+              done();
+            });
+          });
+          it('fires callback(null, false)', function () {
+            val.should.be.false;
+          });
+        });
+
+        describe('kabam.model.User.canWrite for root', function () {
+          var val;
+          before(function(done){
+            user.canWrite({root: true},function(err,v){
+              if(err) throw err;
+              val = v;
+              done();
+            });
+          });
+          it('fires callback(null, true)', function () {
+            val.should.be.true;
+          });
+        });
+
+        describe('kabam.model.User.canWrite for non root', function () {
+          var val;
+          before(function(done){
+            user.canWrite({root: false},function(err,v){
+              if(err) throw err;
+              val = v;
+              done();
+            });
+          });
+          it('fires callback(null, false)', function () {
+            val.should.be.false;
           });
         });
 
@@ -1132,56 +1190,7 @@ describe('Users model', function () {
           userToTest.canRead.should.be.a('function');
           userToTest.canWrite.should.be.a('function');
 
-          userToTest.canRead(user).should.be.true;
-          userToTest.canWrite(user).should.be.true;
         });
-      });
-
-      it('canCreate returns true', function () {
-        kabam.model.User.canCreate(user).should.be.true;
-        kabam.model.User.canCreate({root: false}).should.be.false;
-      });
-
-      after(function (done) {
-        user.remove(done);
-      });
-    });
-
-    describe('getForUser and canCreate do not works for non root', function () {
-      var user, users, errorThrown;
-      before(function (done) {
-        kabam.model.User.create({
-          'username': 'test888',
-          'email': 'anybody@teksi.ru',
-          'root': false,
-          'profileComplete': true,
-          'emailVerified': true
-        }, function (err, userCreated) {
-          if (err) {
-            throw err;
-          }
-          user = userCreated;
-          kabam.model.User.getForUser(user, function (err, usersFound) {
-            errorThrown = err;
-            users = usersFound;
-            done();
-          });
-        });
-      });
-
-      it('getForUser throws error', function () {
-        errorThrown.should.be.instanceOf(Error);
-        errorThrown.message.should.be.equal('Access denied!');
-        should.not.exist(users);
-      });
-
-
-      it('fails when non root user access the usersApi', function () {
-        user.canRead(user).should.be.false;
-        user.canWrite(user).should.be.false;
-      });
-      it('canCreate returns true', function () {
-        kabam.model.User.canCreate(user).should.be.false;
       });
 
       after(function (done) {

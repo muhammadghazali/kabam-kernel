@@ -952,7 +952,6 @@ exports.init = function (mwc) {
    * @description
    * This function return the array of users, that can be editable by current user.
    * Usually, if user is root, he can edit other users
-   * @example
    */
   UserSchema.statics.getForUser = function (user, parameters, callback) {
     var callback2use,
@@ -982,10 +981,10 @@ exports.init = function (mwc) {
    * Can this user create new users by rest api? Returns true if he/she can.
    * If this user is root, he can do it.
    * @param {User} user - user to test privileges, for example, the one from request object
-   * @returns {boolean} - true if he/she can.
+   * @param {function} callback - function(err, booleanValueCanWrite)
    */
-  UserSchema.statics.canCreate = function (user) {
-    return (user && user.root);
+  UserSchema.statics.canCreate = function (user, callback) {
+    callback(null, user && user.root);
   };
   /**
    * @ngdoc function
@@ -994,10 +993,10 @@ exports.init = function (mwc) {
    * Can this user read other users profiles by rest api? Returns true if he/she can.
    * If this user is root, he can do it.
    * @param {User} user - user to test privileges, for example, the one from request object
-   * @returns {boolean} - true if he/she can.
+   * @param {function} callback - function(err, booleanValueCanWrite)
    */
-  UserSchema.methods.canRead = function (user) {
-    return (user && user.root);
+  UserSchema.methods.canRead = function (user, callback) {
+    callback(null, user && user.root);
   };
   /**
    * @ngdoc function
@@ -1006,10 +1005,10 @@ exports.init = function (mwc) {
    * Can this user update/delete other users' profiles by rest api? Returns true
    * If this user is root, he can do it.
    * @param {User} user - user to test privileges, for example, the one from request object
-   * @returns {boolean} - true if he/she can.
+   * @param {function} callback - function(err, booleanValueCanWrite)
    */
-  UserSchema.methods.canWrite = function (user) {
-    return (user && user.root);
+  UserSchema.methods.canWrite = function (user, callback) {
+    callback(null, user && user.root);
   };
 
   /**
