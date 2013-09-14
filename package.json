@@ -12,7 +12,7 @@
     "test": "./node_modules/.bin/mocha --reporter spec"
   },
   "bin": {
-    "kabamUsers":"bin/kabamUsers.js"
+    "kabamUsers": "bin/kabamUsers.js"
   },
   "repository": {
     "type": "git",
@@ -24,8 +24,8 @@
     "redis": "*",
     "connect-redis": "*",
     "connect-flash": "*",
-    "socket.io":"*",
-    "passport.socketio":"*",
+    "socket.io": "*",
+    "passport.socketio": "*",
     "passport": "*",
     "passport-local": "*",
     "passport-hash": "*",
@@ -38,7 +38,8 @@
     "toobusy": "*",
     "colors": "*",
     "commander": "1.3.2",
-    "validator": "*"
+    "validator": "*",
+    "slugify2": "*"
   },
   "devDependencies": {
     "grunt": "*",

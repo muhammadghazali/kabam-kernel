@@ -1,5 +1,8 @@
 'use strict';
-var async = require('async');
+var async = require('async'),
+  slugify2 = require('slugify2'),
+  sanitaze = require('validator').sanitize; //used for dealing with xss injections in title
+
 exports.name = 'group';
 exports.initFunction = function (kabam) {
   var GroupsSchema = new kabam.mongoose.Schema({
@@ -281,7 +284,7 @@ exports.initFunction = function (kabam) {
 
   /**
    * @ngdoc function
-   * @name Group.findGroup
+   * @name kabam.model.Group.findGroup
    * @param {String} schoolUri
    * @param {String}  courseUri
    * @param {String}  groupUri
@@ -397,6 +400,28 @@ exports.initFunction = function (kabam) {
     }
   };
 
+  /**
+   * @ngdoc function
+   * @name Group.createChildGroup
+   * @param {title} title - human readable title of group to be created
+   * @param {function} callback  - function(err,groupCreated) is called on operation completed
+   * @description
+   * Creates child group for current group. Empty, without members
+   */
+  GroupsSchema.methods.createChildGroup = function (title, callback) {
+    var thisGroup = this;
+    if (thisGroup.tier < 3) {
+      Groups.create({
+        'title': sanitaze(title).xss(),
+        'uri': slugify2(title), //it is sanitazed... i think
+        'tier': (thisGroup.tier - 1),
+        'schoolId': ((thisGroup.tier === 1) ? thisGroup._id : thisGroup.schoolId),
+        'courseId': ((thisGroup.tier === 1) ? null : thisGroup._id)
+      }, callback);
+    } else {
+      callback(new Error('This is group is 3 tier - it cannot have child groups'));
+    }
+  };
   //compatibility with rest plugin
 
   //function to work with kabam-plugin-rest - only root can work with REST api to see all groups todo - maybe we can change it in future
