@@ -285,9 +285,9 @@ exports.initFunction = function (kabam) {
   /**
    * @ngdoc function
    * @name kabam.model.Group.findGroup
-   * @param {String} schoolUri
-   * @param {String}  courseUri
-   * @param {String}  groupUri
+   * @param {String} schoolUri School URI
+   * @param {String}  courseUri Course URI
+   * @param {String}  groupUri Group URI
    * @param {function} callback  - function(err,groupFound) is called on operation completed
    * @description
    * Find the group from hierarchy level
