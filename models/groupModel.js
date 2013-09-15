@@ -470,6 +470,6 @@ exports.initFunction = function (kabam) {
     });
   };
 
-  var Groups = kabam.mongoConnection.model('groups', GroupsSchema);
+  var Groups = kabam.mongoConnection.model('Group', GroupsSchema);
   return Groups;
 };

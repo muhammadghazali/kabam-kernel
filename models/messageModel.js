@@ -36,5 +36,5 @@ exports.initFunction = function (kabam) {
     callback(null, false);
   };
 
-  return kabam.mongoConnection.model('messages', messageSchema);
+  return kabam.mongoConnection.model('Message', messageSchema);
 };
