@@ -130,10 +130,10 @@ describe('groups testing', function () {
         it('root have role of admin in school', function () {
           v.school.should.be.equal('admin');
         });
-        it('root have role of admin in school', function () {
+        it('root have role of admin in course', function () {
           v.course.should.be.equal('admin');
         });
-        it('root have role of admin in school', function () {
+        it('root have role of admin in grouop', function () {
           v.group.should.be.equal('admin');
         });
       });
