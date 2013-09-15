@@ -35,6 +35,7 @@
     "passport-facebook": "*",
     "passport-linkedin": "*",
     "mongoose": "*",
+    "mongoose-when": "*",
     "toobusy": "*",
     "colors": "*",
     "commander": "1.3.2",
