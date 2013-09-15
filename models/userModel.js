@@ -790,7 +790,8 @@ exports.init = function (mwc) {
    * @ngdoc function
    * @name User.saveProfile
    * @description
-   * Saves object as current users profile
+   * Saves object as current users profile.
+   * Emit event of `users:saveProfile` with full user's object in it
    * @param {object} profile - username to set for user instance
    * @param {function} callback  - function is fired when user is saved
    */
