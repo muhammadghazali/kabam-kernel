@@ -46,10 +46,10 @@ exports.initFunction = function (kabam) {
   GroupsSchema.methods.findRoleInThisGroup = function (user) {
     var role = 'visitor';
     this.members.map(function (member) {
-      if (member.user.toString() === user._id.toString()) {
+      if (member.user.toString() == user._id.toString()) {
         role = member.role;
       } else {
-        if (member.user._id && member.user._id.toString() === user._id.toString()) {
+        if (member.user._id && member.user._id.toString() == user._id.toString()) {
           role = member.role;
         }
       }

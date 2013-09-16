@@ -88,7 +88,7 @@ describe('groups testing', function () {
 //              }, 300);
 //            },
             'testCourseAddSchool': function (cb) {
-              shared.testCourse.schoolId = shared.testSchool._id;
+              shared.testCourse.schoolId = shared.testSchool._id.toString();
               shared.testCourse.save(cb);
             },
 //            'testCourseAddMember': function (cb) {
@@ -97,8 +97,8 @@ describe('groups testing', function () {
 //              }, 300);
 //            },
             'testGroupAddSchool': function (cb) {
-              shared.testGroup.schoolId = shared.testSchool._id;
-              shared.testGroup.courseId = shared.testCourse._id;
+              shared.testGroup.schoolId = shared.testSchool._id.toString();
+              shared.testGroup.courseId = shared.testCourse._id.toString();
               shared.testGroup.save(cb);
             }
           }, function (err2, obj2) {
@@ -143,13 +143,19 @@ describe('groups testing', function () {
         before(function (done) {
           async.parallel({
             'school': function (cb) {
-              shared.testSchool.checkRights(shared.userAdmin, cb);
+              kabam.model.Group.findGroup('testSchool', null, null, function (err, groupFound) {
+                groupFound.checkRights(shared.userAdmin, cb);
+              });
             },
             'course': function (cb) {
-              shared.testCourse.checkRights(shared.userAdmin, cb);
+              kabam.model.Group.findGroup('testSchool', 'testCourse', null, function (err, groupFound) {
+                groupFound.checkRights(shared.userAdmin, cb);
+              });
             },
             'group': function (cb) {
-              shared.testGroup.checkRights(shared.userAdmin, cb);
+              kabam.model.Group.findGroup('testSchool', 'testCourse', 'testGroup', function (err, groupFound) {
+                groupFound.checkRights(shared.userAdmin, cb);
+              });
             }
           }, function (err, obj) {
             if (err) throw err;
