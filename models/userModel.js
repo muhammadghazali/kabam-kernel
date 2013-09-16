@@ -1213,11 +1213,11 @@ exports.init = function (mwc) {
   /**
    * @ngdoc function
    * @name User.inviteToGroup
-   * @param {String} groupId
-   * @param {String} role
+   * @param {String} groupId Group ID
+   * @param {String} role Role
    * @description
    * Gives the current user role in group
-   * @param {function} callback
+   * @param {function} callback callback function
    */
   UserSchema.methods.inviteToGroup = function (groupId, role, callback) {
     var thisUser = this;
@@ -1237,10 +1237,10 @@ exports.init = function (mwc) {
   /**
    * @ngdoc function
    * @name User.banFromGroup
-   * @param {String} groupId
+   * @param {String} groupId Group ID
    * @description
    * Removes current user from this group
-   * @param {function} callback
+   * @param {function} callback Callback
    */
   UserSchema.methods.banFromGroup = function (groupId, callback) {
     var thisUser = this;
@@ -1260,7 +1260,7 @@ exports.init = function (mwc) {
   /**
    * @ngdoc function
    * @name User.getRole
-   * @param {String} groupId
+   * @param {String} groupId Group ID
    * @description
    * Removes current user from this group
    * @param {function} callback - function(err,stringOfRoleName);

@@ -70,8 +70,8 @@ describe('groups testing', function () {
           },
           'testGroup': function (cb) {
             kabam.model.Group.create({
-              'title': 'testCourse',
-              'uri': 'testCourse',
+              'title': 'testGroup',
+              'uri': 'testGroup',
               'tier': 3
             }, cb);
           }
@@ -130,27 +130,35 @@ describe('groups testing', function () {
         it('root have role of admin in school', function () {
           v.school.should.be.equal('admin');
         });
-        it('root have role of admin in school', function () {
+        it('root have role of admin in course', function () {
           v.course.should.be.equal('admin');
         });
-        it('root have role of admin in school', function () {
+        it('root have role of admin in grouop', function () {
           v.group.should.be.equal('admin');
         });
       });
 /*/
-//fails... i'm finding why
       describe('userAdmin is a admin of every group', function () {
         var v;
         before(function (done) {
           async.parallel({
             'school': function (cb) {
-              shared.testSchool.checkRights(shared.userAdmin, cb);
+              kabam.model.Group.findOne({'uri':'testSchool'},
+              function(err,testSchool){
+                testSchool.checkRights(shared.userAdmin, cb);
+              });
             },
             'course': function (cb) {
-              shared.testCourse.checkRights(shared.userAdmin, cb);
+              kabam.model.Group.findOne({'uri':'testCourse'},
+              function(err,testCourse){
+                testCourse.checkRights(shared.userAdmin, cb);
+              });
             },
             'group': function (cb) {
-              shared.testGroup.checkRights(shared.userAdmin, cb);
+              kabam.model.Group.findOne({'uri':'testGroup'},
+              function(err,testGroup){
+                testGroup.checkRights(shared.userAdmin, cb);
+              });
             }
           }, function (err, obj) {
             if (err) throw err;
@@ -169,6 +177,7 @@ describe('groups testing', function () {
         });
       });
 //*/
+
       after(function (done) {
         async.parallel({
           'userRoot': function (cb) {
@@ -195,6 +204,7 @@ describe('groups testing', function () {
         }, done);
       });
     });
+//*/
   });
 
   describe('invite test', function () {
