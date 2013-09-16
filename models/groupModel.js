@@ -5,7 +5,7 @@ var async = require('async'),
 
 exports.name = 'group';
 exports.initFunction = function (kabam) {
-  var GroupsSchema = new kabam.mongoose.Schema({
+  var groupSchema = new kabam.mongoose.Schema({
       'name': {
         type: String,
         trim: true,
@@ -41,15 +41,23 @@ exports.initFunction = function (kabam) {
     }
   );
 
-  GroupsSchema.index({ name: 1, uri: 1, schoolId: 1, courseId: 1 });
+  groupSchema.index({ name: 1, uri: 1, schoolId: 1, courseId: 1 });
 
-  GroupsSchema.methods.findRoleInThisGroup = function (user) {
+  groupSchema.methods.findRoleInThisGroup = function (user) {
     var role = 'visitor';
     this.members.map(function (member) {
-      if (member.user.toString() == user._id.toString()) {
+      if (typeof member.user === 'string') {
+//        .toString() == user._id.toString()
+        console.log('string');
+        console.log(member.user);
+        console.log(user._id);
         role = member.role;
       } else {
-        if (member.user._id && member.user._id.toString() == user._id.toString()) {
+        console.log('obj');
+        console.log(member.user._id);
+        console.log(member.user.id);
+        console.log(user._id);
+        if (member.user._id && member.user._id.equals(user._id)) {
           role = member.role;
         }
       }
@@ -66,7 +74,7 @@ exports.initFunction = function (kabam) {
    * @param {function} callback - function(err, stringWithRoleName) to be called on completion
    */
 
-  GroupsSchema.methods.checkRights = function (user, callback) {
+  groupSchema.methods.checkRights = function (user, callback) {
     var thisGroup = this;
     if (!user) {
       callback(null, 'visitor');//non authorized user is visitor
@@ -147,7 +155,7 @@ exports.initFunction = function (kabam) {
    * @description
    * Invite user into group with desired role
    */
-  GroupsSchema.methods.invite = function (user, role, callback) {
+  groupSchema.methods.invite = function (user, role, callback) {
     var userIsNotMember = true,
       thisGroup = this;
     this.members.map(function (member) {
@@ -193,7 +201,7 @@ exports.initFunction = function (kabam) {
    * @description
    * Invite user into group with role of Admin
    */
-  GroupsSchema.methods.inviteAdmin = function (user, callback) {
+  groupSchema.methods.inviteAdmin = function (user, callback) {
     this.invite(user, 'admin', callback);
   };
 
@@ -205,7 +213,7 @@ exports.initFunction = function (kabam) {
    * @description
    * Invite user into group with role of Member
    */
-  GroupsSchema.methods.inviteMember = function (user, callback) {
+  groupSchema.methods.inviteMember = function (user, callback) {
     this.invite(user, 'member', callback);
   };
 
@@ -217,7 +225,7 @@ exports.initFunction = function (kabam) {
    * @description
    * Remove this user from members of this group
    */
-  GroupsSchema.methods.ban = function (user, callback) {
+  groupSchema.methods.ban = function (user, callback) {
     var i,
       thisGroup = this;
     async.parallel({
@@ -249,7 +257,7 @@ exports.initFunction = function (kabam) {
    * @description
    * Get group parent with respect to group tier
    */
-  GroupsSchema.methods.getParent = function (callback) {
+  groupSchema.methods.getParent = function (callback) {
     switch (this.tier) {
     case 2:
       Groups.findOne({'_id': this.schoolId, tier: 1}, callback);
@@ -269,7 +277,7 @@ exports.initFunction = function (kabam) {
    * @description
    * Get group children with respect to group tier
    */
-  GroupsSchema.methods.getChildren = function (callback) {
+  groupSchema.methods.getChildren = function (callback) {
     switch (this.tier) {
     case 1:
       Groups.find({'schoolId': this._id, tier: 2}, callback);
@@ -292,7 +300,7 @@ exports.initFunction = function (kabam) {
    * @description
    * Find the group from hierarchy level
    */
-  GroupsSchema.statics.findGroup = function (schoolUri, courseUri, groupUri, callback) {
+  groupSchema.statics.findGroup = function (schoolUri, courseUri, groupUri, callback) {
     var groups = this;
 
     if (schoolUri && !courseUri && !groupUri && typeof callback === 'function') {
@@ -408,7 +416,7 @@ exports.initFunction = function (kabam) {
    * @description
    * Creates child group for current group. Empty, without members
    */
-  GroupsSchema.methods.createChildGroup = function (title, callback) {
+  groupSchema.methods.createChildGroup = function (title, callback) {
     var thisGroup = this;
     if (thisGroup.tier < 3) {
       Groups.create({
@@ -425,7 +433,7 @@ exports.initFunction = function (kabam) {
   //compatibility with rest plugin
 
   //function to work with kabam-plugin-rest - only root can work with REST api to see all groups todo - maybe we can change it in future
-  GroupsSchema.statics.getForUser = function (user, parameters, callback) {
+  groupSchema.statics.getForUser = function (user, parameters, callback) {
     if (user && user.root) {
       if (typeof parameters === 'object') {
         this.find(parameters)
@@ -442,12 +450,12 @@ exports.initFunction = function (kabam) {
   };
 
   //function to work with kabam-plugin-rest - only root can create groups by REST api
-  GroupsSchema.statics.canCreate = function (user, callback) {
+  groupSchema.statics.canCreate = function (user, callback) {
     callback(null, (user && user.root));
   };
 
   //function to work with kabam-plugin-rest - admins and members can read this group parameters by REST api
-  GroupsSchema.methods.canRead = function (user, callback) {
+  groupSchema.methods.canRead = function (user, callback) {
     var thisGroup = this;
     thisGroup.checkRights(user, function (err, roleFound) {
       if (err) {
@@ -459,7 +467,7 @@ exports.initFunction = function (kabam) {
   };
 
   //function to work with kabam-plugin-rest - admins can change this group parameters by REST api
-  GroupsSchema.methods.canWrite = function (user, callback) {
+  groupSchema.methods.canWrite = function (user, callback) {
     var thisGroup = this;
     thisGroup.checkRights(user, function (err, roleFound) {
       if (err) {
@@ -470,6 +478,6 @@ exports.initFunction = function (kabam) {
     });
   };
 
-  var Groups = kabam.mongoConnection.model('Group', GroupsSchema);
+  var Groups = kabam.mongoConnection.model('Group', groupSchema);
   return Groups;
 };
