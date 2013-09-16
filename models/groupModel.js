@@ -223,7 +223,7 @@ exports.initFunction = function (kabam) {
     async.parallel({
       'idInGroup': function (cb) {
         for (i = 0; i < thisGroup.members.length; i = i + 1) {
-          if (thisGroup.members[i].user.toString() === user._id.toString()) {//we do not populate users here, so it works like it...
+          if (thisGroup.members[i].user.toString() == user._id.toString()) {//we do not populate users here, so it works like it...
             thisGroup.members.splice(i, 1);
             break;
           }
@@ -232,7 +232,7 @@ exports.initFunction = function (kabam) {
       },
       'idInUser': function (cb) {
         for (i = 0; i < user.groups.length; i = i + 1) {
-          if (user.groups[i].toString() === thisGroup._id.toString()) {//we do not populate groups here, so it works like it...
+          if (user.groups[i].toString() == thisGroup._id.toString()) {//we do not populate groups here, so it works like it...
             user.groups.splice(i, 1);
             break;
           }

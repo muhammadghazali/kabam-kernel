@@ -82,20 +82,20 @@ describe('groups testing', function () {
             'testSchoolAddAdmin': function (cb) {
               shared.testSchool.inviteAdmin(shared.userAdmin, cb);
             },
-            'testSchoolAddMember': function (cb) {
-              setTimeout(function () { //http://stackoverflow.com/questions/17499089/versionerror-no-matching-document-found-error-on-node-js-mongoose
-                shared.testSchool.inviteMember(shared.userMember, cb);
-              }, 300);
-            },
+//            'testSchoolAddMember': function (cb) {
+//              setTimeout(function () { //http://stackoverflow.com/questions/17499089/versionerror-no-matching-document-found-error-on-node-js-mongoose
+//                shared.testSchool.inviteMember(shared.userMember, cb);
+//              }, 300);
+//            },
             'testCourseAddSchool': function (cb) {
               shared.testCourse.schoolId = shared.testSchool._id;
               shared.testCourse.save(cb);
             },
-            'testCourseAddMember': function (cb) {
-              setTimeout(function () { //http://stackoverflow.com/questions/17499089/versionerror-no-matching-document-found-error-on-node-js-mongoose
-                shared.testCourse.inviteMember(shared.userMember, cb);
-              }, 300);
-            },
+//            'testCourseAddMember': function (cb) {
+//              setTimeout(function () { //http://stackoverflow.com/questions/17499089/versionerror-no-matching-document-found-error-on-node-js-mongoose
+//                shared.testCourse.inviteMember(shared.userMember, cb);
+//              }, 300);
+//            },
             'testGroupAddSchool': function (cb) {
               shared.testGroup.schoolId = shared.testSchool._id;
               shared.testGroup.courseId = shared.testCourse._id;
@@ -138,27 +138,35 @@ describe('groups testing', function () {
         });
       });
 
-      describe('userAdmin is a admin of every group', function () {
+      describe('userAdmin is admin of every group in school hierarchy',function(){
+        it('have to be created');
+      });
+
+      describe('userMember is member of every group in school hierarchy',function(){
+        it('have to be created');
+      });
+
+      describe('userVisitor is a visitor of every group', function () {
         var v;
         before(function (done) {
           async.parallel({
             'school': function (cb) {
-              kabam.model.Group.findOne({'uri':'testSchool'},
-              function(err,testSchool){
-                testSchool.checkRights(shared.userAdmin, cb);
-              });
+              kabam.model.Group.findOne({'uri': 'testSchool'},
+                function (err, testSchool) {
+                  testSchool.checkRights(shared.userVisitor, cb);
+                });
             },
             'course': function (cb) {
-              kabam.model.Group.findOne({'uri':'testCourse'},
-              function(err,testCourse){
-                testCourse.checkRights(shared.userAdmin, cb);
-              });
+              kabam.model.Group.findOne({'uri': 'testCourse'},
+                function (err, testCourse) {
+                  testCourse.checkRights(shared.userVisitor, cb);
+                });
             },
             'group': function (cb) {
-              kabam.model.Group.findOne({'uri':'testGroup'},
-              function(err,testGroup){
-                testGroup.checkRights(shared.userAdmin, cb);
-              });
+              kabam.model.Group.findOne({'uri': 'testGroup'},
+                function (err, testGroup) {
+                  testGroup.checkRights(shared.userVisitor, cb);
+                });
             }
           }, function (err, obj) {
             if (err) throw err;
@@ -166,16 +174,18 @@ describe('groups testing', function () {
             done();
           });
         });
-        it('userAdmin have role of admin in school', function () {
-          v.school.should.be.equal('admin');
+
+        it('userVisitor have role of visitor in school', function () {
+          v.school.should.be.equal('visitor');
         });
-        it('userAdmin have role of admin in course', function () {
-          v.course.should.be.equal('admin');
+        it('userVisitor have role of visitor in course', function () {
+          v.course.should.be.equal('visitor');
         });
-        it('userAdmin have role of admin in group', function () {
-          v.group.should.be.equal('admin');
+        it('userVisitor have role of visitor in group', function () {
+          v.group.should.be.equal('visitor');
         });
       });
+
 
       after(function (done) {
         async.parallel({
@@ -204,7 +214,7 @@ describe('groups testing', function () {
       });
     });
   });
-//*/
+
   describe('invite test', function () {
     it('have to be created');
   });
