@@ -139,7 +139,33 @@ describe('groups testing', function () {
       });
 
       describe('userAdmin is admin of every group in school hierarchy',function(){
-        it('have to be created');
+        var v;
+        before(function (done) {
+          async.parallel({
+            'school': function (cb) {
+              shared.testSchool.checkRights(shared.userAdmin, cb);
+            },
+            'course': function (cb) {
+              shared.testCourse.checkRights(shared.userAdmin, cb);
+            },
+            'group': function (cb) {
+              shared.testGroup.checkRights(shared.userAdmin, cb);
+            }
+          }, function (err, obj) {
+            if (err) throw err;
+            v = obj;
+            done();
+          });
+        });
+        it('userAdmin have role of admin in school', function () {
+          v.school.should.be.equal('admin');
+        });
+        it('userAdmin have role of admin in course', function () {
+          v.course.should.be.equal('admin');
+        });
+        it('userAdmin have role of admin in grouop', function () {
+          v.group.should.be.equal('admin');
+        });
       });
 
       describe('userMember is member of every group in school hierarchy',function(){
