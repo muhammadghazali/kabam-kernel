@@ -7,6 +7,7 @@ exports.initFunction = function (kabam) {
       'from': kabam.mongoose.Schema.Types.ObjectId,
       'fromProfile': { type: kabam.mongoose.Schema.Types.ObjectId, ref:'User' },
       'createdAt': { type: Date, default: Date.now },
+      'title' : {type: String, trim: true },
       'message': {type: String, trim: true } //trim whitespaces - http://mongoosejs.com/docs/api.html#schema_string_SchemaString-trim
     });
 

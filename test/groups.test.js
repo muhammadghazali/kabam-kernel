@@ -20,7 +20,7 @@ describe('groups testing', function () {
     });
     kabam.start(port);
   });
-
+//*/
   describe('general test', function () {
     describe('creating group hierarchy for users', function () {
       var shared;
@@ -137,7 +137,7 @@ describe('groups testing', function () {
           v.group.should.be.equal('admin');
         });
       });
-/*/
+
       describe('userAdmin is a admin of every group', function () {
         var v;
         before(function (done) {
@@ -176,7 +176,6 @@ describe('groups testing', function () {
           v.group.should.be.equal('admin');
         });
       });
-//*/
 
       after(function (done) {
         async.parallel({
@@ -204,9 +203,8 @@ describe('groups testing', function () {
         }, done);
       });
     });
-//*/
   });
-
+//*/
   describe('invite test', function () {
     it('have to be created');
   });
