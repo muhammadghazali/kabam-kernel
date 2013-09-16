@@ -1327,7 +1327,7 @@ describe('Users model', function () {
               event = m;
               setTimeout(done, 1000);
             });
-            User1.sendMessage(User2, "test1", function (err, messageCreated) {
+            User1.sendMessage(User2, 'test1','test1', function (err, messageCreated) {
               if (err) {
                 throw err;
               }
@@ -1348,6 +1348,7 @@ describe('Users model', function () {
 
           it('event have proper contents', function () {
             event.message.should.be.equal('test1');
+            event.title.should.be.equal('test1');
           });
         });
         describe('recieveMessage', function () {
@@ -1357,7 +1358,7 @@ describe('Users model', function () {
               event = m;
               setTimeout(done, 1000);
             });
-            User2.recieveMessage(User1, "test2", function (err, messageCreated) {
+            User2.recieveMessage(User1,'test2', 'test2', function (err, messageCreated) {
               if (err) {
                 throw err;
               }
@@ -1379,6 +1380,7 @@ describe('Users model', function () {
 
           it('event have proper contents', function () {
             event.message.should.be.equal('test2');
+            event.title.should.be.equal('test2');
           });
         });
       });
@@ -1403,10 +1405,12 @@ describe('Users model', function () {
             recentMessages.length.should.be.equal(2);
 
             recentMessages[0].message.should.be.equal('test2');
+            recentMessages[0].title.should.be.equal('test2');
             recentMessages[0].to.should.be.eql(User2._id);
             recentMessages[0].from.should.be.eql(User1._id);
 
             recentMessages[1].message.should.be.equal('test1');
+            recentMessages[1].title.should.be.equal('test1');
             recentMessages[1].to.should.be.eql(User2._id);
             recentMessages[1].from.should.be.eql(User1._id);
 
@@ -1430,13 +1434,14 @@ describe('Users model', function () {
           it('fires callback with recent messages', function () {
             recentMessages.should.be.instanceOf(Array);
             recentMessages.length.should.be.equal(2);
-            //recentMessages.should.be.equal(1);
 
             recentMessages[0].message.should.be.equal('test2');
+            recentMessages[0].title.should.be.equal('test2');
             recentMessages[0].to.should.be.eql(User2._id);
             recentMessages[0].from.should.be.eql(User1._id);
 
             recentMessages[1].message.should.be.equal('test1');
+            recentMessages[1].title.should.be.equal('test1');
             recentMessages[1].to.should.be.eql(User2._id);
             recentMessages[1].from.should.be.eql(User1._id);
 
@@ -1462,10 +1467,12 @@ describe('Users model', function () {
             recentMessages.length.should.be.equal(2);
 
             recentMessages[0].message.should.be.equal('test2');
+            recentMessages[0].title.should.be.equal('test2');
             recentMessages[0].to.should.be.eql(User2._id);
             recentMessages[0].from.should.be.eql(User1._id);
 
             recentMessages[1].message.should.be.equal('test1');
+            recentMessages[1].title.should.be.equal('test1');
             recentMessages[1].to.should.be.eql(User2._id);
             recentMessages[1].from.should.be.eql(User1._id);
 
@@ -1491,10 +1498,12 @@ describe('Users model', function () {
             recentMessages.length.should.be.equal(2);
 
             recentMessages[0].message.should.be.equal('test2');
+            recentMessages[0].title.should.be.equal('test2');
             recentMessages[0].to.should.be.eql(User2._id);
             recentMessages[0].from.should.be.eql(User1._id);
 
             recentMessages[1].message.should.be.equal('test1');
+            recentMessages[1].title.should.be.equal('test1');
             recentMessages[1].to.should.be.eql(User2._id);
             recentMessages[1].from.should.be.eql(User1._id);
 

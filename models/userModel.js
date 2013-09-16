@@ -1023,12 +1023,14 @@ exports.init = function (mwc) {
    * //User1 sends message to User2
    * ```
    * @param {User/string} to - reciever of message
+   * @param {string} title - title of message
    * @param {string} message - text of message
    * @param {function} callback -function to be called on message delivery
    */
-  UserSchema.methods.sendMessage = function (to, message, callback) {
+  UserSchema.methods.sendMessage = function (to, title, message, callback) {
     var thisUser = this;
     message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
+    title = sanitaze(title).xss(true); //https://npmjs.org/package/validator - see xss
     async.waterfall([
       function (cb) {
         if (typeof to === 'string') {
@@ -1047,6 +1049,7 @@ exports.init = function (mwc) {
           'toProfile': userFound._id,
           'from': thisUser._id,
           'fromProfile': thisUser._id,
+          'title': title,
           'message': message
         }, function (err, messageCreated) {
           if (err) {
@@ -1060,6 +1063,7 @@ exports.init = function (mwc) {
         mwc.emit('notify:pm', {
           'user': to,
           'from': thisUser,
+          'title': messageCreated.title,
           'message': messageCreated.message
         });
         cb();
@@ -1078,12 +1082,14 @@ exports.init = function (mwc) {
    * //User1 sends message to User2
    * ```
    * @param {User/string} from - reciever of message
+   * @param {string} title - title of message
    * @param {string} message - text of message
    * @param {function} callback -function to be called on message delivery
    */
-  UserSchema.methods.recieveMessage = function (from, message, callback) {
+  UserSchema.methods.recieveMessage = function (from, title,message, callback) {
     var thisUser = this;
     message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
+    title = sanitaze(title).xss(true); //https://npmjs.org/package/validator - see xss
     async.waterfall([
       function (cb) {
         if (typeof from === 'string') {
@@ -1102,6 +1108,7 @@ exports.init = function (mwc) {
           'fromProfile': userFound._id,
           'to': thisUser._id,
           'toProfile': thisUser._id,
+          'title':title,
           'message': message
         }, function (err, messageCreated) {
           if (err) {
@@ -1115,6 +1122,7 @@ exports.init = function (mwc) {
         mwc.emit('notify:pm', {
           'user': thisUser,
           'from': from,
+          'title': title,
           'message': messageCreated.message
         });
         cb();
