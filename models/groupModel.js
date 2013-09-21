@@ -57,8 +57,14 @@ exports.initFunction = function (kabam) {
         console.log(member.user._id);
         console.log(member.user.id);
         console.log(user._id);
-        if (member.user._id && member.user._id.equals(user._id)) {
-          role = member.role;
+        if (typeof member.user._id === 'undefined') {          
+          if (member.user.toString() == user._id.toString())
+            role = member.role;
+        } else {
+          if (member.user._id.equals(user._id)) {           
+            role = member.role;
+            console.log(role);
+          }
         }
       }
     });
@@ -82,12 +88,12 @@ exports.initFunction = function (kabam) {
     }
 
     if (user.root) {
-      callback(null, 'admin'); //hierarchy admins are admins of every group
+      callback(null, 'admin'); //roots are admins of every group
       return;
     }
 
     if (user.hasRole('hadmin')) {
-      callback(null, 'admin'); //roots are admins of every group
+      callback(null, 'admin'); //hierarchy admins are admins of every group
       return;
     }
 
@@ -98,8 +104,8 @@ exports.initFunction = function (kabam) {
 
     async.parallel({
       'inSchool': function (cb) {
-        if (this.schoolId) {
-          Groups.findOne({'_id': this.schoolId}, function (err, schoolFound) {
+        if (thisGroup.schoolId) {
+          Groups.findOne({'_id': thisGroup.schoolId}, function (err, schoolFound) {
             cb(err, schoolFound.findRoleInThisGroup(user));
           });
         } else {
@@ -107,8 +113,8 @@ exports.initFunction = function (kabam) {
         }
       },
       'inCourse': function (cb) {
-        if (this.courseId) {
-          Groups.findOne({'_id': this.courseId}, function (err, courseFound) {
+        if (thisGroup.courseId) {
+          Groups.findOne({'_id': thisGroup.courseId}, function (err, courseFound) {
             cb(err, courseFound.findRoleInThisGroup(user));
           });
         } else {
