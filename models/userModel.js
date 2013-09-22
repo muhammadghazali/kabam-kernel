@@ -477,7 +477,8 @@ exports.init = function (mwc) {
         'lastName',
         'firstName',
         'profileComplete',
-        'isOnline'
+        'isOnline',
+        'keychain'
       ],
       ret = {},
       x;
