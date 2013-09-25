@@ -48,26 +48,26 @@ exports.initFunction = function (kabam) {
     this.members.map(function (member) {
       if (typeof member.user === 'string') {
 //        .toString() == user._id.toString()
-        console.log('string');
-        console.log(member.user);
-        console.log(user._id);
+//        console.log('string');
+//        console.log(member.user);
+//        console.log(user._id);
         role = member.role;
       } else {
-        console.log('obj');
-        console.log(member.user._id);
-        console.log(member.user.id);
-        console.log(user._id);
-        if (typeof member.user._id === 'undefined') {          
+//        console.log('obj');
+//        console.log(member.user._id);
+//        console.log(member.user.id);
+//        console.log(user._id);
+        if (typeof member.user._id === 'undefined') {
           if (member.user.toString() == user._id.toString())
             role = member.role;
         } else {
-          if (member.user._id.equals(user._id)) {           
+          if (member.user._id.equals(user._id)) {
             role = member.role;
-            console.log(role);
           }
         }
       }
     });
+    console.log(user.username + '\'s ROLE IS ' + role);
     return role;
   };
 
