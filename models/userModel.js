@@ -703,28 +703,50 @@ exports.init = function (mwc) {
    * of user created
    */
   UserSchema.statics.signUp = function (username, email, password, callback) {
-    this.create({
-      'username': username,
-      'email': email,
-      'apiKey': sha512(rack()),
-      'emailVerified': false,
-      'root': false,
-      'profileComplete': true,
-      'apiKeyCreatedAt': new Date()
-    }, function (err, userCreated) {
-      if (err) {
-        callback(err);
-      } else {
-        userCreated.setPassword(password, function (err1) {
-          if (err1) {
-            callback(err1);
-          } else {
-            userCreated.notify('email', {'subject': 'Verify your email account!', 'template': 'signin'});
-            mwc.emit('users:signUp', userCreated);
-            callback(null, userCreated);
-          }
-        });
+    var _this = this;
+    if(!username){
+      return callback(Error('Username is required'));
+    }
+    // first find if some filed already taken
+    this.findOne({'$or':[{username:username}, {email:email}]}, function(err, user){
+      // TODO: database error, should be logged
+      if(err){
+        return callback(Error("Something went wrong"));
       }
+      if(user){
+        if(user.email === email){
+          return callback(Error('Email already taken'));
+        }
+        if(user.username === username){
+          return callback(Error('Username already taken'));
+        }
+      }
+      // create a user if username and email are available
+      _this.create({
+        'username': username,
+        'email': email,
+        'apiKey': sha512(rack()),
+        'emailVerified': false,
+        'root': false,
+        'profileComplete': true,
+        'apiKeyCreatedAt': new Date()
+      }, function (err, userCreated) {
+        if (err) {
+          // TODO: database error, should be logged
+          callback(Error("Something went wrong"));
+        } else {
+          userCreated.setPassword(password, function (err1) {
+            // TODO: database error, should be logged
+            if (err1) {
+              callback(Error("Something went wrong"));
+            } else {
+              userCreated.notify('email', {'subject': 'Verify your email account!', 'template': 'signin'});
+              mwc.emit('users:signUp', userCreated);
+              callback(null, userCreated);
+            }
+          });
+        }
+      });
     });
   };
 
