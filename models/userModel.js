@@ -19,7 +19,7 @@ function rack() {
   return result;
 }
 
-exports.init = function (mwc) {
+exports.init = function (kabam) {
   /**
    * @ngdoc function
    * @name User
@@ -42,7 +42,7 @@ exports.init = function (mwc) {
    * @description
    * Active record style Mongoose object to manipulate users collection
    */
-  var mongoose = mwc.mongoose,
+  var mongoose = kabam.mongoose,
     Schema = mongoose.Schema,
     UserSchema = new Schema({
         /**
@@ -196,7 +196,7 @@ exports.init = function (mwc) {
          * Role is defined IN group, not here
          */
         groups: [
-          { type: mwc.mongoose.Schema.Types.ObjectId, ref: 'Group' }
+          { type: kabam.mongoose.Schema.Types.ObjectId, ref: 'Group' }
         ]
       },
       {
@@ -228,7 +228,7 @@ exports.init = function (mwc) {
    * @example
    * ```javascript
    *
-   *   MWC.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *   kabam.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
    *     console.log(user.getGravatar(140));
    * // -> https://secure.gravatar.com/avatar/02ba513b62ef9f2f7798b9bac1ccf822?s=140
    *   });
@@ -287,7 +287,7 @@ exports.init = function (mwc) {
    * @example
    * ```javascript
    *
-   *   MWC.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *   kabam.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
    *     console.log(user.verifyPassword('someKey'));
    *   });
    *
@@ -307,7 +307,7 @@ exports.init = function (mwc) {
    * @example
    * ```javascript
    *
-   *   MWC.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *   kabam.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
    *     user.setPassword('someKey', function(err){if err throw err;});
    *   });
    *
@@ -317,7 +317,7 @@ exports.init = function (mwc) {
     var salt = sha512(rack());
     this.salt = salt;
     this.password = sha512(salt + newPassword);
-    mwc.emit('users:setPassword', this);
+    kabam.emit('users:setPassword', this);
     this.save(callback);
     return;
   };
@@ -331,7 +331,7 @@ exports.init = function (mwc) {
    * @example
    * ```javascript
    *
-   *   MWC.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *   kabam.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
    *     user.invalidateSession(function(err,newKey){if err throw err;});
    *   });
    *
@@ -355,7 +355,7 @@ exports.init = function (mwc) {
    * @example
    * ```javascript
    *
-   *   MWC.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *   kabam.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
    *     user.grantRole('rulerOfTheWorld', function(err){if err throw err;});
    *   });
    *
@@ -364,7 +364,7 @@ exports.init = function (mwc) {
   UserSchema.methods.grantRole = function (roleName, callback) {
     if (this.roles.indexOf(roleName) === -1) {
       this.roles.push(roleName);
-      mwc.emit('users:grantRole', this);
+      kabam.emit('users:grantRole', this);
       this.save(callback);
     } else {
       callback(null);
@@ -380,7 +380,7 @@ exports.init = function (mwc) {
    * @example
    * ```javascript
    *
-   *   MWC.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *   kabam.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
    *     if(user.hasRole('rulerOfTheWorld')){
    *       ...
    *     } else {
@@ -408,7 +408,7 @@ exports.init = function (mwc) {
    * @example
    * ```javascript
    *
-   *   MWC.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *   kabam.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
    *     user.revokeRole('rulerOfTheWorld', function(err){if err throw err;});
    *   });
    *
@@ -420,7 +420,7 @@ exports.init = function (mwc) {
       callback(null);
     } else {
       this.roles.splice(roleIndex, 1);
-      mwc.emit('users:revokeRole', this);
+      kabam.emit('users:revokeRole', this);
       this.save(callback);
     }
   };
@@ -434,7 +434,7 @@ exports.init = function (mwc) {
    */
   UserSchema.methods.ban = function (callback) {
     this.isBanned = true;
-    mwc.emit('users:ban', this);
+    kabam.emit('users:ban', this);
     this.save(callback);
   };
 
@@ -447,7 +447,7 @@ exports.init = function (mwc) {
    */
   UserSchema.methods.unban = function (callback) {
     this.isBanned = false;
-    mwc.emit('users:unban', this);
+    kabam.emit('users:unban', this);
     this.save(callback);
   };
 
@@ -531,7 +531,7 @@ exports.init = function (mwc) {
    * @ngdoc function
    * @name kabamKernel.model.User.findOneByUsernameOrEmail
    * @description
-   * Alias for mwc.model.User.findOneByLoginOrEmail
+   * Alias for kabam.model.User.findOneByLoginOrEmail
    * @param {string} usernameOrEmail  - username or email address of user
    * @param {function} callback  - function is fired when user is saved
    */
@@ -541,10 +541,10 @@ exports.init = function (mwc) {
    * @ngdoc function
    * @name User.notify
    * @description
-   * Notifies the current user, using the mwc event emitting system. For the present moment there is 2 event dispatchers that
+   * Notifies the current user, using the kabam event emitting system. For the present moment there is 2 event dispatchers that
    * can deliver notifications to users, first of them works by
-   * [email](https://github.com/mywebclass/mwc_plugin_notify_by_email) notifications, and the second one by
-   * [socket.io](https://github.com/mywebclass/mwc_plugin_socket_io) events.
+   * [email](https://github.com/mywebclass/kabam_plugin_notify_by_email) notifications, and the second one by
+   * [socket.io](https://github.com/mywebclass/kabam_plugin_socket_io) events.
    * There is private messages module - [https://github.com/mykabam/kabam-plugin-private-message](https://github.com/mykabam/kabam-plugin-private-message)
    *
    * @param {string} [channel] - optional, channel name, default is 'all'
@@ -552,12 +552,12 @@ exports.init = function (mwc) {
    * @example
    * ```javascript
    *
-   *     MWC.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *     kabam.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
    *       user.notify('email','Happy birthday'); // sending email to this user
    *     });
    *
    *     // we catching the notify event later
-   *     MWC.on('notify:email',function(emailObj){
+   *     kabam.on('notify:email',function(emailObj){
    *       console.log('Sendind email to '+emailObj.user.email+' with text "' + emailObj.message+'"');
    *     });
    * ```
@@ -576,7 +576,7 @@ exports.init = function (mwc) {
       }
     }
 
-    mwc.emit('notify:' + channelToUse, {user: this, message: messageToSend});
+    kabam.emit('notify:' + channelToUse, {user: this, message: messageToSend});
     return;
   };
 
@@ -591,7 +591,7 @@ exports.init = function (mwc) {
    * @example
    * ```javascript
    *
-   *     MWC.model.User.findOneByLoginOrEmail('test@rambler.ru',function(err,userCreated){
+   *     kabam.model.User.findOneByLoginOrEmail('test@rambler.ru',function(err,userCreated){
    *       user.notify('email','Happy birthday'); // sending email to this user
    *     });
    * ```
@@ -615,7 +615,7 @@ exports.init = function (mwc) {
    * @example
    * ```javascript
    *
-   *     MWC.model.User.findOneByApiKey('apiKey',function(err,userCreated){
+   *     kabam.model.User.findOneByApiKey('apiKey',function(err,userCreated){
    *       user.notify('email','Happy birthday'); // sending email to this user
    *     });
    * ```
@@ -634,7 +634,7 @@ exports.init = function (mwc) {
    * @example
    * ```javascript
    *
-   *     MWC.model.User.getByRole('admin',function(err,users){
+   *     kabam.model.User.getByRole('admin',function(err,users){
    *       users.map(function(user){
    *         user.notify('email','Happy birthday'); // sending email to this user
    *       })
@@ -657,7 +657,7 @@ exports.init = function (mwc) {
    * @example
    * ```javascript
    *
-   * mwc.model.User.processOAuthProfile('someEmail@somedomain.com',function(err,user){
+   * kabam.model.User.processOAuthProfile('someEmail@somedomain.com',function(err,user){
    *   assert.equal(true,user.emailVerified);
    *   assert.equal(false,user.profileComplete);
    *   assert.equal('someEmail@somedomain.com',user.email);
@@ -741,7 +741,7 @@ exports.init = function (mwc) {
               callback(Error("Something went wrong"));
             } else {
               userCreated.notify('email', {'subject': 'Verify your email account!', 'template': 'signin'});
-              mwc.emit('users:signUp', userCreated);
+              kabam.emit('users:signUp', userCreated);
               callback(null, userCreated);
             }
           });
@@ -775,7 +775,7 @@ exports.init = function (mwc) {
           if (err1) {
             callback(err1);
           } else {
-            mwc.emit('users:signUpByEmailOnly', userCreated);
+            kabam.emit('users:signUpByEmailOnly', userCreated);
             callback(null, userCreated);
           }
         });
@@ -787,7 +787,7 @@ exports.init = function (mwc) {
    * @ngdoc function
    * @name User.completeProfile
    * @description
-   * Complete users profile for user created by mwc.model.user.signUpByEmailOnly
+   * Complete users profile for user created by kabam.model.user.signUpByEmailOnly
    * @param {string} username - username to set for user instance
    * @param {string} password - password to set for user instance
    * @param {function} callback  - function is fired when user is saved
@@ -800,7 +800,7 @@ exports.init = function (mwc) {
         if (err) {
           callback('Unable to complete profile, username ' + username + ' is occupied!');
         } else {
-          mwc.emit('users:completeProfile', this);
+          kabam.emit('users:completeProfile', this);
           callback(null);
         }
       });
@@ -822,7 +822,7 @@ exports.init = function (mwc) {
   UserSchema.methods.saveProfile = function (profile, callback) {
     this.profile = profile;
     this.markModified('profile'); //http://mongoosejs.com/docs/schematypes.html
-    mwc.emit('users:saveProfile', this);
+    kabam.emit('users:saveProfile', this);
     this.save(callback);
   };
 
@@ -838,11 +838,11 @@ exports.init = function (mwc) {
    * @example
    * ```javascript
    * var userEgorLetov;
-   * mwc.model.User.findOneByLoginOrEmail('EgorLetov',function(err,user){
+   * kabam.model.User.findOneByLoginOrEmail('EgorLetov',function(err,user){
    *   if(err) throw err;
    *   userEgorLetov=user;
    *   user.setKeyChain('paradise','with_Iuda',function(err){
-   *    mwc.model.User.findOneByKeychain('paradise','with_Iuda',function(err,userFound){
+   *    kabam.model.User.findOneByKeychain('paradise','with_Iuda',function(err,userFound){
    *      assert.equal(userFound.username, userEgorLetov.username);
    *    });
    *   });
@@ -856,7 +856,7 @@ exports.init = function (mwc) {
     }
     this.keychain[provider] = id;
     this.markModified('keychain'); //http://mongoosejs.com/docs/schematypes.html
-    mwc.emit('users:setKeyChain', this);
+    kabam.emit('users:setKeyChain', this);
     this.save(callback);
   };
 
@@ -871,7 +871,7 @@ exports.init = function (mwc) {
   UserSchema.methods.revokeKeyChain = function (provider, callback) {
     this.keychain[provider] = null;
     this.markModified('keychain'); //http://mongoosejs.com/docs/schematypes.html
-    mwc.emit('users:revokeKeyChain', this);
+    kabam.emit('users:revokeKeyChain', this);
     this.save(callback);
   };
 
@@ -885,7 +885,7 @@ exports.init = function (mwc) {
    * @param {function} callback  - function is fired when user is saved
    * @example
    * ```javascript
-   *    mwc.model.User.findOneByKeychain('paradise','with_Iuda',function(err,userFound){
+   *    kabam.model.User.findOneByKeychain('paradise','with_Iuda',function(err,userFound){
    *      ...
    *    });
    *
@@ -928,7 +928,7 @@ exports.init = function (mwc) {
         if (userFound && userFound.emailVerified === false && (new Date().getTime() - userFound.apiKeyCreatedAt.getTime()) < 30 * 60 * 1000) {
           userFound.emailVerified = true;
           userFound.save(function (err1) {
-            mwc.emit('users:findOneByApiKeyAndVerify', userFound);
+            kabam.emit('users:findOneByApiKeyAndVerify', userFound);
             callback(err1, userFound);
           });
         } else {
@@ -954,7 +954,7 @@ exports.init = function (mwc) {
       } else {
         if (userFound && (new Date().getTime() - userFound.apiKeyCreatedAt.getTime()) < 30 * 60 * 1000) {
           userFound.setPassword(password, function (err1) {
-            mwc.emit('users:indOneByApiKeyAndResetPassword', userFound);
+            kabam.emit('users:indOneByApiKeyAndResetPassword', userFound);
             callback(err1, userFound);
           });
         } else {
@@ -965,7 +965,7 @@ exports.init = function (mwc) {
   };
 
 
-  //ACL for mwc_plugin_rest
+  //ACL for kabam_plugin_rest
 
   /**
    * @ngdoc function
@@ -1067,7 +1067,7 @@ exports.init = function (mwc) {
         }
       },
       function (userFound, cb) {
-        mwc.model.Message.create({
+        kabam.model.Message.create({
           'to': userFound._id,
           'toProfile': userFound._id,
           'from': thisUser._id,
@@ -1083,7 +1083,7 @@ exports.init = function (mwc) {
         });
       },
       function (to, messageCreated, cb) {
-        mwc.emit('notify:pm', {
+        kabam.emit('notify:pm', {
           'user': to,
           'from': thisUser,
           'title': messageCreated.title,
@@ -1126,7 +1126,7 @@ exports.init = function (mwc) {
         }
       },
       function (userFound, cb) {
-        mwc.model.Message.create({
+        kabam.model.Message.create({
           'from': userFound._id,
           'fromProfile': userFound._id,
           'to': thisUser._id,
@@ -1142,7 +1142,7 @@ exports.init = function (mwc) {
         });
       },
       function (from, messageCreated, cb) {
-        mwc.emit('notify:pm', {
+        kabam.emit('notify:pm', {
           'user': thisUser,
           'from': from,
           'title': title,
@@ -1163,7 +1163,7 @@ exports.init = function (mwc) {
    * @param {function} callback -function(err,messages) to be called with message object
    */
   UserSchema.methods.getRecentMessages = function (mesgLimit, mesgOffset, callback) {
-    mwc.model.Message
+    kabam.model.Message
       .find({'to': this._id})
       .populate('fromProfile')
       .populate('toProfile')
@@ -1198,7 +1198,7 @@ exports.init = function (mwc) {
       },
       function (userFound, cb) {
         if (userFound) {
-          mwc.model.Message
+          kabam.model.Message
             .find({
               $or: [
                 {'to': thisUser._id, 'from': userFound._id},
@@ -1228,7 +1228,7 @@ exports.init = function (mwc) {
   UserSchema.methods.getGroups = function (callback) {
     var groups = [];
     async.each(this.groups, function (groupId, cb) {
-      mwc.model.Group.findOne({'id': groupId}, function (err, groupFound) {
+      kabam.model.Group.findOne({'id': groupId}, function (err, groupFound) {
         if (err) {
           cb(err);
         } else {
@@ -1252,7 +1252,7 @@ exports.init = function (mwc) {
    */
   UserSchema.methods.inviteToGroup = function (groupId, role, callback) {
     var thisUser = this;
-    mwc.model.Group.findOne({'_id': groupId}, function (err, groupFound) {
+    kabam.model.Group.findOne({'_id': groupId}, function (err, groupFound) {
       if (err) {
         callback(err);
       } else {
@@ -1275,7 +1275,7 @@ exports.init = function (mwc) {
    */
   UserSchema.methods.banFromGroup = function (groupId, callback) {
     var thisUser = this;
-    mwc.model.Group.findOne({'_id': groupId}, function (err, groupFound) {
+    kabam.model.Group.findOne({'_id': groupId}, function (err, groupFound) {
       if (err) {
         callback(err);
       } else {
@@ -1298,7 +1298,7 @@ exports.init = function (mwc) {
    */
   UserSchema.methods.getRole = function (groupId, callback) {
     var thisUser = this;
-    mwc.model.Group.findOne({'_id': groupId}, function (err, groupFound) {
+    kabam.model.Group.findOne({'_id': groupId}, function (err, groupFound) {
       if (err) {
         callback(err);
       } else {
@@ -1311,7 +1311,7 @@ exports.init = function (mwc) {
     });
   };
 
-  var User = mwc.mongoConnection.model('User', UserSchema);
+  var User = kabam.mongoConnection.model('User', UserSchema);
 
   return {
     'User': User,

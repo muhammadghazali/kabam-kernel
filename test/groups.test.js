@@ -11,7 +11,7 @@ describe('groups testing', function () {
 
     kabam = KabamKernel({
       'hostUrl': 'http://localhost:' + port,
-      'mongoUrl': 'mongodb://localhost/mwc_dev',
+      'mongoUrl': 'mongodb://localhost/kabam_dev',
       'secret': 'ever_the_youngest_of_Mosirai_knows_that_you_cannot_put_humans_hide_on_a_bear'
     });
 

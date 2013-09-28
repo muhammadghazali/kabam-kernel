@@ -14,7 +14,7 @@ describe('auth api testing', function () {
 
     kabam = KabamKernel({
       'hostUrl': 'http://localhost:' + port,
-      'mongoUrl': 'mongodb://localhost/mwc_dev',
+      'mongoUrl': 'mongodb://localhost/kabam_dev',
       'disableCsrf': true // NEVER DO IT!
     });
 
@@ -137,7 +137,7 @@ describe('auth api testing', function () {
         }
         user = userCreated;
         request({
-            'url': 'http://localhost:' + port + '/auth/completeProfile?mwckey=' + userCreated.apiKey,
+            'url': 'http://localhost:' + port + '/auth/completeProfile?kabamkey=' + userCreated.apiKey,
             'method': 'POST',
             'json': {
               "username": "usernameToUseForNewUser",

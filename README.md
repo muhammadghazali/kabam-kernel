@@ -2,13 +2,12 @@
 @name KabamKernel-index
 @description
 
-kabamKernel
+Kabam Kernel [![Build Status](https://travis-ci.org/mykabam/kabam-kernel.png?branch=master)](https://travis-ci.org/mykabam/kabam-kernel)
 ==========
 
-MyWebClass core node.js application to be extended by plugins.
-[![Build Status](https://travis-ci.org/mykabam/kabam-kernel.png?branch=master)](https://travis-ci.org/mykabam/kabam-kernel)
+Kabam core node.js application to be extended by plugins.
 This is some sort of Application Generator / Bootstrap script to vendor [expressJS](http://expressjs.com/) applications with
-high code reuse  from plugins. It is not a MWC framework or CMS. This is something more low level. This application include
+high code reuse  from plugins. It is not a MVC framework or CMS. This is something more low level. This application include
 expandable kernel module to apply mongoose model, app settings, middlewares and routes for application being created.
 
 
@@ -171,39 +170,39 @@ that can be easily extended by 6 mixin type functions.
 
 0. `kabamKernel(configObj)` - create application object using [configuration object](https://github.com/mykabam/kabam-kernel/blob/master/example/config.json)
 specified. The mandatory configObj fields are `"hostUrl":"http://vvv.msk0.ru/"`, `"secret":"hammer on the keyboard"`,
-and `"mongoUrl":"mongodb://localhost/mwc_dev"`.
+and `"mongoUrl":"mongodb://localhost/kabam_dev"`.
 
-1. [extendCore('fieldName',function(config){...},'nameSpaceName')](http://ci.monimus.com/docs/#/api/mwc.extendCore) or
-[extendCore('fieldName', 'someValue')](http://ci.monimus.com/docs/#/api/mwc.extendCore) - extend kernel object.
- You can call this function multiple times. Later this field/method can be called by `mwc.nameSpaceName.fieldName`. `nameSpaceName`
+1. [extendCore('fieldName',function(config){...},'nameSpaceName')](http://ci.monimus.com/docs/#/api/kabam.extendCore) or
+[extendCore('fieldName', 'someValue')](http://ci.monimus.com/docs/#/api/kabam.extendCore) - extend kernel object.
+ You can call this function multiple times. Later this field/method can be called by `kabam.nameSpaceName.fieldName`. `nameSpaceName`
 can be ommited, default value is `shared`.
 
-2. [extendStrategy](http://ci.monimus.com/docs/#/api/mwc.extendStrategy) - extend authorization means of application by custom passportKS strategies module.
+2. [extendStrategy](http://ci.monimus.com/docs/#/api/kabam.extendStrategy) - extend authorization means of application by custom passportKS strategies module.
 
-3. [extendModel(ModelName,function(mongoose, config){...})](http://ci.monimus.com/docs/#/api/mwc.extendModel) - extend build in mongoose models.
+3. [extendModel(ModelName,function(mongoose, config){...})](http://ci.monimus.com/docs/#/api/kabam.extendModel) - extend build in mongoose models.
 
-4. [extendApp(['development','staging','production','otherEnviroment'],function(core){...})](http://ci.monimus.com/docs/#/api/mwc.extendApp) - set global application parameters, for example
+4. [extendApp(['development','staging','production','otherEnviroment'],function(core){...})](http://ci.monimus.com/docs/#/api/kabam.extendApp) - set global application parameters, for example
 template [engines](http://expressjs.com/api.html#app.engine),
 [locals](http://expressjs.com/api.html#app.locals)
 and [other](http://expressjs.com/api.html#app-settings) settings.
 First argument (array of enviroments) is OPTIONAL
 
-5. [extendMiddleware(['development','staging','production','otherEnviroment'],'/middlewarePath',function(core){...})](http://ci.monimus.com/docs/#/api/mwc.extendMiddleware) -
+5. [extendMiddleware(['development','staging','production','otherEnviroment'],'/middlewarePath',function(core){...})](http://ci.monimus.com/docs/#/api/kabam.extendMiddleware) -
  set application [middleware](http://expressjs.com/api.html#middleware).
 This function can be executed multiple times, the middlewares applied are used in application in *order* they were issued by this function.
 First argument (array of enviroments), and the second one (the path where to use middleware, the default is "/") are OPTIONAL
 
-6. [extendRoutes(function(core){...})](http://ci.monimus.com/docs/#/api/mwc.extendRoutes) - add custom routes to application.
-ExpressJS object of every routes request have functions of `request.mwcEmit`, `request.model`,`request.model.User`, `request.emitMWC`, custom models,
+6. [extendRoutes(function(core){...})](http://ci.monimus.com/docs/#/api/kabam.extendRoutes) - add custom routes to application.
+ExpressJS object of every routes request have functions of `request.kabamEmit`, `request.model`,`request.model.User`, `request.emitKabam`, custom models,
 `request.redisClient`, and `request.user` provided by [passportjs](http://passportjs.org) middleware.
 
 
-7. [loadPlugin("mwc_plugin_foo") or loadPlugin(pluginObj)](http://ci.monimus.com/docs/#/api/mwc.loadPlugin) -
+7. [loadPlugin("kabam_plugin_foo") or loadPlugin(pluginObj)](http://ci.monimus.com/docs/#/api/kabam.loadPlugin) -
 load plugin as object or as a installed [npm](https://npmjs.org/) plugin by name.
 See [Plugin creating manual](https://github.com/mykabam/kabam-kernel#plugin-creating-manual) for details.
 
-8. [start](http://ci.monimus.com/docs/#/api/mwc.start) - start the mwc application in way desired.
-9. [startCluster](http://ci.monimus.com/docs/#/api/mwc.startCluster) - start the mwc application in way desired as a Cluster.
+8. [start](http://ci.monimus.com/docs/#/api/kabam.start) - start the Kabam application in way desired.
+9. [startCluster](http://ci.monimus.com/docs/#/api/kabam.startCluster) - start the Kabam application in way desired as a Cluster.
 
 
 
@@ -211,28 +210,28 @@ Plugins
 =======
 Each of plugins have working example, to see it in action, install plugin like this
 ```shell
-    $ git clone git@github.com:mywebclass/mwc_plugin_socket_io.git
-    $ cd mwc_plugin_socket_io
+    $ git clone git@github.com:mywebclass/kabam_plugin_socket_io.git
+    $ cd kabam_plugin_socket_io
     $ npm install
     $ npm start
 ```
 If you have redis and mongodb running without password, every plugin have will start demonstration from the box.
 If you have errors running plugin, upgrade your kernel or plugin modules.
 
- - [mwc_plugin_example](https://github.com/mywebclass/mwc_plugin_example) [![Build Status](https://travis-ci.org/mywebclass/mwc_plugin_example.png)](https://travis-ci.org/mywebclass/mwc_plugin_example) demonstration plugin
+ - [kabam_plugin_example](https://github.com/mywebclass/kabam_plugin_example) [![Build Status](https://travis-ci.org/mywebclass/kabam_plugin_example.png)](https://travis-ci.org/mywebclass/kabam_plugin_example) demonstration plugin
 
- - [mwc_heroku](https://github.com/mywebclass/mwc_heroku) - plugin to simplify deploy and configuring on [heroku cloud hosting](http://heroku.com).
+ - [kabam_heroku](https://github.com/mywebclass/kabam_heroku) - plugin to simplify deploy and configuring on [heroku cloud hosting](http://heroku.com).
 
- - [mwc_plugin_spine](https://github.com/mywebclass/mwc_plugin_spine) [![Build Status](https://travis-ci.org/mywebclass/mwc_plugin_spine.png)](https://travis-ci.org/mywebclass/mwc_plugin_spine)  plugint that add task queue for application,
+ - [kabam_plugin_spine](https://github.com/mywebclass/kabam_plugin_spine) [![Build Status](https://travis-ci.org/mywebclass/kabam_plugin_spine.png)](https://travis-ci.org/mywebclass/kabam_plugin_spine)  plugint that add task queue for application,
  based on  [Assemblage](https://github.com/pipedrive/assemblage) node module.
 
- - [mwc_plugin_hogan_express](https://github.com/mywebclass/mwc_plugin_hogan_express) [![Build Status](https://travis-ci.org/mywebclass/mwc_plugin_hogan_express.png?branch=master)](https://travis-ci.org/mywebclass/mwc_plugin_hogan_express) - plugin to add support for [hogan-express template engine](https://github.com/vol4ok/hogan-express).
+ - [kabam_plugin_hogan_express](https://github.com/mywebclass/kabam_plugin_hogan_express) [![Build Status](https://travis-ci.org/mywebclass/kabam_plugin_hogan_express.png?branch=master)](https://travis-ci.org/mywebclass/kabam_plugin_hogan_express) - plugin to add support for [hogan-express template engine](https://github.com/vol4ok/hogan-express).
 
- - [https://github.com/mywebclass/mwc_plugin_notify_by_email](https://github.com/mywebclass/mwc_plugin_notify_by_email) - plugin to notify users by email
+ - [https://github.com/mywebclass/kabam_plugin_notify_by_email](https://github.com/mywebclass/kabam_plugin_notify_by_email) - plugin to notify users by email
 
- - [https://github.com/mywebclass/mwc_plugin_gridfs](https://github.com/mywebclass/mwc_plugin_gridfs) [![Build Status](https://travis-ci.org/mywebclass/mwc_plugin_gridfs.png?branch=master)](https://travis-ci.org/mywebclass/mwc_plugin_gridfs) - plugin to use gridfs
+ - [https://github.com/mywebclass/kabam_plugin_gridfs](https://github.com/mywebclass/kabam_plugin_gridfs) [![Build Status](https://travis-ci.org/mywebclass/kabam_plugin_gridfs.png?branch=master)](https://travis-ci.org/mywebclass/kabam_plugin_gridfs) - plugin to use gridfs
 
- - [https://github.com/mywebclass/mwc_plugin_socket_io/](https://github.com/mywebclass/mwc_plugin_socket_io) - plugin to notify users by socket.io events
+ - [https://github.com/mywebclass/kabam_plugin_socket_io/](https://github.com/mywebclass/kabam_plugin_socket_io) - plugin to notify users by socket.io events
 
 [Plugin compatibility wiki](https://github.com/mykabam/kabam-kernel/wiki/Plugin-compatibility-guide)
 
@@ -241,31 +240,31 @@ Example
 
 [https://github.com/mykabam/kabam-kernel/blob/master/example/example.js](https://github.com/mykabam/kabam-kernel/blob/master/example/example.js)
 
-What exposable parts the MWC instance do have?
+What exposable parts the kabam instance do have?
 =======
 
-MWC is a rather complicated object. In minimal installation it have this exposed internals:
+Kabam is a rather complicated object. In minimal installation it have this exposed internals:
 
-1. `MWC` is a `event emmiter`. It can emit various types of events (for now it is `error` event, maybe some other events latter). For example
+1. `kabam` is a `event emmiter`. It can emit various types of events (for now it is `error` event, maybe some other events latter). For example
 
 ```javacript
-    MWC.on('error',function(err){
+    kabam.on('error',function(err){
        console.error(err);
     });
 ```
 
-2. `MWC.app` - is a traditional [expressjs](http://express.js) application. We can bind it to listen to port for `HTTP` requests
+2. `kabam.app` - is a traditional [expressjs](http://express.js) application. We can bind it to listen to port for `HTTP` requests
 in two ways
 
 ```javascript
-    MWC.start(MWC.app.get('port'));
+    kabam.start(kabam.app.get('port'));
 ```
 
 or
 
 ```javascript
     var http = require('http');
-    MWC.start(http);
+    kabam.start(http);
 ```
 
 and for `https` server in this way
@@ -277,29 +276,29 @@ and for `https` server in this way
         key: fs.readFileSync('test/fixtures/keys/agent2-key.pem'),
         cert: fs.readFileSync('test/fixtures/keys/agent2-cert.pem')
     };
-    MWC.start(https,options);
+    kabam.start(https,options);
 ```
 
 
 
-3. `MWC.mongoose` - is a [mongoose](https://npmjs.org/package/mongoose) instance, used by this applications.
+3. `kabam.mongoose` - is a [mongoose](https://npmjs.org/package/mongoose) instance, used by this applications.
 
-4. `MWC.model` - is a object, that includes [mongoose models](http://mongoosejs.com/docs/guide.html), used by this application.
-For now, there is `MWC.model.User` objects in it. But other models can be injected by `MWC.extendModel` function
+4. `kabam.model` - is a object, that includes [mongoose models](http://mongoosejs.com/docs/guide.html), used by this application.
+For now, there is `kabam.model.User` objects in it. But other models can be injected by `kabam.extendModel` function
 
-5. `MWC.redisClient` - is a ready to use [redis](https://npmjs.org/package/redis) client used by application
+5. `kabam.redisClient` - is a ready to use [redis](https://npmjs.org/package/redis) client used by application
 
-When we add some pluggins, they can add more internals to MWC object.
+When we add some pluggins, they can add more internals to kabam object.
 
-Furthemore, MWC extends the [request](http://expressjs.com/api.html#req.params) object of ExpressJS application
+Furthemore, kabam extends the [request](http://expressjs.com/api.html#req.params) object of ExpressJS application
 with
 
 ```javascript
-MWC.app.get('/someURI', function(request, response) {
+kabam.app.get('/someURI', function(request, response) {
   //request.user - passport.js authentication middleware user representation
   //request.model.users - mongoose model of users
   //request.redisClient - ready to work redis client
-  //request.emitMWC('it works!'); //event emmiter, coupled to MWC event emmiter
+  //request.emitKabam('it works!'); //event emmiter, coupled to kabam event emmiter
 });
 ```
 
@@ -307,15 +306,15 @@ The model of User
 =======
 This system use mongoose model to represent users. It have this global methods:
 
-1. `MWC.model.findOneByLoginOrEmail(string,function(err,userFound){...})` - finds one user, that have `username` or `email`  equal to `string`
-2. `MWC.model.findOneByApiKey(string,function(err,userFound){...})` - finds one user, that have `apiKey` equal to `string`
-3. `MWC.model.getByRole(string,function(err,userFound){...})` - finds users, that have `role` of string
-4. `MWC.model.findOneByKeychain('github', 23122, function(err,userFound){...})` - finds user, that has github profile if of 23122
-5. `MWC.model.findOneByApiKeyAndVerify(apiKey,function(err,userFound){...})` - finds user with apiKey given and set his accout as verified
-6. `MWC.model.findOneByApiKeyAndResetPassword(apiKey, password, function(err){...})` - resets password for account with api key given
+1. `kabam.model.findOneByLoginOrEmail(string,function(err,userFound){...})` - finds one user, that have `username` or `email`  equal to `string`
+2. `kabam.model.findOneByApiKey(string,function(err,userFound){...})` - finds one user, that have `apiKey` equal to `string`
+3. `kabam.model.getByRole(string,function(err,userFound){...})` - finds users, that have `role` of string
+4. `kabam.model.findOneByKeychain('github', 23122, function(err,userFound){...})` - finds user, that has github profile if of 23122
+5. `kabam.model.findOneByApiKeyAndVerify(apiKey,function(err,userFound){...})` - finds user with apiKey given and set his accout as verified
+6. `kabam.model.findOneByApiKeyAndResetPassword(apiKey, password, function(err){...})` - resets password for account with api key given
 
 Full description is published there:
-[http://ci.monimus.com/docs/#/api/mwc.model.User](http://ci.monimus.com/docs/#/api/mwc.model.User)
+[http://ci.monimus.com/docs/#/api/kabam.model.User](http://ci.monimus.com/docs/#/api/kabam.model.User)
 
 Methods to one instance of class User
 
@@ -353,7 +352,7 @@ will attach the github profile with id=23122 to users profile
 Further documentation is published here [http://ci.monimus.com/docs/#/api/User](http://ci.monimus.com/docs/#/api/User)
 
 
-There is plugin of [https://github.com/mywebclass/mwc_plugin_notify_by_email](https://github.com/mywebclass/mwc_plugin_notify_by_email)
+There is plugin of [https://github.com/mywebclass/kabam_plugin_notify_by_email](https://github.com/mywebclass/kabam_plugin_notify_by_email)
 that sends notifications as emails to user. There will be other plugins that can notify users by other means
 
 
@@ -412,7 +411,7 @@ Plugin creating manual
 =======
 
 This is typical plugin code. It is placed there
-[https://github.com/mywebclass/mwc_plugin_example](https://github.com/mywebclass/mwc_plugin_example)
+[https://github.com/mywebclass/kabam_plugin_example](https://github.com/mywebclass/kabam_plugin_example)
 
 *Important* - when you create plugin, the `extendApp`, `extendMiddleware` APPLIES to all environments!
 Furthermore, `extendMiddleware` binds to route '/'
@@ -425,7 +424,7 @@ And every call of extending functions shedule some customization for this applic
 I think i will post a bad example, and explain, why this is bad
 
 ```javascript
-MWC.extendCore = function(core) {
+kabam.extendCore = function(core) {
   core.sum = function(a, b) {
     return (a + b);
   }
@@ -448,7 +447,7 @@ This is the way of things it is intended to work
 When you call the `extendCore('fieldName',function(config){...})`, you can add global core functions and variables,
 but not anything other touching the application, middlewares or routes.
 In code it is called right after initializing [mongoose routes](https://github.com/mykabam/kabam-kernel/blob/master/index.js#L195)
-core have event emmiter capabilities `MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.model.User`, `MWC.model.Documents` (exposed as mongoose schemas).
+core have event emmiter capabilities `kabam.emit`,`kabam.on`, `kabam.redisClient`, and `kabam.model.User`, `kabam.model.Documents` (exposed as mongoose schemas).
 Nothing more!
 
 When you call `extendModel(ModelName,function(mongoose, config){...})` you get all the enviroment created after calling
@@ -459,8 +458,8 @@ When you call `extendApp(function(core){...})`, you can set global application p
 template [engines](http://expressjs.com/api.html#app.engine), [locals](http://expressjs.com/api.html#app.locals)
 and [other](http://expressjs.com/api.html#app-settings) settings.
 In code it is called [after settng logging middleware and port](https://github.com/mykabam/kabam-kernel/blob/master/index.js#L236).
-You can set any application parameter you want, you have full MWC core internalls at your disposal
-`MWC.emit`,`MWC.on`, `MWC.redisClient`, and `MWC.model.User`, `MWC.model.Documents` and custom models from calling `extendModel`.
+You can set any application parameter you want, you have full kabam core internalls at your disposal
+`kabam.emit`,`kabam.on`, `kabam.redisClient`, and `kabam.model.User`, `kabam.model.Documents` and custom models from calling `extendModel`.
 
 When you call `extendMiddleware(function(core){...})`, you can set app middlewares.
 They are [called]((https://github.com/mykabam/kabam-kernel/blob/master/index.js#L283) after
@@ -468,7 +467,7 @@ They are [called]((https://github.com/mykabam/kabam-kernel/blob/master/index.js#
 [setting error handlers middlewares](https://github.com/mykabam/kabam-kernel/blob/master/index.js#L283).
 
 So, you have the full power of core internals - (`emit`,`on`), `redisClient`, and `model.Users`, `model.Documents`
-and exposed internals middleware - where expressJS object of request have functions of `request.mwcEmit`,
+and exposed internals middleware - where expressJS object of request have functions of `request.kabamEmit`,
 `request.model`,`request.model.Users`,`request.model.Documents`, custom models,`request.redisClient`, and `request.user` provided
 by passportjs middleware.
 
@@ -478,7 +477,7 @@ This is done after defining [router middleware]((https://github.com/mykabam/kaba
 [setting up the default routes for Users and documents](https://github.com/mykabam/kabam-kernel/blob/master/index.js#L313)
 and routes for passport.js authentication.
 
-It is worth saying, that you also have expressJS object of every route defined to  have functions of `request.mwcEmit`,
+It is worth saying, that you also have expressJS object of every route defined to  have functions of `request.kabamEmit`,
 `request.MODEL`,`request.MODEL.Users`,`request.MODEL.Documents`, custom models,`request.redisClient`, and `request.user` provided
 by [passportjs](http://passportjs.org) middleware.
 
