@@ -40,49 +40,49 @@ function KabamKernel(config) {
     extendMiddlewareFunctions = [],
     extendRoutesFunctions = [],
     catchAllFunction,
-    thisMWC = this;//http://www.crockford.com/javascript/private.html
+    thisKabam = this;//http://www.crockford.com/javascript/private.html
 
   //privileged functions
   /**
    * @ngdoc function
    * @name kabamKernel.extendCore
    * @description
-   * Perform dependency injection on the mwc.shared object.
-   * If mwc do not have fieldName property/method, this method is created as public property/method.
-   * You can call this function multiple times. Later this field/method can be called by `mwc.nameSpaceName.fieldName`. `nameSpaceName`
+   * Perform dependency injection on the kabam.shared object.
+   * If kabam do not have fieldName property/method, this method is created as public property/method.
+   * You can call this function multiple times. Later this field/method can be called by `kabam.nameSpaceName.fieldName`. `nameSpaceName`
    * can be ommited, default value is `shared`
    * @param {string} fieldName - field name
    * @param {function/object/string/number/array} factoryFunctionOrObject  function(config),
-   * what is called to return value assigned to fieldName  config is the mwc.config object, or just a object, to be setted as mwc public field
+   * what is called to return value assigned to fieldName  config is the kabam.config object, or just a object, to be setted as kabam public field
    * @param {string} namespace  namespace to bind this field. default is 'shared;
    * @example
    * ```javascript
    *
-   *     mwc.extendCore('checkSecret',function(config){
+   *     kabam.extendCore('checkSecret',function(config){
    *       return function(secretToCheck){
    *         return secretToCheck === config.secret;
    *       };
    *     };
    *
-   *     mwc.extendCore('someVar',42);
-   *     mwc.extendCore('someArray',[1,2,3]);
-   *     mwc.extendCore('someObj',{ 'someVal':1});
-   *     mwc.extendCore('a',333,'inThatNamespace');
+   *     kabam.extendCore('someVar',42);
+   *     kabam.extendCore('someArray',[1,2,3]);
+   *     kabam.extendCore('someObj',{ 'someVal':1});
+   *     kabam.extendCore('a',333,'inThatNamespace');
    *
-   *     mwc.start('app');
+   *     kabam.start('app');
    *
-   *     console.log(mwc.shared.checkSecret('someThing'); //false
-   *     console.log(mwc.shared.someVar); //42
-   *     console.log(mwc.shared.someArray); //[1,2,3]
-   *     console.log(mwc.shared.someObj); //{ 'someVal':1}
-   *     console.log(mwc.inThatNamespace.a); //333
+   *     console.log(kabam.shared.checkSecret('someThing'); //false
+   *     console.log(kabam.shared.someVar); //42
+   *     console.log(kabam.shared.someArray); //[1,2,3]
+   *     console.log(kabam.shared.someObj); //{ 'someVal':1}
+   *     console.log(kabam.inThatNamespace.a); //333
    *
    *  ```
    * @returns {kabamKernel} kabamKernel object
    */
   this.extendCore = function (fieldName, factoryFunctionOrObject, namespace) {
     if (prepared) {
-      throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+      throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
       if (!namespace) {
         namespace = 'shared';
@@ -107,12 +107,12 @@ function KabamKernel(config) {
    * @ngdoc function
    * @name kabamKernel.extendModel
    * @description
-   * Perform dependency injection of mongoose models to mwc.model and request.model.
+   * Perform dependency injection of mongoose models to kabam.model and request.model.
    * When you call `extendModel(modelName,function(kabamKernel){...})` you get all the environment created after calling
    * `extendCore(function(core){...})`.
    * @param {string} modelName - field name, "Users" is reserved field name!
    * @param {function} modelFunction - function(kabamKernel) - the first argument is mongoose object, the second one is the
-   * mwc.config object
+   * kabam.config object
    * @example
    * ```javascript
    *
@@ -129,7 +129,7 @@ function KabamKernel(config) {
    */
   this.extendModel = function (modelName, modelFunction) {
     if (prepared) {
-      throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+      throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
       if (modelName === 'Users' || modelName === 'User' || modelName === 'Message' || modelName === 'Messages') {
         throw new Error('Error extending model, "User(s)" and "Message(s)" are reserved name');
@@ -151,11 +151,11 @@ function KabamKernel(config) {
    * Loads new passportjs strategies from object
    * @param {object} strategyObject Passport's strategy object
    * @returns {kabamKernel} kabamKernel object
-   * @url https://github.com/mywebclass/mwc_kernel/blob/master/lib/strategies/github.js
+   * @url https://github.com/mykabam/kabam-kernel/blob/master/lib/strategies/github.js
    * @example
    * ```javascript
    *
-   * mwc.extendStrategy({
+   * kabam.extendStrategy({
    * 'strategy':function (core) {
    * return new LinkedInStrategy({
    *    consumerKey: core.config.passport.LINKEDIN_API_KEY,
@@ -185,16 +185,16 @@ function KabamKernel(config) {
    */
   this.extendStrategy = function (strategyObject) {
     if (prepared) {
-      throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+      throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
       if (typeof strategyObject !== 'object') {
-        throw new Error('mwc.extendStrategies requires strategyObject to be an object');
+        throw new Error('kabam.extendStrategy requires strategyObject to be an object');
       }
       if (typeof strategyObject.strategy !== 'function') {
-        throw new Error('mwc.extendStrategies requires strategyObject.strategy to be a proper function!');
+        throw new Error('kabam.extendStrategy requires strategyObject.strategy to be a proper function!');
       }
       if (typeof strategyObject.routes !== 'function') {
-        throw new Error('mwc.extendStrategies requires strategyObject.routes to be a proper function!');
+        throw new Error('kabam.extendStrategy requires strategyObject.routes to be a proper function!');
       }
       additionalStrategies.push(strategyObject);
       return this;
@@ -209,10 +209,10 @@ function KabamKernel(config) {
    * When you call `extendApp(function(core){...})`, you can set global application parameters, for example
    * template [engines](http://expressjs.com/api.html#app.engine), [locals](http://expressjs.com/api.html#app.locals)
    * and [other](http://expressjs.com/api.html#app-settings) settings.
-   * In code it is called [after setting logging middleware and port](https://github.com/mywebclass/mwc_kernel/blob/master/lib/appManager.js#84).
-   * You can set any application parameter you want, you have full MWC core internals at your disposal
-   * `mwc.emit`,`mwc.on`, `mwc.redisClient`, and `mwc.model.User` and custom models from calling `extendModel`.
-   * Some example of setting up the [template engine](https://github.com/mywebclass/mwc_plugin_hogan_express/blob/master/index.js)
+   * In code it is called [after setting logging middleware and port](https://github.com/mykabam/kabam-kernel/blob/master/lib/appManager.js#84).
+   * You can set any application parameter you want, you have full Kabam core internals at your disposal
+   * `kabam.emit`,`kabam.on`, `kabam.redisClient`, and `kabam.model.User` and custom models from calling `extendModel`.
+   * Some example of setting up the [template engine](https://github.com/mykabam/kabam-plugin-hogan/blob/master/index.js)
    * via plugin.
    *
    * @param {string/array/undefined} environment - application environment to use,
@@ -223,11 +223,11 @@ function KabamKernel(config) {
    *
    * ```javascript
    *
-   *     mwc.extendApp('development',function(core){
+   *     kabam.extendApp('development',function(core){
    *       core.app.locals.environment = 'development';
    *     });
    *     //example of setting template engine
-   *     mwc.extendApp.app = function (core) {
+   *     kabam.extendApp.app = function (core) {
    *       core.app.set('views', '/views');
    *       core.app.set('view engine', 'html');
    *       core.app.set('layout', 'layout');
@@ -240,7 +240,7 @@ function KabamKernel(config) {
    */
   this.extendApp = function (environment, settingsFunction) {
     if (prepared) {
-      throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+      throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
       var environmentToUse = null,
         i,
@@ -288,11 +288,11 @@ function KabamKernel(config) {
    * Adds new middleware to expressJS application
    * This function can be executed multiple times, the middlewares applied are used in application in *order* they were issued by this function.
    * First argument (array of enviroments), and the second one (the path where to use middleware, the default is "/") are OPTIONAL
-   * They are [applied]((https://github.com/mywebclass/mwc_kernel/blob/master/index.js#L283) after
-   * [setting default exposed internals middleware](https://github.com/mywebclass/mwc_kernel/blob/master/lib/appManager.js#L114) and before
-   * [setting router middleware](https://github.com/mywebclass/mwc_kernel/blob/master/lib/appManager.js#L142).
+   * They are [applied](https://github.com/mykabam/kabam-kernel/blob/master/index.js#L283) after
+   * [setting default exposed internals middleware](https://github.com/mykabam/kabam-kernelblob/master/lib/appManager.js#L114) and before
+   * [setting router middleware](https://github.com/mykabam/kabam-kernel/blob/master/lib/appManager.js#L142).
    * So, you have the full power of core internals - (`emit`,`on`), `redisClient`, `model.User`
-   * and exposed internals middleware - where expressJS object of request have functions of `request.mwcEmit`,
+   * and exposed internals middleware - where expressJS object of request have functions of `request.kabamEmit`,
    * `request.model`,`request.model.User`, `request.emitMWC`, custom models,`request.redisClient`, and `request.user` provided
    * by passportjs middleware.
    * @param {string/array/undefined} environment - application enviroment to use,
@@ -302,7 +302,7 @@ function KabamKernel(config) {
    * @example
    * ```javascript
    *
-   *     mwc.extendMiddleware('production',function(core){
+   *     kabam.extendMiddleware('production',function(core){
    *       return function(req,res,next){
    *         res.setHeader('X-production','YES!');
    *       };
@@ -313,7 +313,7 @@ function KabamKernel(config) {
    */
   this.extendMiddleware = function (environment, path, settingsFunction) {
     if (prepared) {
-      throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+      throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
       var environmentToUse = null,
         pathToUse = '/',
@@ -383,14 +383,14 @@ function KabamKernel(config) {
    * @name kabamKernel.extendRoutes
    * @description
    * Adds application routes and verbs for them.
-   * ExpressJS object of every routes request have functions of `request.mwcEmit`,
+   * ExpressJS object of every routes request have functions of `request.kabamEmit`,
    * `request.model`,`request.model.User`, `request.emitMWC`, custom models,`request.redisClient`, and `request.user` provided
    * by [passportjs](http://passportjs.org) middleware.
    * @param {function} settingsFunction Settings Function
    * @example
    * ```javascript
    *
-   *     mwc.extendRoutes(function(core){
+   *     kabam.extendRoutes(function(core){
    *       core.app.get('/', function(req,res){
    *         res.send('Hello!');
    *       });
@@ -400,7 +400,7 @@ function KabamKernel(config) {
    */
   this.extendRoutes = function (settingsFunction) {
     if (prepared) {
-      throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+      throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
       if (typeof settingsFunction === 'function') {
         extendRoutesFunctions.push(settingsFunction);
@@ -430,7 +430,7 @@ function KabamKernel(config) {
    */
   this.catchAll = function (func) {
     if (prepared) {
-      throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+      throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     }
     if (typeof func !== 'function') {
       throw new Error('Wrong argument for KabamKernel.catchAll(function(kernel){...});');
@@ -444,11 +444,11 @@ function KabamKernel(config) {
    * @description
    * Loads plugin from object or npm module
    * @param {object/string} pluginObjectOrName - config object or plugin name to get by require
-   * @url https://github.com/mywebclass/mwc_kernel/blob/master/example/plugin.example.js
+   * @url https://github.com/mykabam/kabam-kernel/blob/master/example/plugin.example.js
    */
   this.usePlugin = function (pluginObjectOrName) {
     if (prepared) {
-      throw new Error('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+      throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
       var pluginToBeInstalled = {},
         field,
@@ -529,7 +529,7 @@ function KabamKernel(config) {
    * @ngdoc function
    * @name kabamKernel.start
    * @description
-   * Start mwc application
+   * Start kabam application
    * Parameters:
    *
    * *null* bind expressJS application to default port (process.env.PORT)
@@ -552,47 +552,47 @@ function KabamKernel(config) {
    * ```javascript
    *
    *   //different ways to bind application to 3000 port
-   *   mwc.start('app');
-   *   mwc.app.listen(3000);
+   *   kabam.start('app');
+   *   kabam.app.listen(3000);
    *
-   *   mwc.start(); //binds to default port, 3000
+   *   kabam.start(); //binds to default port, 3000
    *
-   *   mwc.start(3000); //binds to  port 3000
+   *   kabam.start(3000); //binds to  port 3000
    *
    *   var http = require('http');
-   *   mwc.start(http).listen(mwc.app.get('port'));
+   *   kabam.start(http).listen(kabam.app.get('port'));
    *
    *   //with socket.io
    *   //this is done in this way, because we can attach socket.io easily
    *   var http = require('http');
-   *   var server = mwc.start(http);
+   *   var server = kabam.start(http);
    *   io = require('socket.io').listen(server);
-   *   server.listen(mwc.app.get('port'));
+   *   server.listen(kabam.app.get('port'));
    *
    *   //setting up the https
    *   var https = require('https');
-   *   mwc.start(https,{
+   *   kabam.start(https,{
    *     key: fs.readFileSync('test/fixtures/keys/agent2-key.pem'),
    *     cert: fs.readFileSync('test/fixtures/keys/agent2-cert.pem')
-   *   }).listen(mwc.app.get('port'));
+   *   }).listen(kabam.app.get('port'));
    *
    * ```
    */
   this.start = function (howExactly) {
     prepared = true;
     //injecting redis
-    thisMWC.redisClient = redisManager.create(thisMWC.config.redis);
+    thisKabam.redisClient = redisManager.create(thisKabam.config.redis);
 
     //injecting mongoose and additional models
-    thisMWC.model = mongooseManager.injectModels(thisMWC, additionalModels);
+    thisKabam.model = mongooseManager.injectModels(thisKabam, additionalModels);
 
     extendCoreFunctions.map(function (settingsFunction) {
 
-      if (thisMWC[settingsFunction.namespace] === undefined) {
-        thisMWC[settingsFunction.namespace] = {};
+      if (thisKabam[settingsFunction.namespace] === undefined) {
+        thisKabam[settingsFunction.namespace] = {};
       }
-      if (thisMWC[settingsFunction.namespace][settingsFunction.field] === undefined) {
-        thisMWC[settingsFunction.namespace][settingsFunction.field] = settingsFunction.factoryFunction(thisMWC.config);
+      if (thisKabam[settingsFunction.namespace][settingsFunction.field] === undefined) {
+        thisKabam[settingsFunction.namespace][settingsFunction.field] = settingsFunction.factoryFunction(thisKabam.config);
       } else {
         throw new Error('Kernel namespace collision - namespace "' + settingsFunction.namespace + '" already have field of ' + settingsFunction.field);
       }
@@ -600,36 +600,36 @@ function KabamKernel(config) {
     });
 
     //initialize expressJS application
-    thisMWC.app = appManager(thisMWC, extendAppFunctions, additionalStrategies, extendMiddlewareFunctions, extendRoutesFunctions, catchAllFunction);
+    thisKabam.app = appManager(thisKabam, extendAppFunctions, additionalStrategies, extendMiddlewareFunctions, extendRoutesFunctions, catchAllFunction);
     if (howExactly) {
       if (howExactly === 'app') {
-        thisMWC.emit('started', { 'type': 'app' });
-        return thisMWC;
+        thisKabam.emit('started', { 'type': 'app' });
+        return thisKabam;
       }
       if (typeof howExactly === 'number' && howExactly > 0) {
-        thisMWC.httpServer.listen(howExactly, function () {
-          thisMWC.emit('started', {'port': howExactly, 'type': 'expressHttp'});
+        thisKabam.httpServer.listen(howExactly, function () {
+          thisKabam.emit('started', {'port': howExactly, 'type': 'expressHttp'});
           console.log(('KabamKernel started on ' + howExactly + ' port').blue);
         });
-        return thisMWC;
+        return thisKabam;
       }
-      throw new Error('Function MWC.listen(httpOrHttpsOrPort) accepts objects of null, "app" or port\'s number as argument!');
+      throw new Error('Function Kabam.listen(httpOrHttpsOrPort) accepts objects of null, "app" or port\'s number as argument!');
     } else {
-      thisMWC.httpServer.listen(thisMWC.app.get('port'), function () {
-        thisMWC.emit('started', {'port': thisMWC.app.get('port'), 'type': 'expressHttp'});
-        console.log(('KabamKernel started on ' + thisMWC.app.get('port') + ' port').blue);
+      thisKabam.httpServer.listen(thisKabam.app.get('port'), function () {
+        thisKabam.emit('started', {'port': thisKabam.app.get('port'), 'type': 'expressHttp'});
+        console.log(('KabamKernel started on ' + thisKabam.app.get('port') + ' port').blue);
       });
-      return thisMWC;
+      return thisKabam;
     }
   };
   /**
    * @ngdoc function
    * @name kabamKernel.startCluster
    * @description
-   * Start mwc application as a cluster, with 1 process per CPU core.
-   * This command start the process master by mwc.start('app') - so it do not listens to http port,
-   * and the other ones as mwc.start(howExactly,options). When mwc is runned as cluster, it restarts killed processes
-   * @param {object} howExactly - object, same as for mwc.start
+   * Start kabam application as a cluster, with 1 process per CPU core.
+   * This command start the process master by kabam.start('app') - so it do not listens to http port,
+   * and the other ones as kabam.start(howExactly,options). When kabam is runned as cluster, it restarts killed processes
+   * @param {object} howExactly - object, same as for kabam.start
    * Values:
    *
    * - null - bind expressJS application of worker process to default port (process.env.PORT) or 3000 port
@@ -641,7 +641,7 @@ function KabamKernel(config) {
   this.startCluster = function (howExactly) {
     prepared = true;
 
-    var thisMWC = this,
+    var thisKabam = this,
       cluster = require('cluster'),
       numCPUs = require('os').cpus().length,
       maxWorkers,
@@ -673,10 +673,10 @@ function KabamKernel(config) {
         cluster.fork();
       });
 
-      thisMWC.start('app'); // the master process is ran as background application and do not listens to port
+      thisKabam.start('app'); // the master process is ran as background application and do not listens to port
       return true;
     } else {
-      thisMWC.start(howExactly);
+      thisKabam.start(howExactly);
       return false;
     }
   };
@@ -708,14 +708,14 @@ KabamKernel.prototype.validateConfig = function (config) {
  * @name kabamKernel.extendListeners
  * @param {string} eventName Name of the event
  * @param {function} eventHandlerFunction Function to handle the event
- * @description - add custom event handler for mwc
+ * @description - add custom event handler for Kabam
  * @example
  * ``` javascript
  *
- *      mwc.extendListeners('someEvent', console.log);
+ *      kabam.extendListeners('someEvent', console.log);
  *
  * ```
- * @returns {kabamKernel} mwc object
+ * @returns {kabamKernel} kabam object
  */
 KabamKernel.prototype.extendListeners = function (eventName, eventHandlerFunction) {
   if (typeof eventName === 'string' && typeof eventHandlerFunction === 'function') {
@@ -732,13 +732,13 @@ KabamKernel.prototype.extendListeners = function (eventName, eventHandlerFunctio
  * @name kabamKernel.injectEmit
  * @description
  * Injects a function .emit(eventName,eventObj) for every object. This function
- * is used for making this object to be able to emit events through mwc
+ * is used for making this object to be able to emit events through Kabam
  * @param {object} object - object to be extended
  */
 KabamKernel.prototype.injectEmit = function (object) {
-  var thisMWC = this;
-  object.emitMWC = function (eventName, eventContent) {
-    thisMWC.emit(eventName, eventContent);
+  var thisKabam = this;
+  object.emitKabam = function (eventName, eventContent) {
+    thisKabam.emit(eventName, eventContent);
   };
 };
 
@@ -750,7 +750,7 @@ KabamKernel.prototype.injectEmit = function (object) {
  *
  * Use this function with great caution! Because usually redis-database-as-a-service providers have
  * strict connection limit!!! and every one redis client created like this consumes one connection!
- * Usually, MWC needs only one redis client connection
+ * Usually, Kabam needs only one redis client connection
  * BTW, redis is NOT MySQL - we can't increase speed with connection pooling!
  * @returns {RedisClient} redis client
  */
@@ -762,7 +762,7 @@ KabamKernel.prototype.createRedisClient = function () {
  * @ngdoc function
  * @name kabamKernel.create
  * @description
- * Create MWC object instance (factory)
+ * Create Kabam object instance (factory)
  * @param {object} config - config object
  * @example
  * ```javascript
@@ -784,8 +784,8 @@ KabamKernel.prototype.createRedisClient = function () {
  * };
  *
  * //minimal runnable example
- * var KabamKernel = require('mwc_kernel);
- * kabamKernel = mwc(config);
+ * var KabamKernel = require('kabam-kernel');
+ * kabamKernel = kabam(config);
  * kabamKernel.start();
  *
  * ```

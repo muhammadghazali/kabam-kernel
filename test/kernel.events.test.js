@@ -1,7 +1,7 @@
 /*jshint immed: false */
 'use strict';
 var should = require('should'),
-  mwcKernel = require('./../index.js'),
+  kabamKernel = require('./../index.js'),
   events = require('events'),
   config = require('./../example/config.json').development,
   request = require('request'),
@@ -9,16 +9,16 @@ var should = require('should'),
 //*
 describe('Kernel events emitter testing', function () {
 
-  var MWC;
+  var Kabam;
   var isStarted = false;
   before(function (done) {
-    MWC = mwcKernel(config);
+    Kabam = kabamKernel(config);
 
-    MWC.on('started', function (obj) {
+    Kabam.on('started', function (obj) {
       isStarted = true;
     });
 
-    MWC.start(port);
+    Kabam.start(port);
     setTimeout(done, 1000);
   });
 
@@ -29,12 +29,12 @@ describe('Kernel events emitter testing', function () {
   describe('Testing users:signUp', function () {
     var user;
     before(function (done) {
-      MWC.model.User.signUp('ff', 'ff@example.org', 'waterfall', function (err, userCreated) {
+      Kabam.model.User.signUp('ff', 'ff@example.org', 'waterfall', function (err, userCreated) {
         if (err) {
           throw err;
         }
       });
-      MWC.on('users:signUp', function (u) {
+      Kabam.on('users:signUp', function (u) {
         user = u;
         done();
       });
@@ -59,13 +59,13 @@ describe('Kernel events emitter testing', function () {
   describe('Testing users:signUpByEmailOnly event', function () {
     var user;
     before(function (done) {
-      MWC.model.User.signUpByEmailOnly('abde@gmail.com', function (err, userCreated) {
+      Kabam.model.User.signUpByEmailOnly('abde@gmail.com', function (err, userCreated) {
         if (err) {
           throw err;
         }
       });
 
-      MWC.on('users:signUpByEmailOnly', function (u) {
+      Kabam.on('users:signUpByEmailOnly', function (u) {
         user = u;
         done();
       });
@@ -90,7 +90,7 @@ describe('Kernel events emitter testing', function () {
   describe('Testing users:completeProfile event', function () {
     var user;
     before(function (done) {
-      MWC.model.User.create({
+      Kabam.model.User.create({
         'email': 'hggg@dddf.sg',
         'profileComplete': false
       }, function (err, userCreated) {
@@ -106,7 +106,7 @@ describe('Kernel events emitter testing', function () {
         });
       });
 
-      MWC.on('users:completeProfile', function (u) {
+      Kabam.on('users:completeProfile', function (u) {
         done();
       });
     });
@@ -127,7 +127,7 @@ describe('Kernel events emitter testing', function () {
   describe('Testing users:saveProfile event', function () {
     var user;
     before(function (done) {
-      MWC.model.User.create({
+      Kabam.model.User.create({
         'email': 'hzy1@dddf.sg',
         'username': 'hzy1'
       }, function (err, userCreated) {
@@ -148,7 +148,7 @@ describe('Kernel events emitter testing', function () {
 
       });
 
-      MWC.on('users:saveProfile', function (u) {
+      Kabam.on('users:saveProfile', function (u) {
         user = u;
         done();
       });
@@ -168,7 +168,7 @@ describe('Kernel events emitter testing', function () {
   describe('Testing users:revokeRole event', function () {
     var user;
     before(function (done) {
-      MWC.model.User.create({
+      Kabam.model.User.create({
         'email': 'hzy3@dddf.sg',
         'username': 'hzy3',
         'roles': ['role1', 'role2']
@@ -185,7 +185,7 @@ describe('Kernel events emitter testing', function () {
 
       });
 
-      MWC.on('users:revokeRole', function (u) {
+      Kabam.on('users:revokeRole', function (u) {
         user = u;
         done();
       });
@@ -202,14 +202,14 @@ describe('Kernel events emitter testing', function () {
   describe('Testing users:setKeyChain event', function () {
     var user;
     before(function (done) {
-      MWC.model.User.create({
+      Kabam.model.User.create({
         'email': 'hzy5@dddf.sg'
       }, function (err, userCreated) {
         if (err) {
           throw err;
         }
 
-        MWC.model.User.findOneByLoginOrEmail('hzy5@dddf.sg', function (err, userFound) {
+        Kabam.model.User.findOneByLoginOrEmail('hzy5@dddf.sg', function (err, userFound) {
           if (err) {
             throw err;
           }
@@ -223,7 +223,7 @@ describe('Kernel events emitter testing', function () {
       });
 
 
-      MWC.on('users:setKeyChain', function (u) {
+      Kabam.on('users:setKeyChain', function (u) {
         user = u;
         done();
       });
@@ -240,7 +240,7 @@ describe('Kernel events emitter testing', function () {
   describe('Testing users:revokeKeyChain event', function () {
     var user;
     before(function (done) {
-      MWC.model.User.create({
+      Kabam.model.User.create({
         'email': 'hzy6@dddf.sg',
         'keychain': {
           'github': 11111,
@@ -258,7 +258,7 @@ describe('Kernel events emitter testing', function () {
       });
 
 
-      MWC.on('users:revokeKeyChain', function (u) {
+      Kabam.on('users:revokeKeyChain', function (u) {
         user = u;
         //console.log(u);
         done();
@@ -276,7 +276,7 @@ describe('Kernel events emitter testing', function () {
   describe('Testing users:findOneByApiKeyAndVerify event', function () {
     var user;
     before(function (done) {
-      MWC.model.User.create({
+      Kabam.model.User.create({
         'email': 'hzy15@dddf.sg',
         'apiKey': 'vseBydetHoroshooneByApiKey4',
         'emailVerified': false,
@@ -286,7 +286,7 @@ describe('Kernel events emitter testing', function () {
           throw err;
         }
 
-        MWC.model.User.findOneByApiKeyAndVerify('vseBydetHoroshooneByApiKey4', function (err, userActivated) {
+        Kabam.model.User.findOneByApiKeyAndVerify('vseBydetHoroshooneByApiKey4', function (err, userActivated) {
           if (err) {
             throw err;
           }
@@ -294,7 +294,7 @@ describe('Kernel events emitter testing', function () {
       });
 
 
-      MWC.on('users:findOneByApiKeyAndVerify', function (u) {
+      Kabam.on('users:findOneByApiKeyAndVerify', function (u) {
         user = u;
         //console.log(u);
         done();
@@ -318,7 +318,7 @@ describe('Kernel events emitter testing', function () {
         }
       });
 
-      MWC.on('http', function (params) {
+      Kabam.on('http', function (params) {
         data = params;
         done();
       });
@@ -343,7 +343,7 @@ describe('Kernel events emitter testing', function () {
   describe('Testing users:unban (without email)event', function () {
     var user;
     before(function (done) {
-      MWC.model.User.create({
+      Kabam.model.User.create({
         'email': 'hzy23@dddf.sg',
         'isBanned': true
       }, function (err, userCreated) {
@@ -356,7 +356,7 @@ describe('Kernel events emitter testing', function () {
       });
 
 
-      MWC.on('users:unban', function (u) {
+      Kabam.on('users:unban', function (u) {
         user = u;
         done();
       });
@@ -373,19 +373,19 @@ describe('Kernel events emitter testing', function () {
   describe('Testing users:ban (with email)event', function () {
     var user;
     before(function (done) {
-      MWC.model.User.create({
+      Kabam.model.User.create({
         'email': 'hzy27@dddf.sg'
       }, function (err, userCreated) {
         if (err) {
           throw err;
         }
 
-        MWC.model.User.ban('hzy27@dddf.sg', function () {
+        Kabam.model.User.ban('hzy27@dddf.sg', function () {
         });
       });
 
 
-      MWC.on('users:ban', function (u) {
+      Kabam.on('users:ban', function (u) {
         user = u;
         done();
       });
@@ -400,7 +400,7 @@ describe('Kernel events emitter testing', function () {
   });
 
   after(function (done) {
-    MWC.stop();
+    Kabam.stop();
     done();
   });
 });

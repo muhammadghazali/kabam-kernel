@@ -2,20 +2,20 @@
 'use strict';
 var should = require('should'),
   async = require('async'),
-  mwcCore = require('./../index.js'),
+  kabamKernel = require('./../index.js'),
   config = require('./../example/config.json').development,
   kabam;
 
 describe('Users model', function () {
   before(function (done) {
-    kabam = mwcCore(config);
+    kabam = kabamKernel(config);
     kabam.start('app');
     setTimeout(done, 1000);
   });
 
   describe('Users model', function () {
 
-    describe('Testing mwc_core mongoose model of users:', function () {
+    describe('Testing kabam_core mongoose model of users:', function () {
       it('exposes function find', function () {
         kabam.model.User.find.should.be.a('function');
       });
@@ -616,7 +616,7 @@ describe('Users model', function () {
         });
       });
 
-      describe('mwc_plugin_rest integration for users', function () {
+      describe('kabam_plugin_rest integration for users', function () {
         var user;
         before(function (done) {
           kabam.model.User.create({
@@ -774,7 +774,7 @@ describe('Users model', function () {
 
       });
     });
-    describe('Testing mwc_core mongoose model one instance of user:', function () {
+    describe('Testing kabam_core mongoose model one instance of user:', function () {
       describe('general function are callable', function () {
         var user;
 
@@ -1044,7 +1044,7 @@ describe('Users model', function () {
           });
         });
 
-        it('makes mwc core emit events with message created properly', function () {
+        it('makes kabam core emit events with message created properly', function () {
           messageObj.user.should.eql(user);
           messageObj.message.should.be.equal('Hello!');
         });

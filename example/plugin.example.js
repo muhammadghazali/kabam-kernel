@@ -2,7 +2,7 @@
  * @ngdoc function
  * @name Plugin
  * @description
- * Plugin object, that can be loaded by mwc.loadPlugin
+ * Plugin object, that can be loaded by kabam.loadPlugin
  * @example
  * ```javascript
  * exports.name ='testPlugin333';
@@ -34,19 +34,19 @@
  *  }
  * };
  *
- * exports.app = function (mwc) {
- *   mwc.app.set('someValue',42);
+ * exports.app = function (kabam) {
+ *   kabam.app.set('someValue',42);
  * };
  *
- *  exports.routes = function(mwc){
- *   mwc.app.get('/kittens',function(request,response){
+ *  exports.routes = function(kabam){
+ *   kabam.app.get('/kittens',function(request,response){
  *     request.model.Cats.find({},function(err,cats){
  *       if(err) throw err;
  *       response.json(cats);
  *     });
  *   });
  *
- *   mwc.app.get('/dogs',function(request,response){
+ *   kabam.app.get('/dogs',function(request,response){
  *     request.model.Dogs.find({},function(err,dogs){
  *       if(err) throw err;
  *       response.json(dogs);
@@ -77,14 +77,14 @@ exports.name = 'pluginExample';
  * Plugins, that are required to be loaded previously  - not implemented yet
  * @type {Array}
  */
-exports.dependencies = ['mwc_plugin_foo','mwc_plugin_bar']; //we throw error it this plugins are not loaded in application
+exports.dependencies = ['kabam_plugin_foo','kabam_plugin_bar']; //we throw error it this plugins are not loaded in application
 
 /**
  * @ngdoc function
  * @name Plugin.core
  * @type {object}
  * @description
- * Object, that will be supplied as argument to mwc.extencCore function
+ * Object, that will be supplied as argument to kabam.extencCore function
  * @example
  * ```javascript
  * exports.core = {
@@ -115,7 +115,7 @@ exports.core = {
  * @name Plugin.model
  * @type {object}
  * @description
- * Object, that will be supplied as argument to mwc.extendModel function
+ * Object, that will be supplied as argument to kabam.extendModel function
  * @example
  *```javascript
  * exports.model = {
@@ -165,34 +165,34 @@ exports.model = {
  * @name Plugin.app
  * @type {function}
  * @description
- * Function, that will be supplied as argument to mwc.extendApp function
+ * Function, that will be supplied as argument to kabam.extendApp function
  * @example
  * ```javascript
- * exports.app = function (mwc) {
- *   mwc.app.set('someValue',42);
+ * exports.app = function (kabam) {
+ *   kabam.app.set('someValue',42);
  * };
  * ```
  */
-exports.app = function (mwc) {
-  mwc.app.set('someValue',42);
+exports.app = function (kabam) {
+  kabam.app.set('someValue',42);
 };
 
 var LinkedInStrategy = require('passport-linkedin').Strategy;
 
 //sorry, only one(!) passportJS strategy per plugin!
 exports.strategy = {
-  'strategy': function (mwc) {
+  'strategy': function (kabam) {
     return new LinkedInStrategy({
-      consumerKey: mwc.config.passport.LINKEDIN_API_KEY,
-      consumerSecret: mwc.config.passport.LINKEDIN_SECRET_KEY,
-      callbackURL: mwc.config.hostUrl + 'auth/linkedin/callback'
+      consumerKey: kabam.config.passport.LINKEDIN_API_KEY,
+      consumerSecret: kabam.config.passport.LINKEDIN_SECRET_KEY,
+      callbackURL: kabam.config.hostUrl + 'auth/linkedin/callback'
     }, function (token, tokenSecret, profile, done) {
       console.log('==============');
       console.log(profile);
       console.log('==============');
       var email = profile.emails[0].value;
       if (email) {
-        mwc.model.Users.processOAuthProfile(email, done);
+        kabam.model.Users.processOAuthProfile(email, done);
       } else {
         return done(new Error('There is something strange instead of user profile'));
       }
@@ -215,7 +215,7 @@ exports.strategy = {
  * @name Plugin.middleware
  * @type {function}
  * @description
- * Function, that will be supplied as argument to mwc.extendMiddlware function
+ * Function, that will be supplied as argument to kabam.extendMiddlware function
  * the most hard to understand function
  * because middleware conception is tricky and it do need the core object, for example,
  * in this way or maybe in some other way. But it do need the core!!!
@@ -223,7 +223,7 @@ exports.strategy = {
  * @example
  * ```javascript
  * exports.middleware = [
- *   function (mwc) {
+ *   function (kabam) {
  *     return function (request, response, next) {
  *       request.model.Cats.count({name: 'Grumpy'}, function (err, numberOfCats) {
  *         if (numberOfCats > core.parameterOne) {
@@ -235,7 +235,7 @@ exports.strategy = {
  *       });
  *     };
  *   },
- *   function (mwc) {
+ *   function (kabam) {
  *     return function (request, response, next) {
  *       request.model.Dogs.count({name: 'Strelka'}, function (err, numberOfDogs) {
  *         if (numberOfDogs > core.parameterOne) {
@@ -252,7 +252,7 @@ exports.strategy = {
  */
 
 exports.middleware = [
-  function (mwc) {
+  function (kabam) {
     return function (request, response, next) {
       request.model.Cats.count({name: 'Grumpy'}, function (err, numberOfCats) {
         if (numberOfCats > core.parameterOne) {
@@ -264,7 +264,7 @@ exports.middleware = [
       });
     };
   },
-  function (mwc) {
+  function (kabam) {
     return function (request, response, next) {
       request.model.Dogs.count({name: 'Strelka'}, function (err, numberOfDogs) {
         if (numberOfDogs > core.parameterOne) {
@@ -284,18 +284,18 @@ exports.middleware = [
  * @name Plugin.routes
  * @type {function}
  * @description
- * Extend appliction routes, sends the value as argument to a function mwc.extendRoutes
+ * Extend appliction routes, sends the value as argument to a function kabam.extendRoutes
  * @example
  * ```javascript
- *  exports.routes = function(mwc){
- *   mwc.app.get('/kittens',function(request,response){
+ *  exports.routes = function(kabam){
+ *   kabam.app.get('/kittens',function(request,response){
  *     request.model.Cats.find({},function(err,cats){
  *       if(err) throw err;
  *       response.json(cats);
  *     });
  *   });
  *
- *   mwc.app.get('/dogs',function(request,response){
+ *   kabam.app.get('/dogs',function(request,response){
  *     request.model.Dogs.find({},function(err,dogs){
  *       if(err) throw err;
  *       response.json(dogs);
@@ -304,15 +304,15 @@ exports.middleware = [
  * };
  * ```
  */
-exports.routes = function(mwc){
-  mwc.app.get('/kittens',function(request,response){
+exports.routes = function(kabam){
+  kabam.app.get('/kittens',function(request,response){
     request.model.Cats.find({},function(err,cats){
       if(err) throw err;
       response.json(cats);
     });
   });
 
-  mwc.app.get('/dogs',function(request,response){
+  kabam.app.get('/dogs',function(request,response){
     request.model.Dogs.find({},function(err,dogs){
       if(err) throw err;
       response.json(dogs);
@@ -325,7 +325,7 @@ exports.routes = function(mwc){
  * @name Plugin.listeners
  * @type {object}
  * @description
- * Object, that will be supplied as argument to mwc.extendListeners function
+ * Object, that will be supplied as argument to kabam.extendListeners function
  * Field names are the vent types, values are function called against this events
  * @example
  * ```javascript

@@ -2,7 +2,7 @@
 'use strict';
 var should = require('should'),
   async = require('async'),
-  mwcKernel = require('./../index.js'),
+  kabamKernel = require('./../index.js'),
   events = require('events'),
   config = require('./../example/config.json').development,
   request = require('request'),
@@ -11,7 +11,7 @@ var should = require('should'),
 
 describe('Kernel', function () {
 
-  var MWC;
+  var Kabam;
 
 
   /*
@@ -118,31 +118,31 @@ describe('Kernel', function () {
 
 
   before(function (done) {
-    MWC = mwcKernel(config);
+    Kabam = kabamKernel(config);
 
-    MWC.extendCore('sum', function (config) {
+    Kabam.extendCore('sum', function (config) {
       return function (a, b) {
         return a + b;
       }
     });
-    MWC.extendCore('SomeVar', 42);
+    Kabam.extendCore('SomeVar', 42);
 
-    MWC.extendModel('Cats', extendModelFunction);
+    Kabam.extendModel('Cats', extendModelFunction);
 
-    MWC.extendApp(['development', 'staging'], extendAppParametersFunction1);
-    MWC.extendApp('development', extendAppParametersFunction2);
-    MWC.extendApp('production', extendAppParametersFunction3);
+    Kabam.extendApp(['development', 'staging'], extendAppParametersFunction1);
+    Kabam.extendApp('development', extendAppParametersFunction2);
+    Kabam.extendApp('production', extendAppParametersFunction3);
 
-    MWC.extendMiddleware(extendAppMiddlewareFunction1);
-    MWC.extendMiddleware('staging', extendAppMiddlewareFunction2);
-    MWC.extendMiddleware(['staging', 'production'], extendAppMiddlewareFunction3);
-    MWC.extendMiddleware(['development'], '/middleware3Path', extendAppMiddlewareFunction3);
-    MWC.extendMiddleware('development', '/middleware4Path', extendAppMiddlewareFunction4);
+    Kabam.extendMiddleware(extendAppMiddlewareFunction1);
+    Kabam.extendMiddleware('staging', extendAppMiddlewareFunction2);
+    Kabam.extendMiddleware(['staging', 'production'], extendAppMiddlewareFunction3);
+    Kabam.extendMiddleware(['development'], '/middleware3Path', extendAppMiddlewareFunction3);
+    Kabam.extendMiddleware('development', '/middleware4Path', extendAppMiddlewareFunction4);
 
-    MWC.extendRoutes(extendRoutesFunction);
+    Kabam.extendRoutes(extendRoutesFunction);
     //*/
 
-    MWC.usePlugin({
+    Kabam.usePlugin({
       'name': 'unitTestPlugin',
       'core': {'mul': function (config) {
         return function (a, b) {
@@ -156,108 +156,108 @@ describe('Kernel', function () {
     });
     //*/
     //create and start this application
-    MWC.start(port);
+    Kabam.start(port);
     setTimeout(done, 1000);
   });
 
 //  after(function(done){
-//    MWC.mongoose.disconnect();
+//    Kabam.mongoose.disconnect();
 //    done();
 //  });
-  describe('Testing exposed objects of running mwcKernel', function () {
+  describe('Testing exposed objects of running kabamKernel', function () {
 
     it('can emit and listen to events', function () {
-      MWC.emit.should.be.a('function');
-      MWC.on.should.be.a('function');
+      Kabam.emit.should.be.a('function');
+      Kabam.on.should.be.a('function');
     });
 
     it('exposes redis client', function () {
-      MWC.redisClient.should.be.a('object');
-      MWC.redisClient.set.should.be.a('function');
-      MWC.redisClient.get.should.be.a('function');
-      MWC.redisClient.info.should.be.a('function');
-      MWC.redisClient.auth.should.be.a('function');
+      Kabam.redisClient.should.be.a('object');
+      Kabam.redisClient.set.should.be.a('function');
+      Kabam.redisClient.get.should.be.a('function');
+      Kabam.redisClient.info.should.be.a('function');
+      Kabam.redisClient.auth.should.be.a('function');
     });
 
     it('exposes mongoose model', function () {
-      MWC.model.should.be.a('object');
+      Kabam.model.should.be.a('object');
     });
 
     it('exposes mongoose model of users', function () {
-      MWC.model.User.should.be.a('function');
-      MWC.model.Users.should.be.a('function');
+      Kabam.model.User.should.be.a('function');
+      Kabam.model.Users.should.be.a('function');
     });
 
     it('exposes mongoose model of messages', function () {
-      MWC.model.Message.should.be.a('function');
-      MWC.model.Messages.should.be.a('function');
+      Kabam.model.Message.should.be.a('function');
+      Kabam.model.Messages.should.be.a('function');
     });
 
     it('exposes an ExpressJS application', function () {
-      MWC.app.should.be.a('function');
-      MWC.app.listen.should.be.a('function');
-      MWC.app.use.should.be.a('function');
-      MWC.app.get.should.be.a('function');
-      MWC.app.post.should.be.a('function');
-      MWC.app.delete.should.be.a('function');
+      Kabam.app.should.be.a('function');
+      Kabam.app.listen.should.be.a('function');
+      Kabam.app.use.should.be.a('function');
+      Kabam.app.get.should.be.a('function');
+      Kabam.app.post.should.be.a('function');
+      Kabam.app.delete.should.be.a('function');
     });
 
     it('throws error when we try to extend readied application', function () {
 
       (function () {
-        MWC.extendCore(function () {
+        Kabam.extendCore(function () {
           throw new Error('Core was extended for READIED application!');
         });
-      }).should.throw('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+      }).should.throw('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
 
       (function () {
-        MWC.extendApp(['development', 'staging'], function () {
+        Kabam.extendApp(['development', 'staging'], function () {
           throw new Error('Core app parameters were extended for READIED application!');
         });
-      }).should.throw('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+      }).should.throw('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
 
       (function () {
-        MWC.extendMiddleware(['development', 'staging'], function () {
+        Kabam.extendMiddleware(['development', 'staging'], function () {
           throw new Error('Core app middlewares were extended for READIED application!');
         });
-      }).should.throw('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+      }).should.throw('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
 
       (function () {
-        MWC.extendRoutes(function () {
+        Kabam.extendRoutes(function () {
           throw new Error('Core app routes were extended for READIED application!');
         });
-      }).should.throw('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+      }).should.throw('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
 
       (function () {
-        MWC.usePlugin('mwc_plugin_make_suicide_while_punching_wall_on_high_speed');
-      }).should.throw('MWC core application is already prepared! WE CAN\'T EXTEND IT NOW!');
+        Kabam.usePlugin('kabam_plugin_make_suicide_while_punching_wall_on_high_speed');
+      }).should.throw('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
 
     });
 
   });
 
-  describe('Testing mwc_core event emiting system', function () {
+  describe('Testing kabam_core event emiting system', function () {
     var error,
       message;
 
     before(function (done) {
       var promise = new events.EventEmitter(),
-        mwc = MWC;
+        kabam = Kabam;
 
-      mwc.on('error', function (err) {
+      kabam.on('error', function (err) {
         promise.emit('error', err);
         error = err;
         done();
       });
 
-      mwc.on('ping', function (msg) {
+      kabam.on('ping', function (msg) {
         promise.emit('success', msg);
         message = msg;
         done();
       });
 
       setTimeout(function () {
-        mwc.emit('ping', 'pong');
+        kabam.emit('ping', 'pong');
       }, 100);
 
     });
@@ -269,47 +269,47 @@ describe('Kernel', function () {
 
   });
 
-  describe('Testing mwc_core express application', function () {
-    it('it exposes a #MWC.app object', function () {
-      MWC.app.should.be.a('function');
+  describe('Testing kabam_core express application', function () {
+    it('it exposes a #Kabam.app object', function () {
+      Kabam.app.should.be.a('function');
     });
   });
 
-  describe('#MWC.extendCore()', function () {
+  describe('#Kabam.extendCore()', function () {
 
 
-    it('actually adds new functions to #MWC', function () {
-      MWC.shared.SomeVar.should.be.equal(42);
-      MWC.shared.sum.should.be.a('function');
-      MWC.shared.sum(2, 2).should.equal(4);
+    it('actually adds new functions to #Kabam', function () {
+      Kabam.shared.SomeVar.should.be.equal(42);
+      Kabam.shared.sum.should.be.a('function');
+      Kabam.shared.sum(2, 2).should.equal(4);
     });
   });
 
-  describe('#MWC.extendModel()', function () {
+  describe('#Kabam.extendModel()', function () {
 
-    it('adds the model of "Cats" to #MWC.model.Cats', function () {
-      MWC.model.Cats.should.be.a('function');
+    it('adds the model of "Cats" to #Kabam.model.Cats', function () {
+      Kabam.model.Cats.should.be.a('function');
     });
     describe('and the "Cats" model looks like mongoose model', function () {
       it('exposes function find', function () {
-        MWC.model.Cats.find.should.be.a('function');
+        Kabam.model.Cats.find.should.be.a('function');
       });
       it('exposes function findOne', function () {
-        MWC.model.Cats.findOne.should.be.a('function');
+        Kabam.model.Cats.findOne.should.be.a('function');
       });
       it('exposes function count', function () {
-        MWC.model.Cats.count.should.be.a('function');
+        Kabam.model.Cats.count.should.be.a('function');
       });
       it('exposes function remove', function () {
-        MWC.model.Cats.remove.should.be.a('function');
+        Kabam.model.Cats.remove.should.be.a('function');
       });
       it('exposes function create', function () {
-        MWC.model.Cats.create.should.be.a('function');
+        Kabam.model.Cats.create.should.be.a('function');
       });
     });
   });
 
-  describe('#MWC.extendApp()', function () {
+  describe('#Kabam.extendApp()', function () {
     it('We are running the correct environment', function () {
       if (typeof process.env.NODE_ENV !== 'undefined') {
         process.env.NODE_ENV.should.be.equal('development');
@@ -317,15 +317,15 @@ describe('Kernel', function () {
     });
 
     it('actually works', function () {
-      MWC.app.get('TempVar1').should.equal('TempVar1');
-      MWC.app.get('TempVar2').should.equal('TempVar2');
-      if (typeof MWC.app.get('TempVar3') !== 'undefined') {
+      Kabam.app.get('TempVar1').should.equal('TempVar1');
+      Kabam.app.get('TempVar2').should.equal('TempVar2');
+      if (typeof Kabam.app.get('TempVar3') !== 'undefined') {
         throw new Error('We set app parameter for wrong environment!');
       }
     });
   });
 
-  describe('#MWC.extendMiddleware()', function () {
+  describe('#Kabam.extendMiddleware()', function () {
     it('We are running the correct environment', function () {
       if (typeof process.env.NODE_ENV !== 'undefined') {
         process.env.NODE_ENV.should.be.equal('development');
@@ -354,14 +354,14 @@ describe('Kernel', function () {
         response.headers['x-powered-by'].should.be.equal('Express');
       });
 
-      it('this application have headers needed by #MWC.extendMiddleware', function () {
+      it('this application have headers needed by #Kabam.extendMiddleware', function () {
         response.headers['middleware1'].should.be.equal('middleware1');
         response.headers['middleware3'].should.be.equal('middleware3');
       });
     });
   });
 
-  describe('#MWC.extendRoutes()', function () {
+  describe('#Kabam.extendRoutes()', function () {
 
     it('We are running the correct environment', function () {
       if (typeof process.env.NODE_ENV !== 'undefined') {
@@ -391,41 +391,41 @@ describe('Kernel', function () {
         response.headers['x-powered-by'].should.be.equal('Express');
       });
 
-      it('this application have headers needed by #MWC.extendMiddleware', function () {
+      it('this application have headers needed by #Kabam.extendMiddleware', function () {
         response.headers['middleware1'].should.be.equal('middleware1');
       });
     });
   });
 
-  describe('#MWC.usePlugin(object)', function () {
+  describe('#Kabam.usePlugin(object)', function () {
 
     describe('extendCore from plugin', function () {
 
-      it('it actually adds new functions to #MWC.core', function () {
-        MWC.unitTestPlugin.mul.should.be.a('function');
-        MWC.unitTestPlugin.mul(3, 2).should.equal(6);
+      it('it actually adds new functions to #Kabam.core', function () {
+        Kabam.unitTestPlugin.mul.should.be.a('function');
+        Kabam.unitTestPlugin.mul(3, 2).should.equal(6);
       });
     });
 
     describe('extendModel from plugin', function () {
-      it('adds the model of "Dogs" to #MWC.model.Dogs', function () {
-        MWC.model.Dogs.should.be.a('function');
+      it('adds the model of "Dogs" to #Kabam.model.Dogs', function () {
+        Kabam.model.Dogs.should.be.a('function');
       });
       describe('and the "Dogs" model looks like mongoose model', function () {
         it('exposes function find', function () {
-          MWC.model.Dogs.find.should.be.a('function');
+          Kabam.model.Dogs.find.should.be.a('function');
         });
         it('exposes function findOne', function () {
-          MWC.model.Dogs.findOne.should.be.a('function');
+          Kabam.model.Dogs.findOne.should.be.a('function');
         });
         it('exposes function count', function () {
-          MWC.model.Dogs.count.should.be.a('function');
+          Kabam.model.Dogs.count.should.be.a('function');
         });
         it('exposes function remove', function () {
-          MWC.model.Dogs.remove.should.be.a('function');
+          Kabam.model.Dogs.remove.should.be.a('function');
         });
         it('exposes function create', function () {
-          MWC.model.Dogs.create.should.be.a('function');
+          Kabam.model.Dogs.create.should.be.a('function');
         });
       });
     });
@@ -433,7 +433,7 @@ describe('Kernel', function () {
     describe('extendApp from plugin', function () {
 
       it('it works', function () {
-        MWC.app.get('extendAppParametersFunctionPlugin').should.equal('extended111');
+        Kabam.app.get('extendAppParametersFunctionPlugin').should.equal('extended111');
       });
     });
 
@@ -461,7 +461,7 @@ describe('Kernel', function () {
           response.headers['x-powered-by'].should.be.equal('Express');
         });
 
-        it('this  application have headers needed by #MWC.extendMiddleware', function () {
+        it('this  application have headers needed by #Kabam.extendMiddleware', function () {
           response.headers['middleware1'].should.be.equal('middleware1');
           response.headers['extendappmiddlewarefunctionplugin'].should.be.equal('OK');
         });
@@ -491,7 +491,7 @@ describe('Kernel', function () {
           response.headers['x-powered-by'].should.be.equal('Express');
         });
 
-        it('this application have headers needed by #MWC.extendMiddleware', function () {
+        it('this application have headers needed by #Kabam.extendMiddleware', function () {
           response.headers['middleware1'].should.be.equal('middleware1');
           response.headers['extendappmiddlewarefunctionplugin'].should.be.equal('OK');
         });
@@ -505,7 +505,7 @@ describe('Kernel', function () {
     });
   });
 
-  describe('#MWC.listen(portNumber)', function () {
+  describe('#Kabam.listen(portNumber)', function () {
     var response, body;
     before(function (done) {
       request.get('http://localhost:' + port + '/someRoute', function (err, res, b) {
@@ -527,7 +527,7 @@ describe('Kernel', function () {
       response.headers['x-powered-by'].should.be.equal('Express');
     });
 
-    it('this application have headers needed by #MWC.extendMiddleware', function () {
+    it('this application have headers needed by #Kabam.extendMiddleware', function () {
       response.headers['middleware1'].should.be.equal('middleware1');
     });
 
@@ -550,7 +550,7 @@ describe('Kernel', function () {
   });
 
   after(function (done) {
-    MWC.stop();
+    Kabam.stop();
     done();
   });
 });
