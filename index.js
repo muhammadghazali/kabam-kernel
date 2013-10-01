@@ -17,19 +17,6 @@ var EventEmitter = require('events').EventEmitter,
  */
 function KabamKernel(config) {
   EventEmitter.call(this);
-  if (config === undefined) {
-    config = {};
-  }
-  if (typeof config !== 'object') {
-    throw new Error('Config is not an object!');
-  }
-  if (typeof config === 'object') {
-    config.secret = configManager.getSecret(config.secret);
-    config.hostUrl = configManager.getHostUrl(config.hostUrl);
-    config.redis = configManager.getRedisUrl(config.redis);
-    config.mongoUrl = configManager.getMongoUrl(config.mongoUrl);
-  }
-  this.validateConfig(config);
   this.config = config;
 
   var extendCoreFunctions = [],//privileged field
@@ -160,7 +147,7 @@ function KabamKernel(config) {
    * return new LinkedInStrategy({
    *    consumerKey: core.config.passport.LINKEDIN_API_KEY,
    *    consumerSecret: core.config.passport.LINKEDIN_SECRET_KEY,
-   *    callbackURL: core.config.hostUrl + 'auth/linkedin/callback'
+   *    callbackURL: core.config.HOST_URL + 'auth/linkedin/callback'
    *    }, function (token, tokenSecret, profile, done) {
    *       var email = profile.emails[0].value;
    *      if (email) {
@@ -546,7 +533,7 @@ function KabamKernel(config) {
    * returns kabamKernel
    *
    * It emits events of "started"
-   * @param {object} howExactly - config object, see parameters in description
+   * @param {object} method - config object, see parameters in description
    *
    * @example
    * ```javascript
@@ -560,14 +547,14 @@ function KabamKernel(config) {
    *   kabam.start(3000); //binds to  port 3000
    *
    *   var http = require('http');
-   *   kabam.start(http).listen(kabam.app.get('port'));
+   *   kabam.start(http).listen(kabam.config.PORT);
    *
    *   //with socket.io
    *   //this is done in this way, because we can attach socket.io easily
    *   var http = require('http');
    *   var server = kabam.start(http);
    *   io = require('socket.io').listen(server);
-   *   server.listen(kabam.app.get('port'));
+   *   server.listen(kabam.config.PORT);
    *
    *   //setting up the https
    *   var https = require('https');
@@ -578,10 +565,19 @@ function KabamKernel(config) {
    *
    * ```
    */
-  this.start = function (howExactly) {
+  this.start = function (method) {
     prepared = true;
+
+    // rewriting all port configuration, port specified in start has highest priority
+    if(typeof method === 'number'){
+      this.config.PORT = method
+    }
+
+    // creating config
+    this.config = configManager(this.config || {});
+
     //injecting redis
-    thisKabam.redisClient = redisManager.create(thisKabam.config.redis);
+    thisKabam.redisClient = redisManager.create(thisKabam.config.REDIS);
 
     //injecting mongoose and additional models
     thisKabam.model = mongooseManager.injectModels(thisKabam, additionalModels);
@@ -601,26 +597,24 @@ function KabamKernel(config) {
 
     //initialize expressJS application
     thisKabam.app = appManager(thisKabam, extendAppFunctions, additionalStrategies, extendMiddlewareFunctions, extendRoutesFunctions, catchAllFunction);
-    if (howExactly) {
-      if (howExactly === 'app') {
+
+    if (method === 'app') {
         thisKabam.emit('started', { 'type': 'app' });
         return thisKabam;
-      }
-      if (typeof howExactly === 'number' && howExactly > 0) {
-        thisKabam.httpServer.listen(howExactly, function () {
-          thisKabam.emit('started', {'port': howExactly, 'type': 'expressHttp'});
-          console.log(('KabamKernel started on ' + howExactly + ' port').blue);
-        });
-        return thisKabam;
-      }
-      throw new Error('Function Kabam.listen(httpOrHttpsOrPort) accepts objects of null, "app" or port\'s number as argument!');
-    } else {
-      thisKabam.httpServer.listen(thisKabam.app.get('port'), function () {
-        thisKabam.emit('started', {'port': thisKabam.app.get('port'), 'type': 'expressHttp'});
-        console.log(('KabamKernel started on ' + thisKabam.app.get('port') + ' port').blue);
-      });
-      return thisKabam;
+    } else if(method && typeof method !== 'number'){
+      throw new Error('Function Kabam#start() accepts null, "app" or port number as arguments!');
     }
+
+    if(thisKabam.config.PORT < 0){
+      throw new Error('Invalid port number');
+    }
+
+    thisKabam.httpServer.listen(thisKabam.config.PORT, function () {
+      thisKabam.emit('started', {'port': thisKabam.config.PORT, 'type': 'expressHttp'});
+      console.log(('KabamKernel started on ' + thisKabam.config.PORT + ' port').blue);
+    });
+
+    return thisKabam;
   };
   /**
    * @ngdoc function
@@ -683,24 +677,6 @@ function KabamKernel(config) {
 }
 
 util.inherits(KabamKernel, EventEmitter);
-
-KabamKernel.prototype.validateConfig = function (config) {
-  // General check
-  if(typeof config !== 'object') {
-    throw new Error('Config is not an object!');
-  }
-  if (!(config.hostUrl && url.parse(config.hostUrl).hostname)) {
-    throw new Error('Config.hostUrl have to be valid hostname - for example, http://example.org/ with http(s) on start and "/" at end!!!');
-  }
-  if (config.secret.length < 9) {
-    throw new Error('Config.secret is not set or is to short!');
-  }
-
-  mongooseManager.validateConfig(config.mongoUrl);
-  redisManager.validateConfig(config.redis);
-
-  return true;
-};
 
 
 /**
@@ -769,16 +745,16 @@ KabamKernel.prototype.createRedisClient = function () {
  * //minimal config object example
  *
  * var config = {
- *   "hostUrl":"http://example.org/", //host url, can be quessed from enviroment
- *   "mongoUrl":"mongodb://username:password@mongoServer:27017/databaseName", *   // valid mongoUrl, can be quessed
- *   "secret":"LongAndHardSecretStringToPreventSessionHiJask", // can be quessed, but we recommend to set it
- * //"redis": "redis://prefix:authPassword@redisServer:6379",  //url to redis server, can be ommited
+ *   "HOST_URL":"http://example.org/", //host url, can be guessed from environment
+ *   "MONGO_URL":"mongodb://username:password@mongoServer:27017/databaseName", *   // valid MongoDB URL, can be guessed
+ *   "SECRET":"LongAndHardSecretStringToPreventSessionHiJask", // can be guessed, but we recommend to set it
+ * //"REDIS_URL": "redis://prefix:authPassword@redisServer:6379",  //url to redis server, can be omitted
  *
  * //"redis": {"host":"redisServer", "port":6379,"auth":"authPassword"},
- * //redis server parameters in different notation, can be ommited
+ * //redis server parameters in different notation, can be omitted
  *
- *   "redis": {"host":"localhost", "port":6379,"auth":""}, //default redis server values
- *   "disableCsrf" : false // disable csrf protection for application
+ *   "REDIS_URL": {"host":"localhost", "port":6379,"auth":""}, //default redis server values
+ *   "disableCsrf" : false // disable CSRF protection for application
  *   //"io":{'loglevel':1 }, //uncomment t his field to enable socket.io
  *   //'limitWorkers': 2, //uncomment this string to set the max worker processes number the cluster spawn
  * };
@@ -804,6 +780,7 @@ KabamKernel.prototype.stop = function () {
   this.redisClient.end();
   this.mongoose.connection.close();
   this.mongoose.disconnect();
+  this.removeAllListeners();
   return;
 };
 

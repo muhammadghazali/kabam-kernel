@@ -10,9 +10,9 @@ describe('groups testing', function () {
   before(function (done) {
 
     kabam = KabamKernel({
-      'hostUrl': 'http://localhost:' + port,
-      'mongoUrl': 'mongodb://localhost/kabam_dev',
-      'secret': 'ever_the_youngest_of_Mosirai_knows_that_you_cannot_put_humans_hide_on_a_bear'
+      'HOST_URL': 'http://localhost:' + port,
+      'MONGO_URL': 'mongodb://localhost/kabam_dev',
+      'SECRET': 'ever_the_youngest_of_Mosirai_knows_that_you_cannot_put_humans_hide_on_a_bear'
     });
 
     kabam.on('started', function (evnt) {
