@@ -13,8 +13,8 @@ describe('auth api testing', function () {
   before(function (done) {
 
     kabam = KabamKernel({
-      'hostUrl': 'http://localhost:' + port,
-      'mongoUrl': 'mongodb://localhost/kabam_dev',
+      'HOST_URL': 'http://localhost:' + port,
+      'MONGO_URL': 'mongodb://localhost/kabam_dev',
       'disableCsrf': true // NEVER DO IT!
     });
 
