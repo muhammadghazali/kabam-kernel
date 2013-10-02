@@ -3,7 +3,7 @@
 var should = require('should'),
   kabamKernel = require('./../index.js'),
   events = require('events'),
-  config = require('./../example/config.json').development,
+  config = require('./../example/config.json').testing,
   request = require('request'),
   port = Math.floor(2000 + 1000 * Math.random());
 //*
@@ -14,12 +14,16 @@ describe('Kernel events emitter testing', function () {
   before(function (done) {
     Kabam = kabamKernel(config);
 
-    Kabam.on('started', function (obj) {
+    Kabam.on('started', function () {
       isStarted = true;
+      Kabam.mongoConnection.on('open', function(){
+        Kabam.mongoConnection.db.dropDatabase(function () {
+          done();
+        });
+      });
     });
 
     Kabam.start(port);
-    setTimeout(done, 1000);
   });
 
   it('checking start event', function () {
