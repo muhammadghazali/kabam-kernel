@@ -17,25 +17,28 @@ describe('sanity test', function () {
     it('throws proper error for config object being not object', function () {
       (function () {
         var Kabam = kabamKernel('I am pineapple!');
+        Kabam.start('app');
       }).should.throw('Config is not an object!');
     });
 
 
-    it('throws proper error for config without hostUrl - we try to guess it from os.hostname()');
+    it('throws proper error for config without HOST_URL - we try to guess it from os.hostname()');
 
-    it('throws proper error for config with bad hostUrl', function () {
+    it('throws proper error for config with bad HOST_URL', function () {
       (function () {
-        var Kabam = kabamKernel({'hostUrl': 'I am pineapple!'});
-      }).should.throw('Config.hostUrl have to be valid hostname - for example, http://example.org/ with http(s) on start and "/" at end!!!');
+        var Kabam = kabamKernel({'HOST_URL': 'I am pineapple!'});
+        Kabam.start('app');
+      }).should.throw('Config.HOST_URL have to be valid hostname - for example, http://example.org/ with http(s) on start and "/" at end!');
     });
 
     it('throws proper error for too short secret string', function () {
       (function () {
-        var Kabam = kabamKernel({'hostUrl': 'http://example.org/', 'secret': '123'});
-      }).should.throw('Config.secret is not set or is to short!');
+        var Kabam = kabamKernel({'HOST_URL': 'http://example.org/', 'SECRET': '123'});
+        Kabam.start('app');
+      }).should.throw('Config.SECRET is to short!');
     });
 
-    it('throws proper error for empty mongoUrl string, pending, because we guess mongoUrl from environment');
+    it('throws proper error for empty MONGO_URL string, pending, because we guess MONGO_URL from environment');
     /*/
      it('throws proper error for "I am banana!" mongoUrl string', function () {
      var mongoUrl = process.env.mongoUrl;

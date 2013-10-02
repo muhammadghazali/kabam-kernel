@@ -6,8 +6,12 @@ var should = require('should'),
   config = require('./../example/config.json').development,
   kabam;
 
+// FIXME(chopachom): tests should not use development database,
+// they should use test database and clean it up each time tests run
 describe('Users model', function () {
   before(function (done) {
+    // SIGINT fix (each app attaches SIGINT handler and it always grows);
+    process.setMaxListeners(20);
     kabam = kabamKernel(config);
     kabam.start('app');
     setTimeout(done, 1000);
