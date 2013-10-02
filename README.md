@@ -198,7 +198,7 @@ ExpressJS object of every routes request have functions of `request.kabamEmit`, 
 
 
 7. [usePlugin("kabam-plugin-foo") or usePlugin(pluginObj)](http://cd.monimus.com:8080/#/api/kabamKernel.usePlugin) -
-load plugin as an object or [npm](https://npmjs.org/) package. See more on [how to create a plugin](https://github.com/mykabam/kabam-kernel#plugin-creating-manual) for details.
+use plugin as an object or [npm](https://npmjs.org/) package. See more on [how to create a plugin](https://github.com/mykabam/kabam-kernel#plugin-creating-manual) for details.
 
 8. [start](http://ci.monimus.com/docs/#/api/kabam.start) - start the Kabam application in way desired.
 9. [startCluster](http://ci.monimus.com/docs/#/api/kabam.startCluster) - start the Kabam application in way desired as a Cluster.
