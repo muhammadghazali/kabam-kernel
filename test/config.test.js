@@ -38,6 +38,7 @@ describe('ConfigManager', function(){
   describe('PORT', function(){
     it('should default to 3000', function(){
       var kernel = kabamKernel(config);
+      config.PORT = undefined;
       kernel.start('app');
       kernel.config.PORT.should.be.equal(3000);
     });
@@ -61,4 +62,5 @@ describe('ConfigManager', function(){
       kernel.config.MONGO_URL.should.be.equal('mongodb://localhost/kabam_dev');
     });
   });
+  //TODO: redis parsing test
 });
