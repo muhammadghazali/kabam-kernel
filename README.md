@@ -197,14 +197,11 @@ ExpressJS object of every routes request have functions of `request.kabamEmit`, 
 `request.redisClient`, and `request.user` provided by [passportjs](http://passportjs.org) middleware.
 
 
-7. [loadPlugin("kabam_plugin_foo") or loadPlugin(pluginObj)](http://ci.monimus.com/docs/#/api/kabam.loadPlugin) -
-load plugin as object or as a installed [npm](https://npmjs.org/) plugin by name.
-See [Plugin creating manual](https://github.com/mykabam/kabam-kernel#plugin-creating-manual) for details.
+7. [usePlugin("kabam-plugin-foo") or usePlugin(pluginObj)](http://cd.monimus.com:8080/#/api/kabamKernel.usePlugin) -
+load plugin as an object or [npm](https://npmjs.org/) package. See more on [how to create a plugin](https://github.com/mykabam/kabam-kernel#plugin-creating-manual) for details.
 
 8. [start](http://ci.monimus.com/docs/#/api/kabam.start) - start the Kabam application in way desired.
 9. [startCluster](http://ci.monimus.com/docs/#/api/kabam.startCluster) - start the Kabam application in way desired as a Cluster.
-
-
 
 Plugins
 =======
@@ -356,9 +353,6 @@ There is plugin of [https://github.com/mykabam/kabam_plugin_notify_by_email](htt
 that sends notifications as emails to user. There will be other plugins that can notify users by other means
 
 
-
-
-
 Installation
 =======
 
@@ -407,7 +401,7 @@ or
 
 [![Build Status](https://travis-ci.org/mykabam/kabam-kernel.png?branch=master)](https://travis-ci.org/mykabam/kabam-kernel)
 
-Plugin creating manual
+how to create a plugin
 =======
 
 This is typical plugin code. It is placed there
