@@ -2,7 +2,7 @@
  * @ngdoc function
  * @name Plugin
  * @description
- * Plugin object, that can be loaded by kabam.loadPlugin
+ * Plugin object, that can be loaded by kabam.usePlugin
  * @example
  * ```javascript
  * exports.name ='testPlugin333';

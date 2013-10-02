@@ -197,20 +197,17 @@ ExpressJS object of every routes request have functions of `request.kabamEmit`, 
 `request.redisClient`, and `request.user` provided by [passportjs](http://passportjs.org) middleware.
 
 
-7. [loadPlugin("kabam_plugin_foo") or loadPlugin(pluginObj)](http://ci.monimus.com/docs/#/api/kabam.loadPlugin) -
-load plugin as object or as a installed [npm](https://npmjs.org/) plugin by name.
-See [Plugin creating manual](https://github.com/mykabam/kabam-kernel#plugin-creating-manual) for details.
+7. [usePlugin("kabam-plugin-foo") or usePlugin(pluginObj)](http://cd.monimus.com:8080/#/api/kabamKernel.usePlugin) -
+use plugin as an object or [npm](https://npmjs.org/) package. See more on [how to create a plugin](https://github.com/mykabam/kabam-kernel#plugin-creating-manual) for details.
 
 8. [start](http://ci.monimus.com/docs/#/api/kabam.start) - start the Kabam application in way desired.
 9. [startCluster](http://ci.monimus.com/docs/#/api/kabam.startCluster) - start the Kabam application in way desired as a Cluster.
-
-
 
 Plugins
 =======
 Each of plugins have working example, to see it in action, install plugin like this
 ```shell
-    $ git clone git@github.com:mywebclass/kabam_plugin_socket_io.git
+    $ git clone git@github.com:mykabam/kabam_plugin_socket_io.git
     $ cd kabam_plugin_socket_io
     $ npm install
     $ npm start
@@ -218,20 +215,20 @@ Each of plugins have working example, to see it in action, install plugin like t
 If you have redis and mongodb running without password, every plugin have will start demonstration from the box.
 If you have errors running plugin, upgrade your kernel or plugin modules.
 
- - [kabam_plugin_example](https://github.com/mywebclass/kabam_plugin_example) [![Build Status](https://travis-ci.org/mywebclass/kabam_plugin_example.png)](https://travis-ci.org/mywebclass/kabam_plugin_example) demonstration plugin
+ - [kabam_plugin_example](https://github.com/mykabam/kabam_plugin_example) [![Build Status](https://travis-ci.org/mykabam/kabam_plugin_example.png)](https://travis-ci.org/mykabam/kabam_plugin_example) demonstration plugin
 
- - [kabam_heroku](https://github.com/mywebclass/kabam_heroku) - plugin to simplify deploy and configuring on [heroku cloud hosting](http://heroku.com).
+ - [kabam_heroku](https://github.com/mykabam/kabam_heroku) - plugin to simplify deploy and configuring on [heroku cloud hosting](http://heroku.com).
 
- - [kabam_plugin_spine](https://github.com/mywebclass/kabam_plugin_spine) [![Build Status](https://travis-ci.org/mywebclass/kabam_plugin_spine.png)](https://travis-ci.org/mywebclass/kabam_plugin_spine)  plugint that add task queue for application,
+ - [kabam-plugin-spine](https://github.com/mykabam/kabam-plugin-spine) [![Build Status](https://travis-ci.org/mykabam/kabam-plugin-spine.png)](https://travis-ci.org/mykabam/kabam-plugin-spine)  plugint that add task queue for application,
  based on  [Assemblage](https://github.com/pipedrive/assemblage) node module.
 
- - [kabam_plugin_hogan_express](https://github.com/mywebclass/kabam_plugin_hogan_express) [![Build Status](https://travis-ci.org/mywebclass/kabam_plugin_hogan_express.png?branch=master)](https://travis-ci.org/mywebclass/kabam_plugin_hogan_express) - plugin to add support for [hogan-express template engine](https://github.com/vol4ok/hogan-express).
+ - [kabam-plugin-hogan](https://github.com/mykabam/kabam-plugin-hogan) [![Build Status](https://travis-ci.org/mykabam/kabam-plugin-hogan.png?branch=master)](https://travis-ci.org/mykabam/kabam-plugin-hogan) - plugin to add support for [hogan-express template engine](https://github.com/vol4ok/hogan-express).
 
- - [https://github.com/mywebclass/kabam_plugin_notify_by_email](https://github.com/mywebclass/kabam_plugin_notify_by_email) - plugin to notify users by email
+ - [kabam-plugin-notify-email](https://github.com/mykabam/kabam-plugin-notify-email) - plugin to notify users by email
 
- - [https://github.com/mywebclass/kabam_plugin_gridfs](https://github.com/mywebclass/kabam_plugin_gridfs) [![Build Status](https://travis-ci.org/mywebclass/kabam_plugin_gridfs.png?branch=master)](https://travis-ci.org/mywebclass/kabam_plugin_gridfs) - plugin to use gridfs
+ - [https://github.com/mykabam/kabam_plugin_gridfs](https://github.com/mykabam/kabam_plugin_gridfs) [![Build Status](https://travis-ci.org/mykabam/kabam_plugin_gridfs.png?branch=master)](https://travis-ci.org/mykabam/kabam_plugin_gridfs) - plugin to use gridfs
 
- - [https://github.com/mywebclass/kabam_plugin_socket_io/](https://github.com/mywebclass/kabam_plugin_socket_io) - plugin to notify users by socket.io events
+ - [https://github.com/mykabam/kabam_plugin_socket_io/](https://github.com/mykabam/kabam_plugin_socket_io) - plugin to notify users by socket.io events
 
 [Plugin compatibility wiki](https://github.com/mykabam/kabam-kernel/wiki/Plugin-compatibility-guide)
 
@@ -352,11 +349,8 @@ will attach the github profile with id=23122 to users profile
 Further documentation is published here [http://ci.monimus.com/docs/#/api/User](http://ci.monimus.com/docs/#/api/User)
 
 
-There is plugin of [https://github.com/mywebclass/kabam_plugin_notify_by_email](https://github.com/mywebclass/kabam_plugin_notify_by_email)
+There is plugin of [https://github.com/mykabam/kabam_plugin_notify_by_email](https://github.com/mykabam/kabam_plugin_notify_by_email)
 that sends notifications as emails to user. There will be other plugins that can notify users by other means
-
-
-
 
 
 Installation
@@ -407,11 +401,11 @@ or
 
 [![Build Status](https://travis-ci.org/mykabam/kabam-kernel.png?branch=master)](https://travis-ci.org/mykabam/kabam-kernel)
 
-Plugin creating manual
+how to create a plugin
 =======
 
 This is typical plugin code. It is placed there
-[https://github.com/mywebclass/kabam_plugin_example](https://github.com/mywebclass/kabam_plugin_example)
+[https://github.com/mykabam/kabam_plugin_example](https://github.com/mykabam/kabam_plugin_example)
 
 *Important* - when you create plugin, the `extendApp`, `extendMiddleware` APPLIES to all environments!
 Furthermore, `extendMiddleware` binds to route '/'
