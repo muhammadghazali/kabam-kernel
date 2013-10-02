@@ -3,7 +3,7 @@ var
   should = require('should'),
   async = require('async'),
   kabamKernel = require('./../index.js'),
-  config = require('./../example/config.json').development,
+  config = require('./../example/config.json').testing,
   request = require('request');
 
 var kernel;
@@ -54,7 +54,9 @@ describe('ConfigManager', function(){
 
   describe('MONGO_URL', function(){
     it('should default to mongodb://localhost/kabam_dev', function(){
-      kernel = kabamKernel(config);
+      var localConfig = Object.create(config);
+      localConfig.MONGO_URL = undefined;
+      kernel = kabamKernel(localConfig);
       kernel.start('app');
       kernel.config.MONGO_URL.should.be.equal('mongodb://localhost/kabam_dev');
     });
