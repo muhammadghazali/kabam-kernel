@@ -1,8 +1,8 @@
 {
-  "development":{
+  "testing":{
     "HOST_URL":"http://vvv.msk0.ru/",
     "SECRET":"hammer on the keyboard",
-    "MONGO_URL":"mongodb://localhost/kabam_dev",
+    "MONGO_URL":"mongodb://localhost/kabam_test",
     "REDIS":{"host":"localhost","port":6379},
     "sessionStorage": "redis",
     "passport":{

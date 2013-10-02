@@ -641,8 +641,8 @@ function KabamKernel(config) {
       maxWorkers,
       i;
 
-    if (this.config.limitWorkers && this.config.limitWorkers > 0) {
-      maxWorkers  = Math.min(numCPUs, this.config.limitWorkers);
+    if (this.config.LIMIT_WORKERS && this.config.LIMIT_WORKERS > 0) {
+      maxWorkers  = Math.min(numCPUs, this.config.LIMIT_WORKERS);
     } else {
       maxWorkers = numCPUs;
     }
@@ -750,13 +750,13 @@ KabamKernel.prototype.createRedisClient = function () {
  *   "SECRET":"LongAndHardSecretStringToPreventSessionHiJask", // can be guessed, but we recommend to set it
  * //"REDIS_URL": "redis://prefix:authPassword@redisServer:6379",  //url to redis server, can be omitted
  *
- * //"redis": {"host":"redisServer", "port":6379,"auth":"authPassword"},
+ * //"REDIS": {"host":"redisServer", "port":6379,"auth":"authPassword"},
  * //redis server parameters in different notation, can be omitted
  *
  *   "REDIS_URL": {"host":"localhost", "port":6379,"auth":""}, //default redis server values
- *   "disableCsrf" : false // disable CSRF protection for application
- *   //"io":{'loglevel':1 }, //uncomment t his field to enable socket.io
- *   //'limitWorkers': 2, //uncomment this string to set the max worker processes number the cluster spawn
+ *   "DISABLE_CSRF" : false // disable CSRF protection for application
+ *   //"IO":{'LOGLEVEL':1 }, //uncomment t his field to enable socket.io
+ *   //'LIMIT_WORKERS': 2, //uncomment this string to set the max worker processes number the cluster spawn
  * };
  *
  * //minimal runnable example

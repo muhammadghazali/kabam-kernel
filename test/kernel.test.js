@@ -4,7 +4,7 @@ var should = require('should'),
   async = require('async'),
   kabamKernel = require('./../index.js'),
   events = require('events'),
-  config = require('./../example/config.json').development,
+  config = require('./../example/config.json').testing,
   request = require('request'),
   port = Math.floor(2000 + 1000 * Math.random());
 

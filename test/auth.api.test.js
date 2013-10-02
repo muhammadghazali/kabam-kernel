@@ -15,7 +15,7 @@ describe('auth api testing', function () {
     kabam = KabamKernel({
       'HOST_URL': 'http://localhost:' + port,
       'MONGO_URL': 'mongodb://localhost/kabam_dev',
-      'disableCsrf': true // NEVER DO IT!
+      'DISABLE_CSRF': true // NEVER DO IT!
     });
 
     kabam.on('started', function (evnt) {

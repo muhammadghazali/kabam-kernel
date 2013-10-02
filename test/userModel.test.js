@@ -3,18 +3,22 @@
 var should = require('should'),
   async = require('async'),
   kabamKernel = require('./../index.js'),
-  config = require('./../example/config.json').development,
+  config = require('./../example/config.json').testing,
   kabam;
 
-// FIXME(chopachom): tests should not use development database,
-// they should use test database and clean it up each time tests run
 describe('Users model', function () {
   before(function (done) {
     // SIGINT fix (each app attaches SIGINT handler and it always grows);
     process.setMaxListeners(20);
     kabam = kabamKernel(config);
+    kabam.on('started', function () {
+      kabam.mongoConnection.on('open', function(){
+        kabam.mongoConnection.db.dropDatabase(function () {
+          done();
+        });
+      });
+    });
     kabam.start('app');
-    setTimeout(done, 1000);
   });
 
   describe('Users model', function () {
