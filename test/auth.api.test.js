@@ -1,6 +1,7 @@
 /*jshint immed: false */
 'use strict';
 var should = require('should'),
+  mongoose = require('mongoose'),
   KabamKernel = require('./../index.js'),
   events = require('events'),
   config = require('./../example/config.json').testing,
@@ -9,23 +10,24 @@ var should = require('should'),
 
 describe('auth api testing', function () {
 
-  var kabam;
+  var kabam, connection;
   before(function (done) {
 
     config.DISABLE_CSRF = true;
-
     kabam = KabamKernel(config);
 
-    kabam.on('started', function () {
-      kabam.mongoConnection.on('open', function(){
-        kabam.mongoConnection.db.dropDatabase(function () {
+    connection = mongoose.createConnection(config.MONGO_URL);
+    // We should first connect manually to the database and delete it because if we would use kabam.mongoConnection
+    // then models would not recreate their indexes because mongoose would initialise before we would drop database.
+    kabam = KabamKernel(config);
+    connection.on('open', function(){
+      connection.db.dropDatabase(function () {
+        kabam.on('started', function () {
           done();
         });
+        kabam.start(port);
       });
     });
-
-    // kabam.usePlugin(require('./../index.js'));
-    kabam.start(port);
   });
 
   describe('Testing /auth/signup route', function () {

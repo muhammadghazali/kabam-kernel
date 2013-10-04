@@ -52,7 +52,7 @@ exports.init = function (kabam) {
          * @description
          * Primary email of user, the one he/she used for registration. Unique.
          */
-        email: {type: String, trim: true, index: true, required: true, unique: true, match: /^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/},
+        email: {type: String, trim: true, index: true, unique: true, sparse: true, match: /^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/},
         /**
          * @ngdoc value
          * @methodOf User
@@ -110,7 +110,7 @@ exports.init = function (kabam) {
          * Array of user roles/permissions (strings)
          */
         roles: [
-          {type: String, match: /^[a-zA-Z0-9_]+$/ }
+          {type: String, match: /^[a-zA-Z0-9_]+$/, index: true }
         ],
 
         /**
@@ -205,13 +205,13 @@ exports.init = function (kabam) {
       }
     );
 
-  UserSchema.index({
-    username: 1,
-    email: 1,
-    apiKey: 1,
-    keychain: 1,
-    roles: 1
-  });
+//  UserSchema.index({
+//    username: 1,
+//    email: 1,
+//    apiKey: 1,
+//    keychain: 1,
+//    roles: 1
+//  });
 
   /**
    * @ngdoc function
@@ -239,7 +239,8 @@ exports.init = function (kabam) {
     size = size || 300;
     type = type || 'wavatar';
     rating = rating || 'g';
-    return 'https://secure.gravatar.com/avatar/' + md5(this.email.toLowerCase().trim()) + '.jpg?s=' + size + '&d=' + type + '&r=' + rating;
+    var hash = md5(this.email && this.email.toLowerCase().trim() || '');
+    return 'https://secure.gravatar.com/avatar/' + hash + '.jpg?s=' + size + '&d=' + type + '&r=' + rating;
   };
   /**
    * @ngdoc value
@@ -786,6 +787,83 @@ exports.init = function (kabam) {
           }
         });
       }
+    });
+  };
+
+  /**
+   *
+   * @param {String} [email] optional email for a user
+   * @param {{id:String|Number, provider: String, emails:<Array<{value:String}>>}} profile
+   * @param {function(err:Error, user:User?, created:Boolean?)} done
+   */
+  UserSchema.statics.signUpWithService = function(email, profile, done){
+    var data = {
+      'profileComplete': false,
+      'apiKey': sha512(rack()),
+      'root': false,
+      'apiKeyCreatedAt': new Date()
+    };
+    // if profile has email considering that email is verified
+    if(email){
+      data.email = email;
+      data.emailVerified = true;
+    }
+    this.create(data, function(err, user){
+      if(err) return done(err);
+      user.setKeyChain(profile.provider, profile.id, function (err) {
+        if (err) return done(err);
+        // true for marking user as created
+        done(null, user, true);
+      });
+    })
+  };
+
+  /**
+   * @ngdoc function
+   * @name kabamKernel.model.User.linkWithService
+   * @param {String} email If we are linking logged in user we should provide their email
+   * @param {{id:String|Number, provider: String, emails:<Array<{value:String}>>}} profile
+   * @param {function(err:Error, user:User?, created:Boolean?)} done
+   * @description
+   * Links existing user with the service or creates a new user automatically linking it with the service.
+   * If the user already linked with the service callback successfully returns the user but nothing changes in the database.
+   */
+  UserSchema.statics.linkWithService = function(email, profile, done){
+    var
+      provider = profile.provider,
+      query = {},
+      _this = this;
+
+    email || Array.isArray(profile.emails) && profile.emails.length && (email = profile.emails[0].value);
+
+    // the rule is simple if the user is logged in we just select their record by email because email uniquely
+    // identifies users. If we don't have the user logged in we should lookup their record by email in the oauth profile
+    // if such email were provided. If it weren't we just lookup by keychain id
+    if(email){
+      query['email'] = email;
+    } else {
+      query['keychain.'+provider] = profile.id;
+    }
+
+    User.findOne(query, function (err, user) {
+      if(err) return done(err);
+      // no user with such email or provider, sign up
+      if(!user) return _this.signUpWithService(email, profile, done);
+
+      // existing email has higher priority over the new email from service
+      // so we don't do anything with user's email
+
+      // If we've selected the user by email and it already has associated account from the service we throw error.
+      // Technically it is possible to associate multiple accounts per provider, but for now we limit them to just one
+      if(user.keychain[provider] && user.keychain[provider] != profile.id) {
+        return done(new Error(
+          'You already have linked your account with ' + (provider.charAt(0).toUpperCase() + provider.slice(1))
+        ))
+      }
+      user.setKeyChain(provider, profile.id, function (err) {
+        if (err) return done(err);
+        done(null, user, false);
+      });
     });
   };
 
