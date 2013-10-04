@@ -303,11 +303,11 @@ exports.init = function (kabam) {
    * @description
    * Sets new password for user, calls callback when user is saved
    * @param {string} newPassword - password to be set
-   * @param {function} callback - function is fired when user is saved
+   * @param {function} [callback] - if callback is provided user is saved and callback fired
    * @example
    * ```javascript
    *
-   *   kabam.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *   kabam.model.User.create({'email':'test@rambler.ru'},function(err,user){
    *     user.setPassword('someKey', function(err){if err throw err;});
    *   });
    *
@@ -318,8 +318,7 @@ exports.init = function (kabam) {
     this.salt = salt;
     this.password = sha512(salt + newPassword);
     kabam.emit('users:setPassword', this);
-    this.save(callback);
-    return;
+    if(callback) this.save(callback);
   };
 
   /**
