@@ -702,26 +702,30 @@ exports.init = function (kabam) {
    * of user created
    */
   UserSchema.statics.signUp = function (username, email, password, callback) {
-    var _this = this;
-    if(!username){
-      return callback(Error('Username is required'));
+    var thisSchema = this;
+    if (!username) {
+      callback(new Error('Username is required'));
+      return;
     }
     // first find if some filed already taken
-    this.findOne({'$or':[{username:username}, {email:email}]}, function(err, user){
-      // TODO: database error, should be logged
+    thisSchema.findOne({'$or':[{username:username}, {email:email}]}, function(err, user){
       if(err){
-        return callback(Error("Something went wrong"));
+        kabam.emit('error',err);
+        callback(new Error("Something went wrong"));
+        return;
       }
       if(user){
         if(user.email === email){
-          return callback(Error('Email already taken'));
+          callback(new Error('Email already taken'));
+          return;
         }
         if(user.username === username){
-          return callback(Error('Username already taken'));
+          callback(new Error('Username already taken'));
+          return;
         }
       }
       // create a user if username and email are available
-      _this.create({
+      thisSchema.create({
         'username': username,
         'email': email,
         'apiKey': sha512(rack()),
@@ -731,17 +735,20 @@ exports.init = function (kabam) {
         'apiKeyCreatedAt': new Date()
       }, function (err, userCreated) {
         if (err) {
-          // TODO: database error, should be logged
-          callback(Error("Something went wrong"));
+          kabam.emit('error',err);
+          callback(new Error('Something went wrong'));
+          return;
         } else {
           userCreated.setPassword(password, function (err1) {
-            // TODO: database error, should be logged
             if (err1) {
-              callback(Error("Something went wrong"));
+              callback(new Error('Something went wrong'));
+              kabam.emit('error',err1);
+              return;
             } else {
               userCreated.notify('email', {'subject': 'Verify your email account!', 'template': 'signin'});
               kabam.emit('users:signUp', userCreated);
               callback(null, userCreated);
+              return;
             }
           });
         }
