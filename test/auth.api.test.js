@@ -3,7 +3,7 @@
 var should = require('should'),
   KabamKernel = require('./../index.js'),
   events = require('events'),
-  config = require('./../example/config.json').development,
+  config = require('./../example/config.json').testing,
   request = require('request'),
   port = Math.floor(2000 + 1000 * Math.random());
 
@@ -12,15 +12,18 @@ describe('auth api testing', function () {
   var kabam;
   before(function (done) {
 
-    kabam = KabamKernel({
-      'HOST_URL': 'http://localhost:' + port,
-      'MONGO_URL': 'mongodb://localhost/kabam_dev',
-      'DISABLE_CSRF': true // NEVER DO IT!
+    config.DISABLE_CSRF = true;
+
+    kabam = KabamKernel(config);
+
+    kabam.on('started', function () {
+      kabam.mongoConnection.on('open', function(){
+        kabam.mongoConnection.db.dropDatabase(function () {
+          done();
+        });
+      });
     });
 
-    kabam.on('started', function (evnt) {
-      done();
-    });
     // kabam.usePlugin(require('./../index.js'));
     kabam.start(port);
   });
@@ -69,11 +72,9 @@ describe('auth api testing', function () {
       user.remove(done);
     });
   });
+
   describe('Testing /auth/login route', function () {
-    var response,
-      body,
-      user;
-    before(function (done) {
+    function createUser(callback){
       request({
           'url': 'http://localhost:' + port + '/auth/signup',
           'method': 'POST',
@@ -87,11 +88,57 @@ describe('auth api testing', function () {
           if (err) {
             throw err;
           }
-          kabam.model.User.findOneByLoginOrEmail('emailForNewUser@example.org', function (err, userFound) {
+          r.statusCode.should.be.equal(201);
+          kabam.model.User.findOneByLoginOrEmail('emailForNewUser@example.org', function (err, user) {
             if (err) {
               throw err;
             }
-            user = userFound;
+            callback(user);
+          });
+        });
+    }
+
+    describe('Trying to log in with unverified email', function(){
+      var user, response, body;
+      before(function(done){
+        createUser(function(_user){
+          request({
+            'url': 'http://localhost:' + port + '/auth/login',
+            'method': 'POST',
+            'json': {
+              "username": "usernameToUseForNewUser",
+              "password": "myLongAndHardPassword"
+            }
+          },
+          function (err, r, b) {
+            if (err) {
+              throw err;
+            }
+            user = _user;
+            response = r;
+            body = b;
+            done();
+          });
+        });
+      });
+      after(function (done) {
+        user.remove(done);
+      });
+      it('should return 403', function () {
+        response.statusCode.should.be.equal(403);
+      });
+    });
+
+    describe('Trying to login with with verified email', function(){
+      var user, response, body;
+      before(function(done){
+        createUser(function(_user){
+          user = _user;
+          user.set('emailVerified', true);
+          user.save(function(err){
+            if(err){
+              throw err;
+            }
             request({
                 'url': 'http://localhost:' + port + '/auth/login',
                 'method': 'POST',
@@ -109,20 +156,20 @@ describe('auth api testing', function () {
                 done();
               });
           });
-
         });
-    });
-    it('check response username', function () {
-      body.username.should.be.equal('usernameToUseForNewUser');
-    });
-    it('check response email', function () {
-      body.email.should.be.equal('emailForNewUser@example.org');
-    });
-    it('check proper response for it', function () {
-      response.statusCode.should.be.equal(200);
-    });
-    after(function (done) {
-      user.remove(done);
+      });
+      after(function (done) {
+        user.remove(done);
+      });
+      it('check proper response for it', function () {
+        response.statusCode.should.be.equal(200);
+      });
+      it('check response username', function () {
+        body.username.should.be.equal('usernameToUseForNewUser');
+      });
+      it('check response email', function () {
+        body.email.should.be.equal('emailForNewUser@example.org');
+      });
     });
   });
   describe('Testing /auth/completeProfile', function () {
