@@ -62,8 +62,8 @@ describe('Users model', function () {
         kabam.model.User.findOneByApiKeyAndResetPassword.should.be.a('function');
       });
 
-      it('exposes function processOAuthProfile', function () {
-        kabam.model.User.processOAuthProfile.should.be.a('function');
+      it('exposes function linkEmailOnlyProfile', function () {
+        kabam.model.User.linkEmailOnlyProfile.should.be.a('function');
       });
 
 
@@ -446,7 +446,7 @@ describe('Users model', function () {
         });
       });
 
-      describe('processOAuthProfile for user in database', function () {
+      describe('linkEmailOnlyProfile for user in database', function () {
         var user, userFound;
         before(function (done) {
           kabam.model.User.signUp('johnDoe', 'johndoe@example.org', 'suzan123', function (err, userCreated) {
@@ -454,7 +454,7 @@ describe('Users model', function () {
               throw err;
             }
             user = userCreated;
-            kabam.model.User.processOAuthProfile('johndoe@example.org', function (error, userFromProfile) {
+            kabam.model.User.linkEmailOnlyProfile('johndoe@example.org', function (error, userFromProfile) {
               if (error) {
                 throw error;
               }
@@ -482,10 +482,10 @@ describe('Users model', function () {
         });
       });
 
-      describe('processOAuthProfile for user NOT in database', function () {
+      describe('linkEmailOnlyProfile for user NOT in database', function () {
         var user;
         before(function (done) {
-          kabam.model.User.processOAuthProfile('johndoe@mail.ru', function (error, userFromProfile) {
+          kabam.model.User.linkEmailOnlyProfile('johndoe@mail.ru', function (error, userFromProfile) {
             if (error) {
               throw error;
             }
