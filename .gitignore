@@ -18,4 +18,5 @@ nbproject
 *sublime*
 docs
 .idea/
+.DS_Store
 *.geany
