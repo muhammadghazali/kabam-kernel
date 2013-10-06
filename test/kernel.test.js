@@ -533,8 +533,8 @@ describe('Kernel', function () {
 
     describe('this application have proper rate limiting headers', function () {
       var resetTime = Math.floor(new Date().getTime() / 1000) + 80;
-      it('have x-ratelimit-limit to 200', function () {
-        parseInt(response.headers['x-ratelimit-limit']).should.be.equal(200);
+      it('have x-ratelimit-limit to 400', function () {
+        parseInt(response.headers['x-ratelimit-limit']).should.be.equal(400);
       });
       it('have the x-ratelimit-reset header with valid value', function () {
         parseInt(response.headers['x-ratelimit-reset']).should.be.below(resetTime);
@@ -543,7 +543,7 @@ describe('Kernel', function () {
         parseInt(response.headers['x-ratelimit-reset-in-seconds']).should.be.below(61);
       });
       it('have the x-ratelimit-remaining header with valid value', function () {
-        parseInt(response.headers['x-ratelimit-remaining']).should.be.below(201);
+        parseInt(response.headers['x-ratelimit-remaining']).should.be.below(401);
       });
     });
 
