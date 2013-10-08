@@ -274,8 +274,9 @@ exports.init = function (kabam) {
    * @description
    * Returns true, if user profile complete (has first and last names)
    */
+  // TODO: test me please
   UserSchema.virtual('profileComplete').get(function () {
-    return this.firstName && this.lastName;
+    return this.firstName && this.lastName && true;
   });
 
   /**
@@ -761,17 +762,10 @@ exports.init = function (kabam) {
       'apiKeyCreatedAt': new Date()
     }, function (err, userCreated) {
       if (err) {
-        callback(err);
-      } else {
-        userCreated.setPassword(rack(), function (err1) {//because leaving user without password is stupid
-          if (err1) {
-            callback(err1);
-          } else {
-            kabam.emit('users:signUpByEmailOnly', userCreated);
-            callback(null, userCreated);
-          }
-        });
+        return callback(err);
       }
+      kabam.emit('users:signUpByEmailOnly', userCreated);
+      callback(null, userCreated);
     });
   };
 
@@ -791,7 +785,6 @@ exports.init = function (kabam) {
       'apiKeyCreatedAt': new Date()
     };
 
-    // TODO: please, please, please test me
     // trying to get first name and last name
     if(profile.displayName){
       // it tries to split the name by spaces using the first element as first name and everything other as last name

@@ -1,4 +1,4 @@
-/*jshint immed: false */
+/*jshint immed: false, expr: true */
 'use strict';
 var should = require('should'),
   mongoose = require('mongoose'),
@@ -174,47 +174,93 @@ describe('auth api testing', function () {
       });
     });
   });
-  describe('Testing /auth/completeProfile', function () {
+  describe('Testing /auth/profile', function () {
     var user;
     before(function (done) {
-      kabam.model.User.create({
+      var profile = {
         'email': 'emailForNewUser@example.org',
         'profileComplete': false
-      }, function (err, userCreated) {
-        if (err) {
-          throw err;
-        }
+      };
+      kabam.model.User.create(profile, function (err, userCreated) {
+        if (err) {throw err;}
         user = userCreated;
         request({
-            'url': 'http://localhost:' + port + '/auth/completeProfile?kabamkey=' + userCreated.apiKey,
+            'url': 'http://localhost:' + port + '/auth/profile?kabamkey=' + userCreated.apiKey,
             'method': 'POST',
             'json': {
-              "username": "usernameToUseForNewUser",
-              "password": "myLongAndHardPassword"
+              'firstName': 'John',
+              'lastName': 'Malkovich'
             }
           },
-          function (err, r1, b1) {
-            if (err) {
-              throw err;
-            }
+          function (err/*, r1, b1*/) {
+            if (err) {throw err;}
             kabam.model.User.findOneByLoginOrEmail('emailForNewUser@example.org', function (err, userFound) {
-              if (err) {
-                throw err;
-              }
+              if (err) {throw err;}
               user = userFound;
               done();
             });
-          });
+          }
+        );
       });
-    });
-    it('check username', function () {
-      user.username.should.be.equal('usernameToUseForNewUser');
-    });
-    it('check profilecomplete', function () {
-      user.profileComplete.should.be.true;
     });
     after(function (done) {
       user.remove(done);
+    });
+    it('should save fistName', function () {
+      user.firstName.should.be.equal('John');
+    });
+    it('should save lastName', function () {
+      //noinspection BadExpressionStatementJS
+      user.lastName.should.be.equal('Malkovich');
+    });
+
+    describe('Password change', function(){
+      it('should save the new password without asking for an old one if the user doesn\'t have it', function(done){
+        request({
+          'url': 'http://localhost:' + port + '/auth/profile?kabamkey=' + user.apiKey,
+          'method': 'POST',
+          'json': {
+            'newPassword': 'qweqwe'
+          }
+        }, function(err, res/*, body*/){
+          res.statusCode.should.be.equal(200);
+          done();
+        });
+      });
+      it('should return error if we supply wrong old password', function(done){
+        request({
+          'url': 'http://localhost:' + port + '/auth/profile?kabamkey=' + user.apiKey,
+          'method': 'POST',
+          'json': {
+            'password': 'wrong',
+            'newPassword': 'pwned'
+          }
+        }, function(err, res, body){
+          res.statusCode.should.be.equal(400);
+          body.should.have.property('errors');
+          body.errors.should.have.property('password');
+          kabam.model.User.findOneByLoginOrEmail('emailForNewUser@example.org', function (err, user) {
+            user.verifyPassword('qweqwe').should.be.true;
+            done();
+          });
+        });
+      });
+      it('should change password if old password is correct', function(done){
+        request({
+          'url': 'http://localhost:' + port + '/auth/profile?kabamkey=' + user.apiKey,
+          'method': 'POST',
+          'json': {
+            'password': 'qweqwe',
+            'newPassword': 'topsykrets'
+          }
+        }, function(err, res/*, body*/){
+          res.statusCode.should.be.equal(200);
+          kabam.model.User.findOneByLoginOrEmail('emailForNewUser@example.org', function (err, user) {
+            user.verifyPassword('topsykrets').should.be.true;
+            done();
+          });
+        });
+      });
     });
   });
   describe('Testing /auth/confirm/:apiKey route', function () {
