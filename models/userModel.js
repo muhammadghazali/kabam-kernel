@@ -697,7 +697,7 @@ exports.init = function (kabam) {
     thisSchema.findOne({'$or':[{username:username}, {email:email}]}, function(err, user){
       if(err){
         kabam.emit('error',err);
-        callback(new Error("Something went wrong"));
+        callback(new Error('Something went wrong'));
         return;
       }
       if(user){

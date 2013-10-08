@@ -25,27 +25,61 @@ describe('User model OAuth methods', function(){
   });
 
   describe('#signUpWithService', function(){
-    var user;
-    after(function(done){
-      user.remove(done);
+    afterEach(function(done){
+      User.remove(function(err){
+        done(err);
+      });
     });
     it('should create a new user with the given email and save service profile to the keychain', function(done){
-      User.signUpWithService('john@doe.com', {id: 1, provider: 'github'}, function(err, _user){
+      User.signUpWithService('john@doe.com', {id: 1, provider: 'github'}, function(err, user){
         if (err) return done(err);
-        user = _user;
         should.ok(typeof user === 'object');
+        user.should.have.property('email', 'john@doe.com');
         user.should.have.property('keychain');
         user.keychain.should.have.property('github', 1);
         done();
       });
     });
     it('should return error if user exist', function(done){
-      User.signUpWithService('john@doe.com', {id: 1, provider: 'github'}, function(err/*, user*/){
-        should.exist(err);
-        kabam.model.User.find(function(err, users){
-          should(users.length === 1);
-          done();
+      User.signUpWithService('john@doe.com', {id: 1, provider: 'github'}, function(err){
+        if (err) return done(err);
+        User.signUpWithService('john@doe.com', {id: 1, provider: 'github'}, function(err/*, user*/){
+          should.exist(err);
+          kabam.model.User.find(function(err, users){
+            should(users.length === 1);
+            done();
+          });
         });
+      });
+    });
+    it('should create a new user without email just by saving proper keychain', function(done){
+      User.signUpWithService(null, {id: 1, provider: 'github'}, function(err, user){
+        if (err) return done(err);
+        should.ok(typeof user === 'object');
+        user.should.not.have.property('email');
+        user.should.have.property('emailVerified', false);
+        user.should.have.property('keychain');
+        user.keychain.should.have.property('github', 1);
+        done();
+      });
+    });
+    it('should parse last and first name if profile has displayName property', function(done){
+      User.signUpWithService(null, {id: 1, provider: 'github', displayName: 'John Malkovich'}, function(err, user){
+        if (err) return done(err);
+        should.ok(typeof user === 'object');
+        user.should.have.property('firstName', 'John');
+        user.should.have.property('lastName', 'Malkovich');
+        done();
+      });
+    });
+    it('should parse last and first name if profile has name property with given and family names', function(done){
+      var profile = {id: 1, provider: 'github', name: {givenName: 'John', familyName: 'Malkovich'}};
+      User.signUpWithService(null, profile, function(err, user){
+        if (err) return done(err);
+        should.ok(typeof user === 'object');
+        user.should.have.property('firstName', 'John');
+        user.should.have.property('lastName', 'Malkovich');
+        done();
       });
     });
   });
