@@ -276,7 +276,7 @@ exports.init = function (kabam) {
    */
   // TODO: test me please
   UserSchema.virtual('profileComplete').get(function () {
-    return this.firstName && this.lastName && true;
+    return !!this.firstName && !!this.lastName;
   });
 
   /**
@@ -1413,7 +1413,6 @@ exports.init = function (kabam) {
  * kabamKernel.on('users:revokeRole', function(user){...});
  * kabamKernel.on('users:signUp', function(user){...});
  * kabamKernel.on('users:signUpByEmailOnly', function(user){...});
- * kabamKernel.on('users:completeProfile', function(user){...});
  * kabamKernel.on('users:saveProfile', function(user){...});
  * kabamKernel.on('users:setKeyChain', function(user){...});
  * kabamKernel.on('users:revokeKeyChain', function(user){...});
@@ -1434,7 +1433,6 @@ exports.init = function (kabam) {
  * kabamKernel.on('users:revokeRole', function(user){...});
  * kabamKernel.on('users:signUp', function(user){...});
  * kabamKernel.on('users:signUpByEmailOnly', function(user){...});
- * kabamKernel.on('users:completeProfile', function(user){...});
  * kabamKernel.on('users:saveProfile', function(user){...});
  * kabamKernel.on('users:setKeyChain', function(user){...});
  * kabamKernel.on('users:revokeKeyChain', function(user){...});
