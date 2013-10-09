@@ -63,17 +63,8 @@ describe('User model OAuth methods', function(){
         done();
       });
     });
-    it('should parse last and first name if profile has displayName property', function(done){
-      User.signUpWithService(null, {id: 1, provider: 'github', displayName: 'John Malkovich'}, function(err, user){
-        if (err) return done(err);
-        should.ok(typeof user === 'object');
-        user.should.have.property('firstName', 'John');
-        user.should.have.property('lastName', 'Malkovich');
-        done();
-      });
-    });
-    it('should parse last and first name if profile has name property with given and family names', function(done){
-      var profile = {id: 1, provider: 'github', name: {givenName: 'John', familyName: 'Malkovich'}};
+    it('should save last and first name if profile has them property', function(done){
+      var profile = {id: 1, provider: 'github', firstName: 'John', lastName: 'Malkovich'};
       User.signUpWithService(null, profile, function(err, user){
         if (err) return done(err);
         should.ok(typeof user === 'object');
@@ -127,11 +118,12 @@ describe('User model OAuth methods', function(){
             var profile = {id: 1, provider: 'google', emails: [
               {value: 'john@doe.com'}
             ]};
-            User.linkWithService(null, profile, true, function(err, user, created){
-              should.exist(err);
-              should.not.exist(user);
-              should.not.exist(created);
-              should(err.message.indexOf('john@doe.com') !== -1);
+            User.linkWithService(null, profile, true, function(err, user, info){
+              if (err) done(err);
+              //noinspection BadExpressionStatementJS
+              user.should.be.false;
+              info.should.have.property('message');
+              should(info.message.indexOf('john@doe.com') !== -1);
               done();
             });
           });
@@ -175,11 +167,12 @@ describe('User model OAuth methods', function(){
         var profile = {id: 1, provider: 'github', emails: [
           {value: 'john@doe.com'}
         ]};
-        User.linkWithService(null, profile, false, function(err, user, created){
-          should.exist(err);
-          should.not.exist(user);
-          should.not.exist(created);
-          should(err.message.indexOf('Cannot login using Github') !== -1);
+        User.linkWithService(null, profile, false, function(err, user, info){
+          if (err) return done(err);
+          //noinspection BadExpressionStatementJS
+          user.should.be.false;
+          info.should.have.property('message');
+          should(info.message.indexOf('Cannot login using Github') !== -1);
           done();
         });
       });

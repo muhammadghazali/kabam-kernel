@@ -649,36 +649,6 @@ exports.init = function (kabam) {
 
   /**
    * @ngdoc function
-   * @name kabamKernel.model.User.linkEmailOnlyProfile
-   * @param {string} email - email of user from oauth profile we want to process
-   * @param {function} done - function is fired when users are found
-   * @description
-   * For some oauth providers, like google, who returns email in user's profile, we can use this email for preliminary
-   * registration of user. He has email verified, but profile is not complete, because it do not have username and password
-   * If user with such email exists in database, he is authorized
-   * @example
-   * ```javascript
-   *
-   * kabam.model.User.linkEmailOnlyProfile('someEmail@somedomain.com',function(err,user){
-   *   assert.equal(true,user.emailVerified);
-   *   assert.equal(false,user.profileComplete);
-   *   assert.equal('someEmail@somedomain.com',user.email);
-   * });
-   * ```
-   */
-  UserSchema.statics.linkEmailOnlyProfile = function (email, done) {
-    var Users = this;
-    if (!email) {return done(new Error('There is something strange instead of user profile'));}
-    Users.findOne({'email': email}, function (err, userFound) {
-      if (err) {return done(err, false, {'message': 'Database broken...'});}
-      if (userFound) {return done(err, userFound, {message: 'Welcome, ' + userFound.username});}
-      Users.signUpByEmailOnly(email, function (err1, userCreated) {
-        return done(err1, userCreated, { message: 'Please, complete your account!' });
-      });
-    });
-  };
-  /**
-   * @ngdoc function
    * @name kabamKernel.model.User.signUp
    * @param {string} username - username for new user
    * @param {string} email - email for new user
@@ -744,32 +714,6 @@ exports.init = function (kabam) {
   };
 
   /**
-   * @ngdoc function
-   * @name kabamKernel.model.User.signUpByEmailOnly
-   * @param {string}  email  - email for new user
-   * @param {function}  callback  - function is fired when user is saved
-   * @description
-   * signup new user by email only - for example, when he sign in by google and other oauth providers with email present
-   * account is set as uncompleted!
-   */
-  UserSchema.statics.signUpByEmailOnly = function (email, callback) {
-    this.create({
-      'email': email,
-      'emailVerified': true, //email is verified!
-      'profileComplete': false,
-      'apiKey': sha512(rack()),
-      'root': false,
-      'apiKeyCreatedAt': new Date()
-    }, function (err, userCreated) {
-      if (err) {
-        return callback(err);
-      }
-      kabam.emit('users:signUpByEmailOnly', userCreated);
-      callback(null, userCreated);
-    });
-  };
-
-  /**
    * @typedef OauthProfile
    * @type {object}
    * @property {string|number} id - an ID.
@@ -779,13 +723,77 @@ exports.init = function (kabam) {
 
   /**
    * @ngdoc function
+   * @name kabamKernel.model.User.signUpByEmailOnly
+   * @param {string} email  - email for new user
+   * @param {OauthProfile} profile  -  User profile from the service
+   * @param {function} callback  - function is fired when user is saved
+   * @description
+   * signup new user by email only - for example, when he sign in by google and other oauth providers with email present
+   * account is set as uncompleted!
+   */
+  UserSchema.statics.signUpByEmailOnly = function (email, profile, callback) {
+    var data = {
+      'email': email,
+      'emailVerified': true, //email is verified!
+      'apiKey': sha512(rack()),
+      'root': false,
+      'apiKeyCreatedAt': new Date()
+    };
+
+    // jshint expr: true
+    profile.firstName && (data.firstName = profile.firstName);
+    profile.lastName && (data.lastName = profile.lastName);
+
+    this.create(data, function (err, userCreated) {
+      if (err) {
+        return callback(err);
+      }
+      kabam.emit('users:signUpByEmailOnly', userCreated);
+      callback(null, userCreated);
+    });
+  };
+
+  /**
+   * @ngdoc function
+   * @name kabamKernel.model.User.linkEmailOnlyProfile
+   * @param {string} email - email of user from oauth profile we want to process
+   * @param {OauthProfile} profile  -  User profile from the service
+   * @param {function} done - function is fired when users are found
+   * @description
+   * For some oauth providers, like google, who returns email in user's profile, we can use this email for preliminary
+   * registration of user. He has email verified, but profile is not complete, because it do not have username and password
+   * If user with such email exists in database, he is authorized
+   * @example
+   * ```javascript
+   *
+   * kabam.model.User.linkEmailOnlyProfile('someEmail@somedomain.com', {firstName:'John'}, function(err,user){
+   *   assert.equal(true,user.emailVerified);
+   *   assert.equal(false,user.profileComplete);
+   *   assert.equal('someEmail@somedomain.com',user.email);
+   * });
+   * ```
+   */
+  UserSchema.statics.linkEmailOnlyProfile = function (email, profile, done) {
+    var Users = this;
+    if (!email) {return done(new Error('There is something strange instead of user profile'));}
+    Users.findOne({'email': email}, function (err, userFound) {
+      if (err) {return done(err, false, {'message': 'Database broken...'});}
+      if (userFound) {return done(err, userFound, {message: 'Welcome, ' + userFound.username});}
+      Users.signUpByEmailOnly(email, profile, function (err1, userCreated) {
+        return done(err1, userCreated, { message: 'Please, complete your account!' });
+      });
+    });
+  };
+
+
+  /**
+   * @ngdoc function
    * @name kabamKernel.model.User.signUpWithService
    * @param {String} [email] optional email for a user
    * @param {OauthProfile} profile User profile from the service
    * @param {function(err:Error, user:User?, created:Boolean?)} done callback
    */
   UserSchema.statics.signUpWithService = function(email, profile, done){
-    var firstName, lastName, name;
     var data = {
       'profileComplete': false,
       'apiKey': sha512(rack()),
@@ -793,28 +801,9 @@ exports.init = function (kabam) {
       'apiKeyCreatedAt': new Date()
     };
 
-    // trying to get first name and last name
-    if(profile.displayName){
-      // it tries to split the name by spaces using the first element as first name and everything other as last name
-      // so if the user has a name like John Malkovich it will make firstName='John' and lastName='Malkovich'
-      name = profile.displayName.split(' ');
-      firstName = name[0];
-      if(name.length > 1){
-        lastName = name.slice(1).join(' ');
-      }
-    }
-
-    // if profile has given and family names try to use them instead
-    if(profile.name && profile.name.givenName){
-      firstName = profile.name.givenName;
-    }
-    if(profile.name && profile.name.familyName){
-      lastName = profile.name.familyName;
-    }
-
     // jshint expr: true
-    firstName && (data.firstName = firstName);
-    lastName && (data.lastName = lastName);
+    profile.firstName && (data.firstName = profile.firstName);
+    profile.lastName && (data.lastName = profile.lastName);
 
     // if profile has email we are trusting the provider and consider that this email is verified
     if(email){
@@ -838,7 +827,7 @@ exports.init = function (kabam) {
    * @name kabamKernel.model.User.findAndLinkWithService
    * @param {boolean} canCreate - If true will create a new user account if doesn't exists
    * @param {OauthProfile} profile User profile from the service
-   * @param {function(err:Error, user:User?, created:Boolean?)} done callback
+   * @param {function(err:Error, user:(User|Boolean)?, errorOrCreated:(Object|Boolean)?)} done callback
    * @description
    * Tries to find an existing user using provider name and profile id, if the user is found returns it.
    * Otherwise creates a new user.
@@ -857,8 +846,8 @@ exports.init = function (kabam) {
       // if we can't create new accounts using this service.
       if(!canCreate){
         serviceName = (profile.provider.charAt(0).toUpperCase() + profile.provider.slice(1));
-        return done(new Error('Cannot login using ' + serviceName + '. '+
-          'Please be sure you are registered and linked your account with '+serviceName));
+        return done(null, false, {message: 'Cannot login using ' + serviceName + '. '+
+          'Please be sure you are registered and linked your account with '+serviceName});
       }
 
       // if we don't have a user with such keychain and we don't have an email in the profile, just signup them
@@ -872,7 +861,7 @@ exports.init = function (kabam) {
         // otherwise lets notify a user.
         var message = 'Someone already registered with the email '+ email + '. ' +
           'If it\'s you, you have to login to your account to link it';
-        done(new Error(message));
+        done(null, false, {message:message});
       });
     });
   };
@@ -883,7 +872,7 @@ exports.init = function (kabam) {
    * @param {User} user If we are linking logged in user we should provide their email
    * @param {OauthProfile} profile User profile from the service
    * @param {boolean} canCreate - If true will create a new user account if doesn't exists
-   * @param {function(err:Error, user:User?, created:Boolean?)} done callback
+   * @param {function(err:Error, user:(User|Boolean)?, errorOrCreated:(Object|Boolean)?)} done callback
    * @description
    * Links existing user with the service or creates a new user automatically linking it with the service.
    * If the user already linked with the service callback successfully returns the user but nothing changes in the database.
@@ -895,10 +884,10 @@ exports.init = function (kabam) {
     var provider = profile.provider;
 
     // Technically it is possible to associate multiple accounts per provider, but for now we limit them to just one
-    if(user.keychain[provider] && user.keychain[provider] !== profile.id) {
-      return done(new Error(
-        'You already have linked another ' + (provider.charAt(0).toUpperCase() + provider.slice(1)) + ' account'
-      ));
+    if(Array.isArray(user.keychain) && user.keychain[provider] !== profile.id) {
+      return done(null, false, {
+        message: 'You already have linked another ' + (provider.charAt(0).toUpperCase() + provider.slice(1)) + ' account'
+      });
     }
     // just set keychain
     user.setKeyChain(provider, profile.id, function (err) {
@@ -906,6 +895,8 @@ exports.init = function (kabam) {
       done(null, user, false);
     });
   };
+
+
 
 
   /**
