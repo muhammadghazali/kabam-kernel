@@ -1,10 +1,9 @@
 var
   os = require('os'),
+  // jshint unused: false
   should = require('should'),
-  async = require('async'),
   kabamKernel = require('./../index.js'),
-  config = require('./../example/config.json').testing,
-  request = require('request');
+  config = require('./../example/config.json').testing;
 
 var kernel;
 describe('ConfigManager', function(){
@@ -42,14 +41,17 @@ describe('ConfigManager', function(){
       kernel.start('app');
       kernel.config.PORT.should.be.equal(3000);
     });
-    it('should be redefined by kernel#start', function(){
+    it('should be redefined by kernel#start', function(done){
       var localConfig = Object.create(config);
       localConfig.HOST_URL = undefined;
       localConfig.PORT = 1234;
       kernel = kabamKernel(localConfig);
+      kernel.on('started', function(){
+        kernel.httpServer.close();
+        kernel.config.HOST_URL.should.be.equal('http://localhost:42345/');
+        done();
+      });
       kernel.start(42345);
-      kernel.httpServer.close();
-      kernel.config.HOST_URL.should.be.equal('http://localhost:42345/');
     });
   });
 
