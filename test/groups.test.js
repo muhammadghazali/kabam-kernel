@@ -1,24 +1,34 @@
 /*jshint immed: false */
 'use strict';
-var should = require('should'),
+var
+  // jshint unused:false
+  should = require('should'),
   async = require('async'),
-  KabamKernel = require('./../index.js'),
+  mongoose = require('mongoose'),
+  kabamKernel = require('./../index.js'),
   port = Math.floor(2000 + 1000 * Math.random());
 
 describe('groups testing', function () {
-  var kabam;
+  var kabam, config, connection;
   before(function (done) {
 
-    kabam = KabamKernel({
+    config = {
       'HOST_URL': 'http://localhost:' + port,
-      'MONGO_URL': 'mongodb://localhost/kabam_dev',
+      'MONGO_URL': 'mongodb://localhost/kabam_test',
       'SECRET': 'ever_the_youngest_of_Mosirai_knows_that_you_cannot_put_humans_hide_on_a_bear'
-    });
+    };
 
-    kabam.on('started', function (evnt) {
-      done();
+    kabam = kabamKernel(config);
+
+    connection = mongoose.createConnection(config.MONGO_URL);
+    connection.on('open', function () {
+      connection.db.dropDatabase(function () {
+        kabam.on('started', function () {
+          done();
+        });
+        kabam.start(port);
+      });
     });
-    kabam.start(port);
   });
 //*/
   describe('general test', function () {
