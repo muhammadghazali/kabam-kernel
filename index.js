@@ -151,7 +151,7 @@ function KabamKernel(config) {
    *    }, function (token, tokenSecret, profile, done) {
    *       var email = profile.emails[0].value;
    *      if (email) {
-   *        core.model.Users.processOAuthProfile(email,done);
+   *        core.model.Users.linkEmailOnlyProfile(email,done);
    *      } else {
    *        return done(new Error('There is something strange instead of user profile'));
    *      }
