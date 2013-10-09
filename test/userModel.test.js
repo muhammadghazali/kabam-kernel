@@ -62,8 +62,8 @@ describe('Users model', function () {
         kabam.model.User.findOneByApiKeyAndResetPassword.should.be.a('function');
       });
 
-      it('exposes function processOAuthProfile', function () {
-        kabam.model.User.processOAuthProfile.should.be.a('function');
+      it('exposes function linkEmailOnlyProfile', function () {
+        kabam.model.User.linkEmailOnlyProfile.should.be.a('function');
       });
 
 
@@ -446,7 +446,7 @@ describe('Users model', function () {
         });
       });
 
-      describe('processOAuthProfile for user in database', function () {
+      describe('linkEmailOnlyProfile for user in database', function () {
         var user, userFound;
         before(function (done) {
           kabam.model.User.signUp('johnDoe', 'johndoe@example.org', 'suzan123', function (err, userCreated) {
@@ -454,7 +454,7 @@ describe('Users model', function () {
               throw err;
             }
             user = userCreated;
-            kabam.model.User.processOAuthProfile('johndoe@example.org', function (error, userFromProfile) {
+            kabam.model.User.linkEmailOnlyProfile('johndoe@example.org', function (error, userFromProfile) {
               if (error) {
                 throw error;
               }
@@ -473,19 +473,19 @@ describe('Users model', function () {
           user.emailVerified.should.be.false;
         });
 
-        it('user have complete profile as we need it', function () {
-          user.profileComplete.should.be.true;
-        });
+//        it('user have complete profile as we need it', function () {
+//          user.profileComplete.should.be.true;
+//        });
 
         after(function (done) {
           user.remove(done);
         });
       });
 
-      describe('processOAuthProfile for user NOT in database', function () {
+      describe('linkEmailOnlyProfile for user NOT in database', function () {
         var user;
         before(function (done) {
-          kabam.model.User.processOAuthProfile('johndoe@mail.ru', function (error, userFromProfile) {
+          kabam.model.User.linkEmailOnlyProfile('johndoe@mail.ru', function (error, userFromProfile) {
             if (error) {
               throw error;
             }
@@ -824,7 +824,6 @@ describe('Users model', function () {
 
           user.notify.should.be.a('function');
           user.getGravatar.should.be.a('function');
-          user.completeProfile.should.be.a('function');
 
           user.canRead.should.be.a('function');
           user.canWrite.should.be.a('function');
@@ -1072,7 +1071,7 @@ describe('Users model', function () {
         var user, userCompleted;
         before(function (done) {
           kabam.model.User.create({
-            'email': 'emptyness@teksi.ru',
+            'email': 'john@malkovich.com',
             'profileComplete': false,
             'emailVerified': true
           }, function (err, userCreated) {
@@ -1080,14 +1079,12 @@ describe('Users model', function () {
               throw err;
             }
             user = userCreated;
-            userCreated.completeProfile('Anatolij', 'thePerpendicularReality', function (err1) {
-              if (err1) {
-                throw err1;
-              }
-              kabam.model.User.findOneByLoginOrEmail('Anatolij', function (err2, userFound) {
-                if (err2) {
-                  throw err2;
-                }
+            userCreated.firstName = 'John';
+            userCreated.lastName = 'Malkovich';
+            userCreated.save(function (err) {
+              if (err) {throw err;}
+              kabam.model.User.findOneByLoginOrEmail('john@malkovich.com', function (err, userFound) {
+                if (err) {throw err;}
                 userCompleted = userFound;
                 done();
               });
@@ -1103,40 +1100,12 @@ describe('Users model', function () {
           userCompleted.profileComplete.should.be.true;
         });
 
-        it('sets the username properly', function () {
-          userCompleted.username.should.be.equal('Anatolij');
+        it('sets the firstName properly', function () {
+          userCompleted.firstName.should.be.equal('John');
         });
 
-        it('sets the password properly', function () {
-          userCompleted.verifyPassword('thePerpendicularReality').should.be.true;
-        });
-
-        after(function (done) {
-          user.remove(done);
-        });
-      });
-      describe('completeProfile for completed profile', function () {
-        var user, errorThrown;
-        before(function (done) {
-          kabam.model.User.create({
-            'email': 'emptyness@teksi.ru',
-            'profileComplete': true,
-            'emailVerified': true
-          }, function (err, userCreated) {
-            if (err) {
-              throw err;
-            }
-            user = userCreated;
-            userCreated.completeProfile('Anatolij', 'thePerpendicularReality', function (err1) {
-              errorThrown = err1;
-              done();
-            });
-          });
-        });
-
-        it('throws error properly', function () {
-          errorThrown.should.be.instanceOf(Error);
-          errorThrown.message.should.be.equal('Account is completed!');
+        it('sets the lastName properly', function () {
+          userCompleted.lastName.should.be.equal('Malkovich');
         });
 
         after(function (done) {
@@ -1193,7 +1162,6 @@ describe('Users model', function () {
 
           userToTest.notify.should.be.a('function');
           userToTest.getGravatar.should.be.a('function');
-          userToTest.completeProfile.should.be.a('function');
 
           userToTest.canRead.should.be.a('function');
           userToTest.canWrite.should.be.a('function');
@@ -1214,7 +1182,8 @@ describe('Users model', function () {
       before(function (done) {
         kabam.model.User.create({
           'email': 'anybody@teksi.ru',
-          'profileComplete': true,
+          'firstName': 'John',
+          'lastName': 'Malkovich',
           'emailVerified': true
         }, function (err, userCreated) {
           if (err) {

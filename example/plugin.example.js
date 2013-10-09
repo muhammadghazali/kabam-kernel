@@ -192,7 +192,7 @@ exports.strategy = {
       console.log('==============');
       var email = profile.emails[0].value;
       if (email) {
-        kabam.model.Users.processOAuthProfile(email, done);
+        kabam.model.Users.linkEmailOnlyProfile(email, done);
       } else {
         return done(new Error('There is something strange instead of user profile'));
       }

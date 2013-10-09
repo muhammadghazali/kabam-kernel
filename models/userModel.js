@@ -45,173 +45,162 @@ exports.init = function (kabam) {
   var mongoose = kabam.mongoose,
     Schema = mongoose.Schema,
     UserSchema = new Schema({
-        /**
-         * @ngdoc value
-         * @methodOf User
-         * @name User.email
-         * @description
-         * Primary email of user, the one he/she used for registration. Unique.
-         */
-        email: {type: String, trim: true, index: true, required: true, unique: true, match: /^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/},
-        /**
-         * @ngdoc value
-         * @methodOf User
-         * @name User.username
-         * @description
-         * Primary username of user, the one he/she used for registration. Unique.
-         */
-        username: {type: String, trim: true, index: true, unique: true, match: /^[a-zA-Z0-9_]+$/, sparse: true},
-        //sparse - it means it be unique, if not null  http://stackoverflow.com/questions/7955040/mongodb-mongoose-unique-if-not-null
-        salt: String,//string to hash password
-        password: String,//hashed password
+      /**
+       * @ngdoc value
+       * @methodOf User
+       * @name User.email
+       * @description
+       * Primary email of user, the one he/she used for registration. Unique.
+       */
+      email: {type: String, trim: true, index: true, unique: true, sparse: true, match: /^(?:[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+\.)*[\w\!\#\$\%\&\'\*\+\-\/\=\?\^\`\{\|\}\~]+@(?:(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!\.)){0,61}[a-zA-Z0-9]?\.)+[a-zA-Z0-9](?:[a-zA-Z0-9\-](?!$)){0,61}[a-zA-Z0-9]?)|(?:\[(?:(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\.){3}(?:[01]?\d{1,2}|2[0-4]\d|25[0-5])\]))$/},
+      /**
+       * @ngdoc value
+       * @methodOf User
+       * @name User.username
+       * @description
+       * Primary username of user, the one he/she used for registration. Unique.
+       */
+      username: {type: String, trim: true, index: true, unique: true, match: /^[a-zA-Z0-9_]+$/, sparse: true},
+      //sparse - it means it be unique, if not null  http://stackoverflow.com/questions/7955040/mongodb-mongoose-unique-if-not-null
+      salt: String,//string to hash password
+      password: String,//hashed password
 
-        /**
-         * @ngdoc value
-         * @methodOf User
-         * @name User.apiKey
-         * @description
-         * Unique apiKey of user,
-         */
-        apiKey: {type: String, required: true, index: true, unique: true, default: rack, match: /^[a-zA-Z0-9_]+$/ }, //for invalidating sessions by user request, for api interactions...
-        apiKeyCreatedAt: Date,
+      /**
+       * @ngdoc value
+       * @methodOf User
+       * @name User.apiKey
+       * @description
+       * Unique apiKey of user,
+       */
+      apiKey: {type: String, required: true, index: true, unique: true, default: rack, match: /^[a-zA-Z0-9_]+$/ }, //for invalidating sessions by user request, for api interactions...
+      apiKeyCreatedAt: Date,
 
-        /**
-         * @ngdoc value
-         * @methodOf User
-         * @name User.lang
-         * @description
-         * Preferred language of user
-         */
-        lang: {type: String, default: 'en', match: /^[a-z]{2}$/},
+      /**
+       * @ngdoc value
+       * @methodOf User
+       * @name User.lang
+       * @description
+       * Preferred language of user
+       */
+      lang: {type: String, default: 'en', match: /^[a-z]{2}$/},
 
-        /**
-         * @ngdoc value
-         * @methodOf User
-         * @name User.root
-         * @description
-         * Is user root? - boolean
-         */
-        root: {type: Boolean, default: false},
+      /**
+       * @ngdoc value
+       * @methodOf User
+       * @name User.root
+       * @description
+       * Is user root? - boolean
+       */
+      root: {type: Boolean, default: false},
 
-        /**
-         * @ngdoc value
-         * @methodOf User
-         * @name User.isBanned
-         * @description
-         * Is user banned? - boolean
-         */
-        isBanned: {type: Boolean, default: false},
+      /**
+       * @ngdoc value
+       * @methodOf User
+       * @name User.isBanned
+       * @description
+       * Is user banned? - boolean
+       */
+      isBanned: {type: Boolean, default: false},
 
-        /**
-         * @ngdoc value
-         * @methodOf User
-         * @name User.roles
-         * @description
-         * Array of user roles/permissions (strings)
-         */
-        roles: [
-          {type: String, match: /^[a-zA-Z0-9_]+$/ }
-        ],
+      /**
+       * @ngdoc value
+       * @methodOf User
+       * @name User.roles
+       * @description
+       * Array of user roles/permissions (strings)
+       */
+      roles: [
+        {type: String, match: /^[a-zA-Z0-9_]+$/, index: true }
+      ],
 
-        /**
-         * @ngdoc value
-         * @methodOf User
-         * @name User.firstName
-         * @description
-         * Firts name of user
-         */
-        firstName: {type: String, trim: true},
-        /**
-         * @ngdoc value
-         * @methodOf User
-         * @name User.lastName
-         * @description
-         * Last name of user
-         */
-        lastName: {type: String, trim: true},
-        /**
-         * @ngdoc value
-         * @methodOf User
-         * @name User.skype
-         * @description
-         * Skype id of user
-         */
-        skype: {type: String, trim: true},
+      /**
+       * @ngdoc value
+       * @methodOf User
+       * @name User.firstName
+       * @description
+       * Firts name of user
+       */
+      firstName: {type: String, trim: true},
+      /**
+       * @ngdoc value
+       * @methodOf User
+       * @name User.lastName
+       * @description
+       * Last name of user
+       */
+      lastName: {type: String, trim: true},
+      /**
+       * @ngdoc value
+       * @methodOf User
+       * @name User.skype
+       * @description
+       * Skype id of user
+       */
+      skype: {type: String, trim: true},
 
-        /**
-         * @ngdoc value
-         * @methodOf User
-         * @name User.emailVerified
-         * @description
-         * Is email address verified? - boolean
-         */
-        emailVerified: {type: Boolean, default: false},
-        /**
-         * @ngdoc value
-         * @methodOf User
-         * @name User.profileComplete
-         * @description
-         * Is profile complete - it means, it have email, username and password set. boolean
-         */
-        profileComplete: {type: Boolean, default: false},
+      /**
+       * @ngdoc value
+       * @methodOf User
+       * @name User.emailVerified
+       * @description
+       * Is email address verified? - boolean
+       */
+      emailVerified: {type: Boolean, default: false},
+      /**
+       * @ngdoc value
+       * @methodOf User
+       * @name User.keychain
+       * @description
+       * Profile keychain. For example, the one like it
+       * ```javascript
+       * { "github":"111", "twitter":"111" }
+       * ```
+       * allows user to sign in using oAuth providers if he has github id = 111 pr twitter id = 111
+       * @see User.setKeychain
+       */
+      keychain: {type: Object, index: true, unique: true, sparse: true}, // i'm loving mongoose - http://mongoosejs.com/docs/schematypes.html - see mixed
 
-        /**
-         * @ngdoc value
-         * @methodOf User
-         * @name User.keychain
-         * @description
-         * Profile keychain. For example, the one like it
-         * ```javascript
-         * { "github":"111", "twitter":"111" }
-         * ```
-         * allows user to sign in using oAuth providers if he has github id = 111 pr twitter id = 111
-         * @see User.setKeychain
-         */
-        keychain: {type: Object, index: true, unique: true, sparse: true}, // i'm loving mongoose - http://mongoosejs.com/docs/schematypes.html - see mixed
+      /**
+       * @ngdoc value
+       * @methodOf User
+       * @name User.profile
+       * @description
+       * User profile object. it can store anything! - age, postal address, occupation. everything!
+       */
+      profile: {},
 
-        /**
-         * @ngdoc value
-         * @methodOf User
-         * @name User.profile
-         * @description
-         * User profile object. it can store anything! - age, postal address, occupation. everything!
-         */
-        profile: {},
+      /**
+       * @ngdoc value
+       * @methodOf User
+       * @name User.lastSeenOnline
+       * @description
+       * Timestamp of last http interaction with site - last seen online
+       */
+      lastSeenOnline: Date,
 
-        /**
-         * @ngdoc value
-         * @methodOf User
-         * @name User.lastSeenOnline
-         * @description
-         * Timestamp of last http interaction with site - last seen online
-         */
-        lastSeenOnline: Date,
+      /**
+       * @ngdoc value
+       * @methodOf User
+       * @name User.groups
+       * @description
+       * Array of groups' ID, user are a member of...
+       * Role is defined IN group, not here
+       */
+      groups: [
+        { type: kabam.mongoose.Schema.Types.ObjectId, ref: 'Group' }
+      ]
+    },{
+      toObject: { getters: true, virtuals: true }, //http://mongoosejs.com/docs/api.html#document_Document-toObject
+      toJSON: { getters: true, virtuals: true }
+    });
 
-        /**
-         * @ngdoc value
-         * @methodOf User
-         * @name User.groups
-         * @description
-         * Array of groups' ID, user are a member of...
-         * Role is defined IN group, not here
-         */
-        groups: [
-          { type: kabam.mongoose.Schema.Types.ObjectId, ref: 'Group' }
-        ]
-      },
-      {
-        toObject: { getters: true, virtuals: true }, //http://mongoosejs.com/docs/api.html#document_Document-toObject
-        toJSON: { getters: true, virtuals: true }
-      }
-    );
-
-  UserSchema.index({
-    username: 1,
-    email: 1,
-    apiKey: 1,
-    keychain: 1,
-    roles: 1
-  });
+//  UserSchema.index({
+//    username: 1,
+//    email: 1,
+//    apiKey: 1,
+//    keychain: 1,
+//    roles: 1
+//  });
 
   /**
    * @ngdoc function
@@ -239,7 +228,8 @@ exports.init = function (kabam) {
     size = size || 300;
     type = type || 'wavatar';
     rating = rating || 'g';
-    return 'https://secure.gravatar.com/avatar/' + md5(this.email.toLowerCase().trim()) + '.jpg?s=' + size + '&d=' + type + '&r=' + rating;
+    var hash = md5(this.email && this.email.toLowerCase().trim() || '');
+    return 'https://secure.gravatar.com/avatar/' + hash + '.jpg?s=' + size + '&d=' + type + '&r=' + rating;
   };
   /**
    * @ngdoc value
@@ -253,7 +243,7 @@ exports.init = function (kabam) {
   });
 
   /**
-   * @ngdoc function
+   * @ngdoc value
    * @methodOf User
    * @name User.lastSeenOnlineAgo
    * @description
@@ -276,6 +266,19 @@ exports.init = function (kabam) {
   UserSchema.virtual('isOnline').get(function () {
     return (this.lastSeenOnlineAgo < 60000);
   });
+
+  /**
+   * @ngdoc value
+   * @methodOf User
+   * @name User.profileComplete
+   * @description
+   * Returns true, if user profile complete (has first and last names)
+   */
+  // TODO: test me please
+  UserSchema.virtual('profileComplete').get(function () {
+    return !!this.firstName && !!this.lastName;
+  });
+
   /**
    * @ngdoc function
    * @name User.verifyPassword
@@ -318,7 +321,7 @@ exports.init = function (kabam) {
     this.salt = salt;
     this.password = sha512(salt + newPassword);
     kabam.emit('users:setPassword', this);
-    if(callback) this.save(callback);
+    if(callback) {this.save(callback);}
   };
 
   /**
@@ -526,15 +529,6 @@ exports.init = function (kabam) {
     });
   };
 
-  /**
-   * @ngdoc function
-   * @name kabamKernel.model.User.findOneByUsernameOrEmail
-   * @description
-   * Alias for kabam.model.User.findOneByLoginOrEmail
-   * @param {string} usernameOrEmail  - username or email address of user
-   * @param {function} callback  - function is fired when user is saved
-   */
-  UserSchema.statics.findOneByUsernameOrEmail = UserSchema.statics.findOneByLoginOrEmail;
 
   /**
    * @ngdoc function
@@ -574,7 +568,6 @@ exports.init = function (kabam) {
         throw new Error('Function User.notify([channelNameString],messageObj) has wrond arguments!');
       }
     }
-
     kabam.emit('notify:' + channelToUse, {user: this, message: messageToSend});
     return;
   };
@@ -602,6 +595,16 @@ exports.init = function (kabam) {
       this.findOne({'email': loginOrEmail}, callback);
     }
   };
+
+  /**
+   * @ngdoc function
+   * @name kabamKernel.model.User.findOneByUsernameOrEmail
+   * @description
+   * Alias for kabam.model.User.findOneByLoginOrEmail
+   * @param {string} usernameOrEmail  - username or email address of user
+   * @param {function} callback  - function is fired when user is saved
+   */
+  UserSchema.statics.findOneByUsernameOrEmail = UserSchema.statics.findOneByLoginOrEmail;
 
   /**
    * @ngdoc function
@@ -646,7 +649,7 @@ exports.init = function (kabam) {
 
   /**
    * @ngdoc function
-   * @name kabamKernel.model.User.processOAuthProfile
+   * @name kabamKernel.model.User.linkEmailOnlyProfile
    * @param {string} email - email of user from oauth profile we want to process
    * @param {function} done - function is fired when users are found
    * @description
@@ -656,39 +659,23 @@ exports.init = function (kabam) {
    * @example
    * ```javascript
    *
-   * kabam.model.User.processOAuthProfile('someEmail@somedomain.com',function(err,user){
+   * kabam.model.User.linkEmailOnlyProfile('someEmail@somedomain.com',function(err,user){
    *   assert.equal(true,user.emailVerified);
    *   assert.equal(false,user.profileComplete);
    *   assert.equal('someEmail@somedomain.com',user.email);
    * });
    * ```
    */
-  UserSchema.statics.processOAuthProfile = function (email, done) {
+  UserSchema.statics.linkEmailOnlyProfile = function (email, done) {
     var Users = this;
-    if (email) {
-      Users.findOne({'email': email}, function (err, userFound) {
-        if (err) {
-          return done(err, false, {'message': 'Database broken...'});
-        } else {
-//          console.log('==============');
-//          console.log(userFound);
-//          console.log('==============');
-          if (err) {
-            return done(err);
-          } else {
-            if (userFound) {
-              return done(err, userFound, {message: 'Welcome, ' + userFound.username});
-            } else {
-              Users.signUpByEmailOnly(email, function (err1, userCreated) {
-                return done(err1, userCreated, { message: 'Please, complete your account!' });
-              });
-            }
-          }
-        }
+    if (!email) {return done(new Error('There is something strange instead of user profile'));}
+    Users.findOne({'email': email}, function (err, userFound) {
+      if (err) {return done(err, false, {'message': 'Database broken...'});}
+      if (userFound) {return done(err, userFound, {message: 'Welcome, ' + userFound.username});}
+      Users.signUpByEmailOnly(email, function (err1, userCreated) {
+        return done(err1, userCreated, { message: 'Please, complete your account!' });
       });
-    } else {
-      return done(new Error('There is something strange instead of user profile'));
-    }
+    });
   };
   /**
    * @ngdoc function
@@ -711,7 +698,7 @@ exports.init = function (kabam) {
     thisSchema.findOne({'$or':[{username:username}, {email:email}]}, function(err, user){
       if(err){
         kabam.emit('error',err);
-        callback(new Error("Something went wrong"));
+        callback(new Error('Something went wrong'));
         return;
       }
       if(user){
@@ -775,45 +762,134 @@ exports.init = function (kabam) {
       'apiKeyCreatedAt': new Date()
     }, function (err, userCreated) {
       if (err) {
-        callback(err);
-      } else {
-        userCreated.setPassword(rack(), function (err1) {//because leaving user without password is stupid
-          if (err1) {
-            callback(err1);
-          } else {
-            kabam.emit('users:signUpByEmailOnly', userCreated);
-            callback(null, userCreated);
-          }
-        });
+        return callback(err);
       }
+      kabam.emit('users:signUpByEmailOnly', userCreated);
+      callback(null, userCreated);
     });
   };
 
   /**
    * @ngdoc function
-   * @name User.completeProfile
-   * @description
-   * Complete users profile for user created by kabam.model.user.signUpByEmailOnly
-   * @param {string} username - username to set for user instance
-   * @param {string} password - password to set for user instance
-   * @param {function} callback  - function is fired when user is saved
+   * @name kabamKernel.model.User.signUpWithService
+   * @param {String} [email] optional email for a user
+   * @param {{id:(String|Number), provider: String, emails:Array<{value:String}>}} profile
+   * @param {function(err:Error, user:User?, created:Boolean?)} done
    */
-  UserSchema.methods.completeProfile = function (username, password, callback) {
-    if (this.username === undefined && this.profileComplete === false) {
-      this.username = username;
-      this.profileComplete = true;
-      this.setPassword(password, function (err) {
-        if (err) {
-          callback('Unable to complete profile, username ' + username + ' is occupied!');
-        } else {
-          kabam.emit('users:completeProfile', this);
-          callback(null);
-        }
-      });
-    } else {
-      callback(new Error('Account is completed!'));
+  UserSchema.statics.signUpWithService = function(email, profile, done){
+    var firstName, lastName, name;
+    var data = {
+      'profileComplete': false,
+      'apiKey': sha512(rack()),
+      'root': false,
+      'apiKeyCreatedAt': new Date()
+    };
+
+    // trying to get first name and last name
+    if(profile.displayName){
+      // it tries to split the name by spaces using the first element as first name and everything other as last name
+      // so if the user has a name like John Malkovich it will make firstName='John' and lastName='Malkovich'
+      name = profile.displayName.split(' ');
+      firstName = name[0];
+      if(name.length > 1){
+        lastName = name.slice(1).join(' ');
+      }
     }
+
+    // if profile has given and family names try to use them instead
+    if(profile.name && profile.name.givenName){
+      firstName = profile.name.givenName;
+    }
+    if(profile.name && profile.name.familyName){
+      lastName = profile.name.familyName;
+    }
+
+    // jshint expr: true
+    firstName && (data.firstName = firstName);
+    lastName && (data.lastName = lastName);
+
+    // if profile has email we are trusting the provider and consider that this email is verified
+    if(email){
+      data.email = email;
+      data.emailVerified = true;
+    }
+
+    // finally create a new user
+    this.create(data, function(err, user){
+      if(err) {return done(err);}
+      user.setKeyChain(profile.provider, profile.id, function (err) {
+        if (err) {return done(err);}
+        // last true parameter is for marking user as newly created
+        done(null, user, true);
+      });
+    });
   };
+
+  /**
+   * @ngdoc function
+   * @name kabamKernel.model.User.findAndLinkWithService
+   * @param {{id:(String|Number), provider: String, emails:Array<{value:String}>}} profile
+   * @param {function(err:Error, user:User?, created:Boolean?)} done
+   * @description
+   * Tries to find an existing user using provider name and profile id, if the user is found returns it.
+   * Otherwise creates a new user.
+   */
+  UserSchema.statics.findAndLinkWithService = function(profile, done){
+    User.findOneByKeychain(profile.provider, profile.id, function(err, user){
+      if(err) {return done(err);}
+      // we found a user, return them.
+      if(user) {return done(null, user, false);}
+
+      var email;
+      if(Array.isArray(profile.emails) && profile.emails.length){
+        email = profile.emails[0].value;
+      }
+
+      // if we don't have a user with such keychain and we don't have an email in the profile, just signup them
+      if(!email) {return User.signUpWithService(null, profile, done);}
+
+      // if we have an email in the profile we must check if there is some one with such email
+      User.findOneByUsernameOrEmail(email, function(err, user){
+        if(err) {return done(err);}
+        // if no one found, lets sign them up
+        if(!user) {return User.signUpWithService(email, profile, done);}
+        // otherwise lets notify a user.
+        var message = 'Someone already registered with the email '+ email + '. ' +
+          'If it\'s you, you have to login to your account to link it';
+        done(new Error(message));
+      });
+    });
+  };
+
+  /**
+   * @ngdoc function
+   * @name kabamKernel.model.User.linkWithService
+   * @param {User} user If we are linking logged in user we should provide their email
+   * @param {{id:(String|Number), provider: String, emails:Array<{value:String}>}} profile
+   * @param {function(err:Error, user:User?, created:Boolean?)} done
+   * @description
+   * Links existing user with the service or creates a new user automatically linking it with the service.
+   * If the user already linked with the service callback successfully returns the user but nothing changes in the database.
+   */
+  UserSchema.statics.linkWithService = function(user, profile, done){
+    // no user lets find them
+    if(!user) {return User.findAndLinkWithService(profile, done);}
+
+    var provider = profile.provider;
+
+    // Technically it is possible to associate multiple accounts per provider, but for now we limit them to just one
+    if(user.keychain[provider] && user.keychain[provider] !== profile.id) {
+      return done(new Error(
+        'You already have linked another ' + (provider.charAt(0).toUpperCase() + provider.slice(1)) + ' account'
+      ));
+    }
+    // just set keychain
+    user.setKeyChain(provider, profile.id, function (err) {
+      if (err) {return done(err);}
+      done(null, user, false);
+    });
+  };
+
 
   /**
    * @ngdoc function
@@ -1337,7 +1413,6 @@ exports.init = function (kabam) {
  * kabamKernel.on('users:revokeRole', function(user){...});
  * kabamKernel.on('users:signUp', function(user){...});
  * kabamKernel.on('users:signUpByEmailOnly', function(user){...});
- * kabamKernel.on('users:completeProfile', function(user){...});
  * kabamKernel.on('users:saveProfile', function(user){...});
  * kabamKernel.on('users:setKeyChain', function(user){...});
  * kabamKernel.on('users:revokeKeyChain', function(user){...});
@@ -1358,7 +1433,6 @@ exports.init = function (kabam) {
  * kabamKernel.on('users:revokeRole', function(user){...});
  * kabamKernel.on('users:signUp', function(user){...});
  * kabamKernel.on('users:signUpByEmailOnly', function(user){...});
- * kabamKernel.on('users:completeProfile', function(user){...});
  * kabamKernel.on('users:saveProfile', function(user){...});
  * kabamKernel.on('users:setKeyChain', function(user){...});
  * kabamKernel.on('users:revokeKeyChain', function(user){...});
