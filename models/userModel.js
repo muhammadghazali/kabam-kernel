@@ -836,21 +836,29 @@ exports.init = function (kabam) {
   /**
    * @ngdoc function
    * @name kabamKernel.model.User.findAndLinkWithService
+   * @param {boolean} canCreate - If true will create a new user account if doesn't exists
    * @param {OauthProfile} profile User profile from the service
    * @param {function(err:Error, user:User?, created:Boolean?)} done callback
    * @description
    * Tries to find an existing user using provider name and profile id, if the user is found returns it.
    * Otherwise creates a new user.
    */
-  UserSchema.statics.findAndLinkWithService = function(profile, done){
+  UserSchema.statics.findAndLinkWithService = function(canCreate, profile, done){
     User.findOneByKeychain(profile.provider, profile.id, function(err, user){
       if(err) {return done(err);}
       // we found a user, return them.
       if(user) {return done(null, user, false);}
 
-      var email;
+      var email, serviceName;
       if(Array.isArray(profile.emails) && profile.emails.length){
         email = profile.emails[0].value;
+      }
+
+      // if we can't create new accounts using this service.
+      if(!canCreate){
+        serviceName = (profile.provider.charAt(0).toUpperCase() + profile.provider.slice(1));
+        return done(new Error('Cannot login using ' + serviceName + '. '+
+          'Please be sure you are registered and linked your account with '+serviceName));
       }
 
       // if we don't have a user with such keychain and we don't have an email in the profile, just signup them
@@ -874,14 +882,15 @@ exports.init = function (kabam) {
    * @name kabamKernel.model.User.linkWithService
    * @param {User} user If we are linking logged in user we should provide their email
    * @param {OauthProfile} profile User profile from the service
+   * @param {boolean} canCreate - If true will create a new user account if doesn't exists
    * @param {function(err:Error, user:User?, created:Boolean?)} done callback
    * @description
    * Links existing user with the service or creates a new user automatically linking it with the service.
    * If the user already linked with the service callback successfully returns the user but nothing changes in the database.
    */
-  UserSchema.statics.linkWithService = function(user, profile, done){
+  UserSchema.statics.linkWithService = function(user, profile, canCreate, done){
     // no user lets find them
-    if(!user) {return User.findAndLinkWithService(profile, done);}
+    if(!user) {return User.findAndLinkWithService(canCreate, profile, done);}
 
     var provider = profile.provider;
 
