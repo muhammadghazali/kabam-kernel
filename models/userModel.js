@@ -770,11 +770,19 @@ exports.init = function (kabam) {
   };
 
   /**
+   * @typedef OauthProfile
+   * @type {object}
+   * @property {string|number} id - an ID.
+   * @property {string} provider - profiver name.
+   * @property {Array.<{value:String}>} emais - emails array.
+   */
+
+  /**
    * @ngdoc function
    * @name kabamKernel.model.User.signUpWithService
    * @param {String} [email] optional email for a user
-   * @param {{id:(String|Number), provider: String, emails:Array<{value:String}>}} profile
-   * @param {function(err:Error, user:User?, created:Boolean?)} done
+   * @param {OauthProfile} profile User profile from the service
+   * @param {function(err:Error, user:User?, created:Boolean?)} done callback
    */
   UserSchema.statics.signUpWithService = function(email, profile, done){
     var firstName, lastName, name;
@@ -828,8 +836,8 @@ exports.init = function (kabam) {
   /**
    * @ngdoc function
    * @name kabamKernel.model.User.findAndLinkWithService
-   * @param {{id:(String|Number), provider: String, emails:Array<{value:String}>}} profile
-   * @param {function(err:Error, user:User?, created:Boolean?)} done
+   * @param {OauthProfile} profile User profile from the service
+   * @param {function(err:Error, user:User?, created:Boolean?)} done callback
    * @description
    * Tries to find an existing user using provider name and profile id, if the user is found returns it.
    * Otherwise creates a new user.
@@ -865,8 +873,8 @@ exports.init = function (kabam) {
    * @ngdoc function
    * @name kabamKernel.model.User.linkWithService
    * @param {User} user If we are linking logged in user we should provide their email
-   * @param {{id:(String|Number), provider: String, emails:Array<{value:String}>}} profile
-   * @param {function(err:Error, user:User?, created:Boolean?)} done
+   * @param {OauthProfile} profile User profile from the service
+   * @param {function(err:Error, user:User?, created:Boolean?)} done callback
    * @description
    * Links existing user with the service or creates a new user automatically linking it with the service.
    * If the user already linked with the service callback successfully returns the user but nothing changes in the database.
