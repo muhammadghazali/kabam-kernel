@@ -67,7 +67,7 @@ describe('Kernel events emitter testing', function () {
   describe('Testing users:signUpByEmailOnly event', function () {
     var user;
     before(function (done) {
-      kabam.model.User.signUpByEmailOnly('abde@gmail.com', function (err, userCreated) {
+      kabam.model.User.signUpByEmailOnly('abde@gmail.com', {}, function (err/*, userCreated*/) {
         if (err) {
           throw err;
         }

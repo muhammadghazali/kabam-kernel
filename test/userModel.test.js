@@ -177,7 +177,7 @@ describe('Users model', function () {
       describe('signUpByEmailOnly', function () {
         var user;
         before(function (done) {
-          kabam.model.User.signUpByEmailOnly('johndoe@example.org', function (err, userCreated) {
+          kabam.model.User.signUpByEmailOnly('johndoe@example.org', {}, function (err, userCreated) {
             if (err) {
               throw err;
             }
@@ -454,7 +454,7 @@ describe('Users model', function () {
               throw err;
             }
             user = userCreated;
-            kabam.model.User.linkEmailOnlyProfile('johndoe@example.org', function (error, userFromProfile) {
+            kabam.model.User.linkEmailOnlyProfile('johndoe@example.org', {}, function (error, userFromProfile) {
               if (error) {
                 throw error;
               }
@@ -485,7 +485,7 @@ describe('Users model', function () {
       describe('linkEmailOnlyProfile for user NOT in database', function () {
         var user;
         before(function (done) {
-          kabam.model.User.linkEmailOnlyProfile('johndoe@mail.ru', function (error, userFromProfile) {
+          kabam.model.User.linkEmailOnlyProfile('johndoe@mail.ru', [], function (error, userFromProfile) {
             if (error) {
               throw error;
             }
