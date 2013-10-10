@@ -203,35 +203,6 @@ use plugin as an object or [npm](https://npmjs.org/) package. See more on [how t
 8. [start](http://ci.monimus.com/docs/#/api/kabam.start) - start the Kabam application in way desired.
 9. [startCluster](http://ci.monimus.com/docs/#/api/kabam.startCluster) - start the Kabam application in way desired as a Cluster.
 
-Plugins
-=======
-Each of plugins have working example, to see it in action, install plugin like this
-```shell
-    $ git clone git@github.com:mykabam/kabam_plugin_socket_io.git
-    $ cd kabam_plugin_socket_io
-    $ npm install
-    $ npm start
-```
-If you have redis and mongodb running without password, every plugin have will start demonstration from the box.
-If you have errors running plugin, upgrade your kernel or plugin modules.
-
- - [kabam_plugin_example](https://github.com/mykabam/kabam_plugin_example) [![Build Status](https://travis-ci.org/mykabam/kabam_plugin_example.png)](https://travis-ci.org/mykabam/kabam_plugin_example) demonstration plugin
-
- - [kabam_heroku](https://github.com/mykabam/kabam_heroku) - plugin to simplify deploy and configuring on [heroku cloud hosting](http://heroku.com).
-
- - [kabam-plugin-spine](https://github.com/mykabam/kabam-plugin-spine) [![Build Status](https://travis-ci.org/mykabam/kabam-plugin-spine.png)](https://travis-ci.org/mykabam/kabam-plugin-spine)  plugint that add task queue for application,
- based on  [Assemblage](https://github.com/pipedrive/assemblage) node module.
-
- - [kabam-plugin-hogan](https://github.com/mykabam/kabam-plugin-hogan) [![Build Status](https://travis-ci.org/mykabam/kabam-plugin-hogan.png?branch=master)](https://travis-ci.org/mykabam/kabam-plugin-hogan) - plugin to add support for [hogan-express template engine](https://github.com/vol4ok/hogan-express).
-
- - [kabam-plugin-notify-email](https://github.com/mykabam/kabam-plugin-notify-email) - plugin to notify users by email
-
- - [https://github.com/mykabam/kabam_plugin_gridfs](https://github.com/mykabam/kabam_plugin_gridfs) [![Build Status](https://travis-ci.org/mykabam/kabam_plugin_gridfs.png?branch=master)](https://travis-ci.org/mykabam/kabam_plugin_gridfs) - plugin to use gridfs
-
- - [https://github.com/mykabam/kabam_plugin_socket_io/](https://github.com/mykabam/kabam_plugin_socket_io) - plugin to notify users by socket.io events
-
-[Plugin compatibility wiki](https://github.com/mykabam/kabam-kernel/wiki/Plugin-compatibility-guide)
-
 Example
 =======
 
