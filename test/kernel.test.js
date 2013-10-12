@@ -168,39 +168,39 @@ describe('Kernel', function () {
   describe('Testing exposed objects of running kabamKernel', function () {
 
     it('can emit and listen to events', function () {
-      Kabam.emit.should.be.a('function');
-      Kabam.on.should.be.a('function');
+      Kabam.emit.should.be.type('function');
+      Kabam.on.should.be.type('function');
     });
 
     it('exposes redis client', function () {
-      Kabam.redisClient.should.be.a('object');
-      Kabam.redisClient.set.should.be.a('function');
-      Kabam.redisClient.get.should.be.a('function');
-      Kabam.redisClient.info.should.be.a('function');
-      Kabam.redisClient.auth.should.be.a('function');
+      Kabam.redisClient.should.be.type('object');
+      Kabam.redisClient.set.should.be.type('function');
+      Kabam.redisClient.get.should.be.type('function');
+      Kabam.redisClient.info.should.be.type('function');
+      Kabam.redisClient.auth.should.be.type('function');
     });
 
     it('exposes mongoose model', function () {
-      Kabam.model.should.be.a('object');
+      Kabam.model.should.be.type('object');
     });
 
     it('exposes mongoose model of users', function () {
-      Kabam.model.User.should.be.a('function');
-      Kabam.model.Users.should.be.a('function');
+      Kabam.model.User.should.be.type('function');
+      Kabam.model.Users.should.be.type('function');
     });
 
     it('exposes mongoose model of messages', function () {
-      Kabam.model.Message.should.be.a('function');
-      Kabam.model.Messages.should.be.a('function');
+      Kabam.model.Message.should.be.type('function');
+      Kabam.model.Messages.should.be.type('function');
     });
 
     it('exposes an ExpressJS application', function () {
-      Kabam.app.should.be.a('function');
-      Kabam.app.listen.should.be.a('function');
-      Kabam.app.use.should.be.a('function');
-      Kabam.app.get.should.be.a('function');
-      Kabam.app.post.should.be.a('function');
-      Kabam.app.delete.should.be.a('function');
+      Kabam.app.should.be.type('function');
+      Kabam.app.listen.should.be.type('function');
+      Kabam.app.use.should.be.type('function');
+      Kabam.app.get.should.be.type('function');
+      Kabam.app.post.should.be.type('function');
+      Kabam.app.delete.should.be.type('function');
     });
 
     it('throws error when we try to extend readied application', function () {
@@ -272,7 +272,7 @@ describe('Kernel', function () {
 
   describe('Testing kabam_core express application', function () {
     it('it exposes a #Kabam.app object', function () {
-      Kabam.app.should.be.a('function');
+      Kabam.app.should.be.type('function');
     });
   });
 
@@ -281,7 +281,7 @@ describe('Kernel', function () {
 
     it('actually adds new functions to #Kabam', function () {
       Kabam.shared.SomeVar.should.be.equal(42);
-      Kabam.shared.sum.should.be.a('function');
+      Kabam.shared.sum.should.be.type('function');
       Kabam.shared.sum(2, 2).should.equal(4);
     });
   });
@@ -289,23 +289,23 @@ describe('Kernel', function () {
   describe('#Kabam.extendModel()', function () {
 
     it('adds the model of "Cats" to #Kabam.model.Cats', function () {
-      Kabam.model.Cats.should.be.a('function');
+      Kabam.model.Cats.should.be.type('function');
     });
     describe('and the "Cats" model looks like mongoose model', function () {
       it('exposes function find', function () {
-        Kabam.model.Cats.find.should.be.a('function');
+        Kabam.model.Cats.find.should.be.type('function');
       });
       it('exposes function findOne', function () {
-        Kabam.model.Cats.findOne.should.be.a('function');
+        Kabam.model.Cats.findOne.should.be.type('function');
       });
       it('exposes function count', function () {
-        Kabam.model.Cats.count.should.be.a('function');
+        Kabam.model.Cats.count.should.be.type('function');
       });
       it('exposes function remove', function () {
-        Kabam.model.Cats.remove.should.be.a('function');
+        Kabam.model.Cats.remove.should.be.type('function');
       });
       it('exposes function create', function () {
-        Kabam.model.Cats.create.should.be.a('function');
+        Kabam.model.Cats.create.should.be.type('function');
       });
     });
   });
@@ -403,30 +403,30 @@ describe('Kernel', function () {
     describe('extendCore from plugin', function () {
 
       it('it actually adds new functions to #Kabam.core', function () {
-        Kabam.unitTestPlugin.mul.should.be.a('function');
+        Kabam.unitTestPlugin.mul.should.be.type('function');
         Kabam.unitTestPlugin.mul(3, 2).should.equal(6);
       });
     });
 
     describe('extendModel from plugin', function () {
       it('adds the model of "Dogs" to #Kabam.model.Dogs', function () {
-        Kabam.model.Dogs.should.be.a('function');
+        Kabam.model.Dogs.should.be.type('function');
       });
       describe('and the "Dogs" model looks like mongoose model', function () {
         it('exposes function find', function () {
-          Kabam.model.Dogs.find.should.be.a('function');
+          Kabam.model.Dogs.find.should.be.type('function');
         });
         it('exposes function findOne', function () {
-          Kabam.model.Dogs.findOne.should.be.a('function');
+          Kabam.model.Dogs.findOne.should.be.type('function');
         });
         it('exposes function count', function () {
-          Kabam.model.Dogs.count.should.be.a('function');
+          Kabam.model.Dogs.count.should.be.type('function');
         });
         it('exposes function remove', function () {
-          Kabam.model.Dogs.remove.should.be.a('function');
+          Kabam.model.Dogs.remove.should.be.type('function');
         });
         it('exposes function create', function () {
-          Kabam.model.Dogs.create.should.be.a('function');
+          Kabam.model.Dogs.create.should.be.type('function');
         });
       });
     });
