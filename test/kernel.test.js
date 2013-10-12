@@ -117,8 +117,9 @@ describe('Kernel', function () {
 
 
   before(function (done) {
+    process.setMaxListeners(0);
+
     Kabam = kabamKernel(config);
-    Kabam.setMaxListeners(0);
 
     Kabam.extendCore('sum', function (config) {
       return function (a, b) {
