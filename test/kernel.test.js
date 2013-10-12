@@ -8,7 +8,6 @@ var should = require('should'),
   request = require('request'),
   port = Math.floor(2000 + 1000 * Math.random());
 
-
 describe('Kernel', function () {
 
   var Kabam;
@@ -119,6 +118,7 @@ describe('Kernel', function () {
 
   before(function (done) {
     Kabam = kabamKernel(config);
+    Kabam.setMaxListeners(0);
 
     Kabam.extendCore('sum', function (config) {
       return function (a, b) {
