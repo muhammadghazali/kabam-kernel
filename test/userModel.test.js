@@ -1328,14 +1328,14 @@ describe('Users model', function () {
             event.title.should.be.equal('test1');
           });
         });
-        describe('recieveMessage', function () {
+        describe('receiveMessage', function () {
           var event;
           before(function (done) {
             kabam.once('notify:pm', function (m) {
               event = m;
               setTimeout(done, 1000);
             });
-            User2.recieveMessage(User1,'test2', 'test2', function (err, messageCreated) {
+            User2.receiveMessage(User1,'test2', 'test2', function (err, messageCreated) {
               if (err) {
                 throw err;
               }

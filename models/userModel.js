@@ -342,6 +342,7 @@ exports.init = function (kabam) {
   UserSchema.methods.invalidateSession = function (callback) {
     var newApiKey = sha512(rack());
     this.apiKey = newApiKey;
+    this.apiKeyCreatedAt = new Date();
     this.save(function (err) {
       callback(err, newApiKey);
     });
@@ -1135,7 +1136,7 @@ exports.init = function (kabam) {
    * User1.sendMessage(User2,'hello!',function(err){if(err) throw err;});
    * //User1 sends message to User2
    * ```
-   * @param {User/string} to - reciever of message
+   * @param {User/string} to - receiver of message
    * @param {string} title - title of message
    * @param {string} message - text of message
    * @param {function} callback -function to be called on message delivery
@@ -1186,7 +1187,7 @@ exports.init = function (kabam) {
 
   /**
    * @ngdoc function
-   * @name User.recieveMessage
+   * @name User.receiveMessage
    * @description
    * Sends private message to this user from other one
    * @example
@@ -1194,12 +1195,12 @@ exports.init = function (kabam) {
    * User1.sendMessage(User2,'hello!',function(err){if(err) throw err;});
    * //User1 sends message to User2
    * ```
-   * @param {User/string} from - reciever of message
+   * @param {User/string} from - receiver of message
    * @param {string} title - title of message
    * @param {string} message - text of message
    * @param {function} callback -function to be called on message delivery
    */
-  UserSchema.methods.recieveMessage = function (from, title,message, callback) {
+  UserSchema.methods.receiveMessage = function (from, title,message, callback) {
     var thisUser = this;
     message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
     title = sanitaze(title).xss(true); //https://npmjs.org/package/validator - see xss
