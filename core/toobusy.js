@@ -11,13 +11,12 @@ exports.app = function(kernel){
       console.log('setting maxLag to ', maxLag);
       toobusy.maxLag(kernel.config.toobusy.MAX_LAG);
     }
-    // set shutdown procedure
-    kernel.on('stop', function () {
-      // calling .shutdown allows your process to exit normally
-      toobusy.shutdown();
-    });
-
   }
+  process.on('SIGINT', function() {
+    // calling .shutdown allows your process to exit normally
+    toobusy.shutdown();
+    process.exit();
+  });
 };
 
 exports.middleware = [
