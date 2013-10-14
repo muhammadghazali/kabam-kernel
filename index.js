@@ -1,12 +1,12 @@
 'use strict';
 var EventEmitter = require('events').EventEmitter,
-  url = require('url'),
   util = require('util'),
   appManager = require('./lib/appManager.js'),
   MongooseManager = require('./lib/MongooseManager.js'),
   configManager = require('./lib/configManager.js'),
   mongooseManager = new MongooseManager(),
   redisManager = require('./lib/redisManager.js'),
+  // jshint unused: false
   colors = require('colors');
 
 /**
@@ -674,6 +674,12 @@ function KabamKernel(config) {
       return false;
     }
   };
+
+  // default plugins
+  this.usePlugin(require('./core/app'));
+  this.usePlugin(require('./core/socket-io'));
+  this.usePlugin(require('./core/rate-limiter'));
+  this.usePlugin(require('./core/toobusy'));
 }
 
 util.inherits(KabamKernel, EventEmitter);
@@ -777,6 +783,7 @@ KabamKernel.create = function (config) {
  * Stops kabamKernel instance - close redis and mongo connections.
  */
 KabamKernel.prototype.stop = function () {
+  this.emit('stop');
   this.redisClient.end();
   this.mongoose.connection.close();
   this.mongoose.disconnect();

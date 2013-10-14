@@ -1,9 +1,9 @@
 /*jshint immed: false, expr: true */
 'use strict';
+// jshint unused: false
 var should = require('should'),
   mongoose = require('mongoose'),
-  KabamKernel = require('./../index.js'),
-  events = require('events'),
+  kabamKernel = require('./../index.js'),
   config = require('./../example/config.json').testing,
   request = require('request');
 
@@ -15,7 +15,7 @@ describe('auth api testing', function () {
     connection = mongoose.createConnection(config.MONGO_URL);
     // We should first connect manually to the database and delete it because if we would use kabam.mongoConnection
     // then models would not recreate their indexes because mongoose would initialise before we would drop database.
-    kabam = KabamKernel(config);
+    kabam = kabamKernel(config);
     connection.on('open', function(){
       connection.db.dropDatabase(function () {
         kabam.on('started', function () {
@@ -35,9 +35,9 @@ describe('auth api testing', function () {
           'url': 'http://localhost:' + port + '/auth/signup',
           'method': 'POST',
           'json': {
-            "username": "usernameToUseForNewUser",
-            "email": "emailForNewUser@example.org",
-            "password": "myLongAndHardPassword"
+            username: 'usernameToUseForNewUser',
+            email: 'emailForNewUser@example.org',
+            password: 'myLongAndHardPassword'
           }
         },
         function (err, r, b) {
@@ -77,9 +77,9 @@ describe('auth api testing', function () {
           'url': 'http://localhost:' + port + '/auth/signup',
           'method': 'POST',
           'json': {
-            "username": "usernameToUseForNewUser",
-            "email": "emailForNewUser@example.org",
-            "password": "myLongAndHardPassword"
+            username: 'usernameToUseForNewUser',
+            email: 'emailForNewUser@example.org',
+            password: 'myLongAndHardPassword'
           }
         },
         function (err, r, b) {
@@ -104,8 +104,8 @@ describe('auth api testing', function () {
             'url': 'http://localhost:' + port + '/auth/login',
             'method': 'POST',
             'json': {
-              "username": "usernameToUseForNewUser",
-              "password": "myLongAndHardPassword"
+              'username': 'usernameToUseForNewUser',
+              'password': 'myLongAndHardPassword'
             }
           },
           function (err, r, b) {
@@ -141,8 +141,8 @@ describe('auth api testing', function () {
                 'url': 'http://localhost:' + port + '/auth/login',
                 'method': 'POST',
                 'json': {
-                  "username": "usernameToUseForNewUser",
-                  "password": "myLongAndHardPassword"
+                  username: 'usernameToUseForNewUser',
+                  password: 'myLongAndHardPassword'
                 }
               },
               function (err, r1, b1) {
@@ -268,9 +268,9 @@ describe('auth api testing', function () {
           'url': 'http://localhost:' + port + '/auth/signup',
           'method': 'POST',
           'json': {
-            "username": "usernameToUseForNewUser",
-            "email": "emailForNewUser@example.org",
-            "password": "myLongAndHardPassword"
+            username: 'usernameToUseForNewUser',
+            email: 'emailForNewUser@example.org',
+            password: 'myLongAndHardPassword'
           }
         },
         function (err, r, b) {
@@ -301,7 +301,7 @@ describe('auth api testing', function () {
     });
 
     it('check redirect path', function () {
-      response.socket._httpMessage.path.should.equal('/')
+      response.socket._httpMessage.path.should.equal('/');
     });
     after(function (done) {
       user.remove(done);
@@ -321,7 +321,7 @@ describe('Signing in in multiple sessions', function(){
     connection;
   before(function(done){
     connection = mongoose.createConnection('mongodb://localhost/kabam_test');
-    kabam = KabamKernel({MONGO_URL:'mongodb://localhost/kabam_test'});
+    kabam = kabamKernel({MONGO_URL:'mongodb://localhost/kabam_test'});
     connection.on('open', function(){
       connection.db.dropDatabase(function () {
         kabam.on('started', function () {
