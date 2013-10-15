@@ -1,9 +1,10 @@
 'use strict';
+
 var redis = require('redis'),
   url = require('url'),
   errorMessage = 'Config.REDIS has invalid value. Proper values are ' +
-                 '{"port":6379,"host":"localhost","auth":"someSecretPassword"} ' +
-                 'or "redis://usernameIgnored:someSecretPassword@redis.example.org:6739"';
+    '{"port":6379,"host":"localhost","auth":"someSecretPassword"} ' +
+    'or "redis://usernameIgnored:someSecretPassword@redis.example.org:6739"';
 
 
 function parseConfig(redisConfig){
@@ -29,19 +30,18 @@ function parseConfig(redisConfig){
 }
 
 function validateConfig(redisConfig) {
-  var is_valid = (
+  var isValid = (
     (redisConfig.port && redisConfig.host && /^\d+$/.test(redisConfig.port)) ||
-    (typeof redisConfig === 'string' && url.parse(redisConfig).protocol === 'redis:')
-  );
-  if (!is_valid) {
+      (typeof redisConfig === 'string' && url.parse(redisConfig).protocol === 'redis:')
+    );
+  if (!isValid) {
     throw new Error(errorMessage);
   }
   return redisConfig;
 }
 
-var redisManager = {};
 
-redisManager.create = function (redisConfig) {
+function makeClient(redisConfig) {
   var redisClient;
 
   if (redisConfig) {
@@ -56,6 +56,31 @@ redisManager.create = function (redisConfig) {
   }
 
   return redisClient;
-};
+}
 
-module.exports = exports = redisManager;
+
+
+exports.name = 'kabam-core-redis-client';
+exports.core = {
+  'redisClient': function(config){
+    return makeClient(config.REDIS);
+  },
+
+  'createRedisClient': function(config){
+    /**
+     * @ngdoc function
+     * @name kabamKernel.createRedisClient
+     * @description
+     * Create new redis client
+     *
+     * Use this function with great caution! Because usually redis-database-as-a-service providers have
+     * strict connection limit!!! and every one redis client created like this consumes one connection!
+     * Usually, Kabam needs only one redis client connection
+     * BTW, redis is NOT MySQL - we can't increase speed with connection pooling!
+     * @returns {RedisClient} redis client
+     */
+    return function(){
+      return makeClient(config.REDIS);
+    };
+  }
+};

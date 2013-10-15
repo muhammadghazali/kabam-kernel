@@ -1118,9 +1118,9 @@ describe('Users model', function () {
   describe('user model have to be compatible with kabam-plugin-test', function () {
     it('it exposes getForUser and canCreate for Active Record', function () {
       kabam.model.User.getForUser.should.be.type('function');
-      kabam.model.Users.getForUser.should.be.type('function');
+//      kabam.model.Users.getForUser.should.be.type('function');
       kabam.model.User.canCreate.should.be.type('function');
-      kabam.model.Users.canCreate.should.be.type('function');
+//      kabam.model.Users.canCreate.should.be.type('function');
     });
 
     describe('getForUser and canCreate works for root', function () {
@@ -1196,15 +1196,15 @@ describe('Users model', function () {
 
       it('it exposes getForUser and canCreate for Active Record', function () {
         kabam.model.Message.getForUser.should.be.type('function');
-        kabam.model.Messages.getForUser.should.be.type('function');
+//        kabam.model.Messages.getForUser.should.be.type('function');
         kabam.model.Message.canCreate.should.be.type('function');
-        kabam.model.Messages.canCreate.should.be.type('function');
+//        kabam.model.Messages.canCreate.should.be.type('function');
       });
 
       describe('canCreate for proper user', function(){
         var val;
         before(function(done){
-          kabam.model.Messages.canCreate(user, function(err,v){
+          kabam.model.Message.canCreate(user, function(err,v){
             if(err) throw err;
             val = v;
             done();
@@ -1219,7 +1219,7 @@ describe('Users model', function () {
       describe('canCreate for user with uncomplete profile', function(){
         var val;
         before(function(done){
-          kabam.model.Messages.canCreate({'profileComplete': false}, function(err,v){
+          kabam.model.Message.canCreate({'profileComplete': false}, function(err,v){
             if(err) throw err;
             val = v;
             done();
@@ -1234,7 +1234,7 @@ describe('Users model', function () {
       describe('canCreate for user with unverified profile', function(){
         var val;
         before(function(done){
-          kabam.model.Messages.canCreate({'emailVerified': false}, function(err,v){
+          kabam.model.Message.canCreate({'emailVerified': false}, function(err,v){
             if(err) throw err;
             val = v;
             done();
@@ -1249,7 +1249,7 @@ describe('Users model', function () {
       describe('canCreate for user with banned profile', function(){
         var val;
         before(function(done){
-          kabam.model.Messages.canCreate({'isBanned': true}, function(err, v){
+          kabam.model.Message.canCreate({'isBanned': true}, function(err, v){
             if(err) throw err;
             val = v;
             done();

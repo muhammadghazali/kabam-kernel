@@ -1,15 +1,15 @@
 'use strict';
-exports.initFunction = function (kabam) {
 
+function factory(kabam) {
   var messageSchema = new kabam.mongoose.Schema({
-      'to': kabam.mongoose.Schema.Types.ObjectId,
-      'toProfile': { type: kabam.mongoose.Schema.Types.ObjectId, ref:'User' },
-      'from': kabam.mongoose.Schema.Types.ObjectId,
-      'fromProfile': { type: kabam.mongoose.Schema.Types.ObjectId, ref:'User' },
-      'createdAt': { type: Date, default: Date.now },
-      'title' : {type: String, trim: true },
-      'message': {type: String, trim: true } //trim whitespaces - http://mongoosejs.com/docs/api.html#schema_string_SchemaString-trim
-    });
+    'to': kabam.mongoose.Schema.Types.ObjectId,
+    'toProfile': { type: kabam.mongoose.Schema.Types.ObjectId, ref:'User' },
+    'from': kabam.mongoose.Schema.Types.ObjectId,
+    'fromProfile': { type: kabam.mongoose.Schema.Types.ObjectId, ref:'User' },
+    'createdAt': { type: Date, default: Date.now },
+    'title' : {type: String, trim: true },
+    'message': {type: String, trim: true } //trim whitespaces - http://mongoosejs.com/docs/api.html#schema_string_SchemaString-trim
+  });
 
   messageSchema.index({
     to: 1,
@@ -37,5 +37,10 @@ exports.initFunction = function (kabam) {
     callback(null, false);
   };
 
-  return kabam.mongoConnection.model('Message', messageSchema);
+  return messageSchema;
+}
+
+exports.name = 'kabam-core-models-message';
+exports.model = {
+  Message: factory
 };
