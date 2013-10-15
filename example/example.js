@@ -64,7 +64,7 @@ kabam.extendRoutes(
 
     //we use Mongoose Model in this route
     kabam.app.get('/team', function (request, response) {
-      request.model.Users.find({}, function (err, users) {
+      request.model.User.find({}, function (err, users) {
         if (err) {
           throw err;
         }

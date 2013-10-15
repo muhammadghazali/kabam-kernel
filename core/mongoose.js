@@ -28,8 +28,16 @@ exports.core = function(kernel){
       socketOptions: { keepAlive: 1 }
     }
   });
-  return {
-    mongoose: mongoose,
-    mongoConnection: mongoConnection
-  };
+
+  kernel.mongoose = mongoose;
+  kernel.mongoConnection = mongoConnection;
+
+  kernel.model = {};
+  Object.keys(kernel.extensions.models).map(function(name){
+    var schema = kernel.extensions.models[name](kernel);
+    // TODO: maybe this should be done in the mongoose plugin
+    // for now we just assume that mongoConnection is always present
+    kernel.model[name] = kernel.mongoConnection.model(name, schema);
+  });
+
 };

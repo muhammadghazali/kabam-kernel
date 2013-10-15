@@ -1,22 +1,6 @@
 'use strict';
 var LocalStrategy = require('passport-local').Strategy;
 
-exports.strategy = function (core) {
-  return new LocalStrategy(
-    function (username, password, done) {
-      core.model.User.findOneByLoginOrEmail(username, function (err, user) {
-        if (err) { return done(err, false);}
-        if (!user) {return done(null, false);}
-
-        if (user.verifyPassword(password)) {
-          done(null, user);
-        } else {
-          return done(null, false);
-        }
-      });
-    }
-  );
-};
 
 function jsonHandler(request, response, next, user) {
   if (!user) {
@@ -57,10 +41,30 @@ function formHandler(request, response, next, user) {
   });
 }
 
-exports.routes = function (passport, core) {
+
+exports.name = 'kabam-core-strategies-local';
+
+exports.strategy = function (core) {
+  return new LocalStrategy(
+    function (username, password, done) {
+      core.model.User.findOneByLoginOrEmail(username, function (err, user) {
+        if (err) { return done(err, false);}
+        if (!user) {return done(null, false);}
+
+        if (user.verifyPassword(password)) {
+          done(null, user);
+        } else {
+          return done(null, false);
+        }
+      });
+    }
+  );
+};
+
+exports.routes = function (core) {
   //autorization by password and username
   core.app.post('/auth/login', function (request, response, next) {
-    passport.authenticate('local', function (err, user, info) {
+    core.passport.authenticate('local', function (err, user/*, info*/) {
       if (err) {
         return next(err);
       }

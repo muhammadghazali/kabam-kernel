@@ -1,5 +1,8 @@
 'use strict';
 var HashStrategy = require('passport-hash').Strategy;
+
+exports.name = 'kabam-core-strategies-hash';
+
 //used for verify account by email
 exports.strategy = function (core) {
   return new HashStrategy(function (hash, done) {
@@ -8,12 +11,10 @@ exports.strategy = function (core) {
     });
   });
 };
-
-exports.routes = function (passport, core) {
+exports.routes = function (core) {
   //account confirmation by link in email
-  core.app.get('/auth/confirm/:hash',
-    passport.authenticate('hash', { failureRedirect: '/auth/failure' }),
-    function (req, res) {
-      res.redirect('/auth/success');
-    });
+  core.app.get('/auth/confirm/:hash', core.passport.authenticate('hash', {
+    successRedirect: '/auth/success',
+    failureRedirect: '/auth/failure'
+  }));
 };

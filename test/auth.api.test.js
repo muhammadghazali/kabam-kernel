@@ -18,10 +18,14 @@ describe('auth api testing', function () {
     kabam = kabamKernel(config);
     connection.on('open', function(){
       connection.db.dropDatabase(function () {
-        kabam.on('started', function () {
-          done();
-        });
-        kabam.start(port);
+        try {
+          kabam.on('started', function () {
+            done();
+          });
+          kabam.start(port);
+        } catch(e){
+          done(e);
+        }
       });
     });
   });

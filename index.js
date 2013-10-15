@@ -1,8 +1,8 @@
 'use strict';
 var EventEmitter = require('events').EventEmitter,
   util = require('util'),
-  appManager = require('./lib/appManager.js'),
-  configManager = require('./lib/configManager.js'),
+  appBuilder = require('./lib/app-builder'),
+  configBuilder = require('./lib/config-builder.js'),
   // jshint unused: false
   colors = require('colors');
 
@@ -137,56 +137,36 @@ function KabamKernel(config) {
    * @name kabamKernel.extendStrategy
    * @description
    * Loads new passportjs strategies from object
-   * @param {object} strategyObject Passport's strategy object
+   * @param {function} factory - function returning Passport's strategy object
    * @returns {kabamKernel} kabamKernel object
    * @url https://github.com/mykabam/kabam-kernel/blob/master/lib/strategies/github.js
    * @example
    * ```javascript
    *
-   * kabam.extendStrategy({
-   * 'strategy':function (core) {
-   * return new LinkedInStrategy({
-   *    consumerKey: core.config.passport.LINKEDIN_API_KEY,
-   *    consumerSecret: core.config.passport.LINKEDIN_SECRET_KEY,
-   *    callbackURL: core.config.HOST_URL + 'auth/linkedin/callback'
-   *    }, function (token, tokenSecret, profile, done) {
-   *       var email = profile.emails[0].value;
-   *      if (email) {
-   *        core.model.Users.linkEmailOnlyProfile(email,done);
-   *      } else {
-   *        return done(new Error('There is something strange instead of user profile'));
-   *      }
+   * kabam.extendStrategy(function (core) {
+   *   return new LinkedInStrategy({
+   *     consumerKey: core.config.passport.LINKEDIN_API_KEY,
+   *     consumerSecret: core.config.passport.LINKEDIN_SECRET_KEY,
+   *     callbackURL: core.config.HOST_URL + 'auth/linkedin/callback'
+   *   }, function (token, tokenSecret, profile, done) {
+   *     var email = profile.emails[0].value;
+   *     if (email) {
+   *       core.model.User.linkEmailOnlyProfile(email,done);
+   *     } else {
+   *       return done(new Error('There is something strange instead of user profile'));
+   *     }
    *  });
-   * },
-   * 'routes':function (passport, core) {
-   *     core.app.get('/auth/linkedin', passport.authenticate('linkedin'),
-   *        function (req, res) {
-   *
-   *     });
-   *     core.app.get('/auth/linkedin/callback', passport.authenticate('linkedin', { failureRedirect: '/' }),
-   *       function (req, res) {
-   *         res.redirect('/');
-   *       });
-   *     };
-   *  });
+   * });
    * ```
    */
-  this.extendStrategy = function (strategyObject) {
+  this.extendStrategy = function (factory) {
     if (prepared) {
       throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
-    } else {
-      if (typeof strategyObject !== 'object') {
-        throw new Error('kabam.extendStrategy requires strategyObject to be an object');
-      }
-      if (typeof strategyObject.strategy !== 'function') {
-        throw new Error('kabam.extendStrategy requires strategyObject.strategy to be a proper function!');
-      }
-      if (typeof strategyObject.routes !== 'function') {
-        throw new Error('kabam.extendStrategy requires strategyObject.routes to be a proper function!');
-      }
-      additionalStrategies.push(strategyObject);
-      return this;
     }
+    if (typeof factory !== 'function') {
+      throw new Error('kabam.extendStrategy requires and argument to be a function returning strategy object!');
+    }
+    additionalStrategies.push(factory);
   };
 
   /**
@@ -471,11 +451,11 @@ function KabamKernel(config) {
         }
       }
 
-      if (typeof pluginToBeInstalled.strategy === 'object') {
-        if (typeof pluginToBeInstalled.strategy.strategy === 'function' && typeof pluginToBeInstalled.strategy.routes === 'function') {
+      if (pluginToBeInstalled.strategy){
+        if(typeof pluginToBeInstalled.strategy === 'function') {
           this.extendStrategy(pluginToBeInstalled.strategy);
         } else {
-          throw new Error('plugin.strategy has wrong syntax! strategy and routes have to be functions!');
+          throw new Error('plugin.strategy has be function returning strategy object!');
         }
       }
 
@@ -578,44 +558,27 @@ function KabamKernel(config) {
     }
 
     // creating config
-    this.config = configManager(this.config || {});
+    this.config = configBuilder(this.config || {});
 
-    //injecting mongoose and additional models
-
-    extendCoreFunctions.map(function (extension) {
-      if (thisKabam[extension.field]) {
-        console.warn('Kernel namespace collision - kernel already have field named ' + extension.field);
-      }
-      var fields = {};
-      if(typeof extension === 'function'){
-        fields = extension(thisKabam);
-      } else {
-        fields[extension.field] = extension.factory(thisKabam.config);
-      }
-
-      if(typeof fields !== 'object'){
-        throw new Error('Kernel extension function should return an object with name:value pairs, ' +
-          'got '+typeof fields+' instead');
-      }
-      for(var f in fields){
-        thisKabam[f] = fields[f];
-      }
-    });
-
-    thisKabam.model = {};
-    Object.keys(additionalModels).map(function(name){
-      var schema = additionalModels[name](thisKabam);
-      // TODO: maybe this should be done in the mongoose plugin
-      // for now we just assume that mongoConnection is always present
-      thisKabam.model[name] = thisKabam.mongoConnection.model(name, schema);
-    });
+    // dependencies used by some plugins
+    this.extensions = {
+      models: additionalModels,
+      strategies: additionalStrategies
+    };
 
     //initialize expressJS application
-    thisKabam.app = appManager(thisKabam, extendAppFunctions, additionalStrategies, extendMiddlewareFunctions, extendRoutesFunctions, catchAllFunction);
+    thisKabam.app = appBuilder(
+      thisKabam,
+      extendCoreFunctions,
+      extendAppFunctions,
+      extendMiddlewareFunctions,
+      extendRoutesFunctions,
+      catchAllFunction
+    );
 
     if (method === 'app') {
-        thisKabam.emit('started', { 'type': 'app' });
-        return thisKabam;
+      thisKabam.emit('started', { 'type': 'app' });
+      return thisKabam;
     } else if(method && typeof method !== 'number'){
       throw new Error('Function Kabam#start() accepts null, "app" or port number as arguments!');
     }
@@ -696,10 +659,19 @@ function KabamKernel(config) {
   this.usePlugin(require('./core/models/user'));
   this.usePlugin(require('./core/models/group'));
   this.usePlugin(require('./core/models/message'));
+  this.usePlugin(require('./core/passport'));
+  this.usePlugin(require('./core/strategies/facebook'));
+  this.usePlugin(require('./core/strategies/github'));
+  this.usePlugin(require('./core/strategies/google'));
+  this.usePlugin(require('./core/strategies/hash'));
+  this.usePlugin(require('./core/strategies/linkedin'));
+  this.usePlugin(require('./core/strategies/local'));
+  this.usePlugin(require('./core/strategies/twitter'));
   this.usePlugin(require('./core/app'));
   this.usePlugin(require('./core/socket-io'));
   this.usePlugin(require('./core/rate-limiter'));
   this.usePlugin(require('./core/toobusy'));
+  this.usePlugin(require('./core/api'));
 }
 
 util.inherits(KabamKernel, EventEmitter);
