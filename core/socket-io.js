@@ -80,7 +80,7 @@ exports.app = function(kernel){
       success: function (data, accept) {
 
         sessionStorage.get(data.sessionID, function (err, session) {
-          kernel.model.Users.findOneByApiKey(session.passport.user, function (err, user) {
+          kernel.model.User.findOneByApiKey(session.passport.user, function (err, user) {
             if (user) {
               data.user = user;
               accept(err, true);
