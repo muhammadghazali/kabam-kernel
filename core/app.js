@@ -144,7 +144,7 @@ exports.middleware = [
       }
 
       if (kabamkey) {
-        kernel.model.Users.findOneByApiKey(kabamkey, function (err, userFound) {
+        kernel.model.User.findOneByApiKey(kabamkey, function (err, userFound) {
           if (err) {
             throw err;
           }

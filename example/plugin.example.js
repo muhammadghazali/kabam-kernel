@@ -144,7 +144,7 @@ exports.model = {
     CatsSchema.index({
       nickname: 1
     });
-    return mongoose.model('cats', CatsSchema);
+    return CatsSchema;
   },
 
   'Dogs': function (mongoose, config) {
@@ -156,7 +156,7 @@ exports.model = {
       nickname: 1
     });
 
-    return mongoose.model('Dogs', DogsSchema);
+    return DogsSchema;
   }
 };
 

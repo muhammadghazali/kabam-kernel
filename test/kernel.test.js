@@ -26,7 +26,7 @@ describe('Kernel', function () {
       nickname: 1
     });
 
-    return kabam.mongoConnection.model('cats', CatsSchema);
+    return CatsSchema;
   };
 
   /*
@@ -112,7 +112,7 @@ describe('Kernel', function () {
     DogsSchema.index({
       nickname: 1
     });
-    return kabam.mongoConnection.model('dogs', DogsSchema);
+    return DogsSchema;
   };
 
 
@@ -121,10 +121,15 @@ describe('Kernel', function () {
 
     Kabam = kabamKernel(config);
 
-    Kabam.extendCore('sum', function (config) {
+    Kabam.extendCore('sum', function (/*config*/) {
       return function (a, b) {
         return a + b;
-      }
+      };
+    });
+    Kabam.extendCore(function(){
+      return {
+        sub: function(a, b){return a-b;}
+      };
     });
     Kabam.extendCore('SomeVar', 42);
 
@@ -186,12 +191,12 @@ describe('Kernel', function () {
 
     it('exposes mongoose model of users', function () {
       Kabam.model.User.should.be.type('function');
-      Kabam.model.Users.should.be.type('function');
+//      Kabam.model.Users.should.be.type('function');
     });
 
     it('exposes mongoose model of messages', function () {
       Kabam.model.Message.should.be.type('function');
-      Kabam.model.Messages.should.be.type('function');
+//      Kabam.model.Messages.should.be.type('function');
     });
 
     it('exposes an ExpressJS application', function () {
@@ -277,12 +282,12 @@ describe('Kernel', function () {
   });
 
   describe('#Kabam.extendCore()', function () {
-
-
     it('actually adds new functions to #Kabam', function () {
-      Kabam.shared.SomeVar.should.be.equal(42);
-      Kabam.shared.sum.should.be.type('function');
-      Kabam.shared.sum(2, 2).should.equal(4);
+      Kabam.SomeVar.should.be.equal(42);
+      Kabam.sum.should.be.type('function');
+      Kabam.sum(2, 2).should.equal(4);
+      Kabam.sub.should.be.type('function');
+      Kabam.sub(5, 3).should.equal(2);
     });
   });
 
@@ -403,8 +408,8 @@ describe('Kernel', function () {
     describe('extendCore from plugin', function () {
 
       it('it actually adds new functions to #Kabam.core', function () {
-        Kabam.unitTestPlugin.mul.should.be.type('function');
-        Kabam.unitTestPlugin.mul(3, 2).should.equal(6);
+        Kabam.mul.should.be.type('function');
+        Kabam.mul(3, 2).should.equal(6);
       });
     });
 

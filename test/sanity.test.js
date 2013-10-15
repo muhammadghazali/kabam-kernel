@@ -86,47 +86,47 @@ describe('sanity test', function () {
       (function () {
         var kabam = kabamKernel(config);
         kabam.extendCore('i am pineapple!');
-      }).should.throw('KabamKernel.extendCore requires argument of fieldName(string), and value - function(config){} or object!');
+      }).should.throw('KabamKernel.extendCore requires argument of fieldName(string), and value - function(config){} or function!');
     });
 
     it('throws proper error for KabamKernel.extendModel("i am pineapple!")', function () {
       (function () {
         var kabam = kabamKernel(config);
         kabam.extendModel('i am pineapple!');
-      }).should.throw('KabamKernel.extendModel requires arguments of string of "modelName" and function(core){...}');
+      }).should.throw('KabamKernel.extendModel requires arguments of string of "name" and function(core){...}');
     });
 
-    it('throws proper error for trying KabamKernel.extendModel("Users",function()), because  "Users" is reserved name', function () {
-      (function () {
-        var kabam = kabamKernel(config);
-        kabam.extendModel('Users', function () {
-        });
-      }).should.throw('Error extending model, "User(s)" and "Message(s)" are reserved name');
-    });
-
-    it('throws proper error for trying KabamKernel.extendModel("User",function()), because  "Users" is reserved name', function () {
-      (function () {
-        var Kabam = kabamKernel(config);
-        Kabam.extendModel('User', function () {
-        });
-      }).should.throw('Error extending model, "User(s)" and "Message(s)" are reserved name');
-    });
-
-    it('throws proper error for trying KabamKernel.extendModel("Message",function()), because  "Users" is reserved name', function () {
-      (function () {
-        var kabam = kabamKernel(config);
-        kabam.extendModel('User', function () {
-        });
-      }).should.throw('Error extending model, "User(s)" and "Message(s)" are reserved name');
-    });
-
-    it('throws proper error for trying KabamKernel.extendModel("Messages",function()), because  "Users" is reserved name', function () {
-      (function () {
-        var kabam = kabamKernel(config);
-        kabam.extendModel('User', function () {
-        });
-      }).should.throw('Error extending model, "User(s)" and "Message(s)" are reserved name');
-    });
+//    it('throws proper error for trying KabamKernel.extendModel("Users",function()), because  "Users" is reserved name', function () {
+//      (function () {
+//        var kabam = kabamKernel(config);
+//        kabam.extendModel('Users', function () {
+//        });
+//      }).should.throw('Error extending model, "User(s)" and "Message(s)" are reserved name');
+//    });
+//
+//    it('throws proper error for trying KabamKernel.extendModel("User",function()), because  "Users" is reserved name', function () {
+//      (function () {
+//        var Kabam = kabamKernel(config);
+//        Kabam.extendModel('User', function () {
+//        });
+//      }).should.throw('Error extending model, "User(s)" and "Message(s)" are reserved name');
+//    });
+//
+//    it('throws proper error for trying KabamKernel.extendModel("Message",function()), because  "Users" is reserved name', function () {
+//      (function () {
+//        var kabam = kabamKernel(config);
+//        kabam.extendModel('User', function () {
+//        });
+//      }).should.throw('Error extending model, "User(s)" and "Message(s)" are reserved name');
+//    });
+//
+//    it('throws proper error for trying KabamKernel.extendModel("Messages",function()), because  "Users" is reserved name', function () {
+//      (function () {
+//        var kabam = kabamKernel(config);
+//        kabam.extendModel('User', function () {
+//        });
+//      }).should.throw('Error extending model, "User(s)" and "Message(s)" are reserved name');
+//    });
 
     it('throws proper error for KabamKernel.extendApp("i am pineapple!");', function () {
       (function () {
