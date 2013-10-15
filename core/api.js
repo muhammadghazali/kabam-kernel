@@ -184,9 +184,7 @@ exports.routes = function(kernel){
     if(response.locals.flash && response.locals.flash.error){
       message = response.locals.flash.error;
     }
-    if (!request.user) {
-      request.flash('error', message || 'Unable to sign in to this site!');
-    }
+    request.flash('error', message || 'Unable to sign in to this site!');
     var r = request.session.redirectTo;
     request.session.redirectTo = null;
     response.redirect(r);

@@ -886,15 +886,25 @@ function factory(kabam) {
     var provider = profile.provider;
 
     // Technically it is possible to associate multiple accounts per provider, but for now we limit them to just one
-    if(Array.isArray(user.keychain) && user.keychain[provider] !== profile.id) {
+    if(user.keychain && user.keychain[provider] && user.keychain[provider] !== profile.id) {
       return done(null, false, {
-        message: 'You already have linked another ' + (provider.charAt(0).toUpperCase() + provider.slice(1)) + ' account'
+        message: 'You already have linked another ' + (provider.charAt(0).toUpperCase() + provider.slice(1)) + ' profile'
       });
     }
-    // just set keychain
-    user.setKeyChain(provider, profile.id, function (err) {
-      if (err) {return done(err);}
-      done(null, user, false);
+
+    this.findOneByKeychain(profile.provider, profile.id, function(err, _user){
+      if(err){return done(err);}
+      if(_user && !_user._id.equals(user._id)){
+        return done(null, false, {
+          message: 'Someone already linked this ' + (provider.charAt(0).toUpperCase() + provider.slice(1)) + ' profile. ' +
+            'Probably it was you but in another account'
+        });
+      }
+      // just set keychain
+      user.setKeyChain(provider, profile.id, function (err) {
+        if (err) {return done(err);}
+        done(null, user, false);
+      });
     });
   };
 
