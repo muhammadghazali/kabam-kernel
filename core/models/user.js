@@ -19,7 +19,7 @@ function rack() {
   return result;
 }
 
-exports.init = function (kabam) {
+function factory(kabam) {
   /**
    * @ngdoc function
    * @name User
@@ -274,7 +274,7 @@ exports.init = function (kabam) {
    * @description
    * Returns true, if user profile complete (has first and last names)
    */
-  // TODO: test me please
+    // TODO: test me please
   UserSchema.virtual('profileComplete').get(function () {
     return !!this.firstName && !!this.lastName;
   });
@@ -342,6 +342,7 @@ exports.init = function (kabam) {
   UserSchema.methods.invalidateSession = function (callback) {
     var newApiKey = sha512(rack());
     this.apiKey = newApiKey;
+    this.apiKeyCreatedAt = new Date();
     this.save(function (err) {
       callback(err, newApiKey);
     });
@@ -833,6 +834,7 @@ exports.init = function (kabam) {
    * Otherwise creates a new user.
    */
   UserSchema.statics.findAndLinkWithService = function(canCreate, profile, done){
+    var User = this;
     User.findOneByKeychain(profile.provider, profile.id, function(err, user){
       if(err) {return done(err);}
       // we found a user, return them.
@@ -879,20 +881,30 @@ exports.init = function (kabam) {
    */
   UserSchema.statics.linkWithService = function(user, profile, canCreate, done){
     // no user lets find them
-    if(!user) {return User.findAndLinkWithService(canCreate, profile, done);}
+    if(!user) {return this.findAndLinkWithService(canCreate, profile, done);}
 
     var provider = profile.provider;
 
     // Technically it is possible to associate multiple accounts per provider, but for now we limit them to just one
-    if(Array.isArray(user.keychain) && user.keychain[provider] !== profile.id) {
+    if(user.keychain && user.keychain[provider] && user.keychain[provider] !== profile.id) {
       return done(null, false, {
-        message: 'You already have linked another ' + (provider.charAt(0).toUpperCase() + provider.slice(1)) + ' account'
+        message: 'You already have linked another ' + (provider.charAt(0).toUpperCase() + provider.slice(1)) + ' profile'
       });
     }
-    // just set keychain
-    user.setKeyChain(provider, profile.id, function (err) {
-      if (err) {return done(err);}
-      done(null, user, false);
+
+    this.findOneByKeychain(profile.provider, profile.id, function(err, _user){
+      if(err){return done(err);}
+      if(_user && !_user._id.equals(user._id)){
+        return done(null, false, {
+          message: 'Someone already linked this ' + (provider.charAt(0).toUpperCase() + provider.slice(1)) + ' profile. ' +
+            'Probably it was you but in another account'
+        });
+      }
+      // just set keychain
+      user.setKeyChain(provider, profile.id, function (err) {
+        if (err) {return done(err);}
+        done(null, user, false);
+      });
     });
   };
 
@@ -1135,13 +1147,14 @@ exports.init = function (kabam) {
    * User1.sendMessage(User2,'hello!',function(err){if(err) throw err;});
    * //User1 sends message to User2
    * ```
-   * @param {User/string} to - reciever of message
+   * @param {User/string} to - receiver of message
    * @param {string} title - title of message
    * @param {string} message - text of message
    * @param {function} callback -function to be called on message delivery
    */
   UserSchema.methods.sendMessage = function (to, title, message, callback) {
-    var thisUser = this;
+    var User = this.constructor,
+      _this = this;
     message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
     title = sanitaze(title).xss(true); //https://npmjs.org/package/validator - see xss
     async.waterfall([
@@ -1160,8 +1173,8 @@ exports.init = function (kabam) {
         kabam.model.Message.create({
           'to': userFound._id,
           'toProfile': userFound._id,
-          'from': thisUser._id,
-          'fromProfile': thisUser._id,
+          'from': _this._id,
+          'fromProfile': _this._id,
           'title': title,
           'message': message
         }, function (err, messageCreated) {
@@ -1175,7 +1188,7 @@ exports.init = function (kabam) {
       function (to, messageCreated, cb) {
         kabam.emit('notify:pm', {
           'user': to,
-          'from': thisUser,
+          'from': _this,
           'title': messageCreated.title,
           'message': messageCreated.message
         });
@@ -1186,7 +1199,7 @@ exports.init = function (kabam) {
 
   /**
    * @ngdoc function
-   * @name User.recieveMessage
+   * @name User.receiveMessage
    * @description
    * Sends private message to this user from other one
    * @example
@@ -1194,13 +1207,14 @@ exports.init = function (kabam) {
    * User1.sendMessage(User2,'hello!',function(err){if(err) throw err;});
    * //User1 sends message to User2
    * ```
-   * @param {User/string} from - reciever of message
+   * @param {User/string} from - receiver of message
    * @param {string} title - title of message
    * @param {string} message - text of message
    * @param {function} callback -function to be called on message delivery
    */
-  UserSchema.methods.recieveMessage = function (from, title,message, callback) {
-    var thisUser = this;
+  UserSchema.methods.receiveMessage = function (from, title,message, callback) {
+    var User = this.constructor,
+      _this = this;
     message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
     title = sanitaze(title).xss(true); //https://npmjs.org/package/validator - see xss
     async.waterfall([
@@ -1219,8 +1233,8 @@ exports.init = function (kabam) {
         kabam.model.Message.create({
           'from': userFound._id,
           'fromProfile': userFound._id,
-          'to': thisUser._id,
-          'toProfile': thisUser._id,
+          'to': _this._id,
+          'toProfile': _this._id,
           'title':title,
           'message': message
         }, function (err, messageCreated) {
@@ -1233,7 +1247,7 @@ exports.init = function (kabam) {
       },
       function (from, messageCreated, cb) {
         kabam.emit('notify:pm', {
-          'user': thisUser,
+          'user': _this,
           'from': from,
           'title': title,
           'message': messageCreated.message
@@ -1273,7 +1287,8 @@ exports.init = function (kabam) {
    * @param {function} callback -function(err,messages) to be called with message object
    */
   UserSchema.methods.getDialog = function (usernameOrUser, mesgLimit, mesgOffset, callback) {
-    var thisUser = this;
+    var User = this.constructor,
+      _this = this;
     async.waterfall([
       function (cb) {
         if (typeof usernameOrUser === 'string') {
@@ -1291,8 +1306,8 @@ exports.init = function (kabam) {
           kabam.model.Message
             .find({
               $or: [
-                {'to': thisUser._id, 'from': userFound._id},
-                {'from': thisUser._id, 'to': userFound._id}
+                {'to': _this._id, 'from': userFound._id},
+                {'from': _this._id, 'to': userFound._id}
               ]
             })
             .populate('fromProfile')
@@ -1401,14 +1416,13 @@ exports.init = function (kabam) {
     });
   };
 
-  var User = kabam.mongoConnection.model('User', UserSchema);
+  return UserSchema;
+}
 
-  return {
-    'User': User,
-    'Users': User
-  };
+exports.name = 'kabam-core-models-user';
+exports.model = {
+  User: factory
 };
-
 
 /**
  * @ngdoc function

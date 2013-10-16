@@ -1,12 +1,9 @@
 'use strict';
 var EventEmitter = require('events').EventEmitter,
-  url = require('url'),
   util = require('util'),
-  appManager = require('./lib/appManager.js'),
-  MongooseManager = require('./lib/MongooseManager.js'),
-  configManager = require('./lib/configManager.js'),
-  mongooseManager = new MongooseManager(),
-  redisManager = require('./lib/redisManager.js'),
+  appBuilder = require('./lib/app-builder'),
+  configBuilder = require('./lib/config-builder.js'),
+  // jshint unused: false
   colors = require('colors');
 
 /**
@@ -21,7 +18,7 @@ function KabamKernel(config) {
 
   var extendCoreFunctions = [],//privileged field
     extendAppFunctions = [],
-    additionalModels = [],
+    additionalModels = {},
     additionalStrategies = [],
     prepared = false,
     extendMiddlewareFunctions = [],
@@ -39,7 +36,7 @@ function KabamKernel(config) {
    * You can call this function multiple times. Later this field/method can be called by `kabam.nameSpaceName.fieldName`. `nameSpaceName`
    * can be ommited, default value is `shared`
    * @param {string} fieldName - field name
-   * @param {function/object/string/number/array} factoryFunctionOrObject  function(config),
+   * @param {function/object/string/number/array} factory  function(config),
    * what is called to return value assigned to fieldName  config is the kabam.config object, or just a object, to be setted as kabam public field
    * @param {string} namespace  namespace to bind this field. default is 'shared;
    * @example
@@ -67,27 +64,35 @@ function KabamKernel(config) {
    *  ```
    * @returns {kabamKernel} kabamKernel object
    */
-  this.extendCore = function (fieldName, factoryFunctionOrObject, namespace) {
+  this.extendCore = function (fieldName, factory) {
     if (prepared) {
       throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
-    } else {
-      if (!namespace) {
-        namespace = 'shared';
-      }
-
-      if (typeof fieldName === 'string' && factoryFunctionOrObject !== undefined) {
-        if (typeof factoryFunctionOrObject === 'function') {
-          extendCoreFunctions.push({'field': fieldName, 'factoryFunction': factoryFunctionOrObject, 'namespace': namespace});
-        } else {
-          extendCoreFunctions.push({'field': fieldName, 'factoryFunction': function () {
-            return factoryFunctionOrObject;
-          }, 'namespace': namespace});
-        }
-      } else {
-        throw new Error('KabamKernel.extendCore requires argument of fieldName(string), and value - function(config){} or object!');
-      }
-      return this;
     }
+    var extension, value;
+    if(typeof fieldName === 'function'){
+      factory = fieldName;
+      fieldName = null;
+    }
+
+    if(!factory){
+      throw new Error('KabamKernel.extendCore requires argument of fieldName(string), ' +
+                      'and value - function(config){} or function!');
+    }
+
+    if (typeof factory !== 'function') {
+      value = factory;
+      factory = function(){return value;};
+    }
+
+    if(fieldName){
+      extension = {'field': fieldName, 'factory': factory};
+    } else {
+      extension = factory;
+    }
+
+    extendCoreFunctions.push(extension);
+
+    return this;
   };
 
   /**
@@ -95,10 +100,10 @@ function KabamKernel(config) {
    * @name kabamKernel.extendModel
    * @description
    * Perform dependency injection of mongoose models to kabam.model and request.model.
-   * When you call `extendModel(modelName,function(kabamKernel){...})` you get all the environment created after calling
+   * When you call `extendModel(name,function(kabamKernel){...})` you get all the environment created after calling
    * `extendCore(function(core){...})`.
-   * @param {string} modelName - field name, "Users" is reserved field name!
-   * @param {function} modelFunction - function(kabamKernel) - the first argument is mongoose object, the second one is the
+   * @param {string} name - field name, "Users" is reserved field name!
+   * @param {function} factory - function(kabamKernel) - the first argument is mongoose object, the second one is the
    * kabam.config object
    * @example
    * ```javascript
@@ -108,27 +113,23 @@ function KabamKernel(config) {
    *         'nickname': String
    *        });
    *
-   *       return kabam.mongoConnection.model('cats', CatsSchema);
+   *       return CatsSchema;
    *     });
    *
    * ```
    * @returns {kabamKernel} kabamKernel object
    */
-  this.extendModel = function (modelName, modelFunction) {
+  this.extendModel = function (name, factory) {
     if (prepared) {
       throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
-    } else {
-      if (modelName === 'Users' || modelName === 'User' || modelName === 'Message' || modelName === 'Messages') {
-        throw new Error('Error extending model, "User(s)" and "Message(s)" are reserved name');
-      } else {
-        if (typeof modelName === 'string' && typeof modelFunction === 'function') {
-          additionalModels.push({'name': modelName, 'initFunction': modelFunction});
-        } else {
-          throw new Error('KabamKernel.extendModel requires arguments of string of "modelName" and function(core){...}');
-        }
-      }
-      return this;
     }
+
+    if (typeof name === 'string' && typeof factory === 'function') {
+      additionalModels[name] = factory;
+    } else {
+      throw new Error('KabamKernel.extendModel requires arguments of string of "name" and function(core){...}');
+    }
+    return this;
   };
 
   /**
@@ -136,56 +137,36 @@ function KabamKernel(config) {
    * @name kabamKernel.extendStrategy
    * @description
    * Loads new passportjs strategies from object
-   * @param {object} strategyObject Passport's strategy object
+   * @param {function} factory - function returning Passport's strategy object
    * @returns {kabamKernel} kabamKernel object
    * @url https://github.com/mykabam/kabam-kernel/blob/master/lib/strategies/github.js
    * @example
    * ```javascript
    *
-   * kabam.extendStrategy({
-   * 'strategy':function (core) {
-   * return new LinkedInStrategy({
-   *    consumerKey: core.config.passport.LINKEDIN_API_KEY,
-   *    consumerSecret: core.config.passport.LINKEDIN_SECRET_KEY,
-   *    callbackURL: core.config.HOST_URL + 'auth/linkedin/callback'
-   *    }, function (token, tokenSecret, profile, done) {
-   *       var email = profile.emails[0].value;
-   *      if (email) {
-   *        core.model.Users.linkEmailOnlyProfile(email,done);
-   *      } else {
-   *        return done(new Error('There is something strange instead of user profile'));
-   *      }
+   * kabam.extendStrategy(function (core) {
+   *   return new LinkedInStrategy({
+   *     consumerKey: core.config.passport.LINKEDIN_API_KEY,
+   *     consumerSecret: core.config.passport.LINKEDIN_SECRET_KEY,
+   *     callbackURL: core.config.HOST_URL + 'auth/linkedin/callback'
+   *   }, function (token, tokenSecret, profile, done) {
+   *     var email = profile.emails[0].value;
+   *     if (email) {
+   *       core.model.User.linkEmailOnlyProfile(email,done);
+   *     } else {
+   *       return done(new Error('There is something strange instead of user profile'));
+   *     }
    *  });
-   * },
-   * 'routes':function (passport, core) {
-   *     core.app.get('/auth/linkedin', passport.authenticate('linkedin'),
-   *        function (req, res) {
-   *
-   *     });
-   *     core.app.get('/auth/linkedin/callback', passport.authenticate('linkedin', { failureRedirect: '/' }),
-   *       function (req, res) {
-   *         res.redirect('/');
-   *       });
-   *     };
-   *  });
+   * });
    * ```
    */
-  this.extendStrategy = function (strategyObject) {
+  this.extendStrategy = function (factory) {
     if (prepared) {
       throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
-    } else {
-      if (typeof strategyObject !== 'object') {
-        throw new Error('kabam.extendStrategy requires strategyObject to be an object');
-      }
-      if (typeof strategyObject.strategy !== 'function') {
-        throw new Error('kabam.extendStrategy requires strategyObject.strategy to be a proper function!');
-      }
-      if (typeof strategyObject.routes !== 'function') {
-        throw new Error('kabam.extendStrategy requires strategyObject.routes to be a proper function!');
-      }
-      additionalStrategies.push(strategyObject);
-      return this;
     }
+    if (typeof factory !== 'function') {
+      throw new Error('kabam.extendStrategy requires and argument to be a function returning strategy object!');
+    }
+    additionalStrategies.push(factory);
   };
 
   /**
@@ -459,6 +440,9 @@ function KabamKernel(config) {
           }
         }
       }
+      if (typeof pluginToBeInstalled.core === 'function') {
+        this.extendCore(pluginToBeInstalled.core);
+      }
       if (typeof pluginToBeInstalled.model === 'object') {
         for (x in pluginToBeInstalled.model) {
           if (pluginToBeInstalled.model.hasOwnProperty(x)) {
@@ -467,11 +451,11 @@ function KabamKernel(config) {
         }
       }
 
-      if (typeof pluginToBeInstalled.strategy === 'object') {
-        if (typeof pluginToBeInstalled.strategy.strategy === 'function' && typeof pluginToBeInstalled.strategy.routes === 'function') {
+      if (pluginToBeInstalled.strategy){
+        if(typeof pluginToBeInstalled.strategy === 'function') {
           this.extendStrategy(pluginToBeInstalled.strategy);
         } else {
-          throw new Error('plugin.strategy has wrong syntax! strategy and routes have to be functions!');
+          throw new Error('plugin.strategy has be function returning strategy object!');
         }
       }
 
@@ -570,37 +554,31 @@ function KabamKernel(config) {
 
     // rewriting all port configuration, port specified in start has highest priority
     if(typeof method === 'number'){
-      this.config.PORT = method
+      this.config.PORT = method;
     }
 
     // creating config
-    this.config = configManager(this.config || {});
+    this.config = configBuilder(this.config || {});
 
-    //injecting redis
-    thisKabam.redisClient = redisManager.create(thisKabam.config.REDIS);
-
-    //injecting mongoose and additional models
-    thisKabam.model = mongooseManager.injectModels(thisKabam, additionalModels);
-
-    extendCoreFunctions.map(function (settingsFunction) {
-
-      if (thisKabam[settingsFunction.namespace] === undefined) {
-        thisKabam[settingsFunction.namespace] = {};
-      }
-      if (thisKabam[settingsFunction.namespace][settingsFunction.field] === undefined) {
-        thisKabam[settingsFunction.namespace][settingsFunction.field] = settingsFunction.factoryFunction(thisKabam.config);
-      } else {
-        throw new Error('Kernel namespace collision - namespace "' + settingsFunction.namespace + '" already have field of ' + settingsFunction.field);
-      }
-
-    });
+    // dependencies used by some plugins
+    this.extensions = {
+      models: additionalModels,
+      strategies: additionalStrategies
+    };
 
     //initialize expressJS application
-    thisKabam.app = appManager(thisKabam, extendAppFunctions, additionalStrategies, extendMiddlewareFunctions, extendRoutesFunctions, catchAllFunction);
+    thisKabam.app = appBuilder(
+      thisKabam,
+      extendCoreFunctions,
+      extendAppFunctions,
+      extendMiddlewareFunctions,
+      extendRoutesFunctions,
+      catchAllFunction
+    );
 
     if (method === 'app') {
-        thisKabam.emit('started', { 'type': 'app' });
-        return thisKabam;
+      thisKabam.emit('started', { 'type': 'app' });
+      return thisKabam;
     } else if(method && typeof method !== 'number'){
       throw new Error('Function Kabam#start() accepts null, "app" or port number as arguments!');
     }
@@ -674,6 +652,26 @@ function KabamKernel(config) {
       return false;
     }
   };
+
+  // default plugins
+  this.usePlugin(require('./core/redis-client'));
+  this.usePlugin(require('./core/mongoose'));
+  this.usePlugin(require('./core/models/user'));
+  this.usePlugin(require('./core/models/group'));
+  this.usePlugin(require('./core/models/message'));
+  this.usePlugin(require('./core/passport'));
+  this.usePlugin(require('./core/strategies/facebook'));
+  this.usePlugin(require('./core/strategies/github'));
+  this.usePlugin(require('./core/strategies/google'));
+  this.usePlugin(require('./core/strategies/hash'));
+  this.usePlugin(require('./core/strategies/linkedin'));
+  this.usePlugin(require('./core/strategies/local'));
+  this.usePlugin(require('./core/strategies/twitter'));
+  this.usePlugin(require('./core/app'));
+  this.usePlugin(require('./core/socket-io'));
+  this.usePlugin(require('./core/rate-limiter'));
+  this.usePlugin(require('./core/toobusy'));
+  this.usePlugin(require('./core/api'));
 }
 
 util.inherits(KabamKernel, EventEmitter);
@@ -718,21 +716,6 @@ KabamKernel.prototype.injectEmit = function (object) {
   };
 };
 
-/**
- * @ngdoc function
- * @name kabamKernel.createRedisClient
- * @description
- * Create new redis client
- *
- * Use this function with great caution! Because usually redis-database-as-a-service providers have
- * strict connection limit!!! and every one redis client created like this consumes one connection!
- * Usually, Kabam needs only one redis client connection
- * BTW, redis is NOT MySQL - we can't increase speed with connection pooling!
- * @returns {RedisClient} redis client
- */
-KabamKernel.prototype.createRedisClient = function () {
-  return redisManager.create(this.config.redis);
-};
 
 /**
  * @ngdoc function
@@ -777,6 +760,7 @@ KabamKernel.create = function (config) {
  * Stops kabamKernel instance - close redis and mongo connections.
  */
 KabamKernel.prototype.stop = function () {
+  this.emit('stop');
   this.redisClient.end();
   this.mongoose.connection.close();
   this.mongoose.disconnect();

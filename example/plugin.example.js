@@ -144,7 +144,7 @@ exports.model = {
     CatsSchema.index({
       nickname: 1
     });
-    return mongoose.model('cats', CatsSchema);
+    return CatsSchema;
   },
 
   'Dogs': function (mongoose, config) {
@@ -156,7 +156,7 @@ exports.model = {
       nickname: 1
     });
 
-    return mongoose.model('Dogs', DogsSchema);
+    return DogsSchema;
   }
 };
 
@@ -180,32 +180,22 @@ exports.app = function (kabam) {
 var LinkedInStrategy = require('passport-linkedin').Strategy;
 
 //sorry, only one(!) passportJS strategy per plugin!
-exports.strategy = {
-  'strategy': function (kabam) {
-    return new LinkedInStrategy({
-      consumerKey: kabam.config.passport.LINKEDIN_API_KEY,
-      consumerSecret: kabam.config.passport.LINKEDIN_SECRET_KEY,
-      callbackURL: kabam.config.hostUrl + 'auth/linkedin/callback'
-    }, function (token, tokenSecret, profile, done) {
-      console.log('==============');
-      console.log(profile);
-      console.log('==============');
-      var email = profile.emails[0].value;
-      if (email) {
-        kabam.model.Users.linkEmailOnlyProfile(email, done);
-      } else {
-        return done(new Error('There is something strange instead of user profile'));
-      }
-    });
-  },
-  'routes': function (passport, core) {
-    core.app.get('/auth/linkedin', passport.authenticate('linkedin'), function (req, res) {
-    });
-    core.app.get('/auth/linkedin/callback', passport.authenticate('linkedin', { failureRedirect: '/' }),
-      function (req, res) {
-        res.redirect('/');
-      });
-  }
+exports.strategy = function (kabam) {
+  return new LinkedInStrategy({
+    consumerKey: kabam.config.passport.LINKEDIN_API_KEY,
+    consumerSecret: kabam.config.passport.LINKEDIN_SECRET_KEY,
+    callbackURL: kabam.config.hostUrl + 'auth/linkedin/callback'
+  }, function (token, tokenSecret, profile, done) {
+    console.log('==============');
+    console.log(profile);
+    console.log('==============');
+    var email = profile.emails[0].value;
+    if (email) {
+      kabam.model.User.linkEmailOnlyProfile(email, done);
+    } else {
+      return done(new Error('There is something strange instead of user profile'));
+    }
+  });
 };
 
 
@@ -318,6 +308,12 @@ exports.routes = function(kabam){
       response.json(dogs);
     });
   });
+  kabam.app.get('/auth/linkedin', kabam.passport.authenticate('linkedin'), function (req, res) {
+  });
+  kabam.app.get('/auth/linkedin/callback', kabam.passport.authenticate('linkedin', { failureRedirect: '/' }),
+    function (req, res) {
+      res.redirect('/');
+    });
 };
 
 /**

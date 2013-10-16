@@ -1,8 +1,17 @@
+'use strict';
+
 var
   GitHubStrategy = require('passport-github').Strategy,
   linkOAuthProfile = require('./helpers').linkOAuthProfile;
 
+
+exports.name = 'kabam-core-strategies-github';
+
 exports.strategy = function (core) {
+  // TODO: move to config section
+  if (!core.config.PASSPORT || !core.config.PASSPORT.GITHUB_CLIENT_ID || !core.config.PASSPORT.GITHUB_CLIENT_SECRET){
+    return;
+  }
   return new GitHubStrategy({
     clientID: core.config.PASSPORT.GITHUB_CLIENT_ID,
     clientSecret: core.config.PASSPORT.GITHUB_CLIENT_SECRET,
@@ -16,11 +25,17 @@ exports.strategy = function (core) {
   });
 };
 
-
-exports.routes = function (passport, core) {
-  core.app.get('/auth/github', passport.authenticate('github'));
-  core.app.get('/auth/github/callback', passport.authenticate('github', {
+exports.routes = function (core) {
+  // TODO: move to config section
+  if (!core.config.PASSPORT || !core.config.PASSPORT.GITHUB_CLIENT_ID && !core.config.PASSPORT.GITHUB_CLIENT_SECRET){
+    return;
+  }
+  core.app.get('/auth/github', core.passport.authenticate('github'));
+  core.app.get('/auth/github/callback', core.passport.authenticate('github', {
     successRedirect: '/auth/success',
     failureRedirect: '/auth/failure'
   }));
 };
+
+
+

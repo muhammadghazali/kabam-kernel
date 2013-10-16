@@ -188,13 +188,14 @@ describe('User model OAuth methods', function(){
           User.linkWithService(user, profile, false, function(err, user, created){
             if (err) return done(err);
             should.exist(user);
+            created.should.have.type('boolean');
             //noinspection BadExpressionStatementJS
             created.should.not.be.true;
             done();
           });
         });
       });
-      it('should link accounts if user don\'t have the same keychain', function(done){
+      it('should link accounts if user doesn\'t have the same keychain', function(done){
         User.signUpWithService('john@doe.com', {id: 123, provider: 'github'}, function(err, user){
           if (err) return  done(err);
           var profile = {id: 1, provider: 'facebook', emails: [
@@ -225,6 +226,23 @@ describe('User model OAuth methods', function(){
             created.should.not.be.true;
             user.should.have.property('email', 'john@doe.com');
             done();
+          });
+        });
+      });
+      it('should throw error if there is a user with the same keychain', function(done){
+        User.signUpWithService('john@doe.com', {id: 123, provider: 'github'}, function(err/*, user*/){
+          if (err) return  done(err);
+          User.signUpWithService('john@malkovich.com', {id: 321, provider: 'facebook'}, function(err, user){
+            if (err) return  done(err);
+            // trying to lik to the second user the same keychain as for the first user
+            User.linkWithService(user, {id: 123, provider: 'github'}, false, function(err, user, info){
+              if (err) return done(err);
+              should.exist(user);
+              info.should.have.type('object');
+              info.should.have.property('message');
+              should(info.message.indexOf('Someone already linked this Github account') !== -1);
+              done();
+            });
           });
         });
       });

@@ -2,8 +2,12 @@ var
   LinkedInStrategy = require('passport-linkedin-oauth2').Strategy,
   linkOAuthProfile = require('./helpers').linkOAuthProfile;
 
+exports.name = 'kabam-core-strategies-linkedin';
 
 exports.strategy = function (core) {
+  if (!core.config.PASSPORT || !core.config.PASSPORT.LINKEDIN_API_KEY || !core.config.PASSPORT.LINKEDIN_SECRET_KEY){
+    return;
+  }
   return new LinkedInStrategy({
     clientID: core.config.PASSPORT.LINKEDIN_API_KEY,
     clientSecret: core.config.PASSPORT.LINKEDIN_SECRET_KEY,
@@ -16,9 +20,12 @@ exports.strategy = function (core) {
   });
 };
 
-exports.routes = function (passport, core) {
-  core.app.get('/auth/linkedin', passport.authenticate('linkedin', {state: 'SOME_STATE'}));
-  core.app.get('/auth/linkedin/callback', passport.authenticate('linkedin', {
+exports.routes = function (core) {
+  if (!core.config.PASSPORT || !core.config.PASSPORT.LINKEDIN_API_KEY || !core.config.PASSPORT.LINKEDIN_SECRET_KEY){
+    return;
+  }
+  core.app.get('/auth/linkedin', core.passport.authenticate('linkedin', {state: 'SOME_STATE'}));
+  core.app.get('/auth/linkedin/callback', core.passport.authenticate('linkedin', {
     successRedirect: '/auth/success',
     failureRedirect: '/auth/failure'
   }));

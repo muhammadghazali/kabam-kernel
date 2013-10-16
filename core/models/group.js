@@ -3,8 +3,8 @@ var async = require('async'),
   slugify2 = require('slugify2'),
   sanitaze = require('validator').sanitize; //used for dealing with xss injections in title
 
-exports.name = 'group';
-exports.initFunction = function (kabam) {
+
+function factory(kabam) {
   var groupSchema = new kabam.mongoose.Schema({
       'name': {
         type: String,
@@ -58,8 +58,9 @@ exports.initFunction = function (kabam) {
 //        console.log(member.user.id);
 //        console.log(user._id);
         if (typeof member.user._id === 'undefined') {
-          if (member.user.toString() == user._id.toString())
+          if (member.user.toString() === user._id.toString()){
             role = member.role;
+          }
         } else {
           if (member.user._id.equals(user._id)) {
             role = member.role;
@@ -81,7 +82,8 @@ exports.initFunction = function (kabam) {
    */
 
   groupSchema.methods.checkRights = function (user, callback) {
-    var thisGroup = this;
+    var Group = this.constructor,
+      _this = this;
     if (!user) {
       callback(null, 'visitor');//non authorized user is visitor
       return;
@@ -104,8 +106,8 @@ exports.initFunction = function (kabam) {
 
     async.parallel({
       'inSchool': function (cb) {
-        if (thisGroup.schoolId) {
-          Groups.findOne({'_id': thisGroup.schoolId}, function (err, schoolFound) {
+        if (_this.schoolId) {
+          Group.findOne({'_id': _this.schoolId}, function (err, schoolFound) {
             cb(err, schoolFound.findRoleInThisGroup(user));
           });
         } else {
@@ -113,8 +115,8 @@ exports.initFunction = function (kabam) {
         }
       },
       'inCourse': function (cb) {
-        if (thisGroup.courseId) {
-          Groups.findOne({'_id': thisGroup.courseId}, function (err, courseFound) {
+        if (_this.courseId) {
+          Group.findOne({'_id': _this.courseId}, function (err, courseFound) {
             cb(err, courseFound.findRoleInThisGroup(user));
           });
         } else {
@@ -122,17 +124,17 @@ exports.initFunction = function (kabam) {
         }
       },
       'inThisGroup': function (cb) {
-        cb(null, thisGroup.findRoleInThisGroup(user));
+        cb(null, _this.findRoleInThisGroup(user));
       }
     }, function (err, roles) {
       //school
-      if (thisGroup.tier === 1) {
+      if (_this.tier === 1) {
         callback(err, roles.inThisGroup);
       }
 
       //for course // association
       //if user is admin of school, he is admin of every course of school
-      if (thisGroup.tier === 2) {
+      if (_this.tier === 2) {
         if (roles.inSchool === 'admin' || roles.inThisGroup === 'admin') {
           callback(err, 'admin');
         } else {
@@ -142,7 +144,7 @@ exports.initFunction = function (kabam) {
 
       //for students group
       //if user is admin of school/course, he is admin of every in course group
-      if (thisGroup.tier === 3) {
+      if (_this.tier === 3) {
         if (roles.inSchool === 'admin' || roles.inCourse === 'admin' || roles.inThisGroup === 'admin') {
           callback(err, 'admin');
         } else {
@@ -237,7 +239,7 @@ exports.initFunction = function (kabam) {
     async.parallel({
       'idInGroup': function (cb) {
         for (i = 0; i < thisGroup.members.length; i = i + 1) {
-          if (thisGroup.members[i].user.toString() == user._id.toString()) {//we do not populate users here, so it works like it...
+          if (thisGroup.members[i].user.toString() === user._id.toString()) {//we do not populate users here, so it works like it...
             thisGroup.members.splice(i, 1);
             break;
           }
@@ -246,7 +248,7 @@ exports.initFunction = function (kabam) {
       },
       'idInUser': function (cb) {
         for (i = 0; i < user.groups.length; i = i + 1) {
-          if (user.groups[i].toString() == thisGroup._id.toString()) {//we do not populate groups here, so it works like it...
+          if (user.groups[i].toString() === thisGroup._id.toString()) {//we do not populate groups here, so it works like it...
             user.groups.splice(i, 1);
             break;
           }
@@ -264,12 +266,13 @@ exports.initFunction = function (kabam) {
    * Get group parent with respect to group tier
    */
   groupSchema.methods.getParent = function (callback) {
+    var Group = this.constructor;
     switch (this.tier) {
     case 2:
-      Groups.findOne({'_id': this.schoolId, tier: 1}, callback);
+      Group.findOne({'_id': this.schoolId, tier: 1}, callback);
       break;
     case 3:
-      Groups.findOne({'_id': this.courseId, tier: 2}, callback);
+      Group.findOne({'_id': this.courseId, tier: 2}, callback);
       break;
     default:
       callback(null, null);
@@ -284,12 +287,13 @@ exports.initFunction = function (kabam) {
    * Get group children with respect to group tier
    */
   groupSchema.methods.getChildren = function (callback) {
+    var Group = this.constructor;
     switch (this.tier) {
     case 1:
-      Groups.find({'schoolId': this._id, tier: 2}, callback);
+      Group.find({'schoolId': this._id, tier: 2}, callback);
       break;
     case 2:
-      Groups.find({'courseId': this._id, tier: 3}, callback);
+      Group.find({'courseId': this._id, tier: 3}, callback);
       break;
     default:
       callback(null, null);
@@ -423,9 +427,10 @@ exports.initFunction = function (kabam) {
    * Creates child group for current group. Empty, without members
    */
   groupSchema.methods.createChildGroup = function (title, callback) {
+    var Group = this.constructor;
     var thisGroup = this;
     if (thisGroup.tier < 3) {
-      Groups.create({
+      Group.create({
         'title': sanitaze(title).xss(),
         'uri': slugify2(title), //it is sanitazed... i think
         'tier': (thisGroup.tier - 1),
@@ -484,6 +489,10 @@ exports.initFunction = function (kabam) {
     });
   };
 
-  var Groups = kabam.mongoConnection.model('Group', groupSchema);
-  return Groups;
+  return groupSchema;
+}
+
+exports.name = 'kabam-core-models-group';
+exports.model = {
+  Group: factory
 };

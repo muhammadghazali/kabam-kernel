@@ -25,45 +25,45 @@ describe('Users model', function () {
 
     describe('Testing kabam_core mongoose model of users:', function () {
       it('exposes function find', function () {
-        kabam.model.User.find.should.be.a('function');
+        kabam.model.User.find.should.be.type('function');
       });
       it('exposes function findOne', function () {
-        kabam.model.User.findOne.should.be.a('function');
+        kabam.model.User.findOne.should.be.type('function');
       });
       it('exposes function findOneByLoginOrEmail', function () {
-        kabam.model.User.findOneByLoginOrEmail.should.be.a('function');
+        kabam.model.User.findOneByLoginOrEmail.should.be.type('function');
       });
       it('exposes function findOneByApiKey', function () {
-        kabam.model.User.findOneByApiKey.should.be.a('function');
+        kabam.model.User.findOneByApiKey.should.be.type('function');
       });
       it('exposes function count', function () {
-        kabam.model.User.count.should.be.a('function');
+        kabam.model.User.count.should.be.type('function');
       });
       it('exposes function remove', function () {
-        kabam.model.User.remove.should.be.a('function');
+        kabam.model.User.remove.should.be.type('function');
       });
       it('exposes function create', function () {
-        kabam.model.User.create.should.be.a('function');
+        kabam.model.User.create.should.be.type('function');
       });
 
       it('exposes function getByRole', function () {
-        kabam.model.User.getByRole.should.be.a('function');
+        kabam.model.User.getByRole.should.be.type('function');
       });
 
       it('exposes function signUp', function () {
-        kabam.model.User.signUp.should.be.a('function');
+        kabam.model.User.signUp.should.be.type('function');
       });
 
       it('exposes function findOneByApiKeyAndVerify', function () {
-        kabam.model.User.findOneByApiKeyAndVerify.should.be.a('function');
+        kabam.model.User.findOneByApiKeyAndVerify.should.be.type('function');
       });
 
       it('exposes function findOneByApiKeyAndResetPassword', function () {
-        kabam.model.User.findOneByApiKeyAndResetPassword.should.be.a('function');
+        kabam.model.User.findOneByApiKeyAndResetPassword.should.be.type('function');
       });
 
       it('exposes function linkEmailOnlyProfile', function () {
-        kabam.model.User.linkEmailOnlyProfile.should.be.a('function');
+        kabam.model.User.linkEmailOnlyProfile.should.be.type('function');
       });
 
 
@@ -814,19 +814,19 @@ describe('Users model', function () {
         });
 
         it('user instance have functions needed', function () {
-          user.verifyPassword.should.be.a('function');
-          user.setPassword.should.be.a('function');
-          user.invalidateSession.should.be.a('function');
+          user.verifyPassword.should.be.type('function');
+          user.setPassword.should.be.type('function');
+          user.invalidateSession.should.be.type('function');
 
-          user.grantRole.should.be.a('function');
-          user.hasRole.should.be.a('function');
-          user.revokeRole.should.be.a('function');
+          user.grantRole.should.be.type('function');
+          user.hasRole.should.be.type('function');
+          user.revokeRole.should.be.type('function');
 
-          user.notify.should.be.a('function');
-          user.getGravatar.should.be.a('function');
+          user.notify.should.be.type('function');
+          user.getGravatar.should.be.type('function');
 
-          user.canRead.should.be.a('function');
-          user.canWrite.should.be.a('function');
+          user.canRead.should.be.type('function');
+          user.canWrite.should.be.type('function');
         });
 
         it('user instance creates a proper gravatar url', function () {
@@ -1117,10 +1117,10 @@ describe('Users model', function () {
 
   describe('user model have to be compatible with kabam-plugin-test', function () {
     it('it exposes getForUser and canCreate for Active Record', function () {
-      kabam.model.User.getForUser.should.be.a('function');
-      kabam.model.Users.getForUser.should.be.a('function');
-      kabam.model.User.canCreate.should.be.a('function');
-      kabam.model.Users.canCreate.should.be.a('function');
+      kabam.model.User.getForUser.should.be.type('function');
+//      kabam.model.Users.getForUser.should.be.type('function');
+      kabam.model.User.canCreate.should.be.type('function');
+//      kabam.model.Users.canCreate.should.be.type('function');
     });
 
     describe('getForUser and canCreate works for root', function () {
@@ -1149,22 +1149,22 @@ describe('Users model', function () {
         users.should.be.an.instanceOf(Array);
         users.length.should.be.above(0);
         users.map(function (userToTest) {
-          userToTest.username.should.be.a('string');
-          userToTest.email.should.be.a('string');
+          userToTest.username.should.be.type('string');
+          userToTest.email.should.be.type('string');
           userToTest._id.should.match(/[a-z0-9A-Z]+/);
-          userToTest.verifyPassword.should.be.a('function');
-          userToTest.setPassword.should.be.a('function');
-          userToTest.invalidateSession.should.be.a('function');
+          userToTest.verifyPassword.should.be.type('function');
+          userToTest.setPassword.should.be.type('function');
+          userToTest.invalidateSession.should.be.type('function');
 
-          userToTest.grantRole.should.be.a('function');
-          userToTest.hasRole.should.be.a('function');
-          userToTest.revokeRole.should.be.a('function');
+          userToTest.grantRole.should.be.type('function');
+          userToTest.hasRole.should.be.type('function');
+          userToTest.revokeRole.should.be.type('function');
 
-          userToTest.notify.should.be.a('function');
-          userToTest.getGravatar.should.be.a('function');
+          userToTest.notify.should.be.type('function');
+          userToTest.getGravatar.should.be.type('function');
 
-          userToTest.canRead.should.be.a('function');
-          userToTest.canWrite.should.be.a('function');
+          userToTest.canRead.should.be.type('function');
+          userToTest.canWrite.should.be.type('function');
 
         });
       });
@@ -1195,16 +1195,16 @@ describe('Users model', function () {
       });
 
       it('it exposes getForUser and canCreate for Active Record', function () {
-        kabam.model.Message.getForUser.should.be.a('function');
-        kabam.model.Messages.getForUser.should.be.a('function');
-        kabam.model.Message.canCreate.should.be.a('function');
-        kabam.model.Messages.canCreate.should.be.a('function');
+        kabam.model.Message.getForUser.should.be.type('function');
+//        kabam.model.Messages.getForUser.should.be.type('function');
+        kabam.model.Message.canCreate.should.be.type('function');
+//        kabam.model.Messages.canCreate.should.be.type('function');
       });
 
       describe('canCreate for proper user', function(){
         var val;
         before(function(done){
-          kabam.model.Messages.canCreate(user, function(err,v){
+          kabam.model.Message.canCreate(user, function(err,v){
             if(err) throw err;
             val = v;
             done();
@@ -1219,7 +1219,7 @@ describe('Users model', function () {
       describe('canCreate for user with uncomplete profile', function(){
         var val;
         before(function(done){
-          kabam.model.Messages.canCreate({'profileComplete': false}, function(err,v){
+          kabam.model.Message.canCreate({'profileComplete': false}, function(err,v){
             if(err) throw err;
             val = v;
             done();
@@ -1234,7 +1234,7 @@ describe('Users model', function () {
       describe('canCreate for user with unverified profile', function(){
         var val;
         before(function(done){
-          kabam.model.Messages.canCreate({'emailVerified': false}, function(err,v){
+          kabam.model.Message.canCreate({'emailVerified': false}, function(err,v){
             if(err) throw err;
             val = v;
             done();
@@ -1249,7 +1249,7 @@ describe('Users model', function () {
       describe('canCreate for user with banned profile', function(){
         var val;
         before(function(done){
-          kabam.model.Messages.canCreate({'isBanned': true}, function(err, v){
+          kabam.model.Message.canCreate({'isBanned': true}, function(err, v){
             if(err) throw err;
             val = v;
             done();
@@ -1328,14 +1328,14 @@ describe('Users model', function () {
             event.title.should.be.equal('test1');
           });
         });
-        describe('recieveMessage', function () {
+        describe('receiveMessage', function () {
           var event;
           before(function (done) {
             kabam.once('notify:pm', function (m) {
               event = m;
               setTimeout(done, 1000);
             });
-            User2.recieveMessage(User1,'test2', 'test2', function (err, messageCreated) {
+            User2.receiveMessage(User1,'test2', 'test2', function (err, messageCreated) {
               if (err) {
                 throw err;
               }

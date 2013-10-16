@@ -1,31 +1,31 @@
 /*jshint immed: false, expr: true */
 'use strict';
+// jshint unused: false
 var should = require('should'),
   mongoose = require('mongoose'),
-  KabamKernel = require('./../index.js'),
-  events = require('events'),
+  kabamKernel = require('./../index.js'),
   config = require('./../example/config.json').testing,
-  request = require('request'),
-  port = Math.floor(2000 + 1000 * Math.random());
+  request = require('request');
 
 describe('auth api testing', function () {
-
-  var kabam, connection;
+  var kabam, connection, port = Math.floor(2000 + 1000 * Math.random());
   before(function (done) {
 
     config.DISABLE_CSRF = true;
-    kabam = KabamKernel(config);
-
     connection = mongoose.createConnection(config.MONGO_URL);
     // We should first connect manually to the database and delete it because if we would use kabam.mongoConnection
     // then models would not recreate their indexes because mongoose would initialise before we would drop database.
-    kabam = KabamKernel(config);
+    kabam = kabamKernel(config);
     connection.on('open', function(){
       connection.db.dropDatabase(function () {
-        kabam.on('started', function () {
-          done();
-        });
-        kabam.start(port);
+        try {
+          kabam.on('started', function () {
+            done();
+          });
+          kabam.start(port);
+        } catch(e){
+          done(e);
+        }
       });
     });
   });
@@ -39,9 +39,9 @@ describe('auth api testing', function () {
           'url': 'http://localhost:' + port + '/auth/signup',
           'method': 'POST',
           'json': {
-            "username": "usernameToUseForNewUser",
-            "email": "emailForNewUser@example.org",
-            "password": "myLongAndHardPassword"
+            username: 'usernameToUseForNewUser',
+            email: 'emailForNewUser@example.org',
+            password: 'myLongAndHardPassword'
           }
         },
         function (err, r, b) {
@@ -81,9 +81,9 @@ describe('auth api testing', function () {
           'url': 'http://localhost:' + port + '/auth/signup',
           'method': 'POST',
           'json': {
-            "username": "usernameToUseForNewUser",
-            "email": "emailForNewUser@example.org",
-            "password": "myLongAndHardPassword"
+            username: 'usernameToUseForNewUser',
+            email: 'emailForNewUser@example.org',
+            password: 'myLongAndHardPassword'
           }
         },
         function (err, r, b) {
@@ -108,8 +108,8 @@ describe('auth api testing', function () {
             'url': 'http://localhost:' + port + '/auth/login',
             'method': 'POST',
             'json': {
-              "username": "usernameToUseForNewUser",
-              "password": "myLongAndHardPassword"
+              'username': 'usernameToUseForNewUser',
+              'password': 'myLongAndHardPassword'
             }
           },
           function (err, r, b) {
@@ -145,8 +145,8 @@ describe('auth api testing', function () {
                 'url': 'http://localhost:' + port + '/auth/login',
                 'method': 'POST',
                 'json': {
-                  "username": "usernameToUseForNewUser",
-                  "password": "myLongAndHardPassword"
+                  username: 'usernameToUseForNewUser',
+                  password: 'myLongAndHardPassword'
                 }
               },
               function (err, r1, b1) {
@@ -272,9 +272,9 @@ describe('auth api testing', function () {
           'url': 'http://localhost:' + port + '/auth/signup',
           'method': 'POST',
           'json': {
-            "username": "usernameToUseForNewUser",
-            "email": "emailForNewUser@example.org",
-            "password": "myLongAndHardPassword"
+            username: 'usernameToUseForNewUser',
+            email: 'emailForNewUser@example.org',
+            password: 'myLongAndHardPassword'
           }
         },
         function (err, r, b) {
@@ -305,7 +305,7 @@ describe('auth api testing', function () {
     });
 
     it('check redirect path', function () {
-      response.socket._httpMessage.path.should.equal('/')
+      response.socket._httpMessage.path.should.equal('/');
     });
     after(function (done) {
       user.remove(done);
@@ -317,3 +317,114 @@ describe('auth api testing', function () {
   });
 });
 
+describe('Signing in in multiple sessions', function(){
+  var port = Math.floor(2000 + 1000 * Math.random()),
+    r = request,
+    host = 'http://localhost:' + port,
+    kabam,
+    connection;
+  before(function(done){
+    connection = mongoose.createConnection('mongodb://localhost/kabam_test');
+    kabam = kabamKernel({MONGO_URL:'mongodb://localhost/kabam_test'});
+    connection.on('open', function(){
+      connection.db.dropDatabase(function () {
+        kabam.on('started', function () {
+          done();
+        });
+        kabam.start(port);
+      });
+    });
+  });
+  function signUp(done){
+    var jar = r.jar(), request = r.defaults({jar: jar});
+    // first request is just to get XSRF cookie
+    request(host + '/auth/signup', function () {
+      var xsrfToken = decodeURIComponent(jar.cookies.filter(function(c){return c.name === 'XSRF-TOKEN';})[0].value);
+      request({
+        url: host + '/auth/signup',
+        method: 'POST',
+        headers: {
+          'x-xsrf-token': xsrfToken
+        },
+        json: {
+          username: 'qweqwe',
+          email: 'qweqwe@qwe.qwe',
+          password: 'qweqwe'
+        }
+      }, function(err, res, body){
+        if(err){return done(err);}
+        body.should.be.eql({ username: 'qweqwe', email: 'qweqwe@qwe.qwe'});
+        kabam.model.User.findOneByLoginOrEmail('qweqwe@qwe.qwe', function (err, user) {
+          if(err){return done(err);}
+          user.emailVerified = true;
+          user.save(function(err){
+            if(err){return done(err);}
+            done();
+          });
+        });
+      });
+    });
+  }
+  function sessionBoundReq(done){
+    var jar = r.jar(), request = r.defaults({jar: jar});
+    request(host + '/auth/signup', function () {
+      var xsrfToken = decodeURIComponent(jar.cookies.filter(function(c){return c.name === 'XSRF-TOKEN';})[0].value);
+      request({
+        url: host + '/auth/login',
+        method: 'POST',
+        headers: {
+          'x-xsrf-token': xsrfToken
+        },
+        json: {
+          username: 'qweqwe',
+          password: 'qweqwe'
+        }
+      }, function(err/*, res, body*/){
+        if(err){return done(err);}
+        done(null, request, xsrfToken);
+      });
+    });
+  }
+  it('should allow a user to perform mutating operations in multiple sessions', function(done){
+    signUp(function(err){
+      if(err){return done(err);}
+      sessionBoundReq(function(err, r1, xsrf1){
+        if(err){return done(err);}
+        sessionBoundReq(function(err, r2, xsrf2){
+          if(err){return done(err);}
+          r1({
+            method: 'POST',
+            url: host + '/auth/profile',
+            headers: {
+              'x-xsrf-token': xsrf1
+            },
+            json: {
+              firstName: 'John'
+            }
+          }, function(err, res/*, body*/){
+            if(err){return done(err);}
+            res.statusCode.should.be.eql(200);
+
+            r2({
+              method: 'POST',
+              url: host + '/auth/profile',
+              headers: {
+                'x-xsrf-token': xsrf2
+              },
+              json: {
+                lastName: 'Malkovich'
+              }
+            }, function(err, res, body){
+              if(err){return done(err);}
+              res.statusCode.should.be.eql(200);
+              //noinspection BadExpressionStatementJS
+              body.profileComplete.should.be.true;
+              done();
+            });
+
+          });
+        });
+      });
+    });
+  });
+});
