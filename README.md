@@ -142,7 +142,7 @@ kernel.usePlugin(require('foo'));
 
 API Documentation
 =================
-Current API documtation for the Kabam-Kernel and core plguins can be fount at [http://cd.monimus.com:8080/](http://cd.monimus.com:8080/)
+Current API documentation for the Kabam-Kernel and core plugins can be found at [http://cd.monimus.com:8080/](http://cd.monimus.com:8080/)
 
 Kabam-Kernel instance methods
 =============================
