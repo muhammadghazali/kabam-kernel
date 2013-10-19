@@ -104,11 +104,23 @@ exports.app = function(kernel){
     var activeUsers = kernel.io.sockets.manager.handshaken,
       x;
     for (x in activeUsers) {
-      if (activeUsers[x].user && activeUsers[x].user.username === message.user.username) {
+      if (activeUsers[x].user && message.user && activeUsers[x].user.username === message.user.username) {
         if (kernel.io.sockets.manager.sockets.sockets[x]) {
           kernel.io.sockets.manager.sockets.sockets[x].emit('notify', {'user': message.user, 'message': message.message});
         }
       }
     }
   });
+
+  // sample messaging between users
+  // relay notify:sio message from client
+  kernel.io.sockets.on('connection', function (socket) {
+    socket.on('backend', function(data) {
+      // console.log('receive broadcast message from client:', data);
+      if (data.action === 'notify:sio') {
+        kernel.emit('notify:sio', data);
+      }
+    });
+  });
+
 };
