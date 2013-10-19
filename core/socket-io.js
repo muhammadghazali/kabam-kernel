@@ -112,15 +112,42 @@ exports.app = function(kernel){
     }
   });
 
-  // sample messaging between users
-  // relay notify:sio message from client
+  // socket.io event handlers
   kernel.io.sockets.on('connection', function (socket) {
+
+    // receive message from frontend
     socket.on('backend', function(data) {
-      // console.log('receive broadcast message from client:', data);
+      console.log('receive broadcast message from frontend:', data);
       if (data.action === 'notify:sio') {
+        // relay notify:sio message from client
         kernel.emit('notify:sio', data);
+      } else if (data.action === 'subscribe' && data.channel) {
+        // subscribe client
+        socket.join(data.channel);
+      } else if (data.action === 'unsubscribe' && data.channel) {
+        // unsubscribe client
+        socket.leave(data.channel);
+      } else if (data.action === 'publish' && data.channel) {
+        // publish an event
+        socket.broadcast.to(data.channel).emit(data.event, data);
       }
     });
+
+  });
+
+  // publish to room
+  kernel.on('update', function(data) {
+    console.log('event update', data);
+    if (data.channel && kernel.io.sockets.manager.rooms['/' + data.channel]) {
+      console.log('send event update to room');
+      kernel.io.sockets.in(data.channel).emit('update', data);
+    }
+  });
+
+  kernel.on('delete', function(data) {
+    if (data.channel && kernel.io.sockets.manager.rooms['/' + data.channel]) {
+      kernel.io.sockets.in(data.channel).emit('delete', data);
+    }
   });
 
 };
