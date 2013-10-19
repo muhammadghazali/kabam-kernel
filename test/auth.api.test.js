@@ -10,6 +10,7 @@ var should = require('should'),
 describe('auth api testing', function () {
   var kabam, connection, port = Math.floor(2000 + 1000 * Math.random());
   before(function (done) {
+    this.timeout(8000);
 
     config.DISABLE_CSRF = true;
     connection = mongoose.createConnection(config.MONGO_URL);
