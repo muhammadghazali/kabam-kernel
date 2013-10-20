@@ -135,19 +135,49 @@ exports.app = function(kernel){
 
   });
 
-  // publish to room
+  // publish to room for model changes
   kernel.on('update', function(data) {
-    console.log('event update', data);
-    if (data.channel && kernel.io.sockets.manager.rooms['/' + data.channel]) {
-      console.log('send event update to room');
+    if (!data.channel || !/\w+:\w+/.test(data.channel)) {
+      return;
+    }
+
+    // single object room
+    if (kernel.io.sockets.manager.rooms['/' + data.channel]) {
       kernel.io.sockets.in(data.channel).emit('update', data);
+    }
+
+    // list room
+    var arr = /(\w+):/.exec(data.channel);
+    if (arr && kernel.io.sockets.manager.rooms['/' + arr[1]]) {
+      kernel.io.sockets.in(arr[1]).emit('update', data);
     }
   });
 
   kernel.on('delete', function(data) {
-    if (data.channel && kernel.io.sockets.manager.rooms['/' + data.channel]) {
+    if (!data.channel || !/\w+:\w+/.test(data.channel)) {
+      return;
+    }
+
+    // single object room
+    if (kernel.io.sockets.manager.rooms['/' + data.channel]) {
       kernel.io.sockets.in(data.channel).emit('delete', data);
     }
+
+    var arr = /(\w+):/.exec(data.channel);
+    if (arr && kernel.io.sockets.manager.rooms['/' + arr[1]]) {
+      kernel.io.sockets.in(arr[1]).emit('delete', data);
+    }
+  });
+
+  kernel.on('create', function(data) {
+    if (!data.channel) {
+      return;
+    }
+
+    if (kernel.io.sockets.manager.rooms['/' + data.channel]) {
+      kernel.io.sockets.in(data.channel).emit('create', data);
+    }
+
   });
 
 };
