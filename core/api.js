@@ -75,6 +75,11 @@ exports.routes = function(kernel){
     });
   });
 
+  kernel.app.get('/auth/profile', function(req, res){
+    if(!req.user){return res.json(401, {message: 'Unauthorized'});}
+    res.json(200, req.user.export());
+  });
+
   kernel.app.post('/auth/profile',function (request, response){
     if(!request.user){return response.send(401);}
 
