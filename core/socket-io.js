@@ -117,7 +117,6 @@ exports.app = function(kernel){
 
     // receive message from frontend
     socket.on('backend', function(data) {
-      console.log('receive broadcast message from frontend:', data);
       if (data.action === 'notify:sio') {
         // relay notify:sio message from client
         kernel.emit('notify:sio', data);
