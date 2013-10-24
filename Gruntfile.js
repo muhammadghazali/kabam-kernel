@@ -1,3 +1,10 @@
+/**
+ * automatically add ngdoc directives
+ */
+var processContent = function(content, srcpath) {
+  return '@ngdoc overview\n@name kabam-kernel\n@description\n\n' + content;
+};
+
 module.exports = function(grunt) {
 
   // Project configuration.
@@ -8,7 +15,7 @@ module.exports = function(grunt) {
         jshintrc: '.jshintrc'
       },
       all: {
-        src: ['Gruntfile.js', 'index.js', 'example/**/*.js', 'models/**/*.js', 'public/**/*.js', 'routes/**/*.js', 'bin/**/*.js','test/**/*.js']
+        src: ['Gruntfile.js', 'index.js', 'core/**/*.js', 'bin/**/*.js', 'test/**/*.js']
       },
       ci: {
         options: {
@@ -37,6 +44,9 @@ module.exports = function(grunt) {
       docs: [ 'results/docs' ]
     },
     copy: {
+      options: {
+        processContent: processContent
+      },
       readme: {
         src: 'README.md',
         dest: 'results/index.ngdoc'
@@ -49,8 +59,8 @@ module.exports = function(grunt) {
         startPage: '/api'
       },
       api: {
-        src: ['results/index.ngdoc', 'index.js', 'lib/**/*.js', 'models/**/*.js','example/plugin.example.js', ' bin/**/*.js'],
-        title: 'MWC Kernel API'
+        src: ['results/index.ngdoc', 'index.js', 'lib/**/*.js', 'core/**/*.js', ' bin/**/*.js'],
+        title: 'Kernel API'
       }
     },
     watch: {

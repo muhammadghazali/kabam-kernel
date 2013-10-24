@@ -50,7 +50,6 @@
     "mocha": "*",
     "grunt-simple-mocha": "*",
     "request": "*",
-    "grunt-ngdoc": "*",
     "grunt-contrib-copy": "*",
     "grunt-ngdocs": "*",
     "grunt-contrib-clean": "*"

@@ -104,11 +104,79 @@ exports.app = function(kernel){
     var activeUsers = kernel.io.sockets.manager.handshaken,
       x;
     for (x in activeUsers) {
-      if (activeUsers[x].user && activeUsers[x].user.username === message.user.username) {
+      if (activeUsers[x].user && message.user && activeUsers[x].user.username === message.user.username) {
         if (kernel.io.sockets.manager.sockets.sockets[x]) {
           kernel.io.sockets.manager.sockets.sockets[x].emit('notify', {'user': message.user, 'message': message.message});
         }
       }
     }
   });
+
+  // socket.io event handlers
+  kernel.io.sockets.on('connection', function (socket) {
+
+    // receive message from frontend
+    socket.on('backend', function(data) {
+      if (data.action === 'notify:sio') {
+        // relay notify:sio message from client
+        kernel.emit('notify:sio', data);
+      } else if (data.action === 'subscribe' && data.channel) {
+        // subscribe client
+        socket.join(data.channel);
+      } else if (data.action === 'unsubscribe' && data.channel) {
+        // unsubscribe client
+        socket.leave(data.channel);
+      } else if (data.action === 'publish' && data.channel) {
+        // publish an event
+        socket.broadcast.to(data.channel).emit(data.event, data);
+      }
+    });
+
+  });
+
+  // publish to room for model changes
+  kernel.on('update', function(data) {
+    if (!data.channel || !/\w+:\w+/.test(data.channel)) {
+      return;
+    }
+
+    // single object room
+    if (kernel.io.sockets.manager.rooms['/' + data.channel]) {
+      kernel.io.sockets.in(data.channel).emit('update', data);
+    }
+
+    // list room
+    var arr = /(\w+):/.exec(data.channel);
+    if (arr && kernel.io.sockets.manager.rooms['/' + arr[1]]) {
+      kernel.io.sockets.in(arr[1]).emit('update', data);
+    }
+  });
+
+  kernel.on('delete', function(data) {
+    if (!data.channel || !/\w+:\w+/.test(data.channel)) {
+      return;
+    }
+
+    // single object room
+    if (kernel.io.sockets.manager.rooms['/' + data.channel]) {
+      kernel.io.sockets.in(data.channel).emit('delete', data);
+    }
+
+    var arr = /(\w+):/.exec(data.channel);
+    if (arr && kernel.io.sockets.manager.rooms['/' + arr[1]]) {
+      kernel.io.sockets.in(arr[1]).emit('delete', data);
+    }
+  });
+
+  kernel.on('create', function(data) {
+    if (!data.channel) {
+      return;
+    }
+
+    if (kernel.io.sockets.manager.rooms['/' + data.channel]) {
+      kernel.io.sockets.in(data.channel).emit('create', data);
+    }
+
+  });
+
 };
