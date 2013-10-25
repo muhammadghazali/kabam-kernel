@@ -8,7 +8,17 @@ var should = require('should'),
   request = require('request'),
   port = Math.floor(2000 + 1000 * Math.random());
 
-describe('Kernel', function () {
+
+describe('kabamKernel', function(){
+  it('should be function', function(){
+    kabamKernel.should.have.type('function');
+  });
+  it('should have KabamKernel constructor', function(){
+    (new kabamKernel.KabamKernel({})).should.be.an.instanceOf(kabamKernel.KabamKernel);
+  })
+});
+
+describe('Kernel instance', function () {
 
   var Kabam;
 
