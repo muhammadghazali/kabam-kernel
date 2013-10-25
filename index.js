@@ -498,6 +498,39 @@ function KabamKernel(config) {
 
   /**
    * @ngdoc function
+   * @name kabamKernel.compose
+   * @description
+   * Composes all plugins together and freezes the app, you cannot install more plugins after composing.
+   * Application is composed automatically when it is started, so this method should be used only when you need
+   * a KabamKernel instance without launching the app itself.
+   */
+  this.compose = function(){
+    prepared = true;
+
+    // creating config
+    this.config = configBuilder(this.config || {});
+
+    // dependencies used by some plugins
+    this.extensions = {
+      models: additionalModels,
+      strategies: additionalStrategies
+    };
+
+    //initialize expressJS application
+    this.app = appBuilder(
+      thisKabam,
+      extendCoreFunctions,
+      extendAppFunctions,
+      extendMiddlewareFunctions,
+      extendRoutesFunctions,
+      catchAllFunction
+    );
+
+    return this;
+  };
+
+  /**
+   * @ngdoc function
    * @name kabamKernel.start
    * @description
    * Start kabam application
@@ -550,32 +583,15 @@ function KabamKernel(config) {
    * ```
    */
   this.start = function (method) {
-    prepared = true;
-
     // rewriting all port configuration, port specified in start has highest priority
     if(typeof method === 'number'){
       this.config.PORT = method;
     }
 
-    // creating config
-    this.config = configBuilder(this.config || {});
+    // composing the app
+    this.compose();
 
-    // dependencies used by some plugins
-    this.extensions = {
-      models: additionalModels,
-      strategies: additionalStrategies
-    };
-
-    //initialize expressJS application
-    thisKabam.app = appBuilder(
-      thisKabam,
-      extendCoreFunctions,
-      extendAppFunctions,
-      extendMiddlewareFunctions,
-      extendRoutesFunctions,
-      catchAllFunction
-    );
-
+    // launching the app
     if (method === 'app') {
       thisKabam.emit('started', { 'type': 'app' });
       return thisKabam;
