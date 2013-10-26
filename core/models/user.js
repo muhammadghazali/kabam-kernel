@@ -110,7 +110,7 @@ function factory(kabam) {
        * Array of user roles/permissions (strings)
        */
       roles: [
-        {type: String, match: /^[a-zA-Z0-9_]+$/, index: true }
+        {type: String, match: /^[a-zA-Z0-9_:]+$/, index: true }
       ],
 
       /**
@@ -426,6 +426,40 @@ function factory(kabam) {
       kabam.emit('users:revokeRole', this);
       this.save(callback);
     }
+  };
+
+  /**
+   * @ngdoc function
+   * @name User.revokeRoles
+   * @param {Array} roles - roles/permissions to revoke.
+   * @description
+   * Revokes roles from user, fires one 'revokeRole' event per role revoked
+   * @param {function} callback - function is fired when user is saved
+   * @example
+   * ```javascript
+   *
+   *   kabam.model.User.create({'email':'test@rambler.ru'},function(err,userCreated){
+   *     user.revokeRoles(['rulerOfTheWorld', 'rulerOfTheMoon'], function(err){if err throw err;});
+   *   });
+   *
+   * ```
+   */
+  UserSchema.methods.revokeRoles = function (roles, callback) {
+    var _this = this;
+    
+    roles.forEach(function(roleName) {
+      var roleIndex = _this.roles.indexOf(roleName);
+      if(roleIndex > -1) {
+        _this.roles.splice(roleIndex, 1);  
+      }
+    });
+
+    this.save(function() {
+      roles.forEach(function() {
+        kabam.emit('users:revokeRole', _this);
+      });
+      callback();
+    });
   };
 
   /**

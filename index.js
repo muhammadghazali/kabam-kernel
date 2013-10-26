@@ -672,6 +672,7 @@ function KabamKernel(config) {
   this.usePlugin(require('./core/rate-limiter'));
   this.usePlugin(require('./core/toobusy'));
   this.usePlugin(require('./core/api'));
+  this.usePlugin(require('./core/group-manager'));
 }
 
 util.inherits(KabamKernel, EventEmitter);
