@@ -769,6 +769,7 @@ function kabamFactory(config){
   kernel.usePlugin(require('./core/models/user'));
   kernel.usePlugin(require('./core/models/group'));
   kernel.usePlugin(require('./core/models/message'));
+  kernel.usePlugin(require('./core/encrypt-decrypt'));
   kernel.usePlugin(require('./core/passport'));
   kernel.usePlugin(require('./core/strategies/facebook'));
   kernel.usePlugin(require('./core/strategies/github'));
