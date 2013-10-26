@@ -4,21 +4,18 @@ var should = require('should'),
   async = require('async'),
   kabamKernel = require('./../index.js'),
   config = require('./../example/config.json').testing,
+  createKabam = require('./helpers').createKabam,
   kabam;
 
 describe('Users model', function () {
   before(function (done) {
     // SIGINT fix (each app attaches SIGINT handler and it always grows);
     process.setMaxListeners(20);
-    kabam = kabamKernel(config);
-    kabam.on('started', function () {
-      kabam.mongoConnection.on('open', function(){
-        kabam.mongoConnection.db.dropDatabase(function () {
-          done();
-        });
-      });
+    createKabam('app', config, function(err, _kabam){
+      if(err){return done(err);}
+      kabam = _kabam;
+      done();
     });
-    kabam.start('app');
   });
 
   describe('Users model', function () {

@@ -6,27 +6,19 @@ var should = require('should'),
   events = require('events'),
   config = require('./../example/config.json').testing,
   request = require('request'),
+  createKabam = require('./helpers').createKabam,
   port = Math.floor(2000 + 1000 * Math.random());
 //*
 describe('Kernel events emitter testing', function () {
 
-  var kabam, connection;
+  var kabam;
   var isStarted = false;
   before(function (done) {
-    kabam = kabamKernel(config);
-
-    connection = mongoose.createConnection(config.MONGO_URL);
-    // We should first connect manually to the database and delete it because if we would use kabam.mongoConnection
-    // then models would not recreate their indexes because mongoose would initialise before we would drop database.
-    kabam = kabamKernel(config);
-    connection.on('open', function(){
-      connection.db.dropDatabase(function () {
-        kabam.on('started', function () {
-          done();
-        });
-        isStarted = true;
-        kabam.start(port);
-      });
+    createKabam(port, config, function(err, _kabam){
+      if(err){return done(err);}
+      kabam = _kabam;
+      isStarted = true;
+      done();
     });
   });
 

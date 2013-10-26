@@ -1,33 +1,25 @@
 /*jshint immed: false, expr: true */
 'use strict';
-// jshint unused: false
-var should = require('should'),
-  mongoose = require('mongoose'),
+var mongoose = require('mongoose'),
   kabamKernel = require('./../index.js'),
   config = require('./../example/config.json').testing,
+  createKabam = require('./helpers').createKabam,
   request = require('request');
 
+require('should');
+
 describe('auth api testing', function () {
-  var kabam, connection, port = Math.floor(2000 + 1000 * Math.random());
+  var
+    port = Math.floor(2000 + 1000 * Math.random()),
+    kabam;
   before(function (done) {
     this.timeout(8000);
 
     config.DISABLE_CSRF = true;
-    connection = mongoose.createConnection(config.MONGO_URL);
-    // We should first connect manually to the database and delete it because if we would use kabam.mongoConnection
-    // then models would not recreate their indexes because mongoose would initialise before we would drop database.
-    kabam = kabamKernel(config);
-    connection.on('open', function(){
-      connection.db.dropDatabase(function () {
-        try {
-          kabam.on('started', function () {
-            done();
-          });
-          kabam.start(port);
-        } catch(e){
-          done(e);
-        }
-      });
+    createKabam(port, config, function(err, _kabam){
+      if(err){return done(err);}
+      kabam = _kabam;
+      done();
     });
   });
 
