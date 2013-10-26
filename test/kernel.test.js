@@ -10,11 +10,11 @@ var should = require('should'),
 
 
 describe('kabamKernel', function(){
-  it('should be function', function(){
+  it('should be a function', function(){
     kabamKernel.should.have.type('function');
   });
   it('should have KabamKernel constructor', function(){
-    (new kabamKernel.KabamKernel({})).should.be.an.instanceOf(kabamKernel.KabamKernel);
+    (new kabamKernel.KabamKernel()).should.be.an.instanceOf(kabamKernel.KabamKernel);
   })
 });
 
