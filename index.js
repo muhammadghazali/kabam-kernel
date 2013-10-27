@@ -1,6 +1,5 @@
 'use strict';
 var EventEmitter = require('events').EventEmitter,
-  util = require('util'),
   appBuilder = require('./lib/app-builder'),
   configBuilder = require('./lib/config-builder.js'),
   logging = require('./lib/logging'),
@@ -14,22 +13,27 @@ require('colors');
  * @constructor
  * @param {object} config - config object
  */
-function KabamKernel(config) {
+function KabamKernel (config) {
   EventEmitter.call(this);
   this.config = config;
   this.logging = logging;
+  // plugin registry
+  this._registry = {};
+  this._composed = false;
+  this._extendCoreFunctions = [];
+  this._extendConfigEntries = [];
+  this._extendAppFunctions = [];
+  this._additionalModels = {};
+  this._additionalStrategies = [];
+  this._extendMiddlewareFunctions = [];
+  this._extendRoutesFunctions = [];
+  this._catchAllFunction = null;
+}
 
-  var extendCoreFunctions = [],//privileged field
-    extendAppFunctions = [],
-    additionalModels = {},
-    additionalStrategies = [],
-    prepared = false,
-    extendMiddlewareFunctions = [],
-    extendRoutesFunctions = [],
-    catchAllFunction,
-    thisKabam = this;//http://www.crockford.com/javascript/private.html
 
-  //privileged functions
+KabamKernel.prototype = {
+  //jshint proto: true, camelcase: false
+  __proto__: EventEmitter.prototype,
   /**
    * @ngdoc function
    * @name kabamKernel.extendCore
@@ -41,7 +45,6 @@ function KabamKernel(config) {
    * @param {string} fieldName - field name
    * @param {function/object/string/number/array} factory  function(config),
    * what is called to return value assigned to fieldName  config is the kabam.config object, or just a object, to be setted as kabam public field
-   * @param {string} namespace  namespace to bind this field. default is 'shared;
    * @example
    * ```javascript
    *
@@ -67,36 +70,42 @@ function KabamKernel(config) {
    *  ```
    * @returns {kabamKernel} kabamKernel object
    */
-  this.extendCore = function (fieldName, factory) {
-    if (prepared) {
+  extendCore: function (fieldName, factory) {
+    if (this._composed) {
       throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     }
     var extension, value;
-    if(typeof fieldName === 'function'){
+    if (typeof fieldName === 'function') {
       factory = fieldName;
       fieldName = null;
     }
 
-    if(!factory){
+    if (!factory) {
       throw new Error('KabamKernel.extendCore requires argument of fieldName(string), ' +
-                      'and value - function(config){} or function!');
+        'and value - function(config){} or function!');
     }
 
     if (typeof factory !== 'function') {
       value = factory;
-      factory = function(){return value;};
+      factory = function () {
+        return value;
+      };
     }
 
-    if(fieldName){
+    if (fieldName) {
       extension = {'field': fieldName, 'factory': factory};
     } else {
       extension = factory;
     }
 
-    extendCoreFunctions.push(extension);
+    this._extendCoreFunctions.push(extension);
 
     return this;
-  };
+  },
+
+  extendConfig: function (configEntry) {
+    this._extendConfigEntries.push(configEntry);
+  },
 
   /**
    * @ngdoc function
@@ -122,18 +131,18 @@ function KabamKernel(config) {
    * ```
    * @returns {kabamKernel} kabamKernel object
    */
-  this.extendModel = function (name, factory) {
-    if (prepared) {
+  extendModel: function (name, factory) {
+    if (this._composed) {
       throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     }
 
     if (typeof name === 'string' && typeof factory === 'function') {
-      additionalModels[name] = factory;
+      this._additionalModels[name] = factory;
     } else {
       throw new Error('KabamKernel.extendModel requires arguments of string of "name" and function(core){...}');
     }
     return this;
-  };
+  },
 
   /**
    * @ngdoc function
@@ -162,15 +171,15 @@ function KabamKernel(config) {
    * });
    * ```
    */
-  this.extendStrategy = function (factory) {
-    if (prepared) {
+  extendStrategy: function (factory) {
+    if (this._composed) {
       throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     }
     if (typeof factory !== 'function') {
       throw new Error('kabam.extendStrategy requires and argument to be a function returning strategy object!');
     }
-    additionalStrategies.push(factory);
-  };
+    this._additionalStrategies.push(factory);
+  },
 
   /**
    * @ngdoc function
@@ -209,8 +218,8 @@ function KabamKernel(config) {
    *
    * @returns {kabamKernel} kabamKernel object
    */
-  this.extendApp = function (environment, settingsFunction) {
-    if (prepared) {
+  extendApp: function (environment, settingsFunction) {
+    if (this._composed) {
       throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
       var environmentToUse = null,
@@ -235,13 +244,13 @@ function KabamKernel(config) {
       if (typeof settingsFunction === 'function') {
         if (environmentToUse) {
           for (j = 0; j < environmentToUse.length; j = j + 1) {
-            extendAppFunctions.push({
+            this._extendAppFunctions.push({
               'environment': environmentToUse[j],
               'settingsFunction': settingsFunction
             });
           }
         } else {
-          extendAppFunctions.push({
+          this._extendAppFunctions.push({
             'settingsFunction': settingsFunction
           });
         }
@@ -250,7 +259,7 @@ function KabamKernel(config) {
       }
       return this;
     }
-  };
+  },
 
   /**
    * @ngdoc function
@@ -282,8 +291,8 @@ function KabamKernel(config) {
    * ```
    * @returns {kabamKernel} kabamKernel object
    */
-  this.extendMiddleware = function (environment, path, settingsFunction) {
-    if (prepared) {
+  extendMiddleware: function (environment, path, settingsFunction) {
+    if (this._composed) {
       throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
       var environmentToUse = null,
@@ -329,7 +338,7 @@ function KabamKernel(config) {
       if (settingsFunctionToUse) {
         if (environmentToUse) {
           for (l = 0; l < environmentToUse.length; l = l + 1) {
-            extendMiddlewareFunctions.push({
+            this._extendMiddlewareFunctions.push({
               'environment': environmentToUse[l],
               'path': pathToUse,
               'SettingsFunction': settingsFunctionToUse
@@ -337,7 +346,7 @@ function KabamKernel(config) {
           }
         } else {
           //we set middleware for all environments
-          extendMiddlewareFunctions.push({
+          this._extendMiddlewareFunctions.push({
             'path': pathToUse,
             'SettingsFunction': settingsFunctionToUse
           });
@@ -347,7 +356,7 @@ function KabamKernel(config) {
       }
       return this;
     }
-  };
+  },
 
   /**
    * @ngdoc function
@@ -369,18 +378,18 @@ function KabamKernel(config) {
    * ```
    * @returns {kabamKernel} kabamKernel object
    */
-  this.extendRoutes = function (settingsFunction) {
-    if (prepared) {
+  extendRoutes: function (settingsFunction) {
+    if (this._composed) {
       throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     } else {
       if (typeof settingsFunction === 'function') {
-        extendRoutesFunctions.push(settingsFunction);
+        this._extendRoutesFunctions.push(settingsFunction);
       } else {
         throw new Error('Wrong argument for KabamKernel.extendAppRoutes(function(core){...});');
       }
       return this;
     }
-  };
+  },
 
   /**
    * @ngdoc function
@@ -388,7 +397,7 @@ function KabamKernel(config) {
    * @description
    * Provides ability to add a "catch all" callback function that will be called only if no
    * middleware returned a response nor any route have been matched.
-   * @param {function} catchAllFunction callback function
+   * @param {function} func callback function
    * @example
    * ```javascript
    *
@@ -399,105 +408,34 @@ function KabamKernel(config) {
    *     });
    * ```
    */
-  this.catchAll = function (func) {
-    if (prepared) {
+  catchAll: function (func) {
+    if (this._composed) {
       throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
     }
     if (typeof func !== 'function') {
       throw new Error('Wrong argument for KabamKernel.catchAll(function(kernel){...});');
     }
-    catchAllFunction = func;
-  };
+    this._catchAllFunction = func;
+  },
 
   /**
    * @ngdoc function
    * @name kabamKernel.usePlugin
    * @description
    * Loads plugin from object or npm module
-   * @param {object/string} pluginObjectOrName - config object or plugin name to get by require
+   * @param {object/string} plugin - plugin object
    * @url https://github.com/mykabam/kabam-kernel/blob/master/example/plugin.example.js
    */
-  this.usePlugin = function (pluginObjectOrName) {
-    if (prepared) {
+  usePlugin: function (plugin) {
+    if (this._composed) {
       throw new Error('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
-    } else {
-      var pluginToBeInstalled = {},
-        field,
-        i,
-        y,
-        x;
-      if (typeof pluginObjectOrName === 'string') {
-        pluginToBeInstalled = require(pluginObjectOrName);
-      } else {
-        pluginToBeInstalled = pluginObjectOrName;
-      }
-
-      if (typeof pluginToBeInstalled.name !== 'string' && !/^[a-z0-9_\-]+$/.test(pluginToBeInstalled.name) && pluginObjectOrName.name === 'shared') {
-        throw new Error('Wrong plugin syntax. Plugin name is missed or have wrong syntax!');
-      }
-
-      if (typeof pluginToBeInstalled.core === 'object') {
-        for (field in pluginToBeInstalled.core) {
-          if (pluginToBeInstalled.core.hasOwnProperty(field)) {
-            this.extendCore(field, pluginToBeInstalled.core[field], pluginToBeInstalled.name);
-          }
-        }
-      }
-      if (typeof pluginToBeInstalled.core === 'function') {
-        this.extendCore(pluginToBeInstalled.core);
-      }
-      if (typeof pluginToBeInstalled.model === 'object') {
-        for (x in pluginToBeInstalled.model) {
-          if (pluginToBeInstalled.model.hasOwnProperty(x)) {
-            this.extendModel(x, pluginToBeInstalled.model[x]);
-          }
-        }
-      }
-
-      if (pluginToBeInstalled.strategy){
-        if(typeof pluginToBeInstalled.strategy === 'function') {
-          this.extendStrategy(pluginToBeInstalled.strategy);
-        } else {
-          throw new Error('plugin.strategy has be function returning strategy object!');
-        }
-      }
-
-      if (typeof pluginToBeInstalled.app === 'function') {
-        this.extendApp(pluginToBeInstalled.app);
-      }
-
-      if (pluginToBeInstalled.middleware !== undefined) {
-        if (pluginToBeInstalled.middleware instanceof Array) {
-          for (i = 0; i < pluginToBeInstalled.middleware.length; i = i + 1) {
-            if (typeof pluginToBeInstalled.middleware[i] === 'function') {
-              this.extendMiddleware(pluginToBeInstalled.middleware[i]);
-            } else {
-              throw new Error('plugin.middleware[' + i + '] is not a function!');
-            }
-          }
-        } else {
-          if (typeof pluginToBeInstalled.middleware === 'function') {
-            this.extendMiddleware(pluginToBeInstalled.middleware);
-          } else {
-            throw new Error('plugin.middleware is not a function!');
-          }
-        }
-      }
-      if (typeof pluginToBeInstalled.routes === 'function') {
-        this.extendRoutes(pluginToBeInstalled.routes);
-      }
-
-      if (typeof pluginToBeInstalled.listeners === 'object') {
-        for (y in pluginToBeInstalled.listeners) {
-          if (pluginToBeInstalled.listeners.hasOwnProperty(y)) {
-            this.extendListeners(y, pluginToBeInstalled.listeners[y]);
-          }
-        }
-      }
-
-      return this;
     }
-  };
+    if (!plugin.name) {
+      throw new Error('Can\'t add a plugin without a name');
+    }
+    this._registry[plugin.name] = plugin;
+    return this;
+  },
 
   /**
    * @ngdoc function
@@ -507,30 +445,125 @@ function KabamKernel(config) {
    * Application is composed automatically when it is started, so this method should be used only when you need
    * a KabamKernel instance without launching the app itself.
    */
-  this.compose = function(){
-    prepared = true;
+  compose: function () {
+    var configBuild, disabledPlugins;
+    // create config
+    configBuild = configBuilder(this.config || {}, this._registry);
+    disabledPlugins = configBuild.disabledPlugins;
+    this.config = configBuild.config;
 
-    // creating config
-    this.config = configBuilder(this.config || {});
+    // digesting all registered plugins, this may extend disabled plugins list
+    Object.keys(this._registry).forEach(function(name){
+      if(!this._digestPlugin(this._registry[name], disabledPlugins)){
+        disabledPlugins.push(name);
+      }
+    }, this);
+
+    disabledPlugins.forEach(function(name){
+      logger.warn('disabling plugin ', name);
+    });
+
+    this._composed = true;
 
     // dependencies used by some plugins
     this.extensions = {
-      models: additionalModels,
-      strategies: additionalStrategies
+      models: this._additionalModels,
+      strategies: this._additionalStrategies
     };
 
     //initialize expressJS application
     this.app = appBuilder(
-      thisKabam,
-      extendCoreFunctions,
-      extendAppFunctions,
-      extendMiddlewareFunctions,
-      extendRoutesFunctions,
-      catchAllFunction
+      this,
+      this._extendCoreFunctions,
+      this._extendAppFunctions,
+      this._extendMiddlewareFunctions,
+      this._extendRoutesFunctions,
+      this._catchAllFunction
     );
 
     return this;
-  };
+  },
+
+
+  _digestPlugin: function (plugin, disabledPlugins) {
+    var key, ok;
+
+    if(plugin.dependencies){
+      // if some of the dependencies are disabled disable this plugin too
+      ok = plugin.dependencies.forEach(function(name){
+        return disabledPlugins.indexOf(name) > 0;
+      });
+      if(!ok) {
+        return false;
+      }
+      // or if the registry doesn't have a plugin with this name
+      ok = plugin.dependencies.forEach(function(name){
+        if(!this._registry[name]) {
+          return false;
+        }
+      }, this);
+      if(!ok) {
+        return false;
+      }
+    }
+
+    if (typeof plugin.core === 'object') {
+      for (key in plugin.core) {
+        if (plugin.core.hasOwnProperty(key)) {
+          this.extendCore(key, plugin.core[key], plugin.name);
+        }
+      }
+    }
+
+    if (typeof plugin.core === 'function') {
+      this.extendCore(plugin.core);
+    }
+
+    if (typeof plugin.model === 'object') {
+      for (key in plugin.model) {
+        if (plugin.model.hasOwnProperty(key)) {
+          this.extendModel(key, plugin.model[key]);
+        }
+      }
+    }
+
+    if (plugin.strategy){
+      if(typeof plugin.strategy !== 'function') {
+        throw new Error('plugin.strategy has be function returning strategy object!');
+      }
+      this.extendStrategy(plugin.strategy);
+    }
+
+    if (typeof plugin.app === 'function') {
+      this.extendApp(plugin.app);
+    }
+
+    if (plugin.middleware !== undefined) {
+      if(!Array.isArray(plugin.middleware)){
+        plugin.middleware = [plugin.middleware];
+      }
+      plugin.middleware.forEach(function(middlewareComponent, i){
+        if (typeof middlewareComponent !== 'function') {
+          throw new Error(plugin.name + '.middleware[' + i + '] is not a function!');
+        }
+        this.extendMiddleware(middlewareComponent);
+      }, this);
+    }
+
+    if (typeof plugin.routes === 'function') {
+      this.extendRoutes(plugin.routes);
+    }
+
+    if (typeof plugin.listeners === 'object') {
+      for (key in plugin.listeners) {
+        if (plugin.listeners.hasOwnProperty(key)) {
+          this.extendListeners(key, plugin.listeners[key]);
+        }
+      }
+    }
+
+    return true;
+  },
 
   /**
    * @ngdoc function
@@ -585,9 +618,10 @@ function KabamKernel(config) {
    *
    * ```
    */
-  this.start = function (method) {
+  start: function (method) {
+    var _this = this;
     // rewriting all port configuration, port specified in start has highest priority
-    if(typeof method === 'number'){
+    if (typeof method === 'number') {
       this.config.PORT = method;
     }
 
@@ -596,23 +630,23 @@ function KabamKernel(config) {
 
     // launching the app
     if (method === 'app') {
-      thisKabam.emit('started', { 'type': 'app' });
-      return thisKabam;
-    } else if(method && typeof method !== 'number'){
+      this.emit('started', { 'type': 'app' });
+      return this;
+    } else if (method && typeof method !== 'number') {
       throw new Error('Function Kabam#start() accepts null, "app" or port number as arguments!');
     }
 
-    if(thisKabam.config.PORT < 0){
+    if (this.config.PORT < 0) {
       throw new Error('Invalid port number');
     }
 
-    thisKabam.httpServer.listen(thisKabam.config.PORT, function () {
-      thisKabam.emit('started', {'port': thisKabam.config.PORT, 'type': 'expressHttp'});
-      logger.info(('KabamKernel started on ' + thisKabam.config.PORT + ' port').blue);
+    this.httpServer.listen(this.config.PORT, function () {
+      _this.emit('started', {'port': _this.config.PORT, 'type': 'expressHttp'});
+      logger.info(('KabamKernel started on ' + _this.config.PORT + ' port').blue);
     });
 
-    return thisKabam;
-  };
+    return this;
+  },
   /**
    * @ngdoc function
    * @name kabamKernel.startCluster
@@ -629,8 +663,8 @@ function KabamKernel(config) {
    *
    * @returns {boolean} isMaster. Returns true, if this process is a master process of cluster, or false if this is slave process
    */
-  this.startCluster = function (howExactly) {
-    prepared = true;
+  startCluster: function (howExactly) {
+    this._composed = true;
 
     var thisKabam = this,
       cluster = require('cluster'),
@@ -639,7 +673,7 @@ function KabamKernel(config) {
       i;
 
     if (this.config.LIMIT_WORKERS && this.config.LIMIT_WORKERS > 0) {
-      maxWorkers  = Math.min(numCPUs, this.config.LIMIT_WORKERS);
+      maxWorkers = Math.min(numCPUs, this.config.LIMIT_WORKERS);
     } else {
       maxWorkers = numCPUs;
     }
@@ -658,7 +692,7 @@ function KabamKernel(config) {
         logger.info(('Cluster : Worker PID#' + worker.process.pid + ' is online').green);
       });
 
-      cluster.on('exit', function (worker, code, signal) {
+      cluster.on('exit', function (worker/*, code, signal*/) {
         var exitCode = worker.process.exitCode;
         logger.info(('Cluster : Worker #' + worker.process.pid + ' died (' + exitCode + '). Respawning...').yellow);
         cluster.fork();
@@ -670,65 +704,61 @@ function KabamKernel(config) {
       thisKabam.start(howExactly);
       return false;
     }
-  };
-}
+  },
+  /**
+   * @ngdoc function
+   * @name kabamKernel.extendListeners
+   * @param {string} eventName Name of the event
+   * @param {function} eventHandlerFunction Function to handle the event
+   * @description - add custom event handler for Kabam
+   * @example
+   * ``` javascript
+   *
+   *      kabam.extendListeners('someEvent', console.log);
+   *
+   * ```
+   * @returns {kabamKernel} kabam object
+   */
+  extendListeners: function (eventName, eventHandlerFunction) {
+    if (typeof eventName === 'string' && typeof eventHandlerFunction === 'function') {
+      this.on(eventName, eventHandlerFunction);
+    } else {
+      throw new Error('KabamKernel.extendListeners(eventName,eventHandlerFunction) have wrong arguments!');
+    }
+    return this;
+  },
 
-util.inherits(KabamKernel, EventEmitter);
+
+  /**
+   * @ngdoc function
+   * @name kabamKernel.injectEmit
+   * @description
+   * Injects a function .emit(eventName,eventObj) for every object. This function
+   * is used for making this object to be able to emit events through Kabam
+   * @param {object} object - object to be extended
+   */
+  injectEmit: function (object) {
+    var thisKabam = this;
+    object.emitKabam = function (eventName, eventContent) {
+      thisKabam.emit(eventName, eventContent);
+    };
+  },
 
 
-/**
- * @ngdoc function
- * @name kabamKernel.extendListeners
- * @param {string} eventName Name of the event
- * @param {function} eventHandlerFunction Function to handle the event
- * @description - add custom event handler for Kabam
- * @example
- * ``` javascript
- *
- *      kabam.extendListeners('someEvent', console.log);
- *
- * ```
- * @returns {kabamKernel} kabam object
- */
-KabamKernel.prototype.extendListeners = function (eventName, eventHandlerFunction) {
-  if (typeof eventName === 'string' && typeof eventHandlerFunction === 'function') {
-    this.on(eventName, eventHandlerFunction);
-  } else {
-    throw new Error('KabamKernel.extendListeners(eventName,eventHandlerFunction) have wrong arguments!');
+  /**
+   * @ngdoc function
+   * @name kabamKernel.stop
+   * @description
+   * Stops kabamKernel instance - close redis and mongo connections.
+   */
+  stop: function () {
+    this.emit('stop');
+    this.redisClient.end();
+    this.mongoose.connection.close();
+    this.mongoose.disconnect();
+    this.removeAllListeners();
+    return;
   }
-  return this;
-};
-
-
-/**
- * @ngdoc function
- * @name kabamKernel.injectEmit
- * @description
- * Injects a function .emit(eventName,eventObj) for every object. This function
- * is used for making this object to be able to emit events through Kabam
- * @param {object} object - object to be extended
- */
-KabamKernel.prototype.injectEmit = function (object) {
-  var thisKabam = this;
-  object.emitKabam = function (eventName, eventContent) {
-    thisKabam.emit(eventName, eventContent);
-  };
-};
-
-
-/**
- * @ngdoc function
- * @name kabamKernel.stop
- * @description
- * Stops kabamKernel instance - close redis and mongo connections.
- */
-KabamKernel.prototype.stop = function () {
-  this.emit('stop');
-  this.redisClient.end();
-  this.mongoose.connection.close();
-  this.mongoose.disconnect();
-  this.removeAllListeners();
-  return;
 };
 
 
@@ -764,7 +794,7 @@ KabamKernel.prototype.stop = function () {
  *
  * ```
  */
-function kabamFactory(config){
+function kabamFactory (config) {
   var kernel = new KabamKernel(config);
   // default plugins
   kernel.usePlugin(require('./core/logging'));

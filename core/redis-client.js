@@ -61,6 +61,25 @@ function makeClient(redisConfig) {
 
 
 exports.name = 'kabam-core-redis-client';
+exports.config = {
+  REDIS: {
+    doc: 'Redis instance url',
+    env: 'REDIS',
+    default: null,
+    required: false,
+    parse: function(value, ParseError){
+      if(value !== null){
+        var parsed = url.parse(value);
+        var hostname = parsed.hostname;
+        var port = parsed.port || 6379;
+        if(!hostname){
+          throw new ParseError('Invalid hostname');
+        }
+      }
+      return value;
+    }
+  }
+};
 exports.core = {
   'redisClient': function(config){
     return makeClient(config.REDIS);
