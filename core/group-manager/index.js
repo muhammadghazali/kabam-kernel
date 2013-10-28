@@ -58,11 +58,30 @@ exports.core = function(kabam) {
   };
   kabam.mw.lookupGroup = lookupGroup;
 
+  kabam.mw.lookup = function(modelType, idParam) {
+    idParam || (idParam = "id");
+    var _id = req.params[idParam];
+    return function(req, res, next) {
+      kabam.model[modelType].findById(_id, function(err, model) {
+        if(err) return res.send(err, 400);
+        if(!model) return res.send(404);
+        req.model = model;
+        next();
+      });
+    }
+  };
+
   // Add middleware for authorization
   kabam.mw.authorize = function(actions) {
     return function(req, res, next) {
+      var user_id = req.session.user._id;
+      
+      // If user is owner of model he can do everything
+      if(req.model.owner.toString() === user_id) {
+        return next();
+      }
+
       lookupGroup(req, res, function() {
-        var user_id = req.session.user._id;
         req.group.authorize(user_id, actions, function(err, authorized) {
           if(err) return res.send(err, 400);
           if(!authorized) return res.send(403);
