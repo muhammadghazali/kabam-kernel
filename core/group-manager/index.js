@@ -1,6 +1,8 @@
+var mongoose = require("mongoose");
+
 exports.name = "kabam-core-group-manager";
 
-function GroupModel(mongoose) {
+function GroupModel() {
   var Schema = mongoose.Schema
     , ObjectId = Schema.ObjectId;
 
@@ -43,8 +45,17 @@ function GroupModel(mongoose) {
   );
 }
 
+function UserModel() {
+  var kabam = {
+    mongoose: mongoose
+  };
+  var schema = require("../models/user").model.User(kabam);
+  return mongoose.model("UserModel", schema);
+}
+
 exports.core = function(kabam) {
-  var Group = GroupModel(kabam.mongoose);
+  var Group = GroupModel();
+  var User = UserModel();
 
   // This should be done upper in the chain
   kabam.mw || (kabam.mw = {});
@@ -97,6 +108,5 @@ exports.core = function(kabam) {
   };
 
   // GroupFactory for creating domain-specific Group types
-  kabam.groups.GroupFactory = require('./group-factory')(Group, kabam.model.User);
-
+  kabam.groups.GroupFactory = require('./group-factory')(Group, User);
 };

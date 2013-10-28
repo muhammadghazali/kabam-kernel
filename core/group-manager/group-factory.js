@@ -194,12 +194,11 @@ module.exports = function(GroupModel, UserModel) {
     });
   };
 
-  Group.prototype.restify = function(app) {
-    var This = this.constructor;
-    var _this = this;
+  Group.restify = function(app) {
+    var This = this;
 
-    var resource = this.constructor.toLowerCase()+"s";
-    var parent_resource = This.parent && This.parent.constructor.toLowerCase()+"s";
+    var resource = This.name.toLowerCase()+"s";
+    var parent_resource = This.parent && This.parent.toLowerCase()+"s";
 
     var url = function(path) {
       var _url = "/";
@@ -211,21 +210,19 @@ module.exports = function(GroupModel, UserModel) {
       return _url;
     };
 
-    var user = req.session.user;
-    var groups = user.groups[group_type];
-
     function error(err, res) {
       res.send(err, 400);
     }
 
     function authorize(actions) {
       return function(req, res, next) {
-        var group = this;
-        
-        if(req.params.id && !req.parent) {
-          group = this;
-        } 
-        _this.authorize(user._id, actions, function(err, authorized) {
+        var group;
+        if(req.params.id) {
+          group = req.this;
+        } else if(req.params.parent_id) {
+          group = req.parent;
+        }
+        group.authorize(user._id, actions, function(err, authorized) {
           if(!authorized) return res.send(403);
           next();
         });
@@ -242,7 +239,7 @@ module.exports = function(GroupModel, UserModel) {
 
       This.parent.findById(function(err, parent) {
         if(err) return error(err, res);
-        if(!parent) return res.send("Parent does not exist", 400);
+        if(!parent) return res.send("Parent does not exist", 404);
         req.parent = parent;
         next();
       });
@@ -252,14 +249,21 @@ module.exports = function(GroupModel, UserModel) {
       This.findById(req.params.id, function(err, group) {
         if(err) return error(err, res);
         if(!group) return res.send(404);
-        res.send(clean(group));
+        req.group = group;
+
+        parentLookup(req, res, next);
       });
+    }
+    
+    function read(req, res) {
+      res.send(clean(req.group));
     }
 
     function create(req, res, next) {
-      if(!req.body._permissions) {
-        req.body._permissions = This.PERMISSIONS;
-      }
+      var data = req.body;
+
+      data._permissions || (data._permissions = This.PERMISSIONS);
+      data.owner = req.session.user._id;
 
       var model = new This(req.body);
       model.save(function(err, group) {
@@ -282,7 +286,10 @@ module.exports = function(GroupModel, UserModel) {
       });
     }
 
+    // GET /:group_type
+    // e.g. GET /organizations
     app.get(url(), function(req, res) {
+      var groups = req.session.user.groups;
       This.find(
         {
           "_id": { "$in": groups }
@@ -293,16 +300,23 @@ module.exports = function(GroupModel, UserModel) {
         }
       );
     });
-
-    app.post(url(), parentLookup, create);
-    app.get(url([":id"]), authorize(["view"]), lookup);
-    app.put(url([":id"]), authorize(["view"]), update);
-    app.del(url([":id"]), authorize(["view"]), remove);
+    // GET /:group_type/:id
+    // e.g. GET /organizations/123
+    app.get(url([":id"]), authorize(["view"]), lookup, read);
+    // POST /:group_type
+    // e.g. POST /organizations
+    app.post(url(), lookup, create);
+    // PUT /:group_type/:id
+    // e.g. PUT /organizations/123
+    app.put(url([":id"]), authorize(["view"]), lookup, update);
+    // DELETE /:group_type/:id
+    // e.g. DELETE /organizations/123
+    app.del(url([":id"]), authorize(["view"]), lookup, remove);
 
     if(This.parent) {
       app.get(
         url([parent_resource, ":parent_id", resource]),
-        parentLookup,
+        lookup,
         authorize(["view"]),
         function(req, res) {
           This.find(
@@ -317,21 +331,21 @@ module.exports = function(GroupModel, UserModel) {
 
       app.get(
         url([parent_resource, ":parent_id", resource, ":id"]),
-        parentLookup,
+        lookup,
         authorize(["view"]),
         lookup
       );
 
       app.post(
         url([parent_resource, ":parent_id"]),
-        parentLookup,
+        lookup,
         authorize(["create"]),
         create
       );
 
       app.put(
         url([parent_resource, ":parent_id", resource, ":id"]),
-        parentLookup,
+        lookup,
         authorize(["edit"]),
         update
       );
