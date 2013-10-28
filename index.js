@@ -91,7 +91,6 @@ function KabamKernel(config) {
     }
 
     extendCoreFunctions.push(extension);
-
     return this;
   };
 
@@ -653,12 +652,14 @@ function KabamKernel(config) {
     }
   };
 
+
   // default plugins
   this.usePlugin(require('./core/redis-client'));
   this.usePlugin(require('./core/mongoose'));
   this.usePlugin(require('./core/models/user'));
   this.usePlugin(require('./core/models/group'));
   this.usePlugin(require('./core/models/message'));
+  this.usePlugin(require('./core/group-manager'));
   this.usePlugin(require('./core/passport'));
   this.usePlugin(require('./core/strategies/facebook'));
   this.usePlugin(require('./core/strategies/github'));
@@ -672,7 +673,6 @@ function KabamKernel(config) {
   this.usePlugin(require('./core/rate-limiter'));
   this.usePlugin(require('./core/toobusy'));
   this.usePlugin(require('./core/api'));
-  this.usePlugin(require('./core/group-manager'));
 }
 
 util.inherits(KabamKernel, EventEmitter);

@@ -33,11 +33,16 @@ exports.core = function(kernel){
   kernel.mongoConnection = mongoConnection;
 
   kernel.model = {};
-  Object.keys(kernel.extensions.models).map(function(name){
-    var schema = kernel.extensions.models[name](kernel);
-    // TODO: maybe this should be done in the mongoose plugin
-    // for now we just assume that mongoConnection is always present
-    kernel.model[name] = kernel.mongoConnection.model(name, schema);
-  });
 
+  Object.keys(kernel.extensions.models).forEach(function(name) {
+    try {
+      // TODO: maybe this should be done in the mongoose plugin
+      // for now we just assume that mongoConnection is always present
+      var schema = kernel.extensions.models[name](kernel);
+      kernel.model[name] = kernel.mongoConnection.model(name, schema);
+    } catch(e) {
+      // What if we don't want mongoose models?
+      kernel.model[name] = kernel.extensions.models[name];
+    }
+  });
 };

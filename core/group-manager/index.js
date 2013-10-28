@@ -5,7 +5,7 @@ function GroupModel(mongoose) {
     , ObjectId = Schema.ObjectId;
 
   return mongoose.model(
-    "Group", 
+    "GroupModel", 
     new Schema({
       name: {
         type: String,
@@ -17,14 +17,18 @@ function GroupModel(mongoose) {
       },
       group_type: {
         type: String,
-        required: true
+        required: true,
+        index: true
       },
       parent_id: {
         type: ObjectId,
-        required: true
+        required: true,
+        index: true
       },
       owner: {
-        type: ObjectId
+        type: ObjectId,
+        required: true,
+        index: true
       },
       custom: {},
       _permissions: {
@@ -40,12 +44,13 @@ function GroupModel(mongoose) {
 }
 
 exports.core = function(kabam) {
+  var Group = GroupModel(kabam.mongoose);
+
   // This should be done upper in the chain
   kabam.mw || (kabam.mw = {});
+  kabam.groups || (kabam.groups = {});
 
   var lookupGroup = function(req, res, next) {
-    var Group = GroupModel(kabam.mongoose);
-
     var input = req.query || req.body;
     var group_id = req.query.group_id;
     Group.findById(group_id, function(err, group) {
@@ -60,8 +65,8 @@ exports.core = function(kabam) {
 
   kabam.mw.lookup = function(modelType, idParam) {
     idParam || (idParam = "id");
-    var _id = req.params[idParam];
     return function(req, res, next) {
+      var _id = req.params[idParam];
       kabam.model[modelType].findById(_id, function(err, model) {
         if(err) return res.send(err, 400);
         if(!model) return res.send(404);
