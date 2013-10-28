@@ -72,17 +72,7 @@ exports.core = function(kabam) {
     }
   };
 
-  kabam.mw.withPermissions = function(modelType) {
-    var Model = kabam.model[modelType];
-
-    function(req, res, next) {
-      if(req.body._permissions) {
-        data._permissions = req.body._permissions;
-      }
-    }
-  };
-
-  // GroupFactory creating domain-specific Group types
+  // GroupFactory for creating domain-specific Group types
   kabam.groups.GroupFactory = require('./group-factory')(Group, kabam.model.User);
 
 };

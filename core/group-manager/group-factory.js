@@ -128,30 +128,60 @@ module.exports = function(GroupModel, UserModel) {
   };
 
   Group.prototype.authorize = function(user_id, actions, callback) {
-    var _this = this;
 
-    var roles = [];  
-    Object.keys(this._permissions).filter(function(p) {
-      return actions.indexOf(p) > -1;
-    })
-    .map(function(action) {
-      return _this._permissions[action].map(function(r) {
-        var role = _this.group_type.toLowerCase()+":";
-        role += _this._id+":";
-        role += r;
-        return role;
-      });
-    })
-    .forEach(function(rolesPerAction) {
-      rolesPerAction.forEach(function(role) {
-        roles.push(role);
-      });
-    });
+    // If user is owner of Group he can do everything
+    if(user_id === this.owner.toString()) {
+      return callback(null, true);
+    }
 
-    UserModel.findOne({ roles: { "$in": roles }}, function(err, user) {
-      if(err) return callback(err);
-      callback(null, !!user);
-    });
+    // Get all parent Groups for cascading permissions
+    var roles = [];
+    addRoles(this);
+    getParent(this);
+    function getParent(group) {
+      if(group.parent_id) {
+        GroupModel.findById(group.parent_id, function(err, parent) {
+          addRoles(parent);
+          getParent(parent);
+        });
+      } else {
+        _authorize();
+      }
+    }    
+
+    // Build all roles that have permissions and perform
+    // authorization check
+    function addRoles(group) {
+      Object.keys(group._permissions).filter(function(p) {
+        return actions.indexOf(p) > -1;
+      })
+      .map(function(action) {
+        // By default 'admin' role can do everything, 
+        // so it does not need to be explicitly defined
+        // in the permissions matrix
+        group._permissions[action].unshift("admin");
+        
+        return group._permissions[action].map(function(r) {
+          var role = group.group_type.toLowerCase()+":";
+          role += group._id+":";
+          role += r;
+          return role;
+        });
+      })
+      .forEach(function(rolesPerAction) {
+        rolesPerAction.forEach(function(role) {
+          roles.push(role);
+        });
+      });
+    }
+
+    function _authorize() {
+      // Check if user has at least one the roles
+      UserModel.findOne({ "_id": user_id, roles: { "$in": roles }}, function(err, user) {
+        if(err) return callback(err);
+        callback(null, !!user);
+      });      
+    }
   };
 
   Group.prototype.removeMembers = function(members) {
@@ -188,8 +218,18 @@ module.exports = function(GroupModel, UserModel) {
       res.send(err, 400);
     }
 
-    function authorize(req, res, next) {
-
+    function authorize(actions) {
+      return function(req, res, next) {
+        var group = this;
+        
+        if(req.params.id && !req.parent) {
+          group = this;
+        } 
+        _this.authorize(user._id, actions, function(err, authorized) {
+          if(!authorized) return res.send(403);
+          next();
+        });
+      }
     }
 
     function parentLookup(req, res, next) {
@@ -203,6 +243,7 @@ module.exports = function(GroupModel, UserModel) {
       This.parent.findById(function(err, parent) {
         if(err) return error(err, res);
         if(!parent) return res.send("Parent does not exist", 400);
+        req.parent = parent;
         next();
       });
     }
@@ -216,6 +257,10 @@ module.exports = function(GroupModel, UserModel) {
     }
 
     function create(req, res, next) {
+      if(!req.body._permissions) {
+        req.body._permissions = This.PERMISSIONS;
+      }
+
       var model = new This(req.body);
       model.save(function(err, group) {
         if(err) return error(err, res);
@@ -250,14 +295,15 @@ module.exports = function(GroupModel, UserModel) {
     });
 
     app.post(url(), parentLookup, create);
-    app.get(url([":id"]), lookup);
-    app.put(url([":id"]), update);
-    app.del(url([":id"]), remove);
+    app.get(url([":id"]), authorize(["view"]), lookup);
+    app.put(url([":id"]), authorize(["view"]), update);
+    app.del(url([":id"]), authorize(["view"]), remove);
 
     if(This.parent) {
       app.get(
         url([parent_resource, ":parent_id", resource]),
         parentLookup,
+        authorize(["view"]),
         function(req, res) {
           This.find(
             { parent_id: req.params.parent_id },
@@ -272,18 +318,21 @@ module.exports = function(GroupModel, UserModel) {
       app.get(
         url([parent_resource, ":parent_id", resource, ":id"]),
         parentLookup,
+        authorize(["view"]),
         lookup
       );
 
       app.post(
         url([parent_resource, ":parent_id"]),
-        parentLookup, 
+        parentLookup,
+        authorize(["create"]),
         create
       );
 
       app.put(
         url([parent_resource, ":parent_id", resource, ":id"]),
         parentLookup,
+        authorize(["edit"]),
         update
       );
     }
@@ -302,6 +351,7 @@ module.exports = function(GroupModel, UserModel) {
     G.ROLES = o.roles;
     G.FIELDS = o.fields||[];
     G.PARENT = o.parent;
+    G.PERMISSIONS = o.permissions;
 
     // Inherit static methods
     Object.keys(Group).forEach(function(method) {

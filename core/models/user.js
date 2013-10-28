@@ -1158,6 +1158,7 @@ function factory(kabam) {
   UserSchema.methods.canRead = function (user, callback) {
     callback(null, user && user.root);
   };
+  
   /**
    * @ngdoc function
    * @name User.canWrite
@@ -1167,8 +1168,20 @@ function factory(kabam) {
    * @param {User} user - user to test privileges, for example, the one from request object
    * @param {function} callback - function(err, booleanValueCanWrite)
    */
-  UserSchema.methods.canWrite = function (user, callback) {
+  UserSchema.methods.canWrite = function(user, callback) {
     callback(null, user && user.root);
+  };
+
+  /**
+   * @ngdoc function
+   * @name User.canWrite
+   * @description
+   * Can this user perform 'actions' on Group identified by 'group_id'
+   * @param {User} user - user to test privileges, for example, the one from request object
+   * @param {function} callback - function(err, booleanValueCanWrite)
+   */
+  UserSchema.methods.can = function(actions, group_id, callback) {
+    
   };
 
   /**
