@@ -38,6 +38,7 @@ module.exports = function(GroupModel, UserModel) {
       query = {};
     }
     query.group_type = this.name;
+
     GroupModel.find(query, function(err, groups) {
       callback(err, clean(groups));
     });
@@ -216,6 +217,7 @@ module.exports = function(GroupModel, UserModel) {
 
     function authorize(actions) {
       return function(req, res, next) {
+        var user = req.session.user;
         var group;
         if(req.params.id) {
           group = req.this;
@@ -290,11 +292,13 @@ module.exports = function(GroupModel, UserModel) {
     // e.g. GET /organizations
     app.get(url(), function(req, res) {
       var groups = req.session.user.groups;
+      console.log(This);
       This.find(
         {
           "_id": { "$in": groups }
         },
         function(err, groups) {
+          console.log("wtf!!");
           if(err) return error(err, res);
           res.send(clean(groups));
         }

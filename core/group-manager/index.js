@@ -1,8 +1,9 @@
-var mongoose = require("mongoose");
+// var mongoose = require("mongoose");
 
 exports.name = "kabam-core-group-manager";
 
-function GroupModel() {
+function GroupModel(kabam) {
+  var mongoose = kabam.mongoose;
   var Schema = mongoose.Schema
     , ObjectId = Schema.ObjectId;
 
@@ -45,17 +46,17 @@ function GroupModel() {
   );
 }
 
-function UserModel() {
-  var kabam = {
-    mongoose: mongoose
-  };
+function UserModel(kabam) {
+  // var kabam = {
+  //   mongoose: mongoose
+  // };
   var schema = require("../models/user").model.User(kabam);
-  return mongoose.model("UserModel", schema);
+  return kabam.mongoose.model("UserModel", schema);
 }
 
 exports.core = function(kabam) {
-  var Group = GroupModel();
-  var User = UserModel();
+  var Group = GroupModel(kabam);
+  var User = UserModel(kabam);
 
   // This should be done upper in the chain
   kabam.mw || (kabam.mw = {});

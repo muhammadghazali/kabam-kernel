@@ -655,8 +655,9 @@ function KabamKernel(config) {
 
   // default plugins
   this.usePlugin(require('./core/redis-client'));
-  this.usePlugin(require('./core/group-manager'));
   this.usePlugin(require('./core/mongoose'));
+  this.usePlugin(require('./core/group-manager'));
+  this.usePlugin(require('./core/model-loader'));
   this.usePlugin(require('./core/models/user'));
   this.usePlugin(require('./core/models/group'));
   this.usePlugin(require('./core/models/message'));
