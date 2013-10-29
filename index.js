@@ -498,6 +498,39 @@ function KabamKernel(config) {
 
   /**
    * @ngdoc function
+   * @name kabamKernel.compose
+   * @description
+   * Composes all plugins together and freezes the app, you cannot install more plugins after composing.
+   * Application is composed automatically when it is started, so this method should be used only when you need
+   * a KabamKernel instance without launching the app itself.
+   */
+  this.compose = function(){
+    prepared = true;
+
+    // creating config
+    this.config = configBuilder(this.config || {});
+
+    // dependencies used by some plugins
+    this.extensions = {
+      models: additionalModels,
+      strategies: additionalStrategies
+    };
+
+    //initialize expressJS application
+    this.app = appBuilder(
+      thisKabam,
+      extendCoreFunctions,
+      extendAppFunctions,
+      extendMiddlewareFunctions,
+      extendRoutesFunctions,
+      catchAllFunction
+    );
+
+    return this;
+  };
+
+  /**
+   * @ngdoc function
    * @name kabamKernel.start
    * @description
    * Start kabam application
@@ -550,32 +583,15 @@ function KabamKernel(config) {
    * ```
    */
   this.start = function (method) {
-    prepared = true;
-
     // rewriting all port configuration, port specified in start has highest priority
     if(typeof method === 'number'){
       this.config.PORT = method;
     }
 
-    // creating config
-    this.config = configBuilder(this.config || {});
+    // composing the app
+    this.compose();
 
-    // dependencies used by some plugins
-    this.extensions = {
-      models: additionalModels,
-      strategies: additionalStrategies
-    };
-
-    //initialize expressJS application
-    thisKabam.app = appBuilder(
-      thisKabam,
-      extendCoreFunctions,
-      extendAppFunctions,
-      extendMiddlewareFunctions,
-      extendRoutesFunctions,
-      catchAllFunction
-    );
-
+    // launching the app
     if (method === 'app') {
       thisKabam.emit('started', { 'type': 'app' });
       return thisKabam;
@@ -652,26 +668,6 @@ function KabamKernel(config) {
       return false;
     }
   };
-
-  // default plugins
-  this.usePlugin(require('./core/redis-client'));
-  this.usePlugin(require('./core/mongoose'));
-  this.usePlugin(require('./core/models/user'));
-  this.usePlugin(require('./core/models/group'));
-  this.usePlugin(require('./core/models/message'));
-  this.usePlugin(require('./core/passport'));
-  this.usePlugin(require('./core/strategies/facebook'));
-  this.usePlugin(require('./core/strategies/github'));
-  this.usePlugin(require('./core/strategies/google'));
-  this.usePlugin(require('./core/strategies/hash'));
-  this.usePlugin(require('./core/strategies/linkedin'));
-  this.usePlugin(require('./core/strategies/local'));
-  this.usePlugin(require('./core/strategies/twitter'));
-  this.usePlugin(require('./core/app'));
-  this.usePlugin(require('./core/socket-io'));
-  this.usePlugin(require('./core/rate-limiter'));
-  this.usePlugin(require('./core/toobusy'));
-  this.usePlugin(require('./core/api'));
 }
 
 util.inherits(KabamKernel, EventEmitter);
@@ -719,9 +715,25 @@ KabamKernel.prototype.injectEmit = function (object) {
 
 /**
  * @ngdoc function
- * @name kabamKernel.create
+ * @name kabamKernel.stop
  * @description
- * Create Kabam object instance (factory)
+ * Stops kabamKernel instance - close redis and mongo connections.
+ */
+KabamKernel.prototype.stop = function () {
+  this.emit('stop');
+  this.redisClient.end();
+  this.mongoose.connection.close();
+  this.mongoose.disconnect();
+  this.removeAllListeners();
+  return;
+};
+
+
+/**
+ * @ngdoc function
+ * @name kabamFactory
+ * @description
+ * Create Kabam object instance (factory) with se set of default plugins
  * @param {object} config - config object
  * @example
  * ```javascript
@@ -749,26 +761,36 @@ KabamKernel.prototype.injectEmit = function (object) {
  *
  * ```
  */
-KabamKernel.create = function (config) {
-  return new KabamKernel(config);
-};
+function kabamFactory(config){
+  var kernel = new KabamKernel(config);
+  // default plugins
+  kernel.usePlugin(require('./core/redis-client'));
+  kernel.usePlugin(require('./core/mongoose'));
+  kernel.usePlugin(require('./core/models/user'));
+  kernel.usePlugin(require('./core/models/group'));
+  kernel.usePlugin(require('./core/models/message'));
+  kernel.usePlugin(require('./core/encrypt-decrypt'));
+  kernel.usePlugin(require('./core/passport'));
+  kernel.usePlugin(require('./core/strategies/facebook'));
+  kernel.usePlugin(require('./core/strategies/github'));
+  kernel.usePlugin(require('./core/strategies/google'));
+  kernel.usePlugin(require('./core/strategies/hash'));
+  kernel.usePlugin(require('./core/strategies/linkedin'));
+  kernel.usePlugin(require('./core/strategies/local'));
+  kernel.usePlugin(require('./core/strategies/twitter'));
+  kernel.usePlugin(require('./core/app'));
+  kernel.usePlugin(require('./core/socket-io'));
+  kernel.usePlugin(require('./core/rate-limiter'));
+  kernel.usePlugin(require('./core/toobusy'));
+  kernel.usePlugin(require('./core/api'));
 
-/**
- * @ngdoc function
- * @name kabamKernel.stop
- * @description
- * Stops kabamKernel instance - close redis and mongo connections.
- */
-KabamKernel.prototype.stop = function () {
-  this.emit('stop');
-  this.redisClient.end();
-  this.mongoose.connection.close();
-  this.mongoose.disconnect();
-  this.removeAllListeners();
-  return;
-};
+  return kernel;
+}
 
-module.exports = exports = KabamKernel.create;
+// allow to get the kernel constructor itself
+kabamFactory.KabamKernel = KabamKernel;
+
+module.exports = kabamFactory;
 
 /**
  * @ngdoc function

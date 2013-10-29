@@ -1,15 +1,15 @@
 /*jshint immed: false */
 'use strict';
-var
-  // jshint unused:false
-  should = require('should'),
-  async = require('async'),
+var async = require('async'),
   mongoose = require('mongoose'),
   kabamKernel = require('./../index.js'),
+  createKabam = require('./helpers').createKabam,
   port = Math.floor(2000 + 1000 * Math.random());
 
+require('should');
+
 describe('groups testing', function () {
-  var kabam, config, connection;
+  var kabam, config;
   before(function (done) {
 
     config = {
@@ -18,16 +18,10 @@ describe('groups testing', function () {
       'SECRET': 'ever_the_youngest_of_Mosirai_knows_that_you_cannot_put_humans_hide_on_a_bear'
     };
 
-    kabam = kabamKernel(config);
-
-    connection = mongoose.createConnection(config.MONGO_URL);
-    connection.on('open', function () {
-      connection.db.dropDatabase(function () {
-        kabam.on('started', function () {
-          done();
-        });
-        kabam.start(port);
-      });
+    createKabam(port, config, function(err, _kabam){
+      if(err){return done(err);}
+      kabam = _kabam;
+      done();
     });
   });
 //*/
