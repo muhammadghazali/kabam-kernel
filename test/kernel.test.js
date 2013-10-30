@@ -8,9 +8,19 @@ var should = require('should'),
   request = require('request'),
   port = Math.floor(2000 + 1000 * Math.random());
 
-describe('Kernel', function () {
 
-  var Kabam;
+describe('kabamKernel', function(){
+  it('should be a function', function(){
+    kabamKernel.should.have.type('function');
+  });
+  it('should have KabamKernel constructor', function(){
+    (new kabamKernel.KabamKernel()).should.be.an.instanceOf(kabamKernel.KabamKernel);
+  })
+});
+
+describe('Kernel instance', function () {
+
+  var kabam;
 
 
   /*
@@ -119,36 +129,36 @@ describe('Kernel', function () {
   before(function (done) {
     process.setMaxListeners(0);
 
-    Kabam = kabamKernel(config);
+    kabam = kabamKernel(config);
 
-    Kabam.extendCore('sum', function (/*config*/) {
+    kabam.extendCore('sum', function (/*config*/) {
       return function (a, b) {
         return a + b;
       };
     });
-    Kabam.extendCore(function(){
+    kabam.extendCore(function(){
       return {
         sub: function(a, b){return a-b;}
       };
     });
-    Kabam.extendCore('SomeVar', 42);
+    kabam.extendCore('SomeVar', 42);
 
-    Kabam.extendModel('Cats', extendModelFunction);
+    kabam.extendModel('Cats', extendModelFunction);
 
-    Kabam.extendApp(['development', 'staging'], extendAppParametersFunction1);
-    Kabam.extendApp('development', extendAppParametersFunction2);
-    Kabam.extendApp('production', extendAppParametersFunction3);
+    kabam.extendApp(['development', 'staging'], extendAppParametersFunction1);
+    kabam.extendApp('development', extendAppParametersFunction2);
+    kabam.extendApp('production', extendAppParametersFunction3);
 
-    Kabam.extendMiddleware(extendAppMiddlewareFunction1);
-    Kabam.extendMiddleware('staging', extendAppMiddlewareFunction2);
-    Kabam.extendMiddleware(['staging', 'production'], extendAppMiddlewareFunction3);
-    Kabam.extendMiddleware(['development'], '/middleware3Path', extendAppMiddlewareFunction3);
-    Kabam.extendMiddleware('development', '/middleware4Path', extendAppMiddlewareFunction4);
+    kabam.extendMiddleware(extendAppMiddlewareFunction1);
+    kabam.extendMiddleware('staging', extendAppMiddlewareFunction2);
+    kabam.extendMiddleware(['staging', 'production'], extendAppMiddlewareFunction3);
+    kabam.extendMiddleware(['development'], '/middleware3Path', extendAppMiddlewareFunction3);
+    kabam.extendMiddleware('development', '/middleware4Path', extendAppMiddlewareFunction4);
 
-    Kabam.extendRoutes(extendRoutesFunction);
+    kabam.extendRoutes(extendRoutesFunction);
     //*/
 
-    Kabam.usePlugin({
+    kabam.usePlugin({
       'name': 'unitTestPlugin',
       'core': {'mul': function (config) {
         return function (a, b) {
@@ -162,80 +172,81 @@ describe('Kernel', function () {
     });
     //*/
     //create and start this application
-    Kabam.start(port);
+    kabam.start(port);
     setTimeout(done, 1000);
   });
 
-//  after(function(done){
-//    Kabam.mongoose.disconnect();
-//    done();
-//  });
+  after(function (done) {
+    kabam.stop();
+    done();
+  });
+
   describe('Testing exposed objects of running kabamKernel', function () {
 
     it('can emit and listen to events', function () {
-      Kabam.emit.should.be.type('function');
-      Kabam.on.should.be.type('function');
+      kabam.emit.should.be.type('function');
+      kabam.on.should.be.type('function');
     });
 
     it('exposes redis client', function () {
-      Kabam.redisClient.should.be.type('object');
-      Kabam.redisClient.set.should.be.type('function');
-      Kabam.redisClient.get.should.be.type('function');
-      Kabam.redisClient.info.should.be.type('function');
-      Kabam.redisClient.auth.should.be.type('function');
+      kabam.redisClient.should.be.type('object');
+      kabam.redisClient.set.should.be.type('function');
+      kabam.redisClient.get.should.be.type('function');
+      kabam.redisClient.info.should.be.type('function');
+      kabam.redisClient.auth.should.be.type('function');
     });
 
     it('exposes mongoose model', function () {
-      Kabam.model.should.be.type('object');
+      kabam.model.should.be.type('object');
     });
 
     it('exposes mongoose model of users', function () {
-      Kabam.model.User.should.be.type('function');
+      kabam.model.User.should.be.type('function');
 //      Kabam.model.Users.should.be.type('function');
     });
 
     it('exposes mongoose model of messages', function () {
-      Kabam.model.Message.should.be.type('function');
+      kabam.model.Message.should.be.type('function');
 //      Kabam.model.Messages.should.be.type('function');
     });
 
     it('exposes an ExpressJS application', function () {
-      Kabam.app.should.be.type('function');
-      Kabam.app.listen.should.be.type('function');
-      Kabam.app.use.should.be.type('function');
-      Kabam.app.get.should.be.type('function');
-      Kabam.app.post.should.be.type('function');
-      Kabam.app.delete.should.be.type('function');
+      kabam.app.should.be.type('function');
+      kabam.app.listen.should.be.type('function');
+      kabam.app.use.should.be.type('function');
+      kabam.app.get.should.be.type('function');
+      kabam.app.post.should.be.type('function');
+      kabam.app.delete.should.be.type('function');
     });
 
     it('throws error when we try to extend readied application', function () {
 
       (function () {
-        Kabam.extendCore(function () {
+        kabam.extendCore(function () {
           throw new Error('Core was extended for READIED application!');
         });
       }).should.throw('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
 
       (function () {
-        Kabam.extendApp(['development', 'staging'], function () {
+        kabam.extendApp(['development', 'staging'], function () {
           throw new Error('Core app parameters were extended for READIED application!');
         });
       }).should.throw('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
 
       (function () {
-        Kabam.extendMiddleware(['development', 'staging'], function () {
+        kabam.extendMiddleware(['development', 'staging'], function () {
           throw new Error('Core app middlewares were extended for READIED application!');
         });
       }).should.throw('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
 
       (function () {
-        Kabam.extendRoutes(function () {
+        kabam.extendRoutes(function () {
           throw new Error('Core app routes were extended for READIED application!');
         });
       }).should.throw('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
 
       (function () {
-        Kabam.usePlugin('kabam_plugin_make_suicide_while_punching_wall_on_high_speed');
+        kabam.usePlugin('kabam_plugin_make_suicide_while_punching_wall_on_high_speed');
       }).should.throw('Kabam core application is already prepared! WE CAN\'T EXTEND IT NOW!');
 
     });
@@ -247,8 +258,7 @@ describe('Kernel', function () {
       message;
 
     before(function (done) {
-      var promise = new events.EventEmitter(),
-        kabam = Kabam;
+      var promise = new events.EventEmitter();
 
       kabam.on('error', function (err) {
         promise.emit('error', err);
@@ -277,40 +287,40 @@ describe('Kernel', function () {
 
   describe('Testing kabam_core express application', function () {
     it('it exposes a #Kabam.app object', function () {
-      Kabam.app.should.be.type('function');
+      kabam.app.should.be.type('function');
     });
   });
 
   describe('#Kabam.extendCore()', function () {
     it('actually adds new functions to #Kabam', function () {
-      Kabam.SomeVar.should.be.equal(42);
-      Kabam.sum.should.be.type('function');
-      Kabam.sum(2, 2).should.equal(4);
-      Kabam.sub.should.be.type('function');
-      Kabam.sub(5, 3).should.equal(2);
+      kabam.SomeVar.should.be.equal(42);
+      kabam.sum.should.be.type('function');
+      kabam.sum(2, 2).should.equal(4);
+      kabam.sub.should.be.type('function');
+      kabam.sub(5, 3).should.equal(2);
     });
   });
 
   describe('#Kabam.extendModel()', function () {
 
     it('adds the model of "Cats" to #Kabam.model.Cats', function () {
-      Kabam.model.Cats.should.be.type('function');
+      kabam.model.Cats.should.be.type('function');
     });
     describe('and the "Cats" model looks like mongoose model', function () {
       it('exposes function find', function () {
-        Kabam.model.Cats.find.should.be.type('function');
+        kabam.model.Cats.find.should.be.type('function');
       });
       it('exposes function findOne', function () {
-        Kabam.model.Cats.findOne.should.be.type('function');
+        kabam.model.Cats.findOne.should.be.type('function');
       });
       it('exposes function count', function () {
-        Kabam.model.Cats.count.should.be.type('function');
+        kabam.model.Cats.count.should.be.type('function');
       });
       it('exposes function remove', function () {
-        Kabam.model.Cats.remove.should.be.type('function');
+        kabam.model.Cats.remove.should.be.type('function');
       });
       it('exposes function create', function () {
-        Kabam.model.Cats.create.should.be.type('function');
+        kabam.model.Cats.create.should.be.type('function');
       });
     });
   });
@@ -323,9 +333,9 @@ describe('Kernel', function () {
     });
 
     it('actually works', function () {
-      Kabam.app.get('TempVar1').should.equal('TempVar1');
-      Kabam.app.get('TempVar2').should.equal('TempVar2');
-      if (typeof Kabam.app.get('TempVar3') !== 'undefined') {
+      kabam.app.get('TempVar1').should.equal('TempVar1');
+      kabam.app.get('TempVar2').should.equal('TempVar2');
+      if (typeof kabam.app.get('TempVar3') !== 'undefined') {
         throw new Error('We set app parameter for wrong environment!');
       }
     });
@@ -408,30 +418,30 @@ describe('Kernel', function () {
     describe('extendCore from plugin', function () {
 
       it('it actually adds new functions to #Kabam.core', function () {
-        Kabam.mul.should.be.type('function');
-        Kabam.mul(3, 2).should.equal(6);
+        kabam.mul.should.be.type('function');
+        kabam.mul(3, 2).should.equal(6);
       });
     });
 
     describe('extendModel from plugin', function () {
       it('adds the model of "Dogs" to #Kabam.model.Dogs', function () {
-        Kabam.model.Dogs.should.be.type('function');
+        kabam.model.Dogs.should.be.type('function');
       });
       describe('and the "Dogs" model looks like mongoose model', function () {
         it('exposes function find', function () {
-          Kabam.model.Dogs.find.should.be.type('function');
+          kabam.model.Dogs.find.should.be.type('function');
         });
         it('exposes function findOne', function () {
-          Kabam.model.Dogs.findOne.should.be.type('function');
+          kabam.model.Dogs.findOne.should.be.type('function');
         });
         it('exposes function count', function () {
-          Kabam.model.Dogs.count.should.be.type('function');
+          kabam.model.Dogs.count.should.be.type('function');
         });
         it('exposes function remove', function () {
-          Kabam.model.Dogs.remove.should.be.type('function');
+          kabam.model.Dogs.remove.should.be.type('function');
         });
         it('exposes function create', function () {
-          Kabam.model.Dogs.create.should.be.type('function');
+          kabam.model.Dogs.create.should.be.type('function');
         });
       });
     });
@@ -439,7 +449,7 @@ describe('Kernel', function () {
     describe('extendApp from plugin', function () {
 
       it('it works', function () {
-        Kabam.app.get('extendAppParametersFunctionPlugin').should.equal('extended111');
+        kabam.app.get('extendAppParametersFunctionPlugin').should.equal('extended111');
       });
     });
 
@@ -552,11 +562,12 @@ describe('Kernel', function () {
         parseInt(response.headers['x-ratelimit-remaining']).should.be.below(401);
       });
     });
-
   });
 
-  after(function (done) {
-    Kabam.stop();
-    done();
+  describe('Kabam#encrypt, Kabam#decrypt', function(){
+    it('they should encrypt/decrypt text', function(){
+      kabam.decrypt(kabam.encrypt('secret message')).should.be.equal('secret message');
+    });
   });
+
 });

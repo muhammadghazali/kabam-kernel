@@ -495,7 +495,7 @@ function factory(kabam) {
    * Returns the current user object without sensitive data
    * - apiKey, salt, passwords.
    * For now it returns object with
-   *   `username`, `lang`, `root`, `isBanned`,
+   *   `_id`, `username`, `lang`, `root`, `isBanned`,
    *   `roles`, `skype`, `lastName`, 'firstName', `profileComplete`, `isOnline`
    *
    * @return {object} - object of user profile with stripped sensitive
@@ -503,6 +503,7 @@ function factory(kabam) {
    */
   UserSchema.methods.export = function () {
     var exportableProperties = [
+        '_id',
         'username',
         'email',
         'gravatar',
@@ -527,6 +528,18 @@ function factory(kabam) {
     }
     return ret;
   };
+
+  /**
+   * @ngdoc function
+   * @name User.safeJSON
+   * @description
+   * Returns a JSON encoded string with the user info. Safe to include in scripts
+   * @return {string} - JSON encoded string with the user info
+   */
+  UserSchema.methods.safeJSON = function () {
+    return JSON.stringify(this.export()).replace('</', '<\/');
+  };
+
   /**
    * @ngdoc function
    * @name kabamKernel.model.User.ban
