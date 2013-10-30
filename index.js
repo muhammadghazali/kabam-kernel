@@ -3,8 +3,9 @@ var EventEmitter = require('events').EventEmitter,
   util = require('util'),
   appBuilder = require('./lib/app-builder'),
   configBuilder = require('./lib/config-builder.js'),
-  // jshint unused: false
-  colors = require('colors');
+  logger = require('./lib/logging').getLogger('kabam-kernel', module);
+
+require('colors');
 
 /**
  * @ngdoc function
@@ -605,7 +606,7 @@ function KabamKernel(config) {
 
     thisKabam.httpServer.listen(thisKabam.config.PORT, function () {
       thisKabam.emit('started', {'port': thisKabam.config.PORT, 'type': 'expressHttp'});
-      console.log(('KabamKernel started on ' + thisKabam.config.PORT + ' port').blue);
+      logger.info(('KabamKernel started on ' + thisKabam.config.PORT + ' port').blue);
     });
 
     return thisKabam;
@@ -643,21 +644,21 @@ function KabamKernel(config) {
 
 
     if (cluster.isMaster) {
-      console.log(('Cluster : We have ' + numCPUs + ' CPU cores present. We can use ' + maxWorkers + ' of them.').bold.green);
-      console.log(('Cluster : Master PID#' + process.pid + ' is online').green);
+      logger.info(('Cluster : We have ' + numCPUs + ' CPU cores present. We can use ' + maxWorkers + ' of them.').bold.green);
+      logger.info(('Cluster : Master PID#' + process.pid + ' is online').green);
       // Fork workers.
       for (i = 0; i < maxWorkers; i = i + 1) {
         var worker = cluster.fork();
-        console.log(('Cluster : Spawning worker with PID#' + worker.process.pid).green);
+        logger.info(('Cluster : Spawning worker with PID#' + worker.process.pid).green);
       }
 
       cluster.on('online', function (worker) {
-        console.log(('Cluster : Worker PID#' + worker.process.pid + ' is online').green);
+        logger.info(('Cluster : Worker PID#' + worker.process.pid + ' is online').green);
       });
 
       cluster.on('exit', function (worker, code, signal) {
         var exitCode = worker.process.exitCode;
-        console.log(('Cluster : Worker #' + worker.process.pid + ' died (' + exitCode + '). Respawning...').yellow);
+        logger.info(('Cluster : Worker #' + worker.process.pid + ' died (' + exitCode + '). Respawning...').yellow);
         cluster.fork();
       });
 
