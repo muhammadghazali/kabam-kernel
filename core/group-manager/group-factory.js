@@ -183,7 +183,6 @@ module.exports = function(kabam) {
     }
 
     function _authorize() {
-      console.log("_authorize");
       // Check if user has at least one of the roles
       var User = kabam.model.User;
       User.findOne({ "_id": user_id, roles: { "$in": roles }}, function(err, user) {
@@ -203,9 +202,18 @@ module.exports = function(kabam) {
     });
   };
 
-  Group.restify = function(app) {
+  Group.restify = function(app, options) {
     var This = this;
 
+    options = options || {};
+    var includeChildren = options.includeChildren || [];
+
+    // var resource = (function() {
+    //   return (
+    //     options.urlAlias 
+    //     || This.name.toLowerCase()
+    //   )+"s";
+    // })();
     var resource = This.name.toLowerCase()+"s";
     var parent_resource = This.PARENT && This.PARENT.toLowerCase()+"s";
 
@@ -285,7 +293,20 @@ module.exports = function(kabam) {
     }
     
     function read(req, res) {
-      res.send(req.group);
+      if(includeChildren.length) {
+        includeChildren.forEach(function(modelType) {
+          var ChildGroup = kabam.model[modelType];
+          if(ChildGroup) {
+            ChildGroup.find({ parent_id: req.group._id }, function(err, children) {
+              var name = ChildGroup.name.toLowerCase()+"s";
+              req.group[name] = children;
+              res.send(req.group);
+            });
+          }
+        });
+      } else {
+        res.send(req.group);
+      }
     }
 
     function create(req, res, next) {
