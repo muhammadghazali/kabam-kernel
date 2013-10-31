@@ -116,6 +116,15 @@ function factory(kabam) {
       /**
        * @ngdoc value
        * @methodOf User
+       * @name User.rootGroup
+       * @description
+       * The default/root group for this user
+       */
+      rootGroup: { type: kabam.mongoose.Schema.Types.ObjectId, ref: 'GroupModel' },
+
+      /**
+       * @ngdoc value
+       * @methodOf User
        * @name User.firstName
        * @description
        * Firts name of user
@@ -187,7 +196,7 @@ function factory(kabam) {
        * Role is defined IN group, not here
        */
       groups: [
-        { type: kabam.mongoose.Schema.Types.ObjectId, ref: 'Group' }
+        { type: kabam.mongoose.Schema.Types.ObjectId, ref: 'GroupModel' }
       ]
     },{
       toObject: { getters: true, virtuals: true }, //http://mongoosejs.com/docs/api.html#document_Document-toObject
@@ -1476,8 +1485,37 @@ function factory(kabam) {
     });
   };
 
+  /**
+   * @ngdoc function
+   * @name User#getRootGroup
+   * @description
+   * Gets the root group of this User. Will create the root group
+   * if it does not exist
+   * @param {function} callback - function(err, rootGroup);
+   */
+  UserSchema.methods.getRootGroup = function(callback) {
+    var user = this;
+    var RootGroup = kabam.model[kabam.groups.rootGroupType];
+    if(user.rootGroup) {
+      RootGroup.findById(user.rootGroup, callback);
+    } else {
+      var group_type = RootGroup.name;
+      var group = new RootGroup({
+        name: user.username+"'s "+group_type,
+        owner: user._id
+      });
+      group.save(function(err, root) {
+        user.set("rootGroup", root._id);
+        user.save(function(err, u) {
+          callback(null, root);
+        });
+      });
+    }
+  };
+
   return UserSchema;
 }
+
 
 exports.name = 'kabam-core-models-user';
 exports.model = {

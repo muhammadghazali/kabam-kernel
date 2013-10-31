@@ -1,24 +1,29 @@
 var util = require("util");
 var noop = function() {};
 
-module.exports = function(GroupModel, UserModel) {
+module.exports = function(kabam) {
+  var GroupModel = kabam.groups.__Group;
+
   function Group(data) {
+    var This = this.constructor;
     var _this = this;
     this.data = {};
     this.members = [];
 
     if(
+      data &&
       typeof data === "object" &&
       !(data instanceof Array)
     ) {
       // canonical fields
-      this.set("_id", data._id);
+      if(data._id) this.set("_id", data._id);
       this.set("name", data.name);
       this.set("description", data.description);
       this.set("group_type", this.constructor.name);
       this.set("owner", data.owner);
       this.set("parent_id", data.parent_id);
-      this.set("custom", data.custom)
+      this.set("custom", data.custom);
+      this.set("_permissions", data._permissions || This.PERMISSIONS);
 
       // custom fields
       var FIELDS = this.constructor.FIELDS;
@@ -26,7 +31,7 @@ module.exports = function(GroupModel, UserModel) {
         if(data[field]) {
           _this.setCustom(field, data[field]);  
         }
-      });
+      });    
     } else {
       throw new Error("Can't create Group instance");
     }
@@ -76,7 +81,8 @@ module.exports = function(GroupModel, UserModel) {
   Group.prototype.getMembers = function(callback) {
     var _this = this;
 
-    UserModel.find({ groups: this._id }, function(err, users) {
+    var User = kabam.model.User;
+    User.find({ groups: this._id }, function(err, users) {
       if(err) return callback(err);
 
       var members = clean(users, 
@@ -105,7 +111,8 @@ module.exports = function(GroupModel, UserModel) {
       return callback("GroupType "+_this.group_type+" does not accept role "+member.access);
     }
 
-    UserModel.findById(member.member_id, function(err, user) {
+    var User = kabam.model.User;
+    User.findById(member.member_id, function(err, user) {
       if(err) return callback(err);
 
       var roleLevel = ROLES.indexOf(member.access);
@@ -129,9 +136,8 @@ module.exports = function(GroupModel, UserModel) {
   };
 
   Group.prototype.authorize = function(user_id, actions, callback) {
-
     // If user is owner of Group he can do everything
-    if(user_id === this.owner.toString()) {
+    if(user_id.toString() === this.data.owner.toString()) {
       return callback(null, true);
     }
 
@@ -140,8 +146,9 @@ module.exports = function(GroupModel, UserModel) {
     addRoles(this);
     getParent(this);
     function getParent(group) {
-      if(group.parent_id) {
-        GroupModel.findById(group.parent_id, function(err, parent) {
+      if(group.data.parent_id) {
+        var Group = kabam.model[group.data.group_type];
+        Group.findById(group.data.parent_id, function(err, parent) {
           addRoles(parent);
           getParent(parent);
         });
@@ -150,20 +157,19 @@ module.exports = function(GroupModel, UserModel) {
       }
     }    
 
-    // Build all roles that have permissions and perform
-    // authorization check
+    // Build all roles that have permissions 
     function addRoles(group) {
-      Object.keys(group._permissions).filter(function(p) {
+      Object.keys(group.data._permissions).filter(function(p) {
         return actions.indexOf(p) > -1;
       })
       .map(function(action) {
         // By default 'admin' role can do everything, 
         // so it does not need to be explicitly defined
         // in the permissions matrix
-        group._permissions[action].unshift("admin");
+        group.data._permissions[action].unshift("admin");
         
-        return group._permissions[action].map(function(r) {
-          var role = group.group_type.toLowerCase()+":";
+        return group.data._permissions[action].map(function(r) {
+          var role = group.data.group_type.toLowerCase()+":";
           role += group._id+":";
           role += r;
           return role;
@@ -177,8 +183,10 @@ module.exports = function(GroupModel, UserModel) {
     }
 
     function _authorize() {
-      // Check if user has at least one the roles
-      UserModel.findOne({ "_id": user_id, roles: { "$in": roles }}, function(err, user) {
+      console.log("_authorize");
+      // Check if user has at least one of the roles
+      var User = kabam.model.User;
+      User.findOne({ "_id": user_id, roles: { "$in": roles }}, function(err, user) {
         if(err) return callback(err);
         callback(null, !!user);
       });      
@@ -199,10 +207,10 @@ module.exports = function(GroupModel, UserModel) {
     var This = this;
 
     var resource = This.name.toLowerCase()+"s";
-    var parent_resource = This.parent && This.parent.toLowerCase()+"s";
+    var parent_resource = This.PARENT && This.PARENT.toLowerCase()+"s";
 
     var url = function(path) {
-      var _url = "/";
+      var _url = "/api/";
       if(!path || !path.length) {
         _url += resource;
       } else {
@@ -217,12 +225,14 @@ module.exports = function(GroupModel, UserModel) {
 
     function authorize(actions) {
       return function(req, res, next) {
-        var user = req.session.user;
+        var user = req.user;
         var group;
         if(req.params.id) {
-          group = req.this;
-        } else if(req.params.parent_id) {
+          group = req.group;
+        } else if(req.params.parent_id || req.body.parent_id) {
           group = req.parent;
+        } else {
+          group = req.rootGroup;
         }
         group.authorize(user._id, actions, function(err, authorized) {
           if(!authorized) return res.send(403);
@@ -232,14 +242,19 @@ module.exports = function(GroupModel, UserModel) {
     }
 
     function parentLookup(req, res, next) {
-      if(!This.parent) return next();
+      if(!This.PARENT) return next();
 
-      var group_id = req.body.parent_id || req.params.parent_id;
+      var group_id = 
+        (req.group && req.group.data.parent_id)
+        || req.body.parent_id 
+        || req.params.parent_id;
+      
       if(!group_id) {
         return res.send("Should contain parent_id", 400);
       }
 
-      This.parent.findById(function(err, parent) {
+      var ParentGroup = kabam.model[This.PARENT];
+      ParentGroup.findById(group_id, function(err, parent) {
         if(err) return error(err, res);
         if(!parent) return res.send("Parent does not exist", 404);
         req.parent = parent;
@@ -247,30 +262,40 @@ module.exports = function(GroupModel, UserModel) {
       });
     }
 
-    function lookup(req, res, next) {
-      This.findById(req.params.id, function(err, group) {
-        if(err) return error(err, res);
-        if(!group) return res.send(404);
-        req.group = group;
-
-        parentLookup(req, res, next);
+    function rootGroup(req, res, next) {
+      req.user.getRootGroup(function(err, group) {
+        req.rootGroup = group;
+        next();
       });
+    }
+
+    function lookup(req, res, next) {
+      var group_id = req.params.id;// || req.user.rootGroup;
+
+      if(group_id) {
+        This.findById(group_id, function(err, group) {
+          if(err) return error(err, res);
+          if(!group) return res.send(404);
+          req.group = group;
+          parentLookup(req, res, next);
+        });        
+      } else {
+        parentLookup(req, res, next);
+      }
     }
     
     function read(req, res) {
-      res.send(clean(req.group));
+      res.send(req.group);
     }
 
     function create(req, res, next) {
       var data = req.body;
+      data.owner = req.user._id;
 
-      data._permissions || (data._permissions = This.PERMISSIONS);
-      data.owner = req.session.user._id;
-
-      var model = new This(req.body);
+      var model = new This(data);
       model.save(function(err, group) {
         if(err) return error(err, res);
-        res.send(clean(group), 201);
+        res.send(group, 201);
       });
     }
 
@@ -288,36 +313,61 @@ module.exports = function(GroupModel, UserModel) {
       });
     }
 
+    function addMember(req, res, next) {
+      var group_type = req.group_type;
+      This.findById(req.params.id, function(err, group) {
+        if(err) return error(err, res);
+        if(!group) return res.send(404);
+
+        group.addMember({
+          member_id: req.body.member_id,
+          access: req.body.access
+        }, function() {
+          res.send({ ok: 1 });
+        });
+      });
+    };
+
     // GET /:group_type
     // e.g. GET /organizations
-    app.get(url(), function(req, res) {
-      var groups = req.session.user.groups;
-      console.log(This);
+    app.get(url(), rootGroup, function(req, res) {
+      var groups = req.user.groups;
       This.find(
         {
-          "_id": { "$in": groups }
+          "$or": [
+            { "_id": { "$in": groups } },
+            { "owner": req.user._id }
+          ]
         },
         function(err, groups) {
-          console.log("wtf!!");
           if(err) return error(err, res);
-          res.send(clean(groups));
+          res.send(groups);
         }
       );
     });
     // GET /:group_type/:id
     // e.g. GET /organizations/123
-    app.get(url([":id"]), authorize(["view"]), lookup, read);
+    app.get(url([resource, ":id"]), lookup, authorize(["view"]), read);
     // POST /:group_type
     // e.g. POST /organizations
-    app.post(url(), lookup, create);
+    app.post(url(), rootGroup, lookup, authorize(["create"]), create);
     // PUT /:group_type/:id
     // e.g. PUT /organizations/123
-    app.put(url([":id"]), authorize(["view"]), lookup, update);
+    app.put(url([resource, ":id"]), lookup, authorize(["view"]), update);
     // DELETE /:group_type/:id
     // e.g. DELETE /organizations/123
-    app.del(url([":id"]), authorize(["view"]), lookup, remove);
+    app.del(url([resource, ":id"]), lookup, authorize(["view"]), remove);
+    // POST /:group_type/:id/members
+    // e.g. POST /organizations/123/members
+    // Add a member to this group
+    app.post(
+      url([resource, ":id", "members"]),
+      lookup,
+      authorize(["create"]),
+      addMember
+    );
 
-    if(This.parent) {
+    if(This.PARENT) {
       app.get(
         url([parent_resource, ":parent_id", resource]),
         lookup,
@@ -327,7 +377,7 @@ module.exports = function(GroupModel, UserModel) {
             { parent_id: req.params.parent_id },
             function(err, group) {
               if(err) return error(err, res);
-              res.send(clean(group));
+              res.send(group);
             }
           );
         }
@@ -341,7 +391,17 @@ module.exports = function(GroupModel, UserModel) {
       );
 
       app.post(
-        url([parent_resource, ":parent_id"]),
+        url([parent_resource, ":parent_id", resource]),
+        lookup,
+        authorize(["create"]),
+        create
+      );
+
+      // POST /:parent_group_type/:parent_id/:group_type/:id/members
+      // e.g. POST /organizations/123/courses/456/members
+      // Add a member to this group
+      app.post(
+        url([parent_resource, ":parent_id", resource, ":id", "members"]),
         lookup,
         authorize(["create"]),
         create
@@ -363,7 +423,7 @@ module.exports = function(GroupModel, UserModel) {
 
     var G = new Function(
       "Group",
-      "return function "+name+"(o){ Group.call(this, o); }"
+      "return function "+name+"(args){ Group.call(this, args); }"
     )(Group);
 
     G.ROLES = o.roles;

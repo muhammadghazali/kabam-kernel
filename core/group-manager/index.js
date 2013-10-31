@@ -3,11 +3,10 @@
 exports.name = "kabam-core-group-manager";
 
 function GroupModel(kabam) {
-  var mongoose = kabam.mongoose;
-  var Schema = mongoose.Schema
+  var Schema = kabam.mongoose.Schema
     , ObjectId = Schema.ObjectId;
 
-  return mongoose.model(
+  return kabam.mongoConnection.model(
     "GroupModel", 
     new Schema({
       name: {
@@ -25,7 +24,6 @@ function GroupModel(kabam) {
       },
       parent_id: {
         type: ObjectId,
-        required: true,
         index: true
       },
       owner: {
@@ -46,18 +44,7 @@ function GroupModel(kabam) {
   );
 }
 
-function UserModel(kabam) {
-  // var kabam = {
-  //   mongoose: mongoose
-  // };
-  var schema = require("../models/user").model.User(kabam);
-  return kabam.mongoose.model("UserModel", schema);
-}
-
 exports.core = function(kabam) {
-  var Group = GroupModel(kabam);
-  var User = UserModel(kabam);
-
   // This should be done upper in the chain
   kabam.mw || (kabam.mw = {});
   kabam.groups || (kabam.groups = {});
@@ -91,7 +78,7 @@ exports.core = function(kabam) {
   // Add middleware for authorization
   kabam.mw.authorize = function(actions) {
     return function(req, res, next) {
-      var user_id = req.session.user._id;
+      var user_id = req.user._id;
       
       // If user is owner of model he can do everything
       if(req.model.owner.toString() === user_id) {
@@ -108,6 +95,12 @@ exports.core = function(kabam) {
     }
   };
 
+  // Default/Root Group Type. Currently hard-coded by should be
+  // defined in configuration
+  kabam.groups.rootGroupType = "Organization";
   // GroupFactory for creating domain-specific Group types
-  kabam.groups.GroupFactory = require('./group-factory')(Group, User);
+  kabam.groups.__Group = GroupModel(kabam);
+  kabam.groups.GroupFactory = require('./group-factory')(kabam);
+  // We don't want to expose this
+  delete kabam.groups.__Group;
 };
