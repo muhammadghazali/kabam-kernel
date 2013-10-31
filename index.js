@@ -3,7 +3,8 @@ var EventEmitter = require('events').EventEmitter,
   util = require('util'),
   appBuilder = require('./lib/app-builder'),
   configBuilder = require('./lib/config-builder.js'),
-  logger = require('./lib/logging').getLogger('kabam-kernel', module);
+  logging = require('./lib/logging'),
+  logger = logging.getLogger('kabam-kernel', module);
 
 require('colors');
 
@@ -16,6 +17,7 @@ require('colors');
 function KabamKernel(config) {
   EventEmitter.call(this);
   this.config = config;
+  this.logging = logging;
 
   var extendCoreFunctions = [],//privileged field
     extendAppFunctions = [],
@@ -765,6 +767,7 @@ KabamKernel.prototype.stop = function () {
 function kabamFactory(config){
   var kernel = new KabamKernel(config);
   // default plugins
+  kernel.usePlugin(require('./core/logging'));
   kernel.usePlugin(require('./core/redis-client'));
   kernel.usePlugin(require('./core/mongoose'));
   kernel.usePlugin(require('./core/models/user'));

@@ -1,4 +1,4 @@
-var KabamLogger = require('../lib/logging').KabamLogger,
+var KabamLogger = require('../lib/logging').KabamLogging,
   winston = require('winston'),
   util = require('util');
 
