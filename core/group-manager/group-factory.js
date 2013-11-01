@@ -474,8 +474,6 @@ module.exports = function(kabam) {
       var members = req.body.members || [];
       if(!members.length) return res.send({ ok: 1 });
       req.group.removeMembers(members, function(err, ok) {
-        console.log("\n\n\nwtf!!");
-        console.log(err);
         if(err) return res.send(500);
         res.send({ ok: 1 });
       });
