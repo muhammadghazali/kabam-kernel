@@ -239,23 +239,72 @@ module.exports = function(kabam) {
   };
 
   Group.prototype.removeMembers = function(members, callback) {
-    var group = this;
     var User = kabam.model.User;
+    
+    // First off get all children groups from which
+    // these members will need to be removed from ...
+    var removeGroups = [this];
+    (function getChildren(_callback) {
+      _getChildren([this]);
 
-    var ROLES = this.constructor.ROLES;
-    async.each(members, function(user_id, _callback) {
-      User.findById(user_id, function(err, user) {
-        if(err) return _callback(err);
-        var index = user.groups.indexOf(group._id);
-        user.groups.slice(index, 1);
-        ROLES.forEach(function(r) {
-          var role = group.data.group_type.toLowerCase()+":"+group._id+":"+r;
+      function _getChildren(groups) {
+        async.map(
+          groups, 
+          function(group, __callback) {
+            GroupModel.find({ parent_id: group._id }, __callback);
+          }, 
+          _nextChildren
+        );
+      }
+
+      function _nextChildren(err, results) {
+        var next = [];
+        results.forEach(function(r) {
+          next = next.concat(r);
+        });
+        removeGroups = removeGroups.concat(next);
+
+        if(next.length) {
+          _getChildren(next, _nextChildren);
+        } else {
+          _callback();
+        }        
+      }
+    })
+    .call(this,
+      // ... then remove all members from these groups
+      removeMembers.bind(this));
+
+    function removeMembers() {
+      async.each(members, function(user_id, _callback) {
+        User.findById(user_id, function(err, user) {
+          if(err) return _callback(err);
+          if(!user) return _callback();
+          removeFromGroups(user, _callback);
+        });
+      }, callback);      
+    }
+
+    function removeFromGroups(user, _callback) {
+      async.eachSeries(removeGroups, _removeFromGroup, _callback);
+
+      function _removeFromGroup(group, __callback) {
+        var group_type = group.get("group_type");
+        var Group = kabam.model[group_type];
+
+        // Remove from group
+        user.groups = user.groups.filter(function(g) {
+          return group._id.toString() !== g.toString();
+        });
+        // Remove group roles
+        Group.ROLES.forEach(function(r) {
+          var role = group_type.toLowerCase()+":"+group._id+":"+r;
           var _index = user.roles.indexOf(role);
           user.roles.splice(_index, 1);
         });
-        user.save(_callback);
-      });
-    }, callback);
+        user.save(__callback);
+      }
+    }
   };
 
   Group.prototype.save = function(callback) {
@@ -425,6 +474,8 @@ module.exports = function(kabam) {
       var members = req.body.members || [];
       if(!members.length) return res.send({ ok: 1 });
       req.group.removeMembers(members, function(err, ok) {
+        console.log("\n\n\nwtf!!");
+        console.log(err);
         if(err) return res.send(500);
         res.send({ ok: 1 });
       });
