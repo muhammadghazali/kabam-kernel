@@ -1,4 +1,5 @@
 var util = require("util");
+var async = require("async");
 var noop = function() {};
 
 module.exports = function(kabam) {
@@ -102,37 +103,85 @@ module.exports = function(kabam) {
     });
   };
 
+  Group.prototype.hasAdmin = function(user) {
+    var adminRole = this.data.group_type.toLowerCase+":"+this._id+":admin";
+    user._id.toString() === this.data.owner.toString()
+    return (
+      // Is owner ...
+      user._id.toString() === this.data.owner.toString()
+      // ... or is admin
+      || user.roles.indexOf(adminRole) > -1
+    );
+  };
+
+  Group.prototype.getMembership = function(user) {
+    var group = this;
+    return user.roles.filter(function(role) {
+      return role.match(new RegExp(group._id));
+    })
+    .map(function(role) {
+      return role.split(":").pop();
+    })
+    .shift();
+  };
+
   Group.prototype.addMember = function(member, callback) {
     var _this = this;
 
     var ROLES = this.constructor.ROLES;
 
     if(ROLES.indexOf(member.access) === -1) {
-      return callback("GroupType "+_this.group_type+" does not accept role "+member.access);
+      return callback("GroupType '"+_this.data.group_type+"' does not accept role '"+member.access+ "'");
     }
 
     var User = kabam.model.User;
     User.findById(member.member_id, function(err, user) {
       if(err) return callback(err);
 
-      var roleLevel = ROLES.indexOf(member.access);
-      var removeRoles = ROLES/*.slice(roleLevel+1)*/
-        .map(function(role) {
-          return (_this.get("group_type")+":"+_this.get("_id")+":"+role).toLowerCase();
-        });
+      var removeRoles = ROLES.map(function(role) {
+        return (_this.get("group_type")+":"+_this.get("_id")+":"+role).toLowerCase();
+      });
 
       user.revokeRoles(removeRoles, function() {
-        var role = (_this.get("group_type")+":"+_this.get("_id")+":"+member.access).toLowerCase();
-        if(user.groups.indexOf(_this._id) === -1) {
-          user.groups.push(_this._id);
-          // Why need to save here if grantRole will save?
-          user.save(noop);
-        }
-        user.grantRole(role, callback);
-
-        _this.onAddMember && _this.onAddMember(member);
+        _addMember.call(_this, user, member.access, 
+          _addToParent.bind(_this, user, callback));
       });
     });
+
+    function _addMember(user, access, _callback) {
+      var role = (this.get("group_type")+":"+this.get("_id")+":"+access).toLowerCase();
+      if(user.groups.indexOf(this._id) === -1) {
+        user.groups.push(this._id);
+        // Why need to save here if grantRole will save?
+        user.save(function() {
+          user.grantRole(role, _callback);
+        });
+      } else {
+        _callback();
+      }
+    }
+
+    function _addToParent(user, _callback) {
+      var group = this;
+      var nextParent = this.data.parent_id;
+
+      async.until(
+        function() {
+          return !nextParent;
+        }, 
+        __addToParent,
+        _callback
+      );
+
+      function __addToParent(__callback) {
+        var ParentGroup = kabam.model[group.constructor.PARENT];
+        ParentGroup.findById(nextParent, function(err, parent) {
+          group = parent;
+          nextParent = parent.data.parent_id;
+          _addMember.call(parent, user, "member", __callback);
+        });
+      }      
+    }
   };
 
   Group.prototype.authorize = function(user_id, actions, callback) {
@@ -163,7 +212,7 @@ module.exports = function(kabam) {
         return actions.indexOf(p) > -1;
       })
       .map(function(action) {
-        // By default 'admin' role can do everything, 
+        // By convention 'admin' role can do everything, 
         // so it does not need to be explicitly defined
         // in the permissions matrix
         group.data._permissions[action].unshift("admin");
@@ -208,12 +257,15 @@ module.exports = function(kabam) {
     options = options || {};
     var includeChildren = options.includeChildren || [];
 
-    // var resource = (function() {
-    //   return (
-    //     options.urlAlias 
-    //     || This.name.toLowerCase()
-    //   )+"s";
-    // })();
+    // This will be used eventually for enabling 'urlAlias'
+    // option
+    /*var resource = (function() {
+      return (
+        options.urlAlias 
+        || This.name.toLowerCase()
+      )+"s";
+    })();*/
+
     var resource = This.name.toLowerCase()+"s";
     var parent_resource = This.PARENT && This.PARENT.toLowerCase()+"s";
 
@@ -335,6 +387,11 @@ module.exports = function(kabam) {
     }
 
     function addMember(req, res, next) {
+      // Only admins can add admins
+      if(req.body.access === "admin" && !req.group.hasAdmin(req.user)) {
+        return res.send(403);
+      }
+
       var group_type = req.group_type;
       This.findById(req.params.id, function(err, group) {
         if(err) return error(err, res);
@@ -343,7 +400,8 @@ module.exports = function(kabam) {
         group.addMember({
           member_id: req.body.member_id,
           access: req.body.access
-        }, function() {
+        }, function(err) {
+          if(err) return res.send(400);
           res.send({ ok: 1 });
         });
       });
@@ -384,7 +442,7 @@ module.exports = function(kabam) {
     app.post(
       url([resource, ":id", "members"]),
       lookup,
-      authorize(["create"]),
+      authorize(["create", "addMember"]),
       addMember
     );
 
@@ -408,7 +466,7 @@ module.exports = function(kabam) {
         url([parent_resource, ":parent_id", resource, ":id"]),
         lookup,
         authorize(["view"]),
-        lookup
+        read
       );
 
       app.post(
@@ -424,7 +482,7 @@ module.exports = function(kabam) {
       app.post(
         url([parent_resource, ":parent_id", resource, ":id", "members"]),
         lookup,
-        authorize(["create"]),
+        authorize(["create", "addMember"]),
         create
       );
 
