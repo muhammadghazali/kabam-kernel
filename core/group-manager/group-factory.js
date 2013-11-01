@@ -300,7 +300,7 @@ module.exports = function(kabam) {
         Group.ROLES.forEach(function(r) {
           var role = group_type.toLowerCase()+":"+group._id+":"+r;
           var _index = user.roles.indexOf(role);
-          user.roles.splice(_index, 1);
+          if(_index > -1) user.roles.splice(_index, 1);
         });
         user.save(__callback);
       }
