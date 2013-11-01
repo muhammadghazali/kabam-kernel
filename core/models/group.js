@@ -1,7 +1,6 @@
 'use strict';
 var async = require('async'),
-  slugify2 = require('slugify2'),
-  sanitaze = require('validator').sanitize; //used for dealing with xss injections in title
+  slugify2 = require('slugify2');
 
 
 function factory(kabam) {
@@ -431,7 +430,7 @@ function factory(kabam) {
     var thisGroup = this;
     if (thisGroup.tier < 3) {
       Group.create({
-        'title': sanitaze(title).xss(),
+        'title': title,
         'uri': slugify2(title), //it is sanitazed... i think
         'tier': (thisGroup.tier - 1),
         'schoolId': ((thisGroup.tier === 1) ? thisGroup._id : thisGroup.schoolId),
