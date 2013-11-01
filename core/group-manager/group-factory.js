@@ -137,6 +137,7 @@ module.exports = function(kabam) {
     var User = kabam.model.User;
     User.findById(member.member_id, function(err, user) {
       if(err) return callback(err);
+      if(user.groups.indexOf(_this._id) > -1) return callback();
 
       var removeRoles = ROLES.map(function(role) {
         return (_this.get("group_type")+":"+_this.get("_id")+":"+role).toLowerCase();
@@ -149,16 +150,14 @@ module.exports = function(kabam) {
     });
 
     function _addMember(user, access, _callback) {
+      if(user.groups.indexOf(this._id) > -1) return _callback();
+      
       var role = (this.get("group_type")+":"+this.get("_id")+":"+access).toLowerCase();
-      if(user.groups.indexOf(this._id) === -1) {
-        user.groups.push(this._id);
-        // Why need to save here if grantRole will save?
-        user.save(function() {
-          user.grantRole(role, _callback);
-        });
-      } else {
-        _callback();
-      }
+      user.groups.push(this._id);
+      // Why need to save here if grantRole will save?
+      user.save(function() {
+        user.grantRole(role, _callback);
+      });
     }
 
     function _addToParent(user, _callback) {
@@ -166,9 +165,7 @@ module.exports = function(kabam) {
       var nextParent = this.data.parent_id;
 
       async.until(
-        function() {
-          return !nextParent;
-        }, 
+        function() { return !nextParent; }, 
         __addToParent,
         _callback
       );
@@ -241,7 +238,24 @@ module.exports = function(kabam) {
     }
   };
 
-  Group.prototype.removeMembers = function(members) {
+  Group.prototype.removeMembers = function(members, callback) {
+    var group = this;
+    var User = kabam.model.User;
+
+    var ROLES = this.constructor.ROLES;
+    async.each(members, function(user_id, _callback) {
+      User.findById(user_id, function(err, user) {
+        if(err) return _callback(err);
+        var index = user.groups.indexOf(group._id);
+        user.groups.slice(index, 1);
+        ROLES.forEach(function(r) {
+          var role = group.data.group_type.toLowerCase()+":"+group._id+":"+r;
+          var _index = user.roles.indexOf(role);
+          user.roles.splice(_index, 1);
+        });
+        user.save(_callback);
+      });
+    }, callback);
   };
 
   Group.prototype.save = function(callback) {
@@ -407,6 +421,15 @@ module.exports = function(kabam) {
       });
     };
 
+    function removeMembers(req, res, next) {
+      var members = req.body.members || [];
+      if(!members.length) return res.send({ ok: 1 });
+      req.group.removeMembers(members, function(err, ok) {
+        if(err) return res.send(500);
+        res.send({ ok: 1 });
+      });
+    }
+
     // GET /:group_type
     // e.g. GET /organizations
     app.get(url(), rootGroup, function(req, res) {
@@ -444,6 +467,15 @@ module.exports = function(kabam) {
       lookup,
       authorize(["create", "addMember"]),
       addMember
+    );
+    // DELETE /:group_type/:id/members
+    // e.g. DELETE /organizations/123/members { members: [user_id] }
+    // Remove members from this group
+    app.del(
+      url([resource, ":id", "members"]),
+      lookup,
+      authorize(["create", "addMember"]),
+      removeMembers
     );
 
     if(This.PARENT) {
@@ -484,6 +516,16 @@ module.exports = function(kabam) {
         lookup,
         authorize(["create", "addMember"]),
         create
+      );
+
+      // DELETE /:parent_group_type/:parent_id/:group_type/:id/members
+      // e.g. DELETE /organizations/123/courses/456/members
+      // Remove members from this group
+      app.del(
+        url([parent_resource, ":parent_id", resource, ":id", "members"]),
+        lookup,
+        authorize(["create", "addMember"]),
+        removeMembers
       );
 
       app.put(
