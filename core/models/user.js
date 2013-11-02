@@ -1,7 +1,6 @@
 'use strict';
 var async = require('async'),
-  crypto = require('crypto'),
-  sanitaze = require('validator').sanitize; //used for dealing with xss injections in private messages
+  crypto = require('crypto');
 
 function sha512(str) {
   return crypto.createHash('sha512').update(str).digest('hex').toString();
@@ -1168,8 +1167,6 @@ function factory(kabam) {
   UserSchema.methods.sendMessage = function (to, title, message, callback) {
     var User = this.constructor,
       _this = this;
-    message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
-    title = sanitaze(title).xss(true); //https://npmjs.org/package/validator - see xss
     async.waterfall([
       function (cb) {
         if (typeof to === 'string') {
@@ -1228,8 +1225,6 @@ function factory(kabam) {
   UserSchema.methods.receiveMessage = function (from, title,message, callback) {
     var User = this.constructor,
       _this = this;
-    message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
-    title = sanitaze(title).xss(true); //https://npmjs.org/package/validator - see xss
     async.waterfall([
       function (cb) {
         if (typeof from === 'string') {

@@ -39,7 +39,9 @@
     "commander": "1.3.2",
     "validator": "*",
     "slugify2": "*",
-    "passport-linkedin-oauth2": "*"
+    "passport-linkedin-oauth2": "*",
+    "winston": "~0.7.2",
+    "lodash": "~2.2.1"
   },
   "devDependencies": {
     "grunt": "*",
