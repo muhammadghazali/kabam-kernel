@@ -1,142 +1,153 @@
 var KabamLogger = require('../lib/logging').KabamLogging,
-  winston = require('winston'),
-  util = require('util');
+  createKabam = require('./helpers').createKabam,
+  intel = require('intel'),
+  util = require('util'),
+  path = require('path'),
+  os = require('os'),
+  fs = require('fs'),
+  NOW = Date.now(),
+  counter = 1;
 
 require('should');
 
+function TestHandler (options) {
+  intel.Handler.call(this, options);
+  this.records = [];
+}
 
-var TestTransport = function(options){
-  // jshint expr: true
-  options || (options = {});
-  this.name = 'testTransport';
-  this.level = options.level || 'info';
-  this.logRecords = [];
+util.inherits(TestHandler, intel.Handler);
+
+TestHandler.prototype.emit = function customEmit (record, callback) {
+  this.records.push(record);
+  callback(null);
 };
 
-util.inherits(TestTransport, winston.Transport);
 
-TestTransport.prototype.log = function(level, msg, meta, callback){
-  this.logRecords.push({
-    level: level,
-    msg:msg,
-    meta:meta
-  });
-  callback(null, true);
-};
+function tmp () {
+  return path.join(os.tmpDir(),
+    'kabam-' + NOW + '-' + process.pid + '-' + (counter++));
+}
 
-var getLogger = function(logging, name, module, namespace){
-  var logger = logging.getLogger(name, module, namespace);
-  if(logger.transports.console){
-    logger.remove(winston.transports.Console);
-  }
-  if(!logger.transports.testTransport){
-    logger.add(TestTransport);
-  }
-  return logger;
-};
-
-var getLogs = function(logger){
-  return logger.transports.testTransport.logRecords;
-};
-
-describe('Kabam Logging', function(){
+describe('Kabam Logging', function () {
   var logging;
 
-  beforeEach(function(){
-    logging = new KabamLogger(winston, module);
+  beforeEach(function () {
+    logging = new KabamLogger(intel, module);
+    logging.getLogger()._handle = [];
   });
 
-  describe('getLogger()', function(){
-    var logger;
-    beforeEach(function(){
-      logger = getLogger(logging);
+
+  describe('#getLogger()', function () {
+    it('should return root logger', function () {
+      var testHandler = new TestHandler(),
+        logger = logging.getLogger();
+      logger.addHandler(testHandler);
+      testHandler.records.should.have.length(0);
+      logger.info('ololo');
+      testHandler.records.should.have.length(1);
     });
-    it('should return a default logger instance', function(){
-      var defaultLogger = logging.getLogger('default');
-      logger.info('Some message');
-      getLogs(defaultLogger).should.have.lengthOf(1);
+  });
+
+  describe('#getLogger(<name>)', function () {
+    it('should return child logger', function () {
+      var testHandler = new TestHandler(),
+        rootLogger = logging.getLogger(),
+        childLogger = logging.getLogger();
+
+      rootLogger.addHandler(testHandler);
+      testHandler.records.should.have.length(0);
+      childLogger.info('42');
+      testHandler.records.should.have.length(1);
     });
-    describe('#log', function(){
-      it('should save the message', function(){
-        logger.info('Some message');
-        getLogs(logger).should.have.lengthOf(1);
-        getLogs(logger)[0].level.should.be.eql('info');
-        getLogs(logger)[0].msg.should.be.eql('Some message');
+  });
+
+});
+
+describe('Kabam Logging Configuration', function () {
+  // http logger doesn't propagate by default
+  // LOGGING.FILE options
+  // LOGGING.HTTP options
+  var kabam;
+  describe('http logger', function () {
+    describe('default configuration', function () {
+      before(function (done) {
+        createKabam({MONGO_URL: 'mongodb://localhost/kabam_test'}, function (err, _kabam) {
+          kabam = _kabam;
+          done(err);
+        });
+      });
+      after(function () {
+        kabam.stop();
+      });
+      it('should not propagate records by default', function () {
+        var rootLogger = kabam.logging.getLogger(),
+          httpLogger = kabam.logging.getLogger('http'),
+          rootHandler = new TestHandler(),
+          httpHandler = new TestHandler();
+        rootLogger.addHandler(rootHandler);
+        httpLogger.addHandler(httpHandler);
+        rootHandler.records.should.have.length(0);
+        httpHandler.records.should.have.length(0);
+        httpLogger.info('ermahgerd');
+        rootHandler.records.should.have.length(0);
+        httpHandler.records.should.have.length(1);
       });
     });
   });
-
-  describe('getLogger(<name>)', function(){
-    it('should return a separate instance of the logger', function(){
-      var defaultLogger = getLogger(logging),
-        namedLogger = getLogger(logging, 'coolname');
-      defaultLogger.info('some message');
-      defaultLogger.should.not.be.eql(namedLogger);
+  describe('LOGGING.HTTP = true', function () {
+    var BASE_DIR;
+    beforeEach(function (done) {
+      BASE_DIR = tmp();
+      fs.mkdirSync(BASE_DIR);
+      fs.mkdirSync(path.join(BASE_DIR, 'logs'));
+      createKabam({
+        MONGO_URL: 'mongodb://localhost/kabam_test',
+        BASE_DIR: BASE_DIR,
+        LOGGING: {
+          HTTP: true
+        }
+      }, function (err, _kabam) {
+        kabam = _kabam;
+        done(err);
+      });
     });
-    describe('#log', function(){
-      it('should save messages only to this logger', function(){
-        var defaultLogger = getLogger(logging),
-          namedLogger = getLogger(logging, 'coolname');
-        defaultLogger.info('some message');
-        getLogs(defaultLogger).should.have.lengthOf(1);
-        getLogs(namedLogger).should.have.lengthOf(0);
-        namedLogger.info('cool message');
-        getLogs(defaultLogger).should.have.lengthOf(1);
-        getLogs(namedLogger).should.have.lengthOf(1);
+    afterEach(function () {
+      kabam.stop();
+    });
+    it('should log to the logs/http.log in the config.BASE_DIR', function () {
+      var httpLogger = kabam.logging.getLogger('http');
+      httpLogger.info('ermahgerd').then(function (done) {
+        var record = JSON.parse(fs.readFileSync(path.join(BASE_DIR, 'logs/http.log'), 'utf8'));
+        record.message.should.be.equal('ermahgerd');
+        done();
       });
     });
   });
-
-  describe('getLogger(<module>)', function(){
-    it('should return a module-bound instance of the default logger', function(){
-      var defaultLogger = getLogger(logging),
-        moduleLogger = getLogger(logging, module);
-      defaultLogger.info('some message');
-      moduleLogger.info('module message');
-      getLogs(defaultLogger).should.have.lengthOf(2);
-      getLogs(moduleLogger).should.have.lengthOf(2);
+  describe('LOGGING.HTTP = <filename>', function () {
+    var tmpdir;
+    beforeEach(function (done) {
+      tmpdir = tmp();
+      fs.mkdirSync(tmpdir);
+      createKabam({
+        MONGO_URL: 'mongodb://localhost/kabam_test',
+        LOGGING: {
+          HTTP: path.join(tmpdir, 'can-haz-http.logs')
+        }
+      }, function (err, _kabam) {
+        kabam = _kabam;
+        done(err);
+      });
     });
-    describe('#log', function(){
-      it('should save messages to a logger instance but prefix them with module path', function(){
-        var defaultLogger = getLogger(logging),
-          moduleLogger = getLogger(logging, module);
-        defaultLogger.info('some message');
-        moduleLogger.info('module message');
-        getLogs(moduleLogger)[1].msg.should.be.eql('[kabam-kernel/test/logger.test] module message');
+    afterEach(function () {
+      kabam.stop();
+    });
+    it('should log to the logs/http.log in the config.BASE_DIR', function () {
+      var httpLogger = kabam.logging.getLogger('http');
+      httpLogger.info('ermahgerd').then(function (done) {
+        var record = JSON.parse(fs.readFileSync(path.join(tmpdir, 'can-haz-http.logs'), 'utf8'));
+        record.message.should.be.equal('ermahgerd');
+        done();
       });
     });
   });
-
-  describe('getLogger(<name>, <module>)', function(){
-    it('should return a module-bound instance of the named logger', function(){
-      var defaultLogger = getLogger(logging, 'some-name'),
-        moduleLogger = getLogger(logging, 'some-name', module);
-      defaultLogger.info('some message');
-      moduleLogger.info('module message');
-      getLogs(defaultLogger).should.have.lengthOf(2);
-      getLogs(moduleLogger).should.have.lengthOf(2);
-    });
-    describe('#log', function(){
-      it('should save messages to a logger instance but prefix them with module path', function(){
-        var defaultLogger = getLogger(logging, 'some-name'),
-          moduleLogger = getLogger(logging, 'some-name', module);
-        defaultLogger.info('some message');
-        moduleLogger.info('module message');
-        getLogs(moduleLogger)[1].msg.should.be.eql('[kabam-kernel/test/logger.test] module message');
-      });
-    });
-  });
-
-  describe('getLogger(<module>, <name-space>)', function(){
-    it('should append namespace to the logging messages', function(){
-      var defaultLogger = getLogger(logging),
-        namespacedLogger = getLogger(logging, module, 'some-namespace');
-      defaultLogger.info('some message');
-      namespacedLogger.info('module message');
-      getLogs(defaultLogger).should.have.lengthOf(2);
-      getLogs(namespacedLogger).should.have.lengthOf(2);
-      getLogs(namespacedLogger)[1].msg.should.be.eql('[kabam-kernel/test/logger.test] (some-namespace) - module message');
-    });
-  });
-
 });
