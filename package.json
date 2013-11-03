@@ -1,6 +1,6 @@
 {
   "name": "kabam-kernel",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "KabamKernel for building express.js applications with plugins",
   "main": "index.js",
   "engines": {
