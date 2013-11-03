@@ -20,6 +20,10 @@ exports.createKabam = function(method, config, plugins, done){
     plugins = [plugins];
   }
 
+  if(!method){
+    method = 'app';
+  }
+
   var connection = mongoose.createConnection(config.MONGO_URL);
   var kabam = kabamKernel(config);
 
