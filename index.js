@@ -4,7 +4,7 @@ var EventEmitter = require('events').EventEmitter,
   appBuilder = require('./lib/app-builder'),
   configBuilder = require('./lib/config-builder.js'),
   logging = require('./lib/logging'),
-  logger = logging.getLogger('kabam-kernel', module);
+  logger = logging.getLogger(module);
 
 require('colors');
 
