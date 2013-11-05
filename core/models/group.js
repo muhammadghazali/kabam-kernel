@@ -444,7 +444,7 @@ function factory(kabam) {
 
   //function to work with kabam-plugin-rest - only root can work with REST api to see all groups todo - maybe we can change it in future
   groupSchema.statics.getForUser = function (user, parameters, callback) {
-    if (user && user.root) {
+    if (user) {
       if (typeof parameters === 'object') {
         var limit = parameters.limit || 10;
         delete parameters.limit;
@@ -466,7 +466,7 @@ function factory(kabam) {
 
   //function to work with kabam-plugin-rest - only root can create groups by REST api
   groupSchema.statics.canCreate = function (user, callback) {
-    callback(null, (user && user.root));
+    callback(null, user);
   };
 
   //function to work with kabam-plugin-rest - admins and members can read this group parameters by REST api
