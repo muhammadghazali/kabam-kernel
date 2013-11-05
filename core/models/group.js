@@ -446,9 +446,14 @@ function factory(kabam) {
   groupSchema.statics.getForUser = function (user, parameters, callback) {
     if (user && user.root) {
       if (typeof parameters === 'object') {
+        var limit = parameters.limit || 10;
+        delete parameters.limit;
+        var offset = parameters.offset || 0;
+        delete parameters.offset;
+
         this.find(parameters)
-          .limit(parameters.limit || 10)
-          .skip(parameters.offset || 0)
+          .limit(limit)
+          .skip(offset)
           .populate('members.user')
           .exec(callback);
       } else {
