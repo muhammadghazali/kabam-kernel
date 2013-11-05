@@ -152,6 +152,7 @@ exports.app = function(kernel){
     // list room
     var arr = /(\w+):/.exec(data.channel);
     if (arr && kernel.io.sockets.manager.rooms['/' + arr[1]]) {
+      data.channel = arr[1];
       kernel.io.sockets.in(arr[1]).emit('update', data);
     }
   });
@@ -168,6 +169,7 @@ exports.app = function(kernel){
 
     var arr = /(\w+):/.exec(data.channel);
     if (arr && kernel.io.sockets.manager.rooms['/' + arr[1]]) {
+      data.channel = arr[1];
       kernel.io.sockets.in(arr[1]).emit('delete', data);
     }
   });
