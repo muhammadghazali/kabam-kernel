@@ -1104,9 +1104,14 @@ function factory(kabam) {
     }
 
     if (user && user.root) {
+      var limit = parameters2use.limit || 10;
+      delete parameters2use.limit;
+      var offset = parameters2use.offset || 0;
+      delete parameters2use.offset;
+
       this.find(parameters2use)
-        .skip(parameters2use.offset || 0)
-        .limit(parameters2use.limit || 10)
+        .skip(offset)
+        .limit(limit)
         .exec(callback2use);
     } else {
       callback2use(new Error('Access denied!'));
