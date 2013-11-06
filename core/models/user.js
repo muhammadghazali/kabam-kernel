@@ -1103,7 +1103,7 @@ function factory(kabam) {
       parameters2use = parameters;
     }
 
-    if (user && user.root) {
+    if (user) {
       var limit = parameters2use.limit || 10;
       delete parameters2use.limit;
       var offset = parameters2use.offset || 0;
@@ -1127,7 +1127,7 @@ function factory(kabam) {
    * @param {function} callback - function(err, booleanValueCanWrite)
    */
   UserSchema.statics.canCreate = function (user, callback) {
-    callback(null, user && user.root);
+    callback(null, user);
   };
   /**
    * @ngdoc function
@@ -1139,7 +1139,7 @@ function factory(kabam) {
    * @param {function} callback - function(err, booleanValueCanWrite)
    */
   UserSchema.methods.canRead = function (user, callback) {
-    callback(null, user && user.root);
+    callback(null, user);
   };
   /**
    * @ngdoc function
@@ -1151,7 +1151,7 @@ function factory(kabam) {
    * @param {function} callback - function(err, booleanValueCanWrite)
    */
   UserSchema.methods.canWrite = function (user, callback) {
-    callback(null, user && user.root);
+    callback(null, user);
   };
 
   /**
