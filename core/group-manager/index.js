@@ -1,5 +1,3 @@
-// var mongoose = require("mongoose");
-
 exports.name = "kabam-core-group-manager";
 
 function GroupModel(kabam) {

@@ -5,39 +5,28 @@ var noop = function() {};
 module.exports = function(kabam, GroupModel) {
 
   function Group(data) {
-    var This = this.constructor;
-    var _this = this;
-    this.data = {};
-    this.members = [];
-
-    if(
-      data &&
-      typeof data === "object" &&
-      !(data instanceof Array)
-    ) {
-      // canonical fields
-      if(data._id) this.set("_id", data._id);
-      this.set("name", data.name);
-      this.set("description", data.description);
-      this.set("group_type", this.constructor.name);
-      this.set("owner", data.owner);
-      this.set("parent_id", data.parent_id);
-      this.set("custom", data.custom);
-      this.set("_permissions", data._permissions || This.PERMISSIONS);
-
-      // custom fields
-      var FIELDS = this.constructor.FIELDS;
-      FIELDS.forEach(function(field) {
-        if(data[field]) {
-          _this.setCustom(field, data[field]);  
-        }
-      });    
-    } else {
-      throw new Error("Can't create Group instance");
+    if(!data || typeof data !== "object" || data instanceof Array)
+      throw new Error("Wrong parameters. Can't create Group instance");
     }
+
+    if(data.constructor.name === "model") {
+      this.model = data;
+      this._id = data._id;
+    } else {
+      this.model = new kabam.model[This.name](data);
+    }
+    data._permissions || this.model.set("_permissions", This.PERMISSIONS);
+
+    this.owner_id = this.model.get("owner_id");
+    this.parent_id = this.model.get("parent_id");
+    this.group_type = this.constructor.name;    
+    this._permissions = this.model.get("_permissions");
+    this.members = [];
   }
 
   Group.find = function(query, callback) {
+    var T = transform.bind(this);
+
     if(!callback) {
       callback = query;
       query = {};
@@ -45,14 +34,15 @@ module.exports = function(kabam, GroupModel) {
     query.group_type = this.name;
 
     GroupModel.find(query, function(err, groups) {
-      callback(err, clean(groups));
+      callback(err, T(groups));
     });
   };
 
   Group.findById = function(id, callback) {
-    var _this = this;
+    var T = transform.bind(this);
+
     GroupModel.findById(id, function(err, group) {
-      var data = clean(group);
+      var data = T(group);
       var g = new _this(data);
       g._id = data._id.toString();
       // Populate members
@@ -64,18 +54,11 @@ module.exports = function(kabam, GroupModel) {
   };
 
   Group.prototype.set = function(field, value) {
-    this.data[field] = value;
-    return true;
-  };
-
-  Group.prototype.setCustom = function(field, value) {
-    this.data.custom = this.data.custom || {};
-    this.data.custom[field] = value;
-    return true;
+    this.model.set(field, value);
   };
 
   Group.prototype.get = function(field) {
-    return this.data[field];
+    return this.model.get(field);
   };
 
   Group.prototype.getMembers = function(callback) {
@@ -97,17 +80,17 @@ module.exports = function(kabam, GroupModel) {
           return r.split(":").pop();
         });
       });
-      
+
       callback(null, members);
     });
   };
 
   Group.prototype.hasAdmin = function(user) {
-    var adminRole = this.data.group_type.toLowerCase+":"+this._id+":admin";
-    user._id.toString() === this.data.owner.toString()
+    var adminRole = this.group_type.toLowerCase+":"+this._id+":admin";
+    user._id.toString() === this.owner_id.toString()
     return (
       // Is owner ...
-      user._id.toString() === this.data.owner.toString()
+      user._id.toString() === this.owner_id.toString()
       // ... or is admin
       || user.roles.indexOf(adminRole) > -1
     );
@@ -130,7 +113,7 @@ module.exports = function(kabam, GroupModel) {
     var ROLES = this.constructor.ROLES;
 
     if(ROLES.indexOf(member.access) === -1) {
-      return callback("GroupType '"+_this.data.group_type+"' does not accept role '"+member.access+ "'");
+      return callback("GroupType '"+_this.group_type+"' does not accept role '"+member.access+ "'");
     }
 
     var User = kabam.model.User;
@@ -161,7 +144,7 @@ module.exports = function(kabam, GroupModel) {
 
     function _addToParent(user, _callback) {
       var group = this;
-      var nextParent = this.data.parent_id;
+      var nextParent = this.parent_id;
 
       async.until(
         function() { return !nextParent; }, 
@@ -173,7 +156,7 @@ module.exports = function(kabam, GroupModel) {
         var ParentGroup = kabam.model[group.constructor.PARENT];
         ParentGroup.findById(nextParent, function(err, parent) {
           group = parent;
-          nextParent = parent.data.parent_id;
+          nextParent = parent.parent_id;
           _addMember.call(parent, user, "member", __callback);
         });
       }      
@@ -182,7 +165,7 @@ module.exports = function(kabam, GroupModel) {
 
   Group.prototype.isAuthorized = function(user_id, actions, callback) {
     // If user is owner of Group he can do everything
-    if(user_id.toString() === this.data.owner.toString()) {
+    if(user_id.toString() === this.owner_id.toString()) {
       return callback(null, true);
     }
 
@@ -191,9 +174,9 @@ module.exports = function(kabam, GroupModel) {
     addRoles(this);
     getParent(this);
     function getParent(group) {
-      if(group.data.parent_id) {
-        var Group = kabam.model[group.data.group_type];
-        Group.findById(group.data.parent_id, function(err, parent) {
+      if(group.parent_id) {
+        var Group = kabam.model[group.group_type];
+        Group.findById(group.parent_id, function(err, parent) {
           addRoles(parent);
           getParent(parent);
         });
@@ -205,17 +188,17 @@ module.exports = function(kabam, GroupModel) {
     // Build all roles that have permissions to perform 'actions'
     // on this group
     function addRoles(group) {
-      Object.keys(group.data._permissions).filter(function(p) {
+      Object.keys(group._permissions).filter(function(p) {
         return actions.indexOf(p) > -1;
       })
       .map(function(action) {
         // By convention 'admin' role can do everything, 
         // so it does not need to be explicitly defined
         // in the permissions matrix
-        group.data._permissions[action].unshift("admin");
+        group._permissions[action].unshift("admin");
         
-        return group.data._permissions[action].map(function(r) {
-          var role = group.data.group_type.toLowerCase()+":";
+        return group._permissions[action].map(function(r) {
+          var role = group.group_type.toLowerCase()+":";
           role += group._id+":";
           role += r;
           return role;
@@ -340,9 +323,10 @@ module.exports = function(kabam, GroupModel) {
   };
 
   Group.prototype.save = function(callback) {
-    var model = new GroupModel(this.data);
-    model.save(function(err, o) {
-      callback(err, clean(o));
+    var T = transform.bind(this.constructor);
+
+    this.model.save(function(err, o) {
+      callback(err, T(o));
     });
   };
 
@@ -400,7 +384,7 @@ module.exports = function(kabam, GroupModel) {
       if(!This.PARENT) return next();
 
       var group_id = 
-        (req.group && req.group.data.parent_id)
+        (req.group && req.group.parent_id)
         || req.body.parent_id 
         || req.params.parent_id;
       
@@ -682,7 +666,7 @@ function clean(o, opts) {
 
   if(!o) {
     return o;
-  } else if(o instanceof Array) {
+  } else if(Array.isArray(o)) {
     o = o.map(function(_o) {
       return _clean(_o);
     });
@@ -690,4 +674,18 @@ function clean(o, opts) {
     o = _clean(o);
   }
   return o;
+}
+
+// Transforms mongoose model to Group model
+function transform(m) {
+  var groups;
+  if(Array.isArray(models)) {
+    return models.map(_transform);
+  } else {
+    return _transform(m);
+  }
+
+  function _transform() {
+
+  }
 }
