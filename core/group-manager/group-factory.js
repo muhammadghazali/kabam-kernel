@@ -2,8 +2,7 @@ var util = require("util");
 var async = require("async");
 var noop = function() {};
 
-module.exports = function(kabam) {
-  var GroupModel = kabam.groups.__Group;
+module.exports = function(kabam, GroupModel) {
 
   function Group(data) {
     var This = this.constructor;
@@ -181,7 +180,7 @@ module.exports = function(kabam) {
     }
   };
 
-  Group.prototype.authorize = function(user_id, actions, callback) {
+  Group.prototype.isAuthorized = function(user_id, actions, callback) {
     // If user is owner of Group he can do everything
     if(user_id.toString() === this.data.owner.toString()) {
       return callback(null, true);
@@ -203,7 +202,8 @@ module.exports = function(kabam) {
       }
     }    
 
-    // Build all roles that have permissions 
+    // Build all roles that have permissions to perform 'actions'
+    // on this group
     function addRoles(group) {
       Object.keys(group.data._permissions).filter(function(p) {
         return actions.indexOf(p) > -1;
@@ -236,6 +236,38 @@ module.exports = function(kabam) {
         callback(null, !!user);
       });      
     }
+  };
+
+  Group.prototype.getChildren = function(callback) {
+    var children = [];
+    _getChildren([this]);
+
+    function _getChildren(groups) {
+      async.map(
+        groups, 
+        function(group, _callback) {
+          GroupModel.find({ parent_id: group._id }, _callback);
+        }, 
+        _nextChildren
+      );
+    }
+
+    function _nextChildren(err, results) {
+      var next = [];
+      results.forEach(function(r) {
+        next = next.concat(r);
+      });
+      children = children.concat(next);
+
+      if(next.length) {
+        _getChildren(next, _nextChildren);
+      } else {
+        callback(null, children);
+      }        
+    }
+  };
+
+  Group.prototype.remove = function(callback) {
   };
 
   Group.prototype.removeMembers = function(members, callback) {
@@ -357,7 +389,7 @@ module.exports = function(kabam) {
         } else {
           group = req.rootGroup;
         }
-        group.authorize(user._id, actions, function(err, authorized) {
+        group.isAuthorized(user._id, actions, function(err, authorized) {
           if(!authorized) return res.send(403);
           next();
         });
@@ -479,6 +511,12 @@ module.exports = function(kabam) {
       });
     }
 
+    function getChildren(req, res, next) {
+      req.group.getChildren(function(err, children) {
+        res.send(children);
+      });
+    }
+
     // GET /:group_type
     // e.g. GET /organizations
     app.get(url(), rootGroup, function(req, res) {
@@ -525,6 +563,15 @@ module.exports = function(kabam) {
       lookup,
       authorize(["create", "addMember"]),
       removeMembers
+    );
+    // GET /:group_type/:id/children
+    // e.g. GET /organizations/123/children
+    // Get all children groups
+    app.get(
+      url([resource, ":id", "members"]),
+      lookup,
+      authorize(["create"]),
+      getChildren
     );
 
     if(This.PARENT) {

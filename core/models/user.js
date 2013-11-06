@@ -1,6 +1,7 @@
 'use strict';
 var async = require('async'),
   crypto = require('crypto'),
+  Q = require('q'),
   sanitaze = require('validator').sanitize; //used for dealing with xss injections in private messages
 
 function sha512(str) {
@@ -1196,14 +1197,16 @@ function factory(kabam) {
 
   /**
    * @ngdoc function
-   * @name User.canWrite
+   * @name User.can
    * @description
-   * Can this user perform 'actions' on Group identified by 'group_id'
-   * @param {User} user - user to test privileges, for example, the one from request object
+   * Can this user perform 'actions' on 'model'
+   * @param {String} action - action to be performed
    * @param {function} callback - function(err, booleanValueCanWrite)
    */
-  UserSchema.methods.can = function(actions, group_id, callback) {
-    
+  UserSchema.methods.can = function(action, model, callback) {
+    var user = this;
+    var promise = Q.nfbind(model.isAuthorized.bind(model));
+    return promise(user._id, action);
   };
 
   /**
