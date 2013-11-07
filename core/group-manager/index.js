@@ -24,7 +24,7 @@ function GroupModel(kabam) {
         type: ObjectId,
         index: true
       },
-      owner: {
+      owner_id: {
         type: ObjectId,
         required: true,
         index: true
@@ -38,7 +38,7 @@ function GroupModel(kabam) {
         type: Boolean,
         default: 0
       }
-    })
+    }, { collection: "groupmodels" })
   );
 }
 
@@ -79,7 +79,7 @@ exports.core = function(kabam) {
       var user_id = req.user._id;
       
       // If user is owner of model he can do everything
-      if(req.model.owner.toString() === user_id) {
+      if(req.model.owner_id.toString() === user_id) {
         return next();
       }
 

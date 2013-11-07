@@ -375,10 +375,14 @@ function factory(kabam) {
    * ```
    */
   UserSchema.methods.grantRole = function (roleName, callback) {
-    if (this.roles.indexOf(roleName) === -1) {
+    if(this.roles.indexOf(roleName) === -1) {
       this.roles.push(roleName);
       kabam.emit('users:grantRole', this);
-      this.save(callback);
+      // this.save(callback);
+      this.save(
+        function(err, user) {
+        callback(null);
+      });
     } else {
       callback(null);
     }
@@ -1499,13 +1503,14 @@ function factory(kabam) {
   UserSchema.methods.getRootGroup = function(callback) {
     var user = this;
     var RootGroup = kabam.model[kabam.groups.rootGroupType];
+
     if(user.rootGroup) {
       RootGroup.findById(user.rootGroup, callback);
     } else {
       var group_type = RootGroup.name;
       var group = new RootGroup({
         name: user.username+"'s "+group_type,
-        owner: user._id
+        owner_id: user._id
       });
       group.save(function(err, root) {
         user.set("rootGroup", root._id);

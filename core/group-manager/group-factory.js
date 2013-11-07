@@ -2,38 +2,59 @@ var util = require("util");
 var async = require("async");
 var noop = function() {};
 
-module.exports = function(kabam, GroupModel) {
-
+module.exports = function(kabam, BaseGroup) {
   function Group(data) {
-    if(!data || typeof data !== "object" || data instanceof Array)
+    if(!data || typeof data !== "object" || data instanceof Array) {
       throw new Error("Wrong parameters. Can't create Group instance");
     }
 
-    if(data.constructor.name === "model") {
-      this.model = data;
-      this._id = data._id;
-    } else {
-      this.model = new kabam.model[This.name](data);
-    }
-    data._permissions || this.model.set("_permissions", This.PERMISSIONS);
+    var This = this.constructor;
+    var _this = this;
+    var GroupModel = kabam.mongoConnection.model(This.name+"Group");
 
-    this.owner_id = this.model.get("owner_id");
-    this.parent_id = this.model.get("parent_id");
-    this.group_type = this.constructor.name;    
-    this._permissions = this.model.get("_permissions");
-    this.members = [];
+    if(data instanceof GroupModel) {
+      model = data;
+    } else {
+      model = new GroupModel(data);
+      model.set("group_type", This.name);
+      data._permissions || model.set("_permissions", This.PERMISSIONS);
+    }
+
+    Object.keys(model.toObject()).forEach(function(p) {
+      Object.defineProperty(_this, p, { 
+        enumerable: true,
+        get: model.get.bind(model, p), 
+        set: model.set.bind(model, p)
+      });
+    });
+
+    Object.defineProperty(_this, "model", { 
+      get: function() { return model }
+    });
+  }
+
+  Group.prototype.toObject = function() {
+    var o = {};
+    var _this = this;
+    Object.getOwnPropertyNames(this).forEach(function(f) {
+      o[f] = _this[f];
+    });
+    return o;
+  };
+
+  Group.prototype.toString = function() {
+    return JSON.stringify(this.toObject(), null, 2);
   }
 
   Group.find = function(query, callback) {
     var T = transform.bind(this);
-
     if(!callback) {
       callback = query;
       query = {};
     }
     query.group_type = this.name;
 
-    GroupModel.find(query, function(err, groups) {
+    BaseGroup.find(query, function(err, groups) {
       callback(err, T(groups));
     });
   };
@@ -41,10 +62,8 @@ module.exports = function(kabam, GroupModel) {
   Group.findById = function(id, callback) {
     var T = transform.bind(this);
 
-    GroupModel.findById(id, function(err, group) {
-      var data = T(group);
-      var g = new _this(data);
-      g._id = data._id.toString();
+    BaseGroup.findById(id, function(err, group) {
+      var g = T(group);
       // Populate members
       g.getMembers(function(err, members) {
         g.members = members;
@@ -74,7 +93,7 @@ module.exports = function(kabam, GroupModel) {
       members.forEach(function(m) {
         m.roles = m.roles.filter(function(r) {
           var split = r.split(":");
-          return split[1] === _this._id;
+          return split[1] === _this._id.toString();
         })
         .map(function(r) {
           return r.split(":").pop();
@@ -86,7 +105,8 @@ module.exports = function(kabam, GroupModel) {
   };
 
   Group.prototype.hasAdmin = function(user) {
-    var adminRole = this.group_type.toLowerCase+":"+this._id+":admin";
+    var _id = this._id.toString();
+    var adminRole = this.group_type.toLowerCase+":"+_id+":admin";
     user._id.toString() === this.owner_id.toString()
     return (
       // Is owner ...
@@ -99,7 +119,7 @@ module.exports = function(kabam, GroupModel) {
   Group.prototype.getMembership = function(user) {
     var group = this;
     return user.roles.filter(function(role) {
-      return role.match(new RegExp(group._id));
+      return role.match(new RegExp(group._id.toString()));
     })
     .map(function(role) {
       return role.split(":").pop();
@@ -229,7 +249,7 @@ module.exports = function(kabam, GroupModel) {
       async.map(
         groups, 
         function(group, _callback) {
-          GroupModel.find({ parent_id: group._id }, _callback);
+          BaseGroup.find({ parent_id: group._id }, _callback);
         }, 
         _nextChildren
       );
@@ -245,7 +265,9 @@ module.exports = function(kabam, GroupModel) {
       if(next.length) {
         _getChildren(next, _nextChildren);
       } else {
-        callback(null, children);
+        var Child = kabam.model[children[0].get("group_type")];
+        var T = transform.bind(Child);
+        callback(null, T(children));
       }        
     }
   };
@@ -266,7 +288,7 @@ module.exports = function(kabam, GroupModel) {
         async.map(
           groups, 
           function(group, __callback) {
-            GroupModel.find({ parent_id: group._id }, __callback);
+            BaseGroup.find({ parent_id: group._id }, __callback);
           }, 
           _nextChildren
         );
@@ -324,7 +346,6 @@ module.exports = function(kabam, GroupModel) {
 
   Group.prototype.save = function(callback) {
     var T = transform.bind(this.constructor);
-
     this.model.save(function(err, o) {
       callback(err, T(o));
     });
@@ -442,10 +463,10 @@ module.exports = function(kabam, GroupModel) {
 
     function create(req, res, next) {
       var data = req.body;
-      data.owner = req.user._id;
+      data.owner_id = req.user._id;
 
-      var model = new This(data);
-      model.save(function(err, group) {
+      var group = new This(data);
+      group.save(function(err, group) {
         if(err) return error(err, res);
         res.send(group, 201);
       });
@@ -509,7 +530,7 @@ module.exports = function(kabam, GroupModel) {
         {
           "$or": [
             { "_id": { "$in": groups } },
-            { "owner": req.user._id }
+            { "owner_id": req.user._id }
           ]
         },
         function(err, groups) {
@@ -622,15 +643,22 @@ module.exports = function(kabam, GroupModel) {
     if(!name) throw Error("Must define a name for this Group");
     if(!o.roles) throw Error("Must define roles for this Group");
 
+    // Dynamically create a 'Class' named after 'name': the name of the group type
     var G = new Function(
-      "Group",
+      "Group",  // This refers to the Group variable passed as parameter 
+                // to 'new Function', so it exists in the scope of the 
+                // constructor of the Class we're creating here
       "return function "+name+"(args){ Group.call(this, args); }"
     )(Group);
 
     G.ROLES = o.roles;
-    G.FIELDS = o.fields||[];
+    G.FIELDS = o.fields||{};
     G.PARENT = o.parent;
     G.PERMISSIONS = o.permissions;
+
+    // Extend the base Group schema to include custom properties
+    var GSchema = BaseGroup.schema.extend(G.FIELDS);
+    kabam.mongoConnection.model(name+"Group", GSchema);
 
     // Inherit static methods
     Object.keys(Group).forEach(function(method) {
@@ -679,13 +707,13 @@ function clean(o, opts) {
 // Transforms mongoose model to Group model
 function transform(m) {
   var groups;
-  if(Array.isArray(models)) {
-    return models.map(_transform);
+  if(Array.isArray(m)) {
+    return m.map(_t.bind(this));
   } else {
-    return _transform(m);
+    return _t.call(this, m);
   }
 
-  function _transform() {
-
+  function _t(o) {
+    return new this(o);
   }
 }
