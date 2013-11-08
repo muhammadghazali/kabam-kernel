@@ -79,21 +79,11 @@ exports.core = function (kernel) {
   var LOGGING = kernel.config.LOGGING,
     httpLogger = kernel.logging.getLogger('http'),
     rootLogger = kernel.logging.getLogger(),
-    consoleHandler,
     options;
 
   // in the development and staging environments express is logging all http request to the console
   // and to log http messages user should explicitly set config variable LOGGING.HTTP
   httpLogger.propagate = false;
-
-  consoleHandler = new intel.handlers.Console({
-    formatter: new intel.Formatter({
-      format: '[%(levelname)s] %(name)s - %(message)s',
-      colorize: true
-    })
-  });
-  rootLogger._handlers = [];
-  rootLogger.addHandler(consoleHandler);
 
 
   // if no logging configuration provided just return
@@ -110,7 +100,7 @@ exports.core = function (kernel) {
 
   // shut the console handler for the root logger (production, tests, etc...)
   if(LOGGING.CONSOLE === false){
-    rootLogger.removeHandler(consoleHandler);
+    rootLogger.removeHandler(kernel.logging.consoleHandler);
   }
 
   // log all application messages to a file, this would include error messages, and http logs
