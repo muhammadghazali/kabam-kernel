@@ -11,8 +11,9 @@ module.exports = function(kabam, BaseGroup) {
     var This = this.constructor;
     var _this = this;
     var GroupModel = kabam.mongoConnection.model(This.name+"Group");
+    var model;
 
-    if(data instanceof GroupModel) {
+    if(data.constructor.name === "model") {
       model = data;
     } else {
       model = new GroupModel(data);
@@ -53,6 +54,7 @@ module.exports = function(kabam, BaseGroup) {
       query = {};
     }
     query.group_type = this.name;
+    query.removed = 0;
 
     BaseGroup.find(query, function(err, groups) {
       callback(err, T(groups));
@@ -63,6 +65,10 @@ module.exports = function(kabam, BaseGroup) {
     var T = transform.bind(this);
 
     BaseGroup.findById(id, function(err, group) {
+      if(!group || group.removed) {
+        return callback();
+      }
+      
       var g = T(group);
       // Populate members
       g.getMembers(function(err, members) {
@@ -249,7 +255,8 @@ module.exports = function(kabam, BaseGroup) {
       async.map(
         groups, 
         function(group, _callback) {
-          BaseGroup.find({ parent_id: group._id }, _callback);
+          BaseGroup.find({ parent_id: group._id, removed: false }, 
+            _callback);
         }, 
         _nextChildren
       );
@@ -265,6 +272,7 @@ module.exports = function(kabam, BaseGroup) {
       if(next.length) {
         _getChildren(next, _nextChildren);
       } else {
+        if(!children.length) return callback(null, []);
         var Child = kabam.model[children[0].get("group_type")];
         var T = transform.bind(Child);
         callback(null, T(children));
@@ -273,6 +281,19 @@ module.exports = function(kabam, BaseGroup) {
   };
 
   Group.prototype.remove = function(callback) {
+    // Removing a group will also remove all children groups.
+    // Group is not deleted from DB but marked as 'removed'.
+    // All users and content with membership to the Group will 
+    // keep it, but the removed group won't ever be showed.
+    var removeGroups = function(err, groups) {
+      groups.unshift(this);
+      async.each(groups, function(g, cb) { 
+        g.removed = true;
+        g.save(cb);
+      }, callback);
+    }.bind(this);
+
+    this.getChildren(removeGroups);
   };
 
   Group.prototype.removeMembers = function(members, callback) {
@@ -288,7 +309,8 @@ module.exports = function(kabam, BaseGroup) {
         async.map(
           groups, 
           function(group, __callback) {
-            BaseGroup.find({ parent_id: group._id }, __callback);
+            BaseGroup.find({ parent_id: group._id, removed: false }, 
+              __callback);
           }, 
           _nextChildren
         );
@@ -429,6 +451,7 @@ module.exports = function(kabam, BaseGroup) {
       });
     }
 
+    // TODO: review whether it's convenient to also do parent lookup here
     function lookup(req, res, next) {
       var group_id = req.params.id;// || req.user.rootGroup;
 
@@ -480,10 +503,33 @@ module.exports = function(kabam, BaseGroup) {
     }
 
     function remove(req, res, next) {
-      This.update({ "_id": req.params.id }, { "removed": 1 }, function(err, res) {
-        if(err) return error(err, res);
-        res.send({ "ok": 1 });
-      });
+      var T = transform.bind(This);
+      var groups = req.body.groups;
+      if(!groups || !Array.isArray(groups) || !groups.length) return next();
+
+      This.find({ "_id": { "$in": groups } }, checkAccess);
+
+      function checkAccess(err, groups) {
+        async.map(groups, function(g, cb) {
+          g.isAuthorized(req.user._id, ["create"], cb);
+        }, function(err, isAuthorized) {
+          if(err) return res.send(400);
+          if(isAuthorized.indexOf(false) > -1) return res.send(403);
+          removeGroups(groups);
+        });
+      }
+
+      function removeGroups(groups) {
+        async.each(groups, function(g, cb) {
+          g.remove(cb);
+        }, function() {
+          res.send({ ok: 1 });
+        });
+      }
+    }
+
+    function removeOne(req, res, next) {
+      req.send({ err: "Not implemented" }, 401);
     }
 
     function addMember(req, res, next) {
@@ -542,15 +588,24 @@ module.exports = function(kabam, BaseGroup) {
     // GET /:group_type/:id
     // e.g. GET /organizations/123
     app.get(url([resource, ":id"]), lookup, authorize(["view"]), read);
+
     // POST /:group_type
     // e.g. POST /organizations
     app.post(url(), rootGroup, lookup, authorize(["create"]), create);
+
     // PUT /:group_type/:id
     // e.g. PUT /organizations/123
     app.put(url([resource, ":id"]), lookup, authorize(["view"]), update);
+
     // DELETE /:group_type/:id
     // e.g. DELETE /organizations/123
-    app.del(url([resource, ":id"]), lookup, authorize(["view"]), remove);
+    app.del(url([resource, ":id"]), lookup, authorize(["create"]), removeOne);
+
+    // DELETE /:group_type
+    // For removing groups in bulk
+    // e.g. DELETE /organizations
+    app.del(url(), remove);
+
     // POST /:group_type/:id/members
     // e.g. POST /organizations/123/members
     // Add a member to this group
@@ -560,6 +615,7 @@ module.exports = function(kabam, BaseGroup) {
       authorize(["create", "addMember"]),
       addMember
     );
+
     // DELETE /:group_type/:id/members
     // e.g. DELETE /organizations/123/members { members: [user_id] }
     // Remove members from this group
@@ -573,9 +629,9 @@ module.exports = function(kabam, BaseGroup) {
     // e.g. GET /organizations/123/children
     // Get all children groups
     app.get(
-      url([resource, ":id", "members"]),
+      url([resource, ":id", "children"]),
       lookup,
-      authorize(["create"]),
+      authorize(["manager"]),
       getChildren
     );
 
@@ -639,8 +695,8 @@ module.exports = function(kabam, BaseGroup) {
   };
 
   function GroupFactory(name, o) {
-    // TODO: validate `name` format
     if(!name) throw Error("Must define a name for this Group");
+    if(!name.match(/^[_a-zA-Z]+[a-zA-Z0-9_]*$/)) throw Error("Wrong name for a Group. It can only contain letters, numbers and _, and should not start with a number");
     if(!o.roles) throw Error("Must define roles for this Group");
 
     // Dynamically create a 'Class' named after 'name': the name of the group type
@@ -705,6 +761,7 @@ function clean(o, opts) {
 }
 
 // Transforms mongoose model to Group model
+// This function is called bound to the Group constructor
 function transform(m) {
   var groups;
   if(Array.isArray(m)) {
