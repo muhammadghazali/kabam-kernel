@@ -19,7 +19,7 @@ exports.strategy = function (core) {
     passReqToCallback: true,
     stateless: true
   }, function (request, accessToken, refreshToken, profile, done) {
-    linkOAuthProfile(core, 'facebook', request, profile, done);
+    linkOAuthProfile(core, 'facebook', request, profile, false, done);
   });
 };
 
@@ -31,7 +31,3 @@ exports.routes = function (core) {
   core.app.get('/auth/facebook', core.passport.authenticate('facebook'));
   core.app.get('/auth/facebook/callback', core.passport.authenticate('facebook', { successRedirect: '/auth/success', failureRedirect: '/auth/failure' }));
 };
-
-
-
-

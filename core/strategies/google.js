@@ -1,6 +1,6 @@
 'use strict';
 var GoogleStrategy = require('passport-google').Strategy,
-  processProfile = require('./helpers').processProfile;
+  processProfile = require('./helpers').normalizeProfile;
 
 exports.name = 'kabam-core-strategies-google-openid';
 

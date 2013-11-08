@@ -21,7 +21,7 @@ exports.strategy = function (core) {
     passReqToCallback: true,
     stateless: true
   }, function (request, accessToken, refreshToken, profile, done) {
-    linkOAuthProfile(core, 'github', request, profile, done);
+    linkOAuthProfile(core, 'github', request, profile, false, done);
   });
 };
 
