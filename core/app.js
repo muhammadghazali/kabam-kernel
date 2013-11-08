@@ -24,7 +24,7 @@ exports.config = {
   SECRET: {
     default: function () {
       logger.warn('config.SECRET is missing! Generating the secret on the fly...');
-      return (md5(JSON.stringify(os)));
+      return md5(JSON.stringify(os));
     },
     env: 'SECRET'
   },

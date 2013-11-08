@@ -52,6 +52,29 @@ function makeFileHandlerOptions(file, baseDir, filePath) {
 
 exports.name = 'kabam-core-logging';
 
+exports.config = {
+  'LOGGING.LEVEL':{
+    default: null,
+    env: 'LOGGING_LEVEL'
+  },
+  'LOGGING.CONSOLE': {
+    default: true,
+    env: 'LOGGING_CONSOLE'
+  },
+  'LOGGING.FILE': {
+    default: null,
+    env: 'LOGGING_FILE'
+  },
+  'LOGGING.HTTP': {
+    default: null,
+    env: 'LOGGING_HTTP'
+  },
+  'LOGGING.ERROR': {
+    default: null,
+    env: 'LOGGING_ERROR'
+  }
+};
+
 exports.core = function (kernel) {
   var LOGGING = kernel.config.LOGGING,
     httpLogger = kernel.logging.getLogger('http'),
@@ -112,5 +135,4 @@ exports.core = function (kernel) {
     }));
     rootLogger.addHandler(errorHandler);
   }
-  // TODO: error log (using filters)
 };
