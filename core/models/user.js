@@ -680,18 +680,14 @@ function factory(kabam) {
     // first find if some filed already taken
     thisSchema.findOne({'$or':[{username:username}, {email:email}]}, function(err, user){
       if(err){
-        kabam.emit('error',err);
-        callback(new Error('Something went wrong'));
-        return;
+        return callback(err);
       }
       if(user){
         if(user.email === email){
-          callback(new Error('Email already taken'));
-          return;
+          return callback(null, null, {email: 'Email already taken'});
         }
         if(user.username === username){
-          callback(new Error('Username already taken'));
-          return;
+          return callback(null, null, {username: 'Username already taken'});
         }
       }
       // create a user if username and email are available
@@ -703,25 +699,14 @@ function factory(kabam) {
         'root': false,
         'profileComplete': true,
         'apiKeyCreatedAt': new Date()
-      }, function (err, userCreated) {
-        if (err) {
-          kabam.emit('error',err);
-          callback(new Error('Something went wrong'));
-          return;
-        } else {
-          userCreated.setPassword(password, function (err1) {
-            if (err1) {
-              callback(new Error('Something went wrong'));
-              kabam.emit('error',err1);
-              return;
-            } else {
-              userCreated.notify('email', {'subject': 'Verify your email account!', 'template': 'signin'});
-              kabam.emit('users:signUp', userCreated);
-              callback(null, userCreated);
-              return;
-            }
-          });
-        }
+      }, function (err, user) {
+        if (err) {return callback(err);}
+        user.setPassword(password, function (err) {
+          if (err) {return callback(err);}
+          user.notify('email', {'subject': 'Verify your email account!', 'template': 'signin'});
+          kabam.emit('users:signUp', user);
+          callback(null, user);
+        });
       });
     });
   };

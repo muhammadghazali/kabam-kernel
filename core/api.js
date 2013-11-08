@@ -5,26 +5,27 @@ exports.name = 'kabam-core-api';
 exports.routes = function(kernel){
   //registration by username, password and email
   //todo - implement the https://npmjs.org/packages/captcha
-  kernel.app.post('/auth/signup', function (request, response) {
+  kernel.app.post('/auth/signup', function (request, response, next) {
     request.model.User.signUp(request.body.username, request.body.email, request.body.password,
-      function (err, userCreated) {
+      function (err, user, info) {
         if (request.is('json')) {
-          if (err) {
-            response.json(400, {
-              errors: {form: err.message}
-            });
-          } else {
-            userCreated.notify('email', {'subject': 'Account confirmation', 'template': 'signin'});
-            response.json(201, {
-              'username': userCreated.username,
-              'email': userCreated.email
+          if (err){return next(err);}
+          if (!user) {
+            return response.json(400, {
+              errors: info
             });
           }
+          user.notify('email', {'subject': 'Account confirmation', 'template': 'signin'});
+          response.json(201, {
+            'username': user.username,
+            'email': user.email
+          });
         } else {
-          if (err) {
-            request.flash('error', err.message);
+          if (err){return next(err);}
+          if (!user) {
+            request.flash('error', info.email || info.username);
           } else {
-            userCreated.notify('email', {'subject': 'Account confirmation', 'template': 'signin'});
+            user.notify('email', {'subject': 'Account confirmation', 'template': 'signin'});
             request.flash('info', 'You have been registered! Please, check your email for instructions!');
           }
           response.redirect('/');
