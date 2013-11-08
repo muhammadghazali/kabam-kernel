@@ -50,6 +50,8 @@ function makeFileHandlerOptions(file, baseDir, filePath) {
   return options;
 }
 
+exports.name = 'kabam-core-logging';
+
 exports.core = function (kernel) {
   var LOGGING = kernel.config.LOGGING,
     httpLogger = kernel.logging.getLogger('http'),

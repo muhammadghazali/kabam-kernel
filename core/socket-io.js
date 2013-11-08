@@ -9,6 +9,9 @@ var
   RedisStore = require('connect-redis')(express);
 
 exports.name = 'kabam-core-socket-io';
+exports.core = function(kernel){
+  kernel.OLOLO = 42;
+};
 exports.app = function(kernel){
   if (!kernel.config.IO || !kernel.config.IO.ENABLED) {
     return;
