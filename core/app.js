@@ -5,6 +5,7 @@ var
   express = require('express'),
   flashMiddleware = require('connect-flash'),
   RedisStore = require('connect-redis')(express),
+  path = require('path'),
   logger = require('../lib/logging').getLogger(module);
 
 
@@ -43,8 +44,15 @@ exports.config = {
     },
     env: 'HOST_URL'
   },
+
   DISABLE_CSRF: {
     default: false
+  },
+
+  BASE_DIR: {
+    default: function(){
+      return path.dirname(process.mainModule.filename);
+    }
   }
 };
 
