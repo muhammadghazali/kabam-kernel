@@ -766,6 +766,7 @@ KabamKernel.prototype = {
   }
 };
 
+KabamKernel.prototype.plugin = KabamKernel.prototype.usePlugin;
 
 /**
  * @ngdoc function
