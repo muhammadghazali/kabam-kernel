@@ -452,16 +452,22 @@ KabamKernel.prototype = {
     disabledPlugins = configBuild.disabledPlugins;
     this.config = configBuild.config;
 
+    Object.keys(disabledPlugins).forEach(function(name){
+      delete this._registry[name];
+    }, this);
+
     // digesting all registered plugins, this may extend disabled plugins list
     Object.keys(this._registry).forEach(function(name){
-      if(!this._digestPlugin(this._registry[name], disabledPlugins)){
-        disabledPlugins.push(name);
+      try{
+        this._digestPlugin(this._registry[name], disabledPlugins);
+      } catch (e) {
+        if(e.message.indexOf(name) === -1){
+          throw e;
+        }
+        disabledPlugins[name] = e;
       }
     }, this);
 
-    disabledPlugins.forEach(function(name){
-      logger.warn('disabling plugin ', name);
-    });
 
     this._composed = true;
 
@@ -481,30 +487,29 @@ KabamKernel.prototype = {
       this._catchAllFunction
     );
 
-    return this;
+    Object.keys(disabledPlugins).forEach(function(name){
+      logger.warn('PLUGIN DISABLED: ', name, '-', disabledPlugins[name].toString());
+    });
+
   },
 
-
   _digestPlugin: function (plugin, disabledPlugins) {
-    var key, ok;
+    var key;
 
+    // process plugin dependencies and throw error if dependencies unmet
     if(plugin.dependencies){
       // if some of the dependencies are disabled disable this plugin too
-      ok = plugin.dependencies.forEach(function(name){
-        return disabledPlugins.indexOf(name) > 0;
+      plugin.dependencies.forEach(function(name){
+        if(disabledPlugins[name]){
+          throw new Error(plugin.name + ': can\'t find `'+name+'` dependency');
+        }
       });
-      if(!ok) {
-        return false;
-      }
       // or if the registry doesn't have a plugin with this name
-      ok = plugin.dependencies.forEach(function(name){
-        if(!this._registry[name]) {
-          return false;
+      plugin.dependencies.forEach(function(name){
+        if(!this._registry[name]){
+          throw new Error(plugin.name + ': can\'t find `'+name+'` dependency');
         }
       }, this);
-      if(!ok) {
-        return false;
-      }
     }
 
     if (typeof plugin.core === 'object') {

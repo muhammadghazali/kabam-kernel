@@ -196,7 +196,8 @@ describe('Config Builder', function(){
           }
         });
         build.should.have.property('disabledPlugins');
-        build.disabledPlugins.should.eql(['somePlugin']);
+        build.disabledPlugins.should.have.property('somePlugin');
+        build.disabledPlugins.somePlugin.should.be.instanceof(Error);
       });
     });
   });
