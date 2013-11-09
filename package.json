@@ -40,7 +40,8 @@
     "slugify2": "*",
     "passport-linkedin-oauth2": "*",
     "lodash": "~2.2.1",
-    "intel": "~0.3.0"
+    "intel": "~0.3.0",
+    "dotty": "0.0.2"
   },
   "devDependencies": {
     "grunt": "*",
