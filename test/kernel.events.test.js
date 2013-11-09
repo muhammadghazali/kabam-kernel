@@ -309,36 +309,37 @@ describe('Kernel events emitter testing', function () {
     });
   });
 
-  describe('Testing http event', function () {
-    var data;
-    before(function (done) {
-      request.get('http://localhost:' + port + '/', function (err, response, body) {
-        if (err) {
-          throw err;
-        }
-      });
-
-      kabam.on('http', function (params) {
-        data = params;
-        done();
-      });
-    });
-    it('check http method parameter', function () {
-      should.exist(data.method);
-    });
-    it('check http duration parameter', function () {
-      data.duration.should.be.below(100);
-    });
-    it('check http statuscode parameter', function () {
-      should.exist(data.statusCode);
-    });
-    it('check http ip parameter', function () {
-      should.exist(data.ip);
-    });
-    it('check http uri parameter', function () {
-      should.exist(data.uri);
-    });
-  });
+// TODO: test http logging
+//  describe('Testing http event', function () {
+//    var data;
+//    before(function (done) {
+//      request.get('http://localhost:' + port + '/', function (err, response, body) {
+//        if (err) {
+//          throw err;
+//        }
+//      });
+//
+//      kabam.on('http', function (params) {
+//        data = params;
+//        done();
+//      });
+//    });
+//    it('check http method parameter', function () {
+//      should.exist(data.method);
+//    });
+//    it('check http duration parameter', function () {
+//      data.duration.should.be.below(100);
+//    });
+//    it('check http statuscode parameter', function () {
+//      should.exist(data.statusCode);
+//    });
+//    it('check http ip parameter', function () {
+//      should.exist(data.ip);
+//    });
+//    it('check http uri parameter', function () {
+//      should.exist(data.uri);
+//    });
+//  });
 
   describe('Testing users:unban (without email)event', function () {
     var user;

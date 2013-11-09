@@ -1,21 +1,75 @@
 'use strict';
 var
+  os = require('os'),
+  crypto = require('crypto'),
   express = require('express'),
   flashMiddleware = require('connect-flash'),
-  RedisStore = require('connect-redis')(express);
+  RedisStore = require('connect-redis')(express),
+  path = require('path'),
+  logger = require('../lib/logging').getLogger(module);
+
+
+function md5(str) {
+  return crypto.createHash('md5').update(str).digest('hex').toString();
+}
 
 exports.name = 'kabam-core-app';
 
+exports.config = {
+  ENV: {
+    default: 'development',
+    env: 'NODE_ENV'
+  },
+
+  SECRET: {
+    default: function () {
+      logger.warn('config.SECRET is missing! Generating the secret on the fly...');
+      return md5(JSON.stringify(os));
+    },
+    env: 'SECRET'
+  },
+
+  PORT: {
+    default: 3000,
+    env: 'PORT'
+  },
+
+  HOST_URL: {
+    default: function () {
+      var hostname = os.hostname();
+      if (this.ENV === 'development') {
+        hostname = 'localhost';
+      }
+      return 'http://' + hostname + ':' + this.PORT + '/';
+    },
+    env: 'HOST_URL'
+  },
+
+  DISABLE_CSRF: {
+    default: false
+  },
+
+  BASE_DIR: {
+    default: function(){
+      return path.dirname(process.mainModule.filename);
+    }
+  }
+};
+
 exports.app = function(kernel){
+
+  var logger = kernel.logging.getLogger(module),
+    httpLogger = kernel.logging.getLogger('http', module);
+
   kernel.app.configure('development', function () {
-    console.log('Development environment!');
+    logger.info('Development environment!');
     kernel.app.use(express.responseTime());
     kernel.app.use(express.logger('dev'));
     kernel.app.locals.development = true;
   });
 
   kernel.app.configure('staging', function () {
-    console.log('Staging environment!');
+    logger.info('Staging environment!');
     kernel.app.locals.staging = true;
     kernel.app.use(express.responseTime());
     kernel.app.enable('view cache');
@@ -23,69 +77,32 @@ exports.app = function(kernel){
   });
 
   kernel.app.configure('production', function () {
-    console.log('Production environment!');
+    logger.info('Production environment!');
     kernel.app.locals.production = true;
     kernel.app.enable('view cache');
-    kernel.app.use(express.logger('short'));
   });
 
-  //emit events for http requests
-  kernel.app.use(function (request, response, next) {
-    response.on('finish', function () {
-      kernel.emit('http', {
-        'startTime': request._startTime,
-        'duration': (new Date() - request._startTime),
-        'statusCode': response.statusCode,
-        'method': request.method,
-        'ip': request.ip,
-        'uri': request.originalUrl,
-        'username': (request.user ? request.user.username : null),
-        'email': (request.user ? request.user.email : null)
+  // log http events
+  kernel.app.use(function (req, res, next) {
+    // TODO: options for logging bodies of req and res?
+    function logRequest(){
+      res.removeListener('finish', logRequest);
+      res.removeListener('close', logRequest);
+      httpLogger.info({
+        startTime: req._startTime,
+        duration: (new Date() - req._startTime),
+        statusCode: req.statusCode,
+        method: req.method,
+        ip: req.ip,
+        uri: req.originalUrl,
+        userId: (req.user && req.user._id.toString())
       });
-    });
+    }
+
+    res.on('finish', logRequest);
+    res.on('close', logRequest);
+
     next();
-  });
-
-  //setting error handler middlewares, after ROUTER middleware,
-  // so we can simply throw errors in routes and they will be catch here!
-  kernel.app.configure('development', function () {
-    kernel.app.use(express.errorHandler());
-  });
-
-  kernel.app.configure('staging', function () {
-    kernel.app.use(function (err, request, response, next) {
-      kernel.emit('error', {
-        'startTime': request._startTime,
-        'duration': (new Date() - request._startTime),
-        'method': request.method,
-        'ip': request.ip,
-        'uri': request.originalUrl,
-        'username': (request.user ? request.user.username : null),
-        'email': (request.user ? request.user.email : null),
-        'error': err
-      });
-      response.status(503);
-      response.header('Retry-After', 360);
-      response.json(err);
-    });
-  });
-
-  kernel.app.configure('production', function () {
-    kernel.app.use(function (err, request, response, next) {
-      kernel.emit('error', {
-        'startTime': request._startTime,
-        'duration': (new Date() - request._startTime),
-        'method': request.method,
-        'ip': request.ip,
-        'uri': request.originalUrl,
-        'username': (request.user ? request.user.username : null),
-        'email': (request.user ? request.user.email : null),
-        'error': err
-      });
-      response.status(503);
-      response.header('Retry-After', 360);
-      response.send('Error 503. There are problems on our server. We will fix them soon!');//todo - change to our page...
-    });
   });
 };
 

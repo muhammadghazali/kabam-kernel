@@ -3,7 +3,7 @@ var kabamKernel = require('../index'),
 
 exports.createKabam = function(method, config, plugins, done){
   // config, plugins, done
-  if(!~['string', 'number'].indexOf(typeof method)){
+  if(['string', 'number'].indexOf(typeof method) === -1){
     done = plugins;
     plugins = config;
     config = method;
@@ -17,7 +17,11 @@ exports.createKabam = function(method, config, plugins, done){
   }
 
   if(!Array.isArray(plugins)){
-    plugins = [plugins]
+    plugins = [plugins];
+  }
+
+  if(!method){
+    method = 'app';
   }
 
   var connection = mongoose.createConnection(config.MONGO_URL);

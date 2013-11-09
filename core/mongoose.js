@@ -21,6 +21,12 @@ function validateConfig(MONGO_URL) {
 
 
 exports.name = 'kabam-core-mongoose';
+exports.config = {
+  MONGO_URL: {
+    default: 'mongodb://localhost/kabam_dev',
+    env: 'MONGO_URL'
+  }
+};
 exports.core = function(kernel){
   validateConfig(kernel.config.MONGO_URL);
   var mongoConnection = mongoose.createConnection(kernel.config.MONGO_URL, {

@@ -1,8 +1,7 @@
 'use strict';
 var async = require('async'),
   crypto = require('crypto'),
-  Q = require('q'),
-  sanitaze = require('validator').sanitize; //used for dealing with xss injections in private messages
+  Q = require('q');
 
 function sha512(str) {
   return crypto.createHash('sha512').update(str).digest('hex').toString();
@@ -1152,10 +1151,15 @@ function factory(kabam) {
       parameters2use = parameters;
     }
 
-    if (user && user.root) {
+    if (user) {
+      var limit = parameters2use.limit || 10;
+      delete parameters2use.limit;
+      var offset = parameters2use.offset || 0;
+      delete parameters2use.offset;
+
       this.find(parameters2use)
-        .skip(parameters2use.offset || 0)
-        .limit(parameters2use.limit || 10)
+        .skip(offset)
+        .limit(limit)
         .exec(callback2use);
     } else {
       callback2use(new Error('Access denied!'));
@@ -1171,7 +1175,7 @@ function factory(kabam) {
    * @param {function} callback - function(err, booleanValueCanWrite)
    */
   UserSchema.statics.canCreate = function (user, callback) {
-    callback(null, user && user.root);
+    callback(null, user);
   };
   /**
    * @ngdoc function
@@ -1183,7 +1187,7 @@ function factory(kabam) {
    * @param {function} callback - function(err, booleanValueCanWrite)
    */
   UserSchema.methods.canRead = function (user, callback) {
-    callback(null, user && user.root);
+    callback(null, user);
   };
   
   /**
@@ -1195,8 +1199,8 @@ function factory(kabam) {
    * @param {User} user - user to test privileges, for example, the one from request object
    * @param {function} callback - function(err, booleanValueCanWrite)
    */
-  UserSchema.methods.canWrite = function(user, callback) {
-    callback(null, user && user.root);
+  UserSchema.methods.canWrite = function (user, callback) {
+    callback(null, user);
   };
 
   /**
@@ -1231,8 +1235,6 @@ function factory(kabam) {
   UserSchema.methods.sendMessage = function (to, title, message, callback) {
     var User = this.constructor,
       _this = this;
-    message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
-    title = sanitaze(title).xss(true); //https://npmjs.org/package/validator - see xss
     async.waterfall([
       function (cb) {
         if (typeof to === 'string') {
@@ -1291,8 +1293,6 @@ function factory(kabam) {
   UserSchema.methods.receiveMessage = function (from, title,message, callback) {
     var User = this.constructor,
       _this = this;
-    message = sanitaze(message).xss(true); //https://npmjs.org/package/validator - see xss
-    title = sanitaze(title).xss(true); //https://npmjs.org/package/validator - see xss
     async.waterfall([
       function (cb) {
         if (typeof from === 'string') {

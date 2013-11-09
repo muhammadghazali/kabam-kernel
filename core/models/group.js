@@ -1,7 +1,6 @@
 'use strict';
 var async = require('async'),
-  slugify2 = require('slugify2'),
-  sanitaze = require('validator').sanitize; //used for dealing with xss injections in title
+  slugify2 = require('slugify2');
 
 
 function factory(kabam) {
@@ -431,7 +430,7 @@ function factory(kabam) {
     var thisGroup = this;
     if (thisGroup.tier < 3) {
       Group.create({
-        'title': sanitaze(title).xss(),
+        'title': title,
         'uri': slugify2(title), //it is sanitazed... i think
         'tier': (thisGroup.tier - 1),
         'schoolId': ((thisGroup.tier === 1) ? thisGroup._id : thisGroup.schoolId),
@@ -445,11 +444,16 @@ function factory(kabam) {
 
   //function to work with kabam-plugin-rest - only root can work with REST api to see all groups todo - maybe we can change it in future
   groupSchema.statics.getForUser = function (user, parameters, callback) {
-    if (user && user.root) {
+    if (user) {
       if (typeof parameters === 'object') {
+        var limit = parameters.limit || 10;
+        delete parameters.limit;
+        var offset = parameters.offset || 0;
+        delete parameters.offset;
+
         this.find(parameters)
-          .limit(parameters.limit || 10)
-          .skip(parameters.offset || 0)
+          .limit(limit)
+          .skip(offset)
           .populate('members.user')
           .exec(callback);
       } else {
@@ -462,7 +466,7 @@ function factory(kabam) {
 
   //function to work with kabam-plugin-rest - only root can create groups by REST api
   groupSchema.statics.canCreate = function (user, callback) {
-    callback(null, (user && user.root));
+    callback(null, user);
   };
 
   //function to work with kabam-plugin-rest - admins and members can read this group parameters by REST api

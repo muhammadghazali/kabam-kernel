@@ -1,7 +1,20 @@
 'use strict';
 var Passport = require('passport').Passport;
 
+var configSchema = {};
+
+
+['GITHUB_CLIENT_ID', 'GITHUB_CLIENT_SECRET', 'TWITTER_CONSUMER_KEY', 'TWITTER_CONSUMER_SECRET',
+ 'FACEBOOK_APP_ID', 'FACEBOOK_APP_SECRET', 'LINKEDIN_API_KEY', 'LINKEDIN_SECRET_KEY'
+].forEach(function (variable) {
+  configSchema['PASSPORT.'+variable] = {
+    default: null,
+    env: variable
+  };
+});
+
 exports.name = 'kabam-core-passport';
+exports.config = configSchema;
 exports.app = function(kernel){
   var passport = new Passport();
 
