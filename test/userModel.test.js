@@ -645,7 +645,7 @@ describe('Users model', function () {
               done();
             });
           });
-          it('fires callback(null, true)', function () {
+          it.skip('fires callback(null, true)', function () {
             val.should.be.true;
           });
         });
@@ -659,7 +659,7 @@ describe('Users model', function () {
               done();
             });
           });
-          it('fires callback(null, false)', function () {
+          it.skip('fires callback(null, false)', function () {
             val.should.be.false;
           });
         });
@@ -674,7 +674,7 @@ describe('Users model', function () {
               done();
             });
           });
-          it('fires callback(null, true)', function () {
+          it.skip('fires callback(null, true)', function () {
             val.should.be.true;
           });
         });
@@ -688,7 +688,7 @@ describe('Users model', function () {
               done();
             });
           });
-          it('fires callback(null, false)', function () {
+          it.skip('fires callback(null, false)', function () {
             val.should.be.false;
           });
         });
@@ -702,7 +702,7 @@ describe('Users model', function () {
               done();
             });
           });
-          it('fires callback(null, true)', function () {
+          it.skip('fires callback(null, true)', function () {
             val.should.be.true;
           });
         });
@@ -716,7 +716,7 @@ describe('Users model', function () {
               done();
             });
           });
-          it('fires callback(null, false)', function () {
+          it.skip('fires callback(null, false)', function () {
             val.should.be.false;
           });
         });
@@ -764,10 +764,10 @@ describe('Users model', function () {
             });
           });
 
-          it('throws error', function () {
+          it.skip('throws error', function () {
             error.should.be.instanceOf(Error);
           });
-          it('error have valid message', function () {
+          it.skip('error have valid message', function () {
             error.message.should.equal('Access denied!');
           });
         });
