@@ -1,18 +1,18 @@
-exports.name = "Organization";
+exports.name = 'Organization';
 
-function factory(kabam) {
-  var GroupFactory = kabam.groups.GroupFactory;
+function factory(kernel) {
+  var GroupFactory = kernel.groups.GroupFactory;
 
-  var Organization = GroupFactory("Organization", {
-    roles: ["admin", "manager", "member", "guest"],
-    children: ["Course"],
+  var Organization = GroupFactory('Organization', {
+    roles: ['admin', 'manager', 'member', 'guest'],
+    children: ['Course'],
     permissions: {
-      "addMember": ["manager"],
-      "create": ["manager"],
-      "edit": ["manager"],
-      "participate": ["manager"],
-      "view": ["manager", "member", "guest"],
-      "delete": []
+      addMember: ['manager'],
+      create: ['manager'],
+      edit: ['manager'],
+      participate: ['manager'],
+      view: ['manager', 'member', 'guest'],
+      delete: []
     }
   });
 

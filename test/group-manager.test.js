@@ -24,8 +24,7 @@ describe('group-manager testing', function () {
 
     tester = {
       email: 'tester@monimus.com',
-      username: 'tester',
-      root: true
+      username: 'tester'
     };
 
     joed = {
@@ -97,31 +96,49 @@ describe('group-manager testing', function () {
         name: 'Test Group',
         description: 'Test Description',
         group_type: 'Organization',
-        owner: tester,
+        owner_id: tester._id,
         parent_id: null,
         custom: null
       });
+      org1.should.be.an.instanceOf(kernel.model.Organization);
+
       org1.save(function(err, org) {
         if (err) { throw err; }
-        org.should.have.properties('name', 'description', 'group_type', '_permissions');
+        org.should.have.properties('_id', 'name', 'description', 'group_type', 'owner_id', 'parent_id', '_permissions');
+        org.should.be.an.instanceOf(kernel.model.Organization);
+        org.name.should.equal('Test Group');
+        org.description.should.equal('Test Description');
+        org.group_type.should.equal('Organization');
+        org.owner_id.should.equal(tester._id);
+        should.not.exist(org.parent_id);
         org1 = org;
         done();
       });
+
     });
 
-    it('Course can create proper instances', function(done) {
+    it('Course can create proper instances with _static_ and regular object methods', function(done) {
       var course = new kernel.model.Course({
         name: 'Test Course',
-        description: 'Test Description',
+        description: 'Course Test Description',
         group_type: 'Course',
-        owner: tester,
-        parent_id: org1,
+        owner_id: joed._id,
+        parent_id: org1._id,
         custom: null
       });
+      course.should.be.an.instanceOf(kernel.model.Course);
+      kernel.model.Course.multiply(3).should.eql(6);
 
       course.save(function(err, savedCourse) {
         if (err) { throw err; }
-        savedCourse.should.have.properties('name', 'description', 'group_type', '_permissions');
+        savedCourse.should.have.properties('_id', 'name', 'description', 'group_type', 'owner_id', 'parent_id', '_permissions');
+        savedCourse.should.be.an.instanceOf(kernel.model.Course);
+        savedCourse.name.should.equal('Test Course');
+        savedCourse.description.should.equal('Course Test Description');
+        savedCourse.group_type.should.equal('Course');
+        savedCourse.owner_id.should.equal(joed._id);
+        savedCourse.parent_id.should.equal(org1._id);
+        savedCourse.lowerName().should.equal('test course');
         course1 = savedCourse;
         done();
       });
@@ -130,20 +147,26 @@ describe('group-manager testing', function () {
     it('Section can create proper instances', function(done) {
       var section = new kernel.model.Section({
         name: 'Test Section',
-        description: 'Test Description',
+        description: 'Section Test Description',
         group_type: 'Section',
-        owner: tester,
-        parent_id: course1,
-        custom: {
-          start_date: new Date('2013-08-17'),
-          end_date: new Date('2013-11-16')
-        }
+        owner_id: jsmith._id,
+        parent_id: course1._id,
+        start_date: new Date('2013-08-17'),
+        end_date: new Date('2013-11-16')
       });
+      section.should.be.an.instanceOf(kernel.model.Section);
 
       section.save(function(err, savedSection) {
         if (err) { throw err; }
-        savedSection.should.have.properties('name', 'description', 'group_type', '_permissions');
-        savedSection.custom.should.have.properties('start_date', 'end_date');
+        savedSection.should.have.properties('_id', 'name', 'description', 'group_type', 'owner_id', 'parent_id', '_permissions');
+        savedSection.should.be.an.instanceOf(kernel.model.Section);
+        savedSection.name.should.equal('Test Section');
+        savedSection.description.should.equal('Section Test Description');
+        savedSection.group_type.should.equal('Section');
+        savedSection.owner_id.should.equal(jsmith._id);
+        savedSection.parent_id.should.equal(course1._id);
+        savedSection.start_date.should.eql(new Date('2013-08-17'));
+        savedSection.end_date.should.eql(new Date('2013-11-16'));
         section1 = savedSection;
         done();
       });

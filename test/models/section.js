@@ -1,19 +1,22 @@
-exports.name = "Section";
+exports.name = 'Section';
 
-function factory(kabam) {
-  var GroupFactory = kabam.groups.GroupFactory;
+function factory(kernel) {
+  var GroupFactory = kernel.groups.GroupFactory;
 
-  var Section = GroupFactory("Section", {
-    roles: ["instructor", "assistant", "student"],
-    fields: ["start_date", "end_date"],
-    parent: "Course",
+  var Section = GroupFactory('Section', {
+    roles: ['instructor', 'assistant', 'student'],
+    fields: {
+      start_date: Date,
+      end_date: Date
+    },
+    parent: 'Course',
     permissions: {
-      "addMember": ["manager"],
-      "create": ["instructor"],
-      "edit": ["instructor", "assistant"],
-      "participate": ["instructor", "assistant", "student"],
-      "view": ["instructor", "assistant", "student", "guest"],
-      "delete": []
+      addMember: ['manager'],
+      create: ['instructor'],
+      edit: ['instructor', 'assistant'],
+      participate: ['instructor', 'assistant', 'student'],
+      view: ['instructor', 'assistant', 'student', 'guest'],
+      delete: []
     }
   });
 
@@ -23,14 +26,14 @@ function factory(kabam) {
     // By default section members will be members
     // of the parent course
     member.access = {
-      "instructor": "edit",
-      "assistant": "edit",
-      "student": "view"
+      instructor: 'edit',
+      assistant: 'edit',
+      student: 'view'
     }[member.access];
 
     // Section
-    Course.findById(course_id, function(err, course) {
-      course.addMember(member, noop);
+    kernel.model.Course.findById(course_id, function(err, course) {
+      course.addMember(member, function(){});
     });
   };
 
