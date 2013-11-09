@@ -41,7 +41,8 @@
     "passport-linkedin-oauth2": "*",
     "lodash": "~2.2.1",
     "intel": "~0.3.0",
-    "mongoose-schema-extend": "*"
+    "mongoose-schema-extend": "*",
+    "q": "~0.9.7"
   },
   "devDependencies": {
     "grunt": "*",
