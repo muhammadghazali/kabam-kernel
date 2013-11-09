@@ -1,5 +1,3 @@
-// var mongoose = require("mongoose");
-
 exports.name = "kabam-core-group-manager";
 
 function GroupModel(kabam) {
@@ -26,7 +24,7 @@ function GroupModel(kabam) {
         type: ObjectId,
         index: true
       },
-      owner: {
+      owner_id: {
         type: ObjectId,
         required: true,
         index: true
@@ -40,7 +38,7 @@ function GroupModel(kabam) {
         type: Boolean,
         default: 0
       }
-    })
+    }, { collection: "groupmodels" })
   );
 }
 
@@ -76,17 +74,17 @@ exports.core = function(kabam) {
   };
 
   // Add middleware for authorization
-  kabam.mw.authorize = function(actions) {
+  kabam.mw.isAuthorized = function(actions) {
     return function(req, res, next) {
       var user_id = req.user._id;
       
       // If user is owner of model he can do everything
-      if(req.model.owner.toString() === user_id) {
+      if(req.model.owner_id.toString() === user_id) {
         return next();
       }
 
       lookupGroup(req, res, function() {
-        req.group.authorize(user_id, actions, function(err, authorized) {
+        req.group.isAuthorized(user_id, actions, function(err, authorized) {
           if(err) return res.send(err, 400);
           if(!authorized) return res.send(403);
           next();
@@ -98,9 +96,5 @@ exports.core = function(kabam) {
   // Default/Root Group Type. Currently hard-coded by should be
   // defined in configuration
   kabam.groups.rootGroupType = "Organization";
-  // GroupFactory for creating domain-specific Group types
-  kabam.groups.__Group = GroupModel(kabam);
-  kabam.groups.GroupFactory = require('./group-factory')(kabam);
-  // We don't want to expose this
-  delete kabam.groups.__Group;
+  kabam.groups.GroupFactory = require('./group-factory')(kabam, GroupModel(kabam));
 };

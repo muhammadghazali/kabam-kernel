@@ -1,6 +1,7 @@
 'use strict';
 var async = require('async'),
-  crypto = require('crypto');
+  crypto = require('crypto'),
+  Q = require('q');
 
 function sha512(str) {
   return crypto.createHash('sha512').update(str).digest('hex').toString();
@@ -373,10 +374,14 @@ function factory(kabam) {
    * ```
    */
   UserSchema.methods.grantRole = function (roleName, callback) {
-    if (this.roles.indexOf(roleName) === -1) {
+    if(this.roles.indexOf(roleName) === -1) {
       this.roles.push(roleName);
       kabam.emit('users:grantRole', this);
-      this.save(callback);
+      // this.save(callback);
+      this.save(
+        function(err, user) {
+        callback(null);
+      });
     } else {
       callback(null);
     }
@@ -454,11 +459,11 @@ function factory(kabam) {
    */
   UserSchema.methods.revokeRoles = function (roles, callback) {
     var _this = this;
-    
+
     roles.forEach(function(roleName) {
       var roleIndex = _this.roles.indexOf(roleName);
       if(roleIndex > -1) {
-        _this.roles.splice(roleIndex, 1);  
+        _this.roles.splice(roleIndex, 1);
       }
     });
 
@@ -1179,7 +1184,7 @@ function factory(kabam) {
   UserSchema.methods.canRead = function (user, callback) {
     callback(null, user && user.root);
   };
-  
+
   /**
    * @ngdoc function
    * @name User.canWrite
@@ -1195,14 +1200,16 @@ function factory(kabam) {
 
   /**
    * @ngdoc function
-   * @name User.canWrite
+   * @name User.can
    * @description
-   * Can this user perform 'actions' on Group identified by 'group_id'
-   * @param {User} user - user to test privileges, for example, the one from request object
+   * Can this user perform 'actions' on 'model'
+   * @param {String} action - action to be performed
    * @param {function} callback - function(err, booleanValueCanWrite)
    */
-  UserSchema.methods.can = function(actions, group_id, callback) {
-    
+  UserSchema.methods.can = function(action, model, callback) {
+    var user = this;
+    var promise = Q.nfbind(model.isAuthorized.bind(model));
+    return promise(user._id, action);
   };
 
   /**
@@ -1491,13 +1498,14 @@ function factory(kabam) {
   UserSchema.methods.getRootGroup = function(callback) {
     var user = this;
     var RootGroup = kabam.model[kabam.groups.rootGroupType];
+
     if(user.rootGroup) {
       RootGroup.findById(user.rootGroup, callback);
     } else {
       var group_type = RootGroup.name;
       var group = new RootGroup({
         name: user.username+"'s "+group_type,
-        owner: user._id
+        owner_id: user._id
       });
       group.save(function(err, root) {
         user.set("rootGroup", root._id);

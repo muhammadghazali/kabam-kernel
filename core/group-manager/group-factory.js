@@ -2,60 +2,74 @@ var util = require("util");
 var async = require("async");
 var noop = function() {};
 
-module.exports = function(kabam) {
-  var GroupModel = kabam.groups.__Group;
-
+module.exports = function(kabam, BaseGroup) {
   function Group(data) {
+    if(!data || typeof data !== "object" || data instanceof Array) {
+      throw new Error("Wrong parameters. Can't create Group instance");
+    }
+
     var This = this.constructor;
     var _this = this;
-    this.data = {};
-    this.members = [];
+    var GroupModel = kabam.mongoConnection.model(This.name+"Group");
+    var model;
 
-    if(
-      data &&
-      typeof data === "object" &&
-      !(data instanceof Array)
-    ) {
-      // canonical fields
-      if(data._id) this.set("_id", data._id);
-      this.set("name", data.name);
-      this.set("description", data.description);
-      this.set("group_type", this.constructor.name);
-      this.set("owner", data.owner);
-      this.set("parent_id", data.parent_id);
-      this.set("custom", data.custom);
-      this.set("_permissions", data._permissions || This.PERMISSIONS);
-
-      // custom fields
-      var FIELDS = this.constructor.FIELDS;
-      FIELDS.forEach(function(field) {
-        if(data[field]) {
-          _this.setCustom(field, data[field]);  
-        }
-      });    
+    if(data.constructor.name === "model") {
+      model = data;
     } else {
-      throw new Error("Can't create Group instance");
+      model = new GroupModel(data);
+      model.set("group_type", This.name);
+      data._permissions || model.set("_permissions", This.PERMISSIONS);
     }
+
+    Object.keys(model.toObject()).forEach(function(p) {
+      Object.defineProperty(_this, p, { 
+        enumerable: true,
+        get: model.get.bind(model, p), 
+        set: model.set.bind(model, p)
+      });
+    });
+
+    Object.defineProperty(_this, "model", { 
+      get: function() { return model }
+    });
+  }
+
+  Group.prototype.toObject = function() {
+    var o = {};
+    var _this = this;
+    Object.getOwnPropertyNames(this).forEach(function(f) {
+      o[f] = _this[f];
+    });
+    return o;
+  };
+
+  Group.prototype.toString = function() {
+    return JSON.stringify(this.toObject(), null, 2);
   }
 
   Group.find = function(query, callback) {
+    var T = transform.bind(this);
     if(!callback) {
       callback = query;
       query = {};
     }
     query.group_type = this.name;
+    query.removed = 0;
 
-    GroupModel.find(query, function(err, groups) {
-      callback(err, clean(groups));
+    BaseGroup.find(query, function(err, groups) {
+      callback(err, T(groups));
     });
   };
 
   Group.findById = function(id, callback) {
-    var _this = this;
-    GroupModel.findById(id, function(err, group) {
-      var data = clean(group);
-      var g = new _this(data);
-      g._id = data._id.toString();
+    var T = transform.bind(this);
+
+    BaseGroup.findById(id, function(err, group) {
+      if(!group || group.removed) {
+        return callback();
+      }
+      
+      var g = T(group);
       // Populate members
       g.getMembers(function(err, members) {
         g.members = members;
@@ -65,18 +79,11 @@ module.exports = function(kabam) {
   };
 
   Group.prototype.set = function(field, value) {
-    this.data[field] = value;
-    return true;
-  };
-
-  Group.prototype.setCustom = function(field, value) {
-    this.data.custom = this.data.custom || {};
-    this.data.custom[field] = value;
-    return true;
+    this.model.set(field, value);
   };
 
   Group.prototype.get = function(field) {
-    return this.data[field];
+    return this.model.get(field);
   };
 
   Group.prototype.getMembers = function(callback) {
@@ -92,23 +99,24 @@ module.exports = function(kabam) {
       members.forEach(function(m) {
         m.roles = m.roles.filter(function(r) {
           var split = r.split(":");
-          return split[1] === _this._id;
+          return split[1] === _this._id.toString();
         })
         .map(function(r) {
           return r.split(":").pop();
         });
       });
-      
+
       callback(null, members);
     });
   };
 
   Group.prototype.hasAdmin = function(user) {
-    var adminRole = this.data.group_type.toLowerCase+":"+this._id+":admin";
-    user._id.toString() === this.data.owner.toString()
+    var _id = this._id.toString();
+    var adminRole = this.group_type.toLowerCase+":"+_id+":admin";
+    user._id.toString() === this.owner_id.toString()
     return (
       // Is owner ...
-      user._id.toString() === this.data.owner.toString()
+      user._id.toString() === this.owner_id.toString()
       // ... or is admin
       || user.roles.indexOf(adminRole) > -1
     );
@@ -117,7 +125,7 @@ module.exports = function(kabam) {
   Group.prototype.getMembership = function(user) {
     var group = this;
     return user.roles.filter(function(role) {
-      return role.match(new RegExp(group._id));
+      return role.match(new RegExp(group._id.toString()));
     })
     .map(function(role) {
       return role.split(":").pop();
@@ -131,7 +139,7 @@ module.exports = function(kabam) {
     var ROLES = this.constructor.ROLES;
 
     if(ROLES.indexOf(member.access) === -1) {
-      return callback("GroupType '"+_this.data.group_type+"' does not accept role '"+member.access+ "'");
+      return callback("GroupType '"+_this.group_type+"' does not accept role '"+member.access+ "'");
     }
 
     var User = kabam.model.User;
@@ -162,7 +170,7 @@ module.exports = function(kabam) {
 
     function _addToParent(user, _callback) {
       var group = this;
-      var nextParent = this.data.parent_id;
+      var nextParent = this.parent_id;
 
       async.until(
         function() { return !nextParent; }, 
@@ -174,16 +182,16 @@ module.exports = function(kabam) {
         var ParentGroup = kabam.model[group.constructor.PARENT];
         ParentGroup.findById(nextParent, function(err, parent) {
           group = parent;
-          nextParent = parent.data.parent_id;
+          nextParent = parent.parent_id;
           _addMember.call(parent, user, "member", __callback);
         });
       }      
     }
   };
 
-  Group.prototype.authorize = function(user_id, actions, callback) {
+  Group.prototype.isAuthorized = function(user_id, actions, callback) {
     // If user is owner of Group he can do everything
-    if(user_id.toString() === this.data.owner.toString()) {
+    if(user_id.toString() === this.owner_id.toString()) {
       return callback(null, true);
     }
 
@@ -192,9 +200,9 @@ module.exports = function(kabam) {
     addRoles(this);
     getParent(this);
     function getParent(group) {
-      if(group.data.parent_id) {
-        var Group = kabam.model[group.data.group_type];
-        Group.findById(group.data.parent_id, function(err, parent) {
+      if(group.parent_id) {
+        var Group = kabam.model[group.group_type];
+        Group.findById(group.parent_id, function(err, parent) {
           addRoles(parent);
           getParent(parent);
         });
@@ -203,19 +211,20 @@ module.exports = function(kabam) {
       }
     }    
 
-    // Build all roles that have permissions 
+    // Build all roles that have permissions to perform 'actions'
+    // on this group
     function addRoles(group) {
-      Object.keys(group.data._permissions).filter(function(p) {
+      Object.keys(group._permissions).filter(function(p) {
         return actions.indexOf(p) > -1;
       })
       .map(function(action) {
         // By convention 'admin' role can do everything, 
         // so it does not need to be explicitly defined
         // in the permissions matrix
-        group.data._permissions[action].unshift("admin");
+        group._permissions[action].unshift("admin");
         
-        return group.data._permissions[action].map(function(r) {
-          var role = group.data.group_type.toLowerCase()+":";
+        return group._permissions[action].map(function(r) {
+          var role = group.group_type.toLowerCase()+":";
           role += group._id+":";
           role += r;
           return role;
@@ -238,6 +247,55 @@ module.exports = function(kabam) {
     }
   };
 
+  Group.prototype.getChildren = function(callback) {
+    var children = [];
+    _getChildren([this]);
+
+    function _getChildren(groups) {
+      async.map(
+        groups, 
+        function(group, _callback) {
+          BaseGroup.find({ parent_id: group._id, removed: false }, 
+            _callback);
+        }, 
+        _nextChildren
+      );
+    }
+
+    function _nextChildren(err, results) {
+      var next = [];
+      results.forEach(function(r) {
+        next = next.concat(r);
+      });
+      children = children.concat(next);
+
+      if(next.length) {
+        _getChildren(next, _nextChildren);
+      } else {
+        if(!children.length) return callback(null, []);
+        var Child = kabam.model[children[0].get("group_type")];
+        var T = transform.bind(Child);
+        callback(null, T(children));
+      }        
+    }
+  };
+
+  Group.prototype.remove = function(callback) {
+    // Removing a group will also remove all children groups.
+    // Group is not deleted from DB but marked as 'removed'.
+    // All users and content with membership to the Group will 
+    // keep it, but the removed group won't ever be showed.
+    var removeGroups = function(err, groups) {
+      groups.unshift(this);
+      async.each(groups, function(g, cb) { 
+        g.removed = true;
+        g.save(cb);
+      }, callback);
+    }.bind(this);
+
+    this.getChildren(removeGroups);
+  };
+
   Group.prototype.removeMembers = function(members, callback) {
     var User = kabam.model.User;
     
@@ -251,7 +309,8 @@ module.exports = function(kabam) {
         async.map(
           groups, 
           function(group, __callback) {
-            GroupModel.find({ parent_id: group._id }, __callback);
+            BaseGroup.find({ parent_id: group._id, removed: false }, 
+              __callback);
           }, 
           _nextChildren
         );
@@ -308,9 +367,9 @@ module.exports = function(kabam) {
   };
 
   Group.prototype.save = function(callback) {
-    var model = new GroupModel(this.data);
-    model.save(function(err, o) {
-      callback(err, clean(o));
+    var T = transform.bind(this.constructor);
+    this.model.save(function(err, o) {
+      callback(err, T(o));
     });
   };
 
@@ -357,7 +416,7 @@ module.exports = function(kabam) {
         } else {
           group = req.rootGroup;
         }
-        group.authorize(user._id, actions, function(err, authorized) {
+        group.isAuthorized(user._id, actions, function(err, authorized) {
           if(!authorized) return res.send(403);
           next();
         });
@@ -368,7 +427,7 @@ module.exports = function(kabam) {
       if(!This.PARENT) return next();
 
       var group_id = 
-        (req.group && req.group.data.parent_id)
+        (req.group && req.group.parent_id)
         || req.body.parent_id 
         || req.params.parent_id;
       
@@ -392,6 +451,7 @@ module.exports = function(kabam) {
       });
     }
 
+    // TODO: review whether it's convenient to also do parent lookup here
     function lookup(req, res, next) {
       var group_id = req.params.id;// || req.user.rootGroup;
 
@@ -426,10 +486,10 @@ module.exports = function(kabam) {
 
     function create(req, res, next) {
       var data = req.body;
-      data.owner = req.user._id;
+      data.owner_id = req.user._id;
 
-      var model = new This(data);
-      model.save(function(err, group) {
+      var group = new This(data);
+      group.save(function(err, group) {
         if(err) return error(err, res);
         res.send(group, 201);
       });
@@ -443,10 +503,33 @@ module.exports = function(kabam) {
     }
 
     function remove(req, res, next) {
-      This.update({ "_id": req.params.id }, { "removed": 1 }, function(err, res) {
-        if(err) return error(err, res);
-        res.send({ "ok": 1 });
-      });
+      var T = transform.bind(This);
+      var groups = req.body.groups;
+      if(!groups || !Array.isArray(groups) || !groups.length) return next();
+
+      This.find({ "_id": { "$in": groups } }, checkAccess);
+
+      function checkAccess(err, groups) {
+        async.map(groups, function(g, cb) {
+          g.isAuthorized(req.user._id, ["create"], cb);
+        }, function(err, isAuthorized) {
+          if(err) return res.send(400);
+          if(isAuthorized.indexOf(false) > -1) return res.send(403);
+          removeGroups(groups);
+        });
+      }
+
+      function removeGroups(groups) {
+        async.each(groups, function(g, cb) {
+          g.remove(cb);
+        }, function() {
+          res.send({ ok: 1 });
+        });
+      }
+    }
+
+    function removeOne(req, res, next) {
+      req.send({ err: "Not implemented" }, 401);
     }
 
     function addMember(req, res, next) {
@@ -479,6 +562,12 @@ module.exports = function(kabam) {
       });
     }
 
+    function getChildren(req, res, next) {
+      req.group.getChildren(function(err, children) {
+        res.send(children);
+      });
+    }
+
     // GET /:group_type
     // e.g. GET /organizations
     app.get(url(), rootGroup, function(req, res) {
@@ -487,7 +576,7 @@ module.exports = function(kabam) {
         {
           "$or": [
             { "_id": { "$in": groups } },
-            { "owner": req.user._id }
+            { "owner_id": req.user._id }
           ]
         },
         function(err, groups) {
@@ -499,15 +588,24 @@ module.exports = function(kabam) {
     // GET /:group_type/:id
     // e.g. GET /organizations/123
     app.get(url([resource, ":id"]), lookup, authorize(["view"]), read);
+
     // POST /:group_type
     // e.g. POST /organizations
     app.post(url(), rootGroup, lookup, authorize(["create"]), create);
+
     // PUT /:group_type/:id
     // e.g. PUT /organizations/123
     app.put(url([resource, ":id"]), lookup, authorize(["view"]), update);
+
     // DELETE /:group_type/:id
     // e.g. DELETE /organizations/123
-    app.del(url([resource, ":id"]), lookup, authorize(["view"]), remove);
+    app.del(url([resource, ":id"]), lookup, authorize(["create"]), removeOne);
+
+    // DELETE /:group_type
+    // For removing groups in bulk
+    // e.g. DELETE /organizations
+    app.del(url(), remove);
+
     // POST /:group_type/:id/members
     // e.g. POST /organizations/123/members
     // Add a member to this group
@@ -517,6 +615,7 @@ module.exports = function(kabam) {
       authorize(["create", "addMember"]),
       addMember
     );
+
     // DELETE /:group_type/:id/members
     // e.g. DELETE /organizations/123/members { members: [user_id] }
     // Remove members from this group
@@ -525,6 +624,15 @@ module.exports = function(kabam) {
       lookup,
       authorize(["create", "addMember"]),
       removeMembers
+    );
+    // GET /:group_type/:id/children
+    // e.g. GET /organizations/123/children
+    // Get all children groups
+    app.get(
+      url([resource, ":id", "children"]),
+      lookup,
+      authorize(["manager"]),
+      getChildren
     );
 
     if(This.PARENT) {
@@ -587,19 +695,26 @@ module.exports = function(kabam) {
   };
 
   function GroupFactory(name, o) {
-    // TODO: validate `name` format
     if(!name) throw Error("Must define a name for this Group");
+    if(!name.match(/^[_a-zA-Z]+[a-zA-Z0-9_]*$/)) throw Error("Wrong name for a Group. It can only contain letters, numbers and _, and should not start with a number");
     if(!o.roles) throw Error("Must define roles for this Group");
 
+    // Dynamically create a 'Class' named after 'name': the name of the group type
     var G = new Function(
-      "Group",
+      "Group",  // This refers to the Group variable passed as parameter 
+                // to 'new Function', so it exists in the scope of the 
+                // constructor of the Class we're creating here
       "return function "+name+"(args){ Group.call(this, args); }"
     )(Group);
 
     G.ROLES = o.roles;
-    G.FIELDS = o.fields||[];
+    G.FIELDS = o.fields||{};
     G.PARENT = o.parent;
     G.PERMISSIONS = o.permissions;
+
+    // Extend the base Group schema to include custom properties
+    var GSchema = BaseGroup.schema.extend(G.FIELDS);
+    kabam.mongoConnection.model(name+"Group", GSchema);
 
     // Inherit static methods
     Object.keys(Group).forEach(function(method) {
@@ -635,7 +750,7 @@ function clean(o, opts) {
 
   if(!o) {
     return o;
-  } else if(o instanceof Array) {
+  } else if(Array.isArray(o)) {
     o = o.map(function(_o) {
       return _clean(_o);
     });
@@ -643,4 +758,19 @@ function clean(o, opts) {
     o = _clean(o);
   }
   return o;
+}
+
+// Transforms mongoose model to Group model
+// This function is called bound to the Group constructor
+function transform(m) {
+  var groups;
+  if(Array.isArray(m)) {
+    return m.map(_t.bind(this));
+  } else {
+    return _t.call(this, m);
+  }
+
+  function _t(o) {
+    return new this(o);
+  }
 }
