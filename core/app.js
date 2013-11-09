@@ -181,7 +181,6 @@ exports.middleware = [
     return function (request, response, next) {
       response.locals.flash = request.flash();
       response.locals.config = kernel.config;
-      kernel.app.locals.hostUrl = kernel.config.HOST_URL;
       request.model = kernel.model;
       request.redisClient = kernel.redisClient;
       kernel.injectEmit(request);

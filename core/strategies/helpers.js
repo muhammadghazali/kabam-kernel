@@ -59,6 +59,6 @@ module.exports.linkOAuthProfile = function(kernel, providerName, request, profil
     if (!user && info.message){
       request.flash('error', info.message);
     }
-    done(null, user);
+    done(null, user, info);
   });
 };
