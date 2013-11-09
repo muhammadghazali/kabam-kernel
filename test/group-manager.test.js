@@ -12,7 +12,8 @@ describe('group-manager testing', function () {
     tester, joed, jsmith, harry,
     org1, org2,
     course1, course2,
-    section1, section2;
+    section1, section2,
+    event1, event2;
 
   before(function (done) {
 
@@ -168,6 +169,32 @@ describe('group-manager testing', function () {
         savedSection.start_date.should.eql(new Date('2013-08-17'));
         savedSection.end_date.should.eql(new Date('2013-11-16'));
         section1 = savedSection;
+        done();
+      });
+    });
+
+    it('Event can create proper instances', function(done) {
+      var event = new kernel.model.Event({
+        name: 'Test Event',
+        description: 'Event Test Description',
+        owner_id: jsmith._id,
+        group_id: section1._id,
+        startDate: new Date('2013-08-20'),
+        endDate: new Date('2013-11-19')
+      });
+      event.should.be.an.instanceOf(kernel.model.Event);
+
+      event.save(function(err, savedEvent) {
+        if (err) { throw err; }
+        savedEvent.should.have.properties('_id', 'name', 'description', 'owner_id', 'group_id', 'startDate', 'endDate');
+        savedEvent.should.be.an.instanceOf(kernel.model.Event);
+        savedEvent.name.should.equal('Test Event');
+        savedEvent.description.should.equal('Event Test Description');
+        savedEvent.owner_id.should.equal(jsmith._id);
+        savedEvent.group_id.should.equal(section1._id);
+        savedEvent.startDate.should.eql(new Date('2013-08-20'));
+        savedEvent.endDate.should.eql(new Date('2013-11-19'));
+        event1 = savedEvent;
         done();
       });
     });

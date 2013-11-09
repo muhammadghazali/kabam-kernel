@@ -1,17 +1,17 @@
-exports.name = "Event";
+exports.name = 'Event';
 
-function factory(kabam) {
-  var ObjectId = kabam.mongoose.Schema.Types.ObjectId;
+function factory(kernel) {
+  var ObjectId = kernel.mongoose.Schema.Types.ObjectId;
 
   var permissions = {
-    "view": ["student", "assistant", "instructor"],
-    "edit": ["assistant", "instructor"],
-    "create": ["instructor"],
-    "delete": []
+    view: ['student', 'assistant', 'instructor'],
+    edit: ['assistant', 'instructor'],
+    create: ['instructor'],
+    delete: []
   };
 
-  var EventSchema = new kabam.mongoose.Schema({
-    title: {
+  var eventSchema = new kernel.mongoose.Schema({
+    name: {
       type: String,
       required: true,
       index: true
@@ -19,16 +19,16 @@ function factory(kabam) {
     description: {
       type: String
     },
-    start: {
+    startDate: {
       type: Date,
       required: true,
       index: true
     },
-    end: {
+    endDate: {
       type: Date,
       required: true
     },
-    owner: {
+    owner_id: {
       type: ObjectId,
       required: true,
       index: true
@@ -44,7 +44,7 @@ function factory(kabam) {
     }
   });
 
-  return kabam.mongoConnection.model("Event", EventSchema);
+  return eventSchema;
 };
 
 exports.model = {
