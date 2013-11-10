@@ -1,9 +1,9 @@
 exports.name = 'Course';
 
 function factory(kernel) {
-  var GroupFactory = kernel.groups.GroupFactory;
+  var groupFactory = kernel.groups.groupFactory;
 
-  var Course = GroupFactory('Course', {
+  var Course = groupFactory('Course', {
     roles: ['admin', 'manager', 'member', 'guest'],
     parent: 'Organization',
     permissions: {

@@ -1,9 +1,9 @@
 exports.name = 'Section';
 
 function factory(kernel) {
-  var GroupFactory = kernel.groups.GroupFactory;
+  var groupFactory = kernel.groups.groupFactory;
 
-  var Section = GroupFactory('Section', {
+  var Section = groupFactory('Section', {
     roles: ['instructor', 'assistant', 'student'],
     fields: {
       start_date: Date,

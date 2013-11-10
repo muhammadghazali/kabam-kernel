@@ -84,7 +84,7 @@ describe('group-manager testing', function () {
     it('initialize the group model properly', function() {
       should.exist(kernel.mw);
       should.exist(kernel.groups);
-      should.exist(kernel.groups.GroupFactory);
+      should.exist(kernel.groups.groupFactory);
       should.exist(kernel.model.Organization);
       should.exist(kernel.model.Course);
       should.exist(kernel.model.Section);
