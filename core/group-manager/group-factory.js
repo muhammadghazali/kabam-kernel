@@ -143,7 +143,7 @@ module.exports = function(kabam, BaseGroup) {
     }
 
     var User = kabam.model.User;
-    User.findById(member.member_id, function(err, user) {
+    User.findById(member._id, function(err, user) {
       if(err) return callback(err);
       if(user.groups.indexOf(_this._id) > -1) return callback();
 
