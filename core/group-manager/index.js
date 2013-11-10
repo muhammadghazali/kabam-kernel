@@ -5,7 +5,7 @@ function GroupModel(kabam) {
     , ObjectId = Schema.ObjectId;
 
   return kabam.mongoConnection.model(
-    "GroupModel", 
+    "GroupModel",
     new Schema({
       name: {
         type: String,
@@ -77,7 +77,7 @@ exports.core = function(kabam) {
   kabam.mw.isAuthorized = function(actions) {
     return function(req, res, next) {
       var user_id = req.user._id;
-      
+
       // If user is owner of model he can do everything
       if(req.model.owner_id.toString() === user_id) {
         return next();
@@ -96,5 +96,5 @@ exports.core = function(kabam) {
   // Default/Root Group Type. Currently hard-coded by should be
   // defined in configuration
   kabam.groups.rootGroupType = "Organization";
-  kabam.groups.GroupFactory = require('./group-factory')(kabam, GroupModel(kabam));
+  kabam.groups.groupFactory = require('./group-factory')(kabam, GroupModel(kabam));
 };

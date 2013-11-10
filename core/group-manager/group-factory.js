@@ -22,14 +22,14 @@ module.exports = function(kabam, BaseGroup) {
     }
 
     Object.keys(model.toObject()).forEach(function(p) {
-      Object.defineProperty(_this, p, { 
+      Object.defineProperty(_this, p, {
         enumerable: true,
-        get: model.get.bind(model, p), 
+        get: model.get.bind(model, p),
         set: model.set.bind(model, p)
       });
     });
 
-    Object.defineProperty(_this, "model", { 
+    Object.defineProperty(_this, "model", {
       get: function() { return model }
     });
   }
@@ -68,7 +68,7 @@ module.exports = function(kabam, BaseGroup) {
       if(!group || group.removed) {
         return callback();
       }
-      
+
       var g = T(group);
       // Populate members
       g.getMembers(function(err, members) {
@@ -93,9 +93,9 @@ module.exports = function(kabam, BaseGroup) {
     User.find({ groups: this._id }, function(err, users) {
       if(err) return callback(err);
 
-      var members = clean(users, 
+      var members = clean(users,
         { include: ["firstName", "lastName", "username", "roles", "email", "gravatar"] });
-      
+
       members.forEach(function(m) {
         m.roles = m.roles.filter(function(r) {
           var split = r.split(":");
@@ -152,14 +152,14 @@ module.exports = function(kabam, BaseGroup) {
       });
 
       user.revokeRoles(removeRoles, function() {
-        _addMember.call(_this, user, member.access, 
+        _addMember.call(_this, user, member.access,
           _addToParent.bind(_this, user, callback));
       });
     });
 
     function _addMember(user, access, _callback) {
       if(user.groups.indexOf(this._id) > -1) return _callback();
-      
+
       var role = (this.get("group_type")+":"+this.get("_id")+":"+access).toLowerCase();
       user.groups.push(this._id);
       // Why need to save here if grantRole will save?
@@ -173,7 +173,7 @@ module.exports = function(kabam, BaseGroup) {
       var nextParent = this.parent_id;
 
       async.until(
-        function() { return !nextParent; }, 
+        function() { return !nextParent; },
         __addToParent,
         _callback
       );
@@ -185,7 +185,7 @@ module.exports = function(kabam, BaseGroup) {
           nextParent = parent.parent_id;
           _addMember.call(parent, user, "member", __callback);
         });
-      }      
+      }
     }
   };
 
@@ -209,7 +209,7 @@ module.exports = function(kabam, BaseGroup) {
       } else {
         _authorize();
       }
-    }    
+    }
 
     // Build all roles that have permissions to perform 'actions'
     // on this group
@@ -218,11 +218,11 @@ module.exports = function(kabam, BaseGroup) {
         return actions.indexOf(p) > -1;
       })
       .map(function(action) {
-        // By convention 'admin' role can do everything, 
+        // By convention 'admin' role can do everything,
         // so it does not need to be explicitly defined
         // in the permissions matrix
         group._permissions[action].unshift("admin");
-        
+
         return group._permissions[action].map(function(r) {
           var role = group.group_type.toLowerCase()+":";
           role += group._id+":";
@@ -243,7 +243,7 @@ module.exports = function(kabam, BaseGroup) {
       User.findOne({ "_id": user_id, roles: { "$in": roles }}, function(err, user) {
         if(err) return callback(err);
         callback(null, !!user);
-      });      
+      });
     }
   };
 
@@ -253,11 +253,11 @@ module.exports = function(kabam, BaseGroup) {
 
     function _getChildren(groups) {
       async.map(
-        groups, 
+        groups,
         function(group, _callback) {
-          BaseGroup.find({ parent_id: group._id, removed: false }, 
+          BaseGroup.find({ parent_id: group._id, removed: false },
             _callback);
-        }, 
+        },
         _nextChildren
       );
     }
@@ -276,18 +276,18 @@ module.exports = function(kabam, BaseGroup) {
         var Child = kabam.model[children[0].get("group_type")];
         var T = transform.bind(Child);
         callback(null, T(children));
-      }        
+      }
     }
   };
 
   Group.prototype.remove = function(callback) {
     // Removing a group will also remove all children groups.
     // Group is not deleted from DB but marked as 'removed'.
-    // All users and content with membership to the Group will 
+    // All users and content with membership to the Group will
     // keep it, but the removed group won't ever be showed.
     var removeGroups = function(err, groups) {
       groups.unshift(this);
-      async.each(groups, function(g, cb) { 
+      async.each(groups, function(g, cb) {
         g.removed = true;
         g.save(cb);
       }, callback);
@@ -298,7 +298,7 @@ module.exports = function(kabam, BaseGroup) {
 
   Group.prototype.removeMembers = function(members, callback) {
     var User = kabam.model.User;
-    
+
     // First off get all children groups from which
     // these members will need to be removed from ...
     var removeGroups = [this];
@@ -307,11 +307,11 @@ module.exports = function(kabam, BaseGroup) {
 
       function _getChildren(groups) {
         async.map(
-          groups, 
+          groups,
           function(group, __callback) {
-            BaseGroup.find({ parent_id: group._id, removed: false }, 
+            BaseGroup.find({ parent_id: group._id, removed: false },
               __callback);
-          }, 
+          },
           _nextChildren
         );
       }
@@ -327,7 +327,7 @@ module.exports = function(kabam, BaseGroup) {
           _getChildren(next, _nextChildren);
         } else {
           _callback();
-        }        
+        }
       }
     })
     .call(this,
@@ -341,7 +341,7 @@ module.exports = function(kabam, BaseGroup) {
           if(!user) return _callback();
           removeFromGroups(user, _callback);
         });
-      }, callback);      
+      }, callback);
     }
 
     function removeFromGroups(user, _callback) {
@@ -383,7 +383,7 @@ module.exports = function(kabam, BaseGroup) {
     // option
     /*var resource = (function() {
       return (
-        options.urlAlias 
+        options.urlAlias
         || This.name.toLowerCase()
       )+"s";
     })();*/
@@ -426,11 +426,11 @@ module.exports = function(kabam, BaseGroup) {
     function parentLookup(req, res, next) {
       if(!This.PARENT) return next();
 
-      var group_id = 
+      var group_id =
         (req.group && req.group.parent_id)
-        || req.body.parent_id 
+        || req.body.parent_id
         || req.params.parent_id;
-      
+
       if(!group_id) {
         return res.send("Should contain parent_id", 400);
       }
@@ -461,12 +461,12 @@ module.exports = function(kabam, BaseGroup) {
           if(!group) return res.send(404);
           req.group = group;
           parentLookup(req, res, next);
-        });        
+        });
       } else {
         parentLookup(req, res, next);
       }
     }
-    
+
     function read(req, res) {
       if(includeChildren.length) {
         includeChildren.forEach(function(modelType) {
@@ -694,15 +694,15 @@ module.exports = function(kabam, BaseGroup) {
     }
   };
 
-  function GroupFactory(name, o) {
+  function groupFactory(name, o) {
     if(!name) throw Error("Must define a name for this Group");
     if(!name.match(/^[_a-zA-Z]+[a-zA-Z0-9_]*$/)) throw Error("Wrong name for a Group. It can only contain letters, numbers and _, and should not start with a number");
     if(!o.roles) throw Error("Must define roles for this Group");
 
     // Dynamically create a 'Class' named after 'name': the name of the group type
     var G = new Function(
-      "Group",  // This refers to the Group variable passed as parameter 
-                // to 'new Function', so it exists in the scope of the 
+      "Group",  // This refers to the Group variable passed as parameter
+                // to 'new Function', so it exists in the scope of the
                 // constructor of the Class we're creating here
       "return function "+name+"(args){ Group.call(this, args); }"
     )(Group);
@@ -727,7 +727,7 @@ module.exports = function(kabam, BaseGroup) {
     return G;
   }
 
-  return GroupFactory;
+  return groupFactory;
 }
 
 // Removes unwanted fields from Mongoose model object
