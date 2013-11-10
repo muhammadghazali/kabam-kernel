@@ -1,6 +1,6 @@
 {
   "name": "kabam-kernel",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "KabamKernel for building express.js applications with plugins",
   "main": "index.js",
   "engines": {
@@ -43,7 +43,8 @@
     "intel": "~0.3.0",
     "mongoose-schema-extend": "*",
     "q": "~0.9.7",
-    "dotty": "0.0.2"
+    "dotty": "0.0.2",
+    "oauth": "~0.9.10"
   },
   "devDependencies": {
     "grunt": "*",

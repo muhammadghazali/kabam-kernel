@@ -17,7 +17,7 @@ exports.strategy =  function (core) {
     passReqToCallback: true,
     stateless: true
   }, function (request, token, tokenSecret, profile, done) {
-    linkOAuthProfile(core, 'twitter', request, profile, done);
+    linkOAuthProfile(core, 'twitter', request, profile, false, done);
   });
 };
 
