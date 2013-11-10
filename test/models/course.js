@@ -9,9 +9,9 @@ function factory(kernel) {
     permissions: {
       addMember: ['manager'],
       create: ['manager'],
-      edit: ['manager'],
+      update: ['manager'],
       participate: ['manager'],
-      view: ['manager', 'member', 'guest'],
+      read: ['manager', 'member', 'guest'],
       delete: []
     }
   });

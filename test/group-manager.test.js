@@ -230,15 +230,15 @@ describe('group-manager testing', function () {
         })
         .then(function(authorized) {
           authorized.should.be.true;
-          return people.tester.can('view', org1);
+          return people.tester.can('read', org1);
         })
         .then(function(authorized) {
           authorized.should.be.true;
-          return people.joed.can('view', course1);
+          return people.joed.can('read', course1);
         })
         .then(function(authorized) {
           authorized.should.be.true;
-          return people.jsmith.can('view', section1);
+          return people.jsmith.can('read', section1);
         })
         .then(function(authorized) {
           authorized.should.be.true;
@@ -259,14 +259,14 @@ describe('group-manager testing', function () {
     });
 
     it('owner can access user data', function(done) {
-      people.tester.can('view', people.joed)
+      people.tester.can('read', people.joed)
         .then(function(authorized) {
           authorized.should.be.true;
-          return people.tester.can('view', people.jsmith);
+          return people.tester.can('read', people.jsmith);
         })
         .then(function(authorized) {
           authorized.should.be.true;
-          return people.joed.can('view', people.jsmith);
+          return people.joed.can('read', people.jsmith);
         })
         .then(function(authorized) {
           authorized.should.be.true;
@@ -275,14 +275,14 @@ describe('group-manager testing', function () {
     });
 
     it('owner can access event data', function(done) {
-      people.jsmith.can('view', eventorg1)
+      people.jsmith.can('read', eventorg1)
         .then(function(authorized) {
           authorized.should.be.true;
-          return people.joed.can('view', eventorg1);
+          return people.joed.can('read', eventorg1);
         })
         .then(function(authorized) {
           authorized.should.be.true;
-          return people.tester.can('view', eventorg1);
+          return people.tester.can('read', eventorg1);
         })
         .then(function(authorized) {
           authorized.should.be.true;
@@ -291,14 +291,14 @@ describe('group-manager testing', function () {
     });
 
     it('non-member cannot access group data', function(done) {
-      people.harry.can('view', org1)
+      people.harry.can('read', org1)
         .then(function(authorized) {
           authorized.should.not.be.true;
-          return people.harry.can('view', course1);
+          return people.harry.can('read', course1);
         })
         .then(function(authorized) {
           authorized.should.not.be.true;
-          return people.harry.can('view', section1);
+          return people.harry.can('read', section1);
         })
         .then(function(authorized) {
           authorized.should.not.be.true;
@@ -307,14 +307,14 @@ describe('group-manager testing', function () {
     });
 
     it('non-member cannot access user data', function(done) {
-      people.harry.can('view', people.tester)
+      people.harry.can('read', people.tester)
         .then(function(authorized) {
           authorized.should.not.be.true;
-          return people.harry.can('view', people.joed);
+          return people.harry.can('read', people.joed);
         })
         .then(function(authorized) {
           authorized.should.not.be.true;
-          return people.harry.can('view', people.jsmith);
+          return people.harry.can('read', people.jsmith);
         })
         .then(function(authorized) {
           authorized.should.not.be.true;
@@ -323,7 +323,7 @@ describe('group-manager testing', function () {
     });
 
     it('non-member cannot access event data', function(done) {
-      people.harry.can('view', eventorg1)
+      people.harry.can('read', eventorg1)
         .then(function(authorized) {
           authorized.should.not.be.true;
           done();
@@ -427,7 +427,7 @@ describe('group-manager testing', function () {
       people.frodo.can('create', org1)
         .then(function(authorized) {
           authorized.should.be.true;
-          return people.frodo.can('view', org1);
+          return people.frodo.can('read', org1);
         })
         .then(function(authorized) {
           authorized.should.be.true;
@@ -439,7 +439,7 @@ describe('group-manager testing', function () {
         })
         .then(function(authorized) {
           authorized.should.be.true;
-          return people.frodo.can('view', eventorg1);
+          return people.frodo.can('read', eventorg1);
         })
         .then(function(authorized) {
           authorized.should.be.true;
@@ -455,7 +455,7 @@ describe('group-manager testing', function () {
       people.sam.can('create', org1)
         .then(function(authorized) {
           authorized.should.be.true;
-          return people.sam.can('view', org1);
+          return people.sam.can('read', org1);
         })
         .then(function(authorized) {
           authorized.should.be.true;
@@ -467,7 +467,7 @@ describe('group-manager testing', function () {
         })
         .then(function(authorized) {
           authorized.should.be.true;
-          return people.sam.can('view', eventorg1);
+          return people.sam.can('read', eventorg1);
         })
         .then(function(authorized) {
           authorized.should.be.true;
@@ -483,7 +483,7 @@ describe('group-manager testing', function () {
       people.merry.can('create', org1)
         .then(function(authorized) {
           authorized.should.not.be.true;
-          return people.merry.can('view', org1);
+          return people.merry.can('read', org1);
         })
         .then(function(authorized) {
           authorized.should.be.true;
@@ -495,7 +495,7 @@ describe('group-manager testing', function () {
         })
         .then(function(authorized) {
           authorized.should.not.be.true;
-          return people.merry.can('view', eventorg1);
+          return people.merry.can('read', eventorg1);
         })
         .then(function(authorized) {
           authorized.should.be.true;

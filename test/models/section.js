@@ -13,9 +13,9 @@ function factory(kernel) {
     permissions: {
       addMember: ['manager'],
       create: ['instructor'],
-      edit: ['instructor', 'assistant'],
+      update: ['instructor', 'assistant'],
       participate: ['instructor', 'assistant', 'student'],
-      view: ['instructor', 'assistant', 'student', 'guest'],
+      read: ['instructor', 'assistant', 'student', 'guest'],
       delete: []
     }
   });
@@ -26,9 +26,9 @@ function factory(kernel) {
     // By default section members will be members
     // of the parent course
     member.access = {
-      instructor: 'edit',
-      assistant: 'edit',
-      student: 'view'
+      instructor: 'update',
+      assistant: 'update',
+      student: 'read'
     }[member.access];
 
     // Section

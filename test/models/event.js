@@ -4,8 +4,8 @@ function factory(kernel) {
   var ObjectId = kernel.mongoose.Schema.Types.ObjectId;
 
   var permissions = {
-    view: ['student', 'assistant', 'instructor'],
-    edit: ['assistant', 'instructor'],
+    read: ['student', 'assistant', 'instructor'],
+    update: ['assistant', 'instructor'],
     create: ['instructor'],
     delete: []
   };
