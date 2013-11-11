@@ -21,12 +21,12 @@ var kabamKernel = require('kabam-kernel');
 // instantiate kabam-kernel providing config object
 var kernel = kabamKernel({FOO:"BAR"});
 kernel.usePlugin({
-    routes: function(kernel){
-        kernel.app.get('/', function(req, res){
-            res.send('Hello World');
-        }
-    }
-})
+  routes: function(kernel) {
+    kernel.app.get('/', function(req, res) {
+      res.send('Hello World');
+    });
+  }
+});
 
 // start listening on 3000 port by default
 kernel.start();

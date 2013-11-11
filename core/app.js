@@ -1,10 +1,60 @@
 'use strict';
 var
+  os = require('os'),
+  crypto = require('crypto'),
   express = require('express'),
   flashMiddleware = require('connect-flash'),
-  RedisStore = require('connect-redis')(express);
+  RedisStore = require('connect-redis')(express),
+  path = require('path'),
+  logger = require('../lib/logging').getLogger(module);
+
+
+function md5(str) {
+  return crypto.createHash('md5').update(str).digest('hex').toString();
+}
 
 exports.name = 'kabam-core-app';
+
+exports.config = {
+  ENV: {
+    default: 'development',
+    env: 'NODE_ENV'
+  },
+
+  SECRET: {
+    default: function () {
+      logger.warn('config.SECRET is missing! Generating the secret on the fly...');
+      return md5(JSON.stringify(os));
+    },
+    env: 'SECRET'
+  },
+
+  PORT: {
+    default: 3000,
+    env: 'PORT'
+  },
+
+  HOST_URL: {
+    default: function () {
+      var hostname = os.hostname();
+      if (this.ENV === 'development') {
+        hostname = 'localhost';
+      }
+      return 'http://' + hostname + ':' + this.PORT + '/';
+    },
+    env: 'HOST_URL'
+  },
+
+  DISABLE_CSRF: {
+    default: false
+  },
+
+  BASE_DIR: {
+    default: function(){
+      return path.dirname(process.mainModule.filename);
+    }
+  }
+};
 
 exports.app = function(kernel){
 
@@ -131,7 +181,6 @@ exports.middleware = [
     return function (request, response, next) {
       response.locals.flash = request.flash();
       response.locals.config = kernel.config;
-      kernel.app.locals.hostUrl = kernel.config.HOST_URL;
       request.model = kernel.model;
       request.redisClient = kernel.redisClient;
       kernel.injectEmit(request);

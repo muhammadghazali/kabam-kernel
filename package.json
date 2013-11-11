@@ -1,6 +1,6 @@
 {
   "name": "kabam-kernel",
-  "version": "0.2.5",
+  "version": "0.2.7",
   "description": "KabamKernel for building express.js applications with plugins",
   "main": "index.js",
   "engines": {
@@ -40,7 +40,9 @@
     "slugify2": "*",
     "passport-linkedin-oauth2": "*",
     "lodash": "~2.2.1",
-    "intel": "~0.3.0"
+    "intel": "~0.3.0",
+    "dotty": "0.0.2",
+    "oauth": "~0.9.10"
   },
   "devDependencies": {
     "grunt": "*",

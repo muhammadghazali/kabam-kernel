@@ -3,7 +3,7 @@
     "HOST_URL":"http://vvv.msk0.ru/",
     "SECRET":"hammer on the keyboard",
     "MONGO_URL":"mongodb://localhost/kabam_test",
-    "REDIS":{"host":"localhost","port":6379},
+    "REDIS": "redis://localhost:6379",
     "sessionStorage": "redis",
     "passport":{
       "GITHUB_CLIENT_ID":"--insert-github-client-id-here--",
